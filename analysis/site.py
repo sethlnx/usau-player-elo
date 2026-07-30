@@ -13,7 +13,7 @@ replays the model, so the page can never disagree with the CSVs:
     data/team_elo_upcoming.csv   clubs, next event roster - the U.S. Open field
     data/usau.db                 the U.S. Open schedule
 
-Usage: python -m analysis.site   ->   site/index.html
+Usage: python -m analysis.site   ->   docs/index.html
 """
 
 import csv
@@ -27,7 +27,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from analysis.backtest import DB_PATH
 from analysis.rankings import PUBLISHED
 
-OUT = DB_PATH.parent.parent / "site" / "index.html"
+# docs/ rather than site/: GitHub Pages can serve a branch's root or its
+# /docs folder and nothing else, so putting the page here makes the project
+# URL itself the app. The accompanying .nojekyll stops Pages running the
+# output through Jekyll, which is pure overhead for a single static file.
+OUT = DB_PATH.parent.parent / "docs" / "index.html"
 
 # The player table's display floor, matching the ranking convention: below 30
 # games a rating still sits inside the engine's provisional window.
@@ -140,8 +144,9 @@ def build():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(TEMPLATE.replace("__DATA__", json.dumps(payload, separators=(",", ":"))))
+    (OUT.parent / ".nojekyll").write_text("")
     kb = OUT.stat().st_size / 1024
-    print(f"wrote {OUT} ({kb:,.0f} KB)")
+    print(f"wrote {OUT} ({kb:,.0f} KB) + .nojekyll")
     print(f"  {len(payload['players']):,} players (>={MIN_GAMES} games), "
           f"{len(clubs['completed'])} clubs, {len(field)} U.S. Open teams, "
           f"{len(sched)} scheduled games, {len(pools)} pools")

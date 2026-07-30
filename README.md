@@ -16,7 +16,7 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv
-.venv/bin/python -m analysis.site         # site/index.html — standalone, no server
+.venv/bin/python -m analysis.site         # docs/index.html — standalone, no server
 ```
 
 The scrape is slow, disk-cached and resumable; `data/usau.db` and the raw HTML
@@ -25,7 +25,9 @@ cache are gitignored and rebuilt by the first two commands. 2020 does not exist
 
 ## Front end
 
-`analysis/site.py` emits a single self-contained `site/index.html`: club
+Live: **https://sethlnx.github.io/usau-player-elo/**
+
+`analysis/site.py` emits a single self-contained `docs/index.html`: club
 rankings on three roster bases, a searchable player table, and a U.S. Open
 tracker whose bracket you fill in as games finish, re-running a 40,000-sim
 Monte Carlo in the browser against whatever you have entered. It reads only
