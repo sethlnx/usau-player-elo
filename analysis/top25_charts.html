@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USAU Player Elo — Top 25</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --surface-1: #fcfcfb; --page: #f9f9f7;
+  --ink-1: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --baseline: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --series-club: #2a78d6; --series-player: #008300;
+  --div-pos: #2a78d6; --div-neg: #e34948; --div-mid: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --ink-1: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --ring: rgba(255,255,255,0.10);
+    --series-club: #3987e5; --series-player: #008300;
+    --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #383835;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --surface-1: #1a1a19; --page: #0d0d0d;
+  --ink-1: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --baseline: #383835; --ring: rgba(255,255,255,0.10);
+  --series-club: #3987e5; --series-player: #008300;
+  --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #383835;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink-1);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+h1 { font-size: 22px; margin: 0; }
+.sub { color: var(--ink-2); margin: 4px 0 0; }
+#themeBtn { margin-left: auto; border: 1px solid var(--ring); background: var(--surface-1);
+  color: var(--ink-2); border-radius: 8px; padding: 5px 12px; cursor: pointer; font: inherit; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px; margin: 22px 0; }
+.tile { background: var(--surface-1); border: 1px solid var(--ring);
+  border-radius: 12px; padding: 14px 16px; }
+.tile .v { font-size: 26px; font-weight: 650; }
+.tile .l { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.panel { background: var(--surface-1); border: 1px solid var(--ring);
+  border-radius: 12px; padding: 18px 20px 10px; margin: 18px 0; }
+.panel h2 { font-size: 15px; margin: 0 0 2px; }
+.panel .note { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); margin: 2px 0 8px; }
+.legend .chip { display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+  margin-right: 5px; vertical-align: -1px; }
+svg { display: block; width: 100%; height: auto; }
+svg text { font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
+.name { fill: var(--ink-1); }
+.val { fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.rk, .tick { fill: var(--muted); font-variant-numeric: tabular-nums; }
+.gridline { stroke: var(--grid); stroke-width: 1; }
+.axisline { stroke: var(--baseline); stroke-width: 1; }
+#tooltip { position: fixed; pointer-events: none; background: var(--surface-1);
+  border: 1px solid var(--ring); border-radius: 8px; padding: 8px 10px;
+  font-size: 12px; color: var(--ink-1); box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  opacity: 0; transition: opacity .08s; max-width: 240px; z-index: 10; }
+#tooltip .t2 { color: var(--ink-2); }
+details { margin-top: 18px; }
+summary { cursor: pointer; color: var(--ink-2); }
+table { border-collapse: collapse; margin: 10px 0 20px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 4px 14px 4px 0; border-bottom: 1px solid var(--grid); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+<header>
+  <div>
+    <h1>USAU Player-Level Elo — Top 25</h1>
+    <p class="sub">Club Men's, through July 17, 2026 · unified club + college pool,
+    Nationals + UFA stat mechanisms (UFA game results excluded — they measurably
+    hurt prediction)</p>
+  </div>
+  <button id="themeBtn" aria-label="Toggle color theme">Theme: auto</button>
+</header>
+
+<section class="tiles" id="tiles"></section>
+
+<section class="panel">
+  <h2>Top 25 clubs, 2026</h2>
+  <p class="note">Roster-mean player Elo at each club's latest event · axis is truncated,
+  not zero-based — dots mark position on the rating scale</p>
+  <div id="clubs"></div>
+</section>
+
+<section class="panel">
+  <h2>Top 25 players</h2>
+  <p class="note">Personal Elo, 5+ games · dot = estimate, band = 90% range from the
+  empirically measured uncertainty &sigma;(games) — low game counts read wide, and a
+  &asymp;110-point floor of real season-to-season skill drift never shrinks away</p>
+  <div id="players"></div>
+</section>
+
+<section class="panel">
+  <h2>What adding UFA game results would change (not published)</h2>
+  <p class="note">Intermingled-run Elo minus published Elo for the top 25 players ·
+  the intermingled variant scores worse in backtest, shown for comparison only</p>
+  <div class="legend">
+    <span><span class="chip" style="background:var(--div-pos)"></span>higher with UFA games</span>
+    <span><span class="chip" style="background:var(--div-neg)"></span>lower with UFA games</span>
+  </div>
+  <div id="delta"></div>
+</section>
+
+<details>
+  <summary>Table view</summary>
+  <div id="tables"></div>
+</details>
+</div>
+<div id="tooltip" role="status"></div>
+
+<script>
+const DATA = {"teams": [{"rank": 1, "name": "Revolver", "elo": 2067.6, "roster": 26}, {"rank": 2, "name": "PoNY", "elo": 2064.4, "roster": 24}, {"rank": 3, "name": "Rhino Slam!", "elo": 2036.7, "roster": 26}, {"rank": 4, "name": "DiG", "elo": 2025.5, "roster": 19}, {"rank": 5, "name": "Ring of Fire", "elo": 1969.8, "roster": 26}, {"rank": 6, "name": "Magnitude (Quake)-Senior", "elo": 1937.1, "roster": 20}, {"rank": 7, "name": "Chicago Machine", "elo": 1910.0, "roster": 25}, {"rank": 8, "name": "Johnny Bravo", "elo": 1885.9, "roster": 23}, {"rank": 9, "name": "Sockeye", "elo": 1874.8, "roster": 24}, {"rank": 10, "name": "Philadelphia Pacmen", "elo": 1848.0, "roster": 24}, {"rank": 11, "name": "Chain Lightning", "elo": 1828.6, "roster": 19}, {"rank": 12, "name": "GOAT", "elo": 1828.1, "roster": 25}, {"rank": 13, "name": "Sub Zero", "elo": 1810.4, "roster": 25}, {"rank": 14, "name": "Tanasi", "elo": 1806.5, "roster": 24}, {"rank": 15, "name": "Blueprint", "elo": 1805.5, "roster": 26}, {"rank": 16, "name": "Mad Men", "elo": 1797.6, "roster": 26}, {"rank": 17, "name": "Haymaker", "elo": 1797.6, "roster": 26}, {"rank": 18, "name": "Red Tide", "elo": 1794.7, "roster": 26}, {"rank": 19, "name": "Mephisto", "elo": 1786.2, "roster": 22}, {"rank": 20, "name": "Dark Star", "elo": 1774.1, "roster": 26}, {"rank": 21, "name": "Doublewide", "elo": 1764.3, "roster": 21}, {"rank": 22, "name": "Furious George", "elo": 1755.7, "roster": 25}, {"rank": 23, "name": "Sprout", "elo": 1745.5, "roster": 22}, {"rank": 24, "name": "Wavestorms", "elo": 1736.6, "roster": 23}, {"rank": 25, "name": "MOB Ultimate", "elo": 1724.9, "roster": 24}], "players": [{"rank": 1, "name": "Raphael Hayes", "elo": 2911.6, "sigma": 115.7, "lo": 2721.2, "hi": 3102.0, "games": 153, "club": "Rhino Slam!"}, {"rank": 2, "name": "Calvin Stoughton", "elo": 2823.0, "sigma": 113.3, "lo": 2636.6, "hi": 3009.5, "games": 266, "club": "DiG"}, {"rank": 3, "name": "Benjamin Jagt", "elo": 2716.8, "sigma": 117.0, "lo": 2524.4, "hi": 2909.2, "games": 125, "club": "PoNY"}, {"rank": 4, "name": "Alex Atkins", "elo": 2660.6, "sigma": 115.5, "lo": 2470.5, "hi": 2850.6, "games": 159, "club": "Philadelphia Pacmen"}, {"rank": 5, "name": "Samuel McGuckin", "elo": 2611.2, "sigma": 143.9, "lo": 2374.5, "hi": 2847.9, "games": 23, "club": "Chicago Machine"}, {"rank": 6, "name": "Adam Rees", "elo": 2559.9, "sigma": 115.6, "lo": 2369.7, "hi": 2750.0, "games": 157, "club": "Revolver"}, {"rank": 7, "name": "Ben Dameron", "elo": 2520.4, "sigma": 113.6, "lo": 2333.6, "hi": 2707.2, "games": 248, "club": "PoNY"}, {"rank": 8, "name": "Jacques Nissen", "elo": 2469.1, "sigma": 113.9, "lo": 2281.7, "hi": 2656.4, "games": 227, "club": "Truck Stop"}, {"rank": 9, "name": "Chris Kocher", "elo": 2437.5, "sigma": 116.3, "lo": 2246.2, "hi": 2628.9, "games": 138, "club": "PoNY"}, {"rank": 10, "name": "Paul Krenik", "elo": 2393.5, "sigma": 114.2, "lo": 2205.6, "hi": 2581.4, "games": 210, "club": "Sub Zero"}, {"rank": 11, "name": "Hayden Austin-Knab", "elo": 2386.8, "sigma": 114.9, "lo": 2197.8, "hi": 2575.7, "games": 181, "club": "Chain Lightning"}, {"rank": 12, "name": "Jacob Fairfax", "elo": 2376.7, "sigma": 117.9, "lo": 2182.8, "hi": 2570.7, "games": 110, "club": "Ring of Fire"}, {"rank": 13, "name": "Seamus Robinson", "elo": 2373.4, "sigma": 113.9, "lo": 2186.0, "hi": 2560.7, "games": 228, "club": "Revolver"}, {"rank": 14, "name": "Ryan Smith", "elo": 2372.6, "sigma": 133.9, "lo": 2152.3, "hi": 2592.8, "games": 34, "club": "Alamode"}, {"rank": 15, "name": "Beau Fournet", "elo": 2372.6, "sigma": 133.9, "lo": 2152.3, "hi": 2592.8, "games": 34, "club": "Alamode"}, {"rank": 16, "name": "Jack Hatchett", "elo": 2369.9, "sigma": 115.2, "lo": 2180.4, "hi": 2559.3, "games": 170, "club": "Rhino Slam!"}, {"rank": 17, "name": "Simon Carapella", "elo": 2369.3, "sigma": 116.7, "lo": 2177.3, "hi": 2561.3, "games": 130, "club": "DiG"}, {"rank": 18, "name": "Joe White", "elo": 2364.1, "sigma": 118.0, "lo": 2169.9, "hi": 2558.3, "games": 108, "club": "Chicago Machine"}, {"rank": 19, "name": "Unmil Patel", "elo": 2364.1, "sigma": 119.1, "lo": 2168.2, "hi": 2560.0, "games": 95, "club": "Florida Untied"}, {"rank": 20, "name": "Nathan Prior", "elo": 2355.2, "sigma": 115.5, "lo": 2165.2, "hi": 2545.3, "games": 159, "club": "Revolver"}, {"rank": 21, "name": "Tobe Decraene", "elo": 2353.8, "sigma": 125.3, "lo": 2147.7, "hi": 2559.9, "games": 55, "club": "DiG"}, {"rank": 22, "name": "Anders Juengst", "elo": 2349.6, "sigma": 116.3, "lo": 2158.3, "hi": 2541.0, "games": 138, "club": "PoNY"}, {"rank": 23, "name": "Simon Higgins", "elo": 2333.5, "sigma": 116.0, "lo": 2142.6, "hi": 2524.4, "games": 145, "club": "Revolver"}, {"rank": 24, "name": "Matthew Armour", "elo": 2331.8, "sigma": 117.3, "lo": 2138.9, "hi": 2524.7, "games": 120, "club": "Doublewide"}, {"rank": 25, "name": "Sam Keller", "elo": 2325.2, "sigma": 130.6, "lo": 2110.4, "hi": 2540.0, "games": 40, "club": "Fungi"}], "delta": [{"rank": 1, "name": "Raphael Hayes", "pub": 2911.6, "mix": 2910.1, "delta": -1.5}, {"rank": 2, "name": "Calvin Stoughton", "pub": 2823.0, "mix": 2809.8, "delta": -13.2}, {"rank": 3, "name": "Benjamin Jagt", "pub": 2716.8, "mix": 2713.2, "delta": -3.6}, {"rank": 4, "name": "Alex Atkins", "pub": 2660.6, "mix": 2642.2, "delta": -18.4}, {"rank": 5, "name": "Samuel McGuckin", "pub": 2611.2, "mix": 2596.2, "delta": -15.0}, {"rank": 6, "name": "Adam Rees", "pub": 2559.9, "mix": 2568.0, "delta": 8.1}, {"rank": 7, "name": "Ben Dameron", "pub": 2520.4, "mix": 2571.7, "delta": 51.3}, {"rank": 8, "name": "Jacques Nissen", "pub": 2469.1, "mix": 2289.7, "delta": -179.4}, {"rank": 9, "name": "Chris Kocher", "pub": 2437.5, "mix": 2448.4, "delta": 10.9}, {"rank": 10, "name": "Paul Krenik", "pub": 2393.5, "mix": 2445.2, "delta": 51.7}, {"rank": 11, "name": "Hayden Austin-Knab", "pub": 2386.8, "mix": 2420.8, "delta": 34.0}, {"rank": 12, "name": "Jacob Fairfax", "pub": 2376.7, "mix": 2269.3, "delta": -107.4}, {"rank": 13, "name": "Seamus Robinson", "pub": 2373.4, "mix": 2278.2, "delta": -95.2}, {"rank": 14, "name": "Ryan Smith", "pub": 2372.6, "mix": 2360.7, "delta": -11.9}, {"rank": 15, "name": "Beau Fournet", "pub": 2372.6, "mix": 2360.7, "delta": -11.9}, {"rank": 16, "name": "Jack Hatchett", "pub": 2369.9, "mix": 2363.2, "delta": -6.7}, {"rank": 17, "name": "Simon Carapella", "pub": 2369.3, "mix": 2350.0, "delta": -19.3}, {"rank": 18, "name": "Joe White", "pub": 2364.1, "mix": 2379.0, "delta": 14.9}, {"rank": 19, "name": "Unmil Patel", "pub": 2364.1, "mix": 2017.5, "delta": -346.6}, {"rank": 20, "name": "Nathan Prior", "pub": 2355.2, "mix": 2368.4, "delta": 13.2}, {"rank": 21, "name": "Tobe Decraene", "pub": 2353.8, "mix": 1978.7, "delta": -375.1}, {"rank": 22, "name": "Anders Juengst", "pub": 2349.6, "mix": 2171.0, "delta": -178.6}, {"rank": 23, "name": "Simon Higgins", "pub": 2333.5, "mix": 2321.8, "delta": -11.7}, {"rank": 24, "name": "Matthew Armour", "pub": 2331.8, "mix": 2196.2, "delta": -135.6}, {"rank": 25, "name": "Sam Keller", "pub": 2325.2, "mix": 2327.9, "delta": 2.7}]};
+const fmt = n => n.toLocaleString("en-US", {maximumFractionDigits: 1});
+
+const tiles = [
+  ["31,374", "players rated (5+ games)"],
+  ["23,112", "games scored: club, college + 761 UFA"],
+  ["0.765", "eval accuracy, club 2024\u201325 (base-init config)"],
+  ["227 / 400", "top club players with linked UFA careers"],
+];
+document.getElementById("tiles").innerHTML = tiles.map(([v, l]) =>
+  `<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+
+const tip = document.getElementById("tooltip");
+function showTip(evt, html) {
+  tip.innerHTML = html;
+  tip.style.opacity = 1;
+  const x = Math.min(evt.clientX + 14, innerWidth - 260);
+  tip.style.left = x + "px";
+  tip.style.top = (evt.clientY + 12) + "px";
+}
+function hideTip() { tip.style.opacity = 0; }
+
+const W = 940, ROW = 27, PADL = 250, PADR = 70, PADT = 24, PADB = 8;
+
+function dotPlot(el, rows, colorVar, tipFn, subLabel) {
+  const min = Math.min(...rows.map(r => r.lo ?? r.elo)),
+        max = Math.max(...rows.map(r => r.hi ?? r.elo));
+  const lo = Math.floor((min - 15) / 50) * 50, hi = Math.ceil((max + 15) / 50) * 50;
+  const H = PADT + rows.length * ROW + PADB;
+  const x = v => PADL + (v - lo) / (hi - lo) * (W - PADL - PADR);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Elo dot plot">`;
+  const step = (hi - lo) > 600 ? 100 : 50;
+  for (let t = lo; t <= hi; t += step) {
+    s += `<line class="gridline" x1="${x(t)}" y1="${PADT - 6}" x2="${x(t)}" y2="${H - PADB}"/>`;
+    s += `<text class="tick" x="${x(t)}" y="${PADT - 10}" text-anchor="middle">${t}</text>`;
+  }
+  rows.forEach((r, i) => {
+    const cy = PADT + i * ROW + ROW / 2;
+    s += `<text class="rk" x="26" y="${cy + 4}" text-anchor="end">${r.rank}</text>`;
+    s += `<text class="name" x="36" y="${cy + 4}">${r.name}${subLabel ? `<tspan class="rk"> \u00b7 ${subLabel(r)}</tspan>` : ""}</text>`;
+    const leadEnd = (r.lo != null ? x(r.lo) : x(r.elo)) - 8;
+    s += `<line class="gridline" x1="${PADL}" y1="${cy}" x2="${leadEnd}" y2="${cy}" stroke-dasharray="1 3"/>`;
+    if (r.lo != null)
+      s += `<line x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${cy}" y2="${cy}"
+             stroke="var(${colorVar})" stroke-opacity="0.35" stroke-width="3"
+             stroke-linecap="round"/>`;
+    s += `<circle data-i="${i}" cx="${x(r.elo)}" cy="${cy}" r="5.5" fill="var(${colorVar})"
+           stroke="var(--surface-1)" stroke-width="2"/>`;
+    s += `<circle data-i="${i}" cx="${x(r.elo)}" cy="${cy}" r="11" fill="transparent"/>`;
+    s += `<text class="val" x="${(r.hi != null ? x(r.hi) : x(r.elo)) + 10}" y="${cy + 4}">${fmt(r.elo)}</text>`;
+  });
+  s += `</svg>`;
+  el.innerHTML = s;
+  el.querySelectorAll("circle").forEach(c => {
+    const r = rows[+c.dataset.i];
+    c.addEventListener("mousemove", e => showTip(e, tipFn(r)));
+    c.addEventListener("mouseleave", hideTip);
+  });
+}
+
+dotPlot(document.getElementById("clubs"), DATA.teams, "--series-club",
+  r => `<b>#${r.rank} ${r.name}</b><div class="t2">Elo ${fmt(r.elo)} \u00b7 roster of ${r.roster}</div>`);
+
+dotPlot(document.getElementById("players"), DATA.players, "--series-player",
+  r => `<b>#${r.rank} ${r.name}</b><div class="t2">Elo ${fmt(r.elo)} \u00b7 90% range ${fmt(r.lo)}\u2013${fmt(r.hi)}<br>${r.games} games \u00b7 ${r.club}</div>`,
+  r => r.club);
+
+(function divergingBars() {
+  const el = document.getElementById("delta");
+  const rows = DATA.delta;
+  const ext = Math.max(10, ...rows.map(r => Math.abs(r.delta ?? 0)));
+  const H = PADT + rows.length * ROW + PADB;
+  const half = (W - PADL - PADR) / 2, cx0 = PADL + half;
+  const x = v => cx0 + v / ext * (half - 10);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Elo delta diverging bars">`;
+  for (const t of [-ext, -ext / 2, 0, ext / 2, ext]) {
+    const tx = x(t);
+    s += `<line class="${t === 0 ? "axisline" : "gridline"}" x1="${tx}" y1="${PADT - 6}" x2="${tx}" y2="${H - PADB}"/>`;
+    s += `<text class="tick" x="${tx}" y="${PADT - 10}" text-anchor="middle">${t > 0 ? "+" : ""}${Math.round(t)}</text>`;
+  }
+  rows.forEach((r, i) => {
+    const cy = PADT + i * ROW + ROW / 2;
+    s += `<text class="rk" x="26" y="${cy + 4}" text-anchor="end">${r.rank}</text>`;
+    s += `<text class="name" x="36" y="${cy + 4}">${r.name}</text>`;
+    if (r.delta == null) {
+      s += `<text class="rk" x="${cx0 + 8}" y="${cy + 4}">\u2013 not comparable</text>`;
+      return;
+    }
+    const w = Math.abs(x(r.delta) - cx0), h = 13, y0 = cy - h / 2, rr = Math.min(4, w);
+    const col = r.delta >= 0 ? "var(--div-pos)" : "var(--div-neg)";
+    let path;
+    if (r.delta >= 0)
+      path = `M${cx0} ${y0} h${w - rr} a${rr} ${rr} 0 0 1 ${rr} ${rr} v${h - 2 * rr} a${rr} ${rr} 0 0 1 -${rr} ${rr} h-${w - rr} Z`;
+    else
+      path = `M${cx0} ${y0} h-${w - rr} a${rr} ${rr} 0 0 0 -${rr} ${rr} v${h - 2 * rr} a${rr} ${rr} 0 0 0 ${rr} ${rr} h${w - rr} Z`;
+    s += `<path data-i="${i}" d="${path}" fill="${col}"/>`;
+    s += `<text class="val" x="${r.delta >= 0 ? x(r.delta) + 8 : x(r.delta) - 8}" y="${cy + 4}"
+          text-anchor="${r.delta >= 0 ? "start" : "end"}">${r.delta > 0 ? "+" : ""}${fmt(r.delta)}</text>`;
+  });
+  s += `</svg>`;
+  el.innerHTML = s;
+  el.querySelectorAll("path[data-i]").forEach(p => {
+    const r = rows[+p.dataset.i];
+    p.addEventListener("mousemove", e => showTip(e,
+      `<b>#${r.rank} ${r.name}</b><div class="t2">published ${fmt(r.pub)} \u2192 intermingled ${fmt(r.mix)} (${r.delta > 0 ? "+" : ""}${fmt(r.delta)})</div>`));
+    p.addEventListener("mouseleave", hideTip);
+  });
+})();
+
+document.getElementById("tables").innerHTML = `
+<table><caption class="rk">Top 25 clubs</caption>
+<tr><th>#</th><th>Club</th><th>Elo</th><th>Roster</th></tr>
+${DATA.teams.map(r => `<tr><td>${r.rank}</td><td>${r.name}</td><td>${fmt(r.elo)}</td><td>${r.roster}</td></tr>`).join("")}
+</table>
+<table><caption class="rk">Top 25 players</caption>
+<tr><th>#</th><th>Player</th><th>Elo</th><th>90% range</th><th>Games</th><th>Club</th><th>\u0394 w/ UFA games</th></tr>
+${DATA.players.map((r, i) => `<tr><td>${r.rank}</td><td>${r.name}</td><td>${fmt(r.elo)}</td><td>${fmt(r.lo)}\u2013${fmt(r.hi)}</td><td>${r.games}</td><td>${r.club}</td><td>${DATA.delta[i].delta == null ? "\u2013" : (DATA.delta[i].delta > 0 ? "+" : "") + fmt(DATA.delta[i].delta)}</td></tr>`).join("")}
+</table>`;
+
+const btn = document.getElementById("themeBtn");
+const states = ["auto", "light", "dark"];
+let ti = 0;
+btn.addEventListener("click", () => {
+  ti = (ti + 1) % 3;
+  const t = states[ti];
+  if (t === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = t;
+  btn.textContent = "Theme: " + t;
+});
+</script>
+</body>
+</html>

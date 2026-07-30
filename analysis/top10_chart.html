@@ -1,0 +1,364 @@
+<title>USAU Club Men's — Top 10 Teams by Player-Elo, 2021–2026</title>
+<style>
+  :root {
+    --bg: #f4f5f4;
+    --surface: #fcfcfb;
+    --ink: #12140f;
+    --ink-2: #52544c;
+    --ink-3: #86887e;
+    --line: #e2e3dd;
+    --line-strong: #c9cbc2;
+    --accent: #1baf7a;
+    --grid: #ececE6;
+    --baseline: #b7b9ae;
+    /* series — light mode */
+    --s1: #2a78d6; --s2: #008300; --s3: #e87ba4; --s4: #eda100;
+    --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #e34948;
+    --s9: #7d7f75; --s10: #7d7f75;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14150f; --surface: #1c1d16; --ink: #f4f4ee; --ink-2: #c3c3b8;
+      --ink-3: #8b8c80; --line: #34352c; --line-strong: #45463b; --grid: #2a2b22;
+      --baseline: #56574c;
+      --s1: #3987e5; --s2: #3aa53a; --s3: #d55181; --s4: #d89a1e;
+      --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+      --s9: #9a9c90; --s10: #9a9c90;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14150f; --surface: #1c1d16; --ink: #f4f4ee; --ink-2: #c3c3b8;
+    --ink-3: #8b8c80; --line: #34352c; --line-strong: #45463b; --grid: #2a2b22;
+    --baseline: #56574c;
+    --s1: #3987e5; --s2: #3aa53a; --s3: #d55181; --s4: #d89a1e;
+    --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+    --s9: #9a9c90; --s10: #9a9c90;
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f5f4; --surface: #fcfcfb; --ink: #12140f; --ink-2: #52544c;
+    --ink-3: #86887e; --line: #e2e3dd; --line-strong: #c9cbc2; --grid: #ececE6;
+    --baseline: #b7b9ae;
+    --s1: #2a78d6; --s2: #008300; --s3: #e87ba4; --s4: #eda100;
+    --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #e34948;
+    --s9: #7d7f75; --s10: #7d7f75;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 44px 24px 72px; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(26px, 4.4vw, 40px); line-height: 1.08; margin: 0 0 12px;
+    letter-spacing: -0.02em; text-wrap: balance; font-weight: 680;
+  }
+  .lede { font-size: 17px; color: var(--ink-2); max-width: 64ch; margin: 0; }
+  .lede b { color: var(--ink); font-weight: 620; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; margin-top: 32px; padding: 24px 20px 12px;
+  }
+  .card-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 16px; flex-wrap: wrap; padding: 0 6px 4px;
+  }
+  .card-title { font-size: 15px; font-weight: 620; margin: 0; }
+  .card-sub { font-size: 13px; color: var(--ink-3); margin: 0; }
+  .toggle {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink-2); background: transparent;
+    border: 1px solid var(--line-strong); border-radius: 7px;
+    padding: 6px 11px; cursor: pointer;
+  }
+  .toggle:hover { border-color: var(--ink-3); color: var(--ink); }
+  .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .chart-shell { position: relative; width: 100%; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1.5; stroke-dasharray: 2 4; }
+  .axis-label { fill: var(--ink-3); font-family: var(--mono); font-size: 11px; }
+  .axis-title { fill: var(--ink-2); font-size: 12px; font-weight: 560; }
+  .series-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .series-dot { stroke: var(--surface); stroke-width: 1.5; }
+  .series-label {
+    font-size: 12px; font-weight: 620; dominant-baseline: middle;
+    paint-order: stroke; stroke: var(--surface); stroke-width: 3px;
+  }
+  .series-rank { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+  .dim { opacity: 0.16; transition: opacity .12s; }
+  .hi { opacity: 1; }
+  .hover-x { stroke: var(--line-strong); stroke-width: 1; }
+
+  .tip {
+    position: absolute; pointer-events: none; opacity: 0; transition: opacity .1s;
+    background: var(--surface); border: 1px solid var(--line-strong);
+    border-radius: 9px; padding: 9px 11px; font-size: 12px; min-width: 168px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.13); z-index: 5;
+  }
+  .tip-season { font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    letter-spacing: .06em; margin-bottom: 6px; }
+  .tip-row { display: flex; align-items: center; gap: 7px; padding: 1.5px 0; }
+  .tip-sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .tip-name { color: var(--ink-2); flex: 1; white-space: nowrap; }
+  .tip-val { font-variant-numeric: tabular-nums; font-weight: 620; color: var(--ink); }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 16px 6px 6px;
+    border-top: 1px solid var(--line); margin-top: 6px;
+  }
+  .lg { display: flex; align-items: center; gap: 7px; font-size: 12.5px;
+    color: var(--ink-2); cursor: default; }
+  .lg-sw { width: 22px; height: 3px; border-radius: 2px; flex: none; }
+  .lg .rk { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  .tblwrap { overflow-x: auto; padding: 6px; }
+  th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums; white-space: nowrap; }
+  th { color: var(--ink-3); font-weight: 560; font-family: var(--mono);
+    font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+  td.team, th.team { text-align: left; }
+  td.rk { color: var(--ink-3); font-family: var(--mono); }
+  .hidden { display: none; }
+
+  .notes { margin-top: 30px; font-size: 13px; color: var(--ink-3); max-width: 74ch; }
+  .notes p { margin: 0 0 9px; }
+  .notes b { color: var(--ink-2); font-weight: 600; }
+  .final-list { columns: 2; column-gap: 40px; font-size: 13.5px; margin-top: 8px;
+    max-width: 620px; }
+  .final-list div { break-inside: avoid; padding: 3px 0; color: var(--ink-2);
+    font-variant-numeric: tabular-nums; }
+  .final-list .n { font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    display: inline-block; width: 22px; }
+  .final-list .e { float: right; color: var(--ink-3); }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">USA Ultimate · Club Men's · Player-Elo model</p>
+  <h1>Six seasons of the best teams, on one continuous rating</h1>
+  <p class="lede">
+    Every player carries a personal Elo across years; a team is rated from whoever
+    is on its roster. So a season never resets — a club's strength is inherited from
+    its people. Here are the <b>ten strongest teams entering 2026</b>, traced back
+    through 2021. Height is <b>points above the league median</b> that season, which
+    strips out the model's year-over-year scale drift so the lines are comparable.
+  </p>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <p class="card-title">Distance above the field, 2021–2026</p>
+        <p class="card-sub">Roster-derived team rating minus the season's median club</p>
+      </div>
+      <button class="toggle" id="toggle" aria-pressed="false">Show table</button>
+    </div>
+
+    <div class="chart-shell" id="chartView">
+      <svg id="chart" viewBox="0 0 900 460" role="img"
+           aria-label="Line chart of the top 10 Club Men's teams' Elo above league median across 2021 to 2026."></svg>
+      <div class="tip" id="tip"></div>
+    </div>
+
+    <div class="tblwrap hidden" id="tableView">
+      <table>
+        <thead><tr><th class="team">Team</th>
+          <th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="notes">
+    <p><b>Final 2026 ranking</b> (roster-derived rating, tuned model — K = 60, softmax τ = 150):</p>
+    <div class="final-list" id="finalList"></div>
+    <p style="margin-top:18px"><b>Reading the chart.</b> The dashed zero line is the median
+      club each season; +700 means a team rated 700 Elo points above that middle. Values climb
+      toward recent years partly because the whole field's ratings inflate over time — the
+      median-relative scale here controls for that, so a rising line means pulling away from the
+      pack, not just riding the tide.</p>
+    <p><b>Caveats.</b> Rhino Slam! registered as "Rhino" in 2025; the two are merged here so the
+      line stays continuous — a club-identity fix, distinct from player identity. Ratings are on
+      the model's internal scale, not the USAU algorithm's. Built from 12,702 games and 97,423
+      roster entries scraped from play.usaultimate.org.</p>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  seasons: [2021,2022,2023,2024,2025,2026],
+  order: ["Revolver","DiG","Rhino Slam!","PoNY","Ring of Fire","Red Tide","Chicago Machine","Sockeye","Johnny Bravo","Doublewide"],
+  series: {
+    "Revolver":[410.9,544.4,618.4,681.5,940.6,886.4],
+    "DiG":[440.7,486.6,624.3,777.4,837.9,795.7],
+    "Rhino Slam!":[327.7,463.9,582.1,784.3,772.4,784.8],
+    "PoNY":[508.6,630.4,775.4,733.5,809.6,784.1],
+    "Ring of Fire":[513.2,586.0,640.1,692.4,762.8,699.3],
+    "Red Tide":[-33.8,-9.1,136.8,347.1,415.4,693.8],
+    "Chicago Machine":[421.8,531.0,657.5,726.3,739.7,687.6],
+    "Sockeye":[485.6,502.0,399.2,622.5,669.1,633.2],
+    "Johnny Bravo":[285.5,589.4,636.3,652.4,675.0,626.6],
+    "Doublewide":[235.4,453.4,552.1,573.0,601.5,576.3]
+  },
+  final: [["Revolver",2545.9],["DiG",2455.2],["Rhino Slam!",2444.3],["PoNY",2443.5],["Ring of Fire",2358.7],["Red Tide",2353.2],["Chicago Machine",2347.0],["Sockeye",2292.6],["Johnny Bravo",2286.1],["Doublewide",2235.8],["Sub Zero",2200.8],["Chain Lightning",2196.4],["GOAT",2191.7],["Philadelphia Pacmen",2177.4],["Mad Men",2175.4],["Truck Stop",2167.7],["Mephisto",2153.3],["Furious George",2129.4],["Vault",2093.1],["Raleigh-Durham United",2087.5]]
+};
+const DASHED = { "Johnny Bravo": "3 3", "Doublewide": "1 4" };
+const cvar = i => getComputedStyle(document.documentElement).getPropertyValue('--s'+i).trim();
+
+const svg = document.getElementById('chart');
+const tip = document.getElementById('tip');
+const NS = "http://www.w3.org/2000/svg";
+const W = 900, H = 460, M = { t: 22, r: 132, b: 40, l: 46 };
+const plotW = W - M.l - M.r, plotH = H - M.t - M.b;
+
+const allVals = DATA.order.flatMap(t => DATA.series[t]).filter(v => v != null);
+const yMin = Math.min(0, ...allVals), yMax = Math.max(...allVals);
+const yLo = Math.floor(yMin/100)*100, yHi = Math.ceil(yMax/100)*100;
+const xAt = i => M.l + (plotW * i) / (DATA.seasons.length - 1);
+const yAt = v => M.t + plotH * (1 - (v - yLo) / (yHi - yLo));
+
+let active = null;
+
+function el(tag, attrs, txt) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+
+function draw() {
+  svg.innerHTML = "";
+  // gridlines + y labels
+  for (let v = yLo; v <= yHi; v += 200) {
+    svg.appendChild(el(v === 0 ? 'line' : 'line', {
+      class: v === 0 ? 'baseline' : 'gridline',
+      x1: M.l, x2: M.l + plotW, y1: yAt(v), y2: yAt(v)
+    }));
+    svg.appendChild(el('text', { class: 'axis-label', x: M.l - 10, y: yAt(v) + 4,
+      'text-anchor': 'end' }, v === 0 ? 'median' : ('+' + v)));
+  }
+  // x labels
+  DATA.seasons.forEach((s, i) => {
+    svg.appendChild(el('text', { class: 'axis-label', x: xAt(i), y: H - M.b + 20,
+      'text-anchor': 'middle' }, s));
+  });
+  svg.appendChild(el('text', { class: 'axis-title', x: M.l, y: 12 }, 'Elo above league median'));
+
+  // series
+  DATA.order.forEach((team, idx) => {
+    const color = cvar(idx + 1);
+    const pts = DATA.series[team];
+    const g = el('g', { 'data-team': team, class: active && active !== team ? 'dim' : 'hi' });
+
+    // split into segments across nulls
+    let seg = [];
+    const segs = [];
+    pts.forEach((v, i) => {
+      if (v == null) { if (seg.length) segs.push(seg); seg = []; }
+      else seg.push([xAt(i), yAt(v)]);
+    });
+    if (seg.length) segs.push(seg);
+    segs.forEach(s => {
+      const d = s.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+      const path = el('path', { class: 'series-line', d, stroke: color });
+      if (DASHED[team]) path.setAttribute('stroke-dasharray', DASHED[team]);
+      g.appendChild(path);
+    });
+    // dots
+    pts.forEach((v, i) => { if (v != null)
+      g.appendChild(el('circle', { class: 'series-dot', cx: xAt(i), cy: yAt(v), r: 3, fill: color })); });
+    // right-edge direct label
+    let li = pts.length - 1; while (li >= 0 && pts[li] == null) li--;
+    const rank = idx + 1;
+    const ly = yAt(pts[li]);
+    g.appendChild(el('text', { class: 'series-rank', x: xAt(li) + 10, y: ly + 4 }, rank));
+    g.appendChild(el('text', { class: 'series-label', x: xAt(li) + 24, y: ly, fill: color }, team));
+    svg.appendChild(g);
+  });
+
+  // hover crosshair holder
+  const hx = el('line', { class: 'hover-x', y1: M.t, y2: M.t + plotH, x1: -99, x2: -99, id: 'hx' });
+  hx.style.opacity = 0;
+  svg.appendChild(hx);
+}
+
+function nearestSeason(clientX) {
+  const r = svg.getBoundingClientRect();
+  const svgX = (clientX - r.left) / r.width * W;
+  let best = 0, bd = 1e9;
+  DATA.seasons.forEach((s, i) => { const d = Math.abs(xAt(i) - svgX); if (d < bd) { bd = d; best = i; } });
+  return best;
+}
+
+function showTip(i, clientX) {
+  const hx = document.getElementById('hx');
+  hx.setAttribute('x1', xAt(i)); hx.setAttribute('x2', xAt(i)); hx.style.opacity = 1;
+  const rows = DATA.order.map((t, idx) => ({ t, idx, v: DATA.series[t][i] }))
+    .filter(r => r.v != null).sort((a, b) => b.v - a.v);
+  tip.innerHTML = '<div class="tip-season">' + DATA.seasons[i] + ' season</div>' +
+    rows.map(r => '<div class="tip-row"><span class="tip-sw" style="background:' + cvar(r.idx+1) +
+      '"></span><span class="tip-name">' + r.t + '</span><span class="tip-val">' +
+      (r.v > 0 ? '+' : '') + Math.round(r.v) + '</span></div>').join('');
+  const shell = document.getElementById('chartView').getBoundingClientRect();
+  let left = clientX - shell.left + 16;
+  if (left + 190 > shell.width) left = clientX - shell.left - 190;
+  tip.style.left = Math.max(4, left) + 'px';
+  tip.style.top = '14px';
+  tip.style.opacity = 1;
+}
+
+svg.addEventListener('mousemove', e => showTip(nearestSeason(e.clientX), e.clientX));
+svg.addEventListener('mouseleave', () => {
+  tip.style.opacity = 0; const hx = document.getElementById('hx'); if (hx) hx.style.opacity = 0;
+});
+
+// legend with hover-highlight
+const legend = document.getElementById('legend');
+DATA.order.forEach((team, idx) => {
+  const item = el('span', { class: 'lg' });
+  item.innerHTML = '<span class="rk">' + (idx+1) + '</span><span class="lg-sw" style="background:' +
+    cvar(idx+1) + (DASHED[team] ? ';opacity:.9' : '') + '"></span>' + team;
+  item.addEventListener('mouseenter', () => { active = team; draw(); });
+  item.addEventListener('mouseleave', () => { active = null; draw(); });
+  legend.appendChild(item);
+});
+
+// table
+const tbody = document.getElementById('tbody');
+DATA.order.forEach((team, idx) => {
+  const tr = el('tr');
+  tr.innerHTML = '<td class="team"><span class="rk">'+(idx+1)+'</span> '+team+'</td>' +
+    DATA.series[team].map(v => '<td>' + (v==null ? '—' : (v>0?'+':'')+Math.round(v)) + '</td>').join('');
+  tbody.appendChild(tr);
+});
+
+// final list
+document.getElementById('finalList').innerHTML = DATA.final.map((r, i) =>
+  '<div><span class="n">'+(i+1)+'</span>'+r[0]+'<span class="e">'+r[1].toFixed(0)+'</span></div>').join('');
+
+// toggle
+const toggle = document.getElementById('toggle');
+toggle.addEventListener('click', () => {
+  const showTable = document.getElementById('tableView').classList.contains('hidden');
+  document.getElementById('tableView').classList.toggle('hidden', !showTable);
+  document.getElementById('chartView').classList.toggle('hidden', showTable);
+  toggle.textContent = showTable ? 'Show chart' : 'Show table';
+  toggle.setAttribute('aria-pressed', showTable);
+});
+
+draw();
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+</script>

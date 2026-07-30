@@ -1,0 +1,42 @@
+# Virtualenv and bytecode
+.venv/
+__pycache__/
+*.pyc
+
+# Scrape logs
+*.log
+
+# SQLite corpora. data/usau.db is 114 MB on its own, past GitHub's 100 MB hard
+# limit, and it is fully derived from the scrape cache. Rebuild with:
+#   python -m scraper.build_db --division club  2017 2018 2019 2021 2022 2023 2024 2025 2026
+#   python -m scraper.build_db --division college 2021 2022 2023 2024 2025 2026
+#   python -m identity.resolve
+*.db
+*.db-wal
+*.db-shm
+
+# Everything under data/ is ignored by default and the published artifacts are
+# allowlisted back in below. Deliberate: the directory also holds a 1.1 GB raw
+# HTML cache (data/raw/, content-addressed and rebuildable) plus a pile of CSVs
+# left over from earlier configs — player_elo_final, _intermingled, _alltime,
+# _oregon, *_snap, bridge_audit. Those were produced by superseded versions of
+# the engine, so committing them would publish numbers that no longer reproduce.
+# An allowlist fails safe; a blocklist would silently pick up the next one.
+data/*
+
+# Hand-maintained input, not derived from anything — the identity review queue.
+!data/link_overrides.csv
+
+# Published outputs of `python -m analysis.rankings`
+!data/player_elo.csv
+!data/team_elo.csv
+!data/team_elo_best.csv
+!data/team_elo_upcoming.csv
+
+# Published outputs of `python -m identity.resolve`
+!data/ambiguities.csv
+!data/cross_division_links.csv
+
+# UFA -> USAU identity links, and its manual review queue
+!data/ufa_links.csv
+!data/ufa_link_audit.csv
