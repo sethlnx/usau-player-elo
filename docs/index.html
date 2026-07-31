@@ -70,23 +70,49 @@ td.band{color:var(--ink-3);font-family:var(--mono);font-size:12px;white-space:no
 .stand td{padding:2.5px 0;border:0;font-size:13px}
 .stand td.w{text-align:right;font-family:var(--mono);color:var(--ink-3);font-size:12px}
 .seed{display:inline-block;width:17px;color:var(--ink-3);font-family:var(--mono);font-size:11px}
-.bracket{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:4px}
-.round h4{margin:0 0 7px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+/* Bracket geometry. A CSS grid with explicit row spans does the alignment for
+   free: a semi spans the two rows its quarters occupy, so align-items:center
+   drops it exactly level with the midpoint between them. Connector geometry
+   then follows from the row pitch (--mh + --rg) rather than magic numbers. */
+.bracket{--mh:66px; --rg:10px; --cg:30px;
+  display:grid; grid-template-columns:repeat(4,minmax(148px,1fr));
+  grid-template-rows:auto repeat(4,var(--mh));
+  column-gap:var(--cg); row-gap:var(--rg); align-items:center; margin-top:4px}
+.round h4{margin:0 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
   color:var(--ink-3);font-weight:600}
-.m{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px;
-   margin-bottom:8px}
-.m .t{display:flex;justify-content:space-between;gap:6px;padding:4px 6px;border-radius:5px;
+.m{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px;
+   position:relative;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.m .t{display:flex;gap:6px;padding:3px 6px;border-radius:5px;
   cursor:pointer;font-size:13px;align-items:baseline}
 .m .t:hover{background:var(--chip)}
 .m .t.w{background:color-mix(in srgb,var(--win) 15%,transparent);font-weight:600}
 .m .t.l{opacity:.42}
-.m .t.tbd{color:var(--ink-3);cursor:default;font-style:italic}
+.m .t.tbd{color:var(--ink-3);cursor:default}
 .m .t.tbd:hover{background:none}
+.m .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .m .p{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+/* seed chip: which pool slot, or which earlier match, feeds this line */
+.m .sd{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);background:var(--chip);
+  border-radius:3px;padding:1px 3px;min-width:26px;text-align:center;flex:none}
+/* outgoing stub, and incoming stub + vertical join drawn by the <i> */
+.m.out::after{content:'';position:absolute;left:100%;top:50%;
+  width:calc(var(--cg)/2);border-top:1px solid var(--line-strong)}
+.m > i.cin{position:absolute;right:100%;top:50%;transform:translateY(-50%);
+  width:calc(var(--cg)/2);height:var(--span,0px);
+  border-left:1px solid var(--line-strong)}
+.m > i.cin::after{content:'';position:absolute;left:0;top:50%;
+  width:calc(var(--cg)/2);border-top:1px solid var(--line-strong)}
+.champline{margin-top:14px;font-size:13px;color:var(--ink-2)}
+.champline b{background:color-mix(in srgb,var(--accent) 18%,transparent);
+  border:1px solid var(--accent);border-radius:6px;padding:3px 9px}
 .odds td.bar-c{width:38%;padding-right:12px}
 .oddsbar{height:7px;border-radius:4px;background:var(--accent);min-width:1px}
 .champ{background:color-mix(in srgb,var(--accent) 13%,transparent);border-color:var(--accent)}
-@media (max-width:860px){.bracket{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .bracket{grid-template-columns:1fr;grid-template-rows:none;row-gap:6px}
+  .bracket > *{grid-column:1 !important;grid-row:auto !important}
+  .m.out::after,.m > i.cin{display:none}
+}
 </style>
 
 <header>
@@ -145,6 +171,7 @@ td.band{color:var(--ink-3);font-family:var(--mono);font-size:12px;white-space:no
   <div class="grid" id="pools"></div>
   <h3 style="font-size:13px;margin:22px 0 9px;color:var(--ink-2)">Bracket</h3>
   <div class="bracket" id="bracket"></div>
+  <div class="champline" id="champline"></div>
   <h3 style="font-size:13px;margin:22px 0 9px;color:var(--ink-2)">
     Title odds — re-simulated from whatever you have entered</h3>
   <table class="odds"><thead><tr>
@@ -228,7 +255,10 @@ $('#pnote').textContent =
 const U = D.usopen, R = U.ratings, SCALE = D.scale;
 const POOLS = U.pools, PK = Object.keys(POOLS).sort();
 const SCHED = U.schedule;
-const KEY = 'usopen2026.v1';
+// v2: prequarter/quarter slot ids were renumbered so column i feeds column
+// i+1, which changes what 'pq0' refers to. Bumping the key discards saved
+// state rather than silently reinterpreting it against the new bracket.
+const KEY = 'usopen2026.v2';
 let S = load();
 function load() {
   try { return JSON.parse(localStorage.getItem(KEY)) || {pool:{}, br:{}}; }
@@ -257,11 +287,20 @@ function poolComplete(k) {
   return SCHED.every((g,i) => poolOf(g.home) !== k || S.pool[i]);
 }
 
-/* Prequarter pairing: 2nd of one pool vs 3rd of the next, cross-pool.
-   Quarters: pool winners against prequarter winners. This is an ASSUMPTION -
-   USAU has not published the bracket - and it is flagged in the note below. */
-const PQ = [['A',1,'D',2], ['B',1,'C',2], ['C',1,'B',2], ['D',1,'A',2]];
-const QF = [['A',0,1], ['D',0,2], ['B',0,0], ['C',0,3]];
+/* Prequarter pairing: 2nd of one pool vs 3rd of another, cross-pool; quarters
+   are pool winners against prequarter winners. This is an ASSUMPTION - USAU
+   has not published the pairing - and it is flagged in the note below.
+
+   The arrays are ordered so prequarter i feeds quarter i. That is purely a
+   presentation concern and it is the whole reason the columns line up: the
+   bracket is identical to the previous indexing, just renumbered so row i of
+   one column is the input to row i of the next. */
+const PQ = [['B',1,'C',2], ['C',1,'B',2], ['A',1,'D',2], ['D',1,'A',2]];
+const QF = [['A',0], ['D',0], ['B',0], ['C',0]];
+const PQL = PQ.map(([p1,i1,p2,i2]) => [p1+(i1+1), p2+(i2+1)]);
+const QFL = QF.map(([p,si],i) => [p+(si+1), 'W PQ'+(i+1)]);
+const SFL = [['W QF1','W QF2'], ['W QF3','W QF4']];
+const FL  = ['W SF1','W SF2'];
 
 function bracketFrom(res, br) {
   // A pool's finishing order is a FACT only once its games are all played.
@@ -280,7 +319,7 @@ function bracketFrom(res, br) {
     return rnd ? (Math.random() < P(a,b) ? a : b) : null;
   };
   const pqw = pq.map((m,i) => pick('pq'+i, m[0], m[1], false));
-  const qf = QF.map(([p,si,pqi]) => [ord[p][si], pqw[pqi]]);
+  const qf = QF.map(([p,si],i) => [ord[p][si], pqw[i]]);
   const qfw = qf.map((m,i) => pick('qf'+i, m[0], m[1], false));
   const sf = [[qfw[0], qfw[1]], [qfw[2], qfw[3]]];
   const sfw = sf.map((m,i) => pick('sf'+i, m[0], m[1], false));
@@ -309,7 +348,7 @@ function simulate(n) {
       return Math.random() < P(a,b) ? a : b;
     };
     const pqw = PQ.map(([p1,i1,p2,i2],i) => rp('pq'+i, ord[p1][i1], ord[p2][i2]));
-    const qfw = QF.map(([p,si,pqi],i) => rp('qf'+i, ord[p][si], pqw[pqi]));
+    const qfw = QF.map(([p,si],i) => rp('qf'+i, ord[p][si], pqw[i]));
     const s1 = rp('sf0', qfw[0], qfw[1]), s2 = rp('sf1', qfw[2], qfw[3]);
     semi[qfw[0]]++; semi[qfw[1]]++; semi[qfw[2]]++; semi[qfw[3]]++;
     title[rp('f0', s1, s2)]++;
@@ -343,31 +382,47 @@ function drawPools() {
   }).join('');
 }
 
-function slot(id, a, b, champ) {
-  const t = (x, other) => {
-    if (!x) return `<div class="t tbd">TBD</div>`;
+/* One match box. `lbl` is the pair of seed descriptors ("A1" / "W PQ2") so a
+   slot still says what feeds it while the teams are unknown. `place` is the
+   grid position, `span` the height of the incoming vertical connector in px -
+   0 for a one-to-one feed, one row pitch for a semi, two for the final. */
+function slot(id, a, b, lbl, place, span, opts) {
+  opts = opts || {};
+  const line = (x, other, seed) => {
+    const sd = `<span class="sd">${seed}</span>`;
+    if (!x) return `<div class="t tbd">${sd}<span class="nm">TBD</span></div>`;
     const w = S.br[id], cls = w ? (w === x ? 't w' : 't l') : 't';
     const p = other ? `<span class="p">${pct(P(x, other))}</span>` : '';
     return `<div class="${cls}" data-b="${id}" data-w="${esc(x)}">` +
-           `<span>${esc(x)}</span>${p}</div>`;
+           `${sd}<span class="nm">${esc(x)}</span>${p}</div>`;
   };
-  return `<div class="m${champ ? ' champ' : ''}">${t(a,b)}${t(b,a)}</div>`;
+  const cin = span === null ? '' :
+    `<i class="cin" style="--span:${span}px"></i>`;
+  return `<div class="m${opts.champ ? ' champ' : ''}${opts.out ? ' out' : ''}" ` +
+         `style="${place}">${cin}${line(a,b,lbl[0])}${line(b,a,lbl[1])}</div>`;
 }
 
 function drawBracket() {
   const B = bracketFrom(S.pool, S.br);
-  const cols = [
-    ['Prequarters', B.pq.map((m,i) => slot('pq'+i, m[0], m[1]))],
-    ['Quarters',    B.qf.map((m,i) => slot('qf'+i, m[0], m[1]))],
-    ['Semis',       B.sf.map((m,i) => slot('sf'+i, m[0], m[1]))],
-    ['Final',       [slot('f0', B.fin[0], B.fin[1], !!B.champ)]],
-  ];
-  $('#bracket').innerHTML = cols.map(([h, ms]) =>
-    `<div class="round"><h4>${h}</h4>${ms.join('')}</div>`).join('');
-  if (B.champ) {
-    $('#bracket').innerHTML += `<div class="round"><h4>Champion</h4>` +
-      `<div class="m champ"><div class="t w"><span>${esc(B.champ)}</span></div></div></div>`;
-  }
+  // Row pitch must match the CSS custom properties --mh and --rg.
+  const PITCH = 66 + 10;
+  const at = (col, row, span) =>
+    `grid-column:${col};grid-row:${row}${span ? ' / span ' + span : ''}`;
+  const head = ['Prequarters','Quarters','Semis','Final'].map((h,i) =>
+    `<div class="round" style="${at(i+1,1)}"><h4>${h}</h4></div>`).join('');
+  const pq = B.pq.map((m,i) =>
+    slot('pq'+i, m[0], m[1], PQL[i], at(1, i+2), null, {out:true})).join('');
+  const qf = B.qf.map((m,i) =>
+    slot('qf'+i, m[0], m[1], QFL[i], at(2, i+2), 0, {out:true})).join('');
+  const sf = B.sf.map((m,i) =>
+    slot('sf'+i, m[0], m[1], SFL[i], at(3, 2*i+2, 2), PITCH, {out:true})).join('');
+  const fin = slot('f0', B.fin[0], B.fin[1], FL, at(4, 2, 4), 2*PITCH,
+                   {champ: !!B.champ});
+  $('#bracket').innerHTML = head + pq + qf + sf + fin;
+  $('#champline').innerHTML = B.champ
+    ? `Champion: <b>${esc(B.champ)}</b>`
+    : `<span class="muted">Record pool results above, then click through the ` +
+      `bracket. Each slot shows the seed that feeds it until the teams are known.</span>`;
 }
 
 function drawOdds() {
