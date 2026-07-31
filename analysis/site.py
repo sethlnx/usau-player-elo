@@ -123,6 +123,13 @@ def build():
     for i, ts in enumerate(ordered):
         pools[chr(65 + i)] = sorted(ts, key=lambda t: -(ratings.get(t) or 0))
 
+    # Trajectories for the drill-down, written by analysis.rankings from the
+    # same replay that produced the CSVs. Optional: if it is missing the page
+    # still builds, it just has nothing to open when a name is clicked.
+    hist_path = DB_PATH.parent / "history.json"
+    history = (json.loads(hist_path.read_text()) if hist_path.exists()
+               else {"events": [], "players": {}, "teams": {}})
+
     payload = {
         "generated": ev[2] if ev else None,
         "minGames": MIN_GAMES,
@@ -130,11 +137,12 @@ def build():
         "scale": PUBLISHED["division_scale"]["club"],
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
-                     int(r["rank"])]
+                     int(r["rank"]), r["player_id"]]
                     for r in players],
         "clubs": {k: [[int(r["rank"]), r["club"], float(r["elo"]),
                        int(r["roster_size"]), r["roster_event"]]
                       for r in v] for k, v in clubs.items()},
+        "history": history,
         "usopen": {
             "name": ev[1] if ev else "",
             "start": ev[2] if ev else "",
@@ -278,8 +286,43 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   .bracket > *{grid-column:1 !important;grid-row:auto !important}
   .m.out::after,.m > i.cin{display:none}
 }
+/* drill-down overlay */
+.nmlink{cursor:pointer;border-bottom:1px dotted var(--line-strong)}
+.nmlink:hover{color:var(--accent);border-bottom-color:var(--accent)}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;z-index:40}
+#scrim.on{display:block}
+#detail{position:fixed;top:0;right:0;bottom:0;width:min(760px,100vw);z-index:41;
+  background:var(--surface);border-left:1px solid var(--line-strong);
+  overflow-y:auto;padding:18px 22px 40px;display:none;
+  box-shadow:-10px 0 40px rgba(0,0,0,.18)}
+#detail.on{display:block}
+#detail h2{font-size:18px;margin:0 0 2px;letter-spacing:-.01em}
+#detail .meta{color:var(--ink-3);font-size:13px;margin-bottom:14px}
+#detail .close{position:absolute;top:14px;right:18px;font-size:20px;line-height:1;
+  background:none;border:0;color:var(--ink-3);cursor:pointer;padding:4px 8px}
+#detail .close:hover{color:var(--ink)}
+.chart{width:100%;height:190px;display:block;margin:2px 0 6px}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2}
+.chart .dot{fill:var(--accent)}
+.chart .ax{stroke:var(--line);stroke-width:1}
+.chart .gl{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.chart text{fill:var(--ink-3);font-size:10px;font-family:var(--mono)}
+.chart .hit{fill:transparent;cursor:crosshair}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);
+  font-size:11.5px;padding:4px 7px;border-radius:5px;display:none;z-index:50;
+  font-family:var(--mono);white-space:nowrap}
+#tip.on{display:block}
+.hist td.d{font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
+.hist td.r{text-align:right;font-family:var(--mono);font-size:13px}
+.hist td.dl{text-align:right;font-family:var(--mono);font-size:11.5px}
+.up{color:var(--win)} .dn{color:var(--lose)}
+
 </style>
 
+<div id="scrim"></div>
+<div id="detail"><button class="close" id="dclose">&times;</button>
+  <div id="dbody"></div></div>
+<div id="tip"></div>
 <header>
   <h1>USAU Club Men's — Player-Elo Rankings</h1>
   <div class="sub" id="sub"></div>
@@ -381,7 +424,9 @@ const CNOTE = {
 function drawClubs() {
   const basis = $('#basis').value, rows = D.clubs[basis] || [];
   $('#ctb').innerHTML = rows.map(r =>
-    `<tr><td class="rk">${r[0]}</td><td>${esc(r[1])}</td>` +
+    `<tr><td class="rk">${r[0]}</td>` +
+    `<td><span class="nmlink" data-club="${esc(r[1])}" data-elo="${r[2].toFixed(0)}"` +
+    ` data-n="${r[3]}" data-rk="${r[0]}">${esc(r[1])}</span></td>` +
     `<td class="n">${r[2].toFixed(0)}</td><td class="n">${r[3]}</td>` +
     `<td class="muted" style="font-size:13px">${esc(r[4])}</td></tr>`).join('');
   $('#ccount').textContent = `${rows.length} clubs`;
@@ -407,7 +452,10 @@ function drawPlayers() {
   const shown = rows.slice(0, 300);
   $('#ptb').innerHTML = shown.map(p =>
     `<tr><td class="rk" title="#${p[7]} of all ${D.totalRated.toLocaleString()} rated players">` +
-    `${rankOf.get(p)}</td><td>${esc(p[0])}</td>` +
+    `${rankOf.get(p)}</td>` +
+    `<td><span class="nmlink" data-pid="${p[8]}" data-nm="${esc(p[0])}"` +
+    ` data-elo="${p[1].toFixed(0)}" data-g="${p[4]}" data-rk="${p[7]}">` +
+    `${esc(p[0])}</span></td>` +
     `<td class="n">${p[1].toFixed(0)}</td>` +
     `<td class="band">[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]</td>` +
     `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(p[5])}</td>` +
@@ -733,6 +781,131 @@ $('#unote').innerHTML =
   `Warao and EVOLUTION are international entrants with no USAU history, so their ratings ` +
   `encode absence of evidence rather than measured weakness. Results you enter are kept in ` +
   `this browser only.`;
+
+/* ---------- drill-down: play history + rating curve ---------- */
+const H = D.history || {events:[], players:{}, teams:{}, teamKey:{}};
+const TK = H.teamKey || {};   // display name -> normalized club key
+const HEV = H.events;   // [date, name, season, divisionInitial]
+
+/* Stored delta-encoded: rebuild absolute event indices. */
+function decode(entry) {
+  if (!entry) return [];
+  const [deltas, vals] = entry;
+  const out = []; let i = 0;
+  for (let k = 0; k < deltas.length; k++) {
+    i += deltas[k];
+    const ev = HEV[i];
+    if (!ev) continue;
+    const v = vals[k];
+    out.push({date: ev[0], event: ev[1], season: ev[2], div: ev[3],
+              elo: Array.isArray(v) ? v[0] : v,
+              n: Array.isArray(v) ? v[1] : null});
+  }
+  return out;
+}
+
+const DAY = 864e5;
+const asDay = s => Date.parse(s) / DAY;
+
+/* Rating curve. x is real calendar time, so a gap in a career shows as a gap
+   rather than being collapsed into an evenly-spaced sequence. */
+function chart(pts) {
+  if (pts.length < 2) return '<p class="muted" style="font-size:13px">' +
+    'Not enough events to plot.</p>';
+  const W = 700, Hh = 190, L = 44, R = 10, T = 12, B = 010 + 18;
+  const xs = pts.map(p => asDay(p.date)), ys = pts.map(p => p.elo);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const pad = Math.max(40, (y1 - y0) * 0.15); y0 -= pad; y1 += pad;
+  const px = v => L + (W - L - R) * (x1 === x0 ? .5 : (v - x0) / (x1 - x0));
+  const py = v => T + (Hh - T - B) * (1 - (v - y0) / (y1 - y0));
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none">`;
+  // y gridlines at round numbers
+  const step = (y1 - y0) > 900 ? 500 : (y1 - y0) > 350 ? 200 : 100;
+  for (let g = Math.ceil(y0 / step) * step; g < y1; g += step) {
+    s += `<line class="gl" x1="${L}" x2="${W - R}" y1="${py(g).toFixed(1)}" ` +
+         `y2="${py(g).toFixed(1)}"/><text x="4" y="${(py(g) + 3).toFixed(1)}">${g}</text>`;
+  }
+  // year ticks
+  const yr0 = new Date(pts[0].date).getUTCFullYear(),
+        yr1 = new Date(pts[pts.length - 1].date).getUTCFullYear();
+  for (let y = yr0; y <= yr1; y++) {
+    const d = asDay(y + '-01-01');
+    if (d < x0 || d > x1) continue;
+    s += `<text x="${(px(d) - 12).toFixed(1)}" y="${Hh - 4}">${y}</text>`;
+  }
+  s += `<polyline class="ln" points="${pts.map((p,i) =>
+        px(xs[i]).toFixed(1) + ',' + py(p.elo).toFixed(1)).join(' ')}"/>`;
+  pts.forEach((p, i) => {
+    s += `<circle class="dot" cx="${px(xs[i]).toFixed(1)}" cy="${py(p.elo).toFixed(1)}" r="2.6"/>`;
+    s += `<circle class="hit" cx="${px(xs[i]).toFixed(1)}" cy="${py(p.elo).toFixed(1)}" r="9" ` +
+         `data-tip="${esc(p.date + '  ' + p.elo + '  ' + p.event)}"/>`;
+  });
+  return s + '</svg>';
+}
+
+function histTable(pts, isTeam) {
+  const rows = pts.slice().reverse().map((p, i, arr) => {
+    const nxt = arr[i + 1];
+    const d = nxt ? p.elo - nxt.elo : null;
+    const dl = d === null ? '' :
+      `<span class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}${d}</span>`;
+    return `<tr><td class="d">${p.date}</td>` +
+           `<td>${esc(p.event)}<span class="muted" style="font-size:11.5px">` +
+           ` ${p.div ? 'college' : 'club'}</span></td>` +
+           (isTeam ? `<td class="n">${p.n ?? ''}</td>` : '') +
+           `<td class="r">${p.elo}</td><td class="dl">${dl}</td></tr>`;
+  }).join('');
+  return `<table class="hist"><thead><tr><th>Date</th><th>Event</th>` +
+         (isTeam ? '<th class="n">Roster</th>' : '') +
+         `<th class="n">Elo after</th><th class="n">Δ</th></tr></thead>` +
+         `<tbody>${rows}</tbody></table>`;
+}
+
+function openDetail(kind, key, title, sub) {
+  const pts = decode(kind === 'p' ? H.players[key]
+                                  : (H.teams[TK[key]] || H.teams[key]));
+  const peak = pts.length ? Math.max(...pts.map(p => p.elo)) : null;
+  const peakAt = pts.find(p => p.elo === peak);
+  $('#dbody').innerHTML =
+    `<h2>${esc(title)}</h2><div class="meta">${sub}` +
+    (peak ? ` · peak <b>${peak}</b> after ${esc(peakAt.event)} (${peakAt.date})` : '') +
+    `</div>` + chart(pts) +
+    `<p class="note" style="margin:0 0 14px">Each point is the rating after that ` +
+    `event — a weekend tournament is one step, not one point per game. ` +
+    `${pts.length} event${pts.length === 1 ? '' : 's'} on record.</p>` +
+    (pts.length ? histTable(pts, kind === 'c') : '');
+  $('#detail').classList.add('on'); $('#scrim').classList.add('on');
+}
+function closeDetail() {
+  $('#detail').classList.remove('on'); $('#scrim').classList.remove('on');
+  $('#tip').classList.remove('on');
+}
+$('#dclose').onclick = closeDetail;
+$('#scrim').onclick = closeDetail;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+$('#detail').addEventListener('mousemove', e => {
+  const h = e.target.closest('[data-tip]'); const tip = $('#tip');
+  if (!h) { tip.classList.remove('on'); return; }
+  tip.textContent = h.dataset.tip;
+  tip.style.left = (e.clientX + 14) + 'px';
+  tip.style.top = (e.clientY - 26) + 'px';
+  tip.classList.add('on');
+});
+
+$('#ptb').addEventListener('click', e => {
+  const el = e.target.closest('[data-pid]'); if (!el) return;
+  openDetail('p', el.dataset.pid, el.dataset.nm,
+             `Elo <b>${el.dataset.elo}</b> · ${el.dataset.g} games · ` +
+             `#${el.dataset.rk} of ${D.totalRated.toLocaleString()} rated`);
+});
+$('#ctb').addEventListener('click', e => {
+  const el = e.target.closest('[data-club]'); if (!el) return;
+  openDetail('c', el.dataset.club, el.dataset.club,
+             `Elo <b>${el.dataset.elo}</b> · roster ${el.dataset.n} · ` +
+             `#${el.dataset.rk} of ${(D.clubs[$('#basis').value]||[]).length} clubs`);
+});
 
 drawClubs(); drawPlayers(); drawUS();
 </script>

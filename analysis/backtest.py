@@ -221,12 +221,17 @@ def load_maps(con):
 
 
 def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
-           stat_events=None):
+           stat_events=None, on_game=None):
     """Returns records of (season, expected, outcome) and the final model.
 
     stat_events (from load_stat_events) are ingested strictly walk-forward:
     a team-event's stat lines reach the model only once the replay passes the
     event's end date, so they never inform predictions of that same event.
+
+    on_game(game, home_roster, away_roster, model) fires after each game is
+    applied. It exists so a caller can record rating trajectories from the one
+    authoritative pass rather than monkeypatching the engine or replaying a
+    second time and hoping the two agree.
     """
     if model_kind == "player":
         model = PlayerElo(cfg)
@@ -268,6 +273,8 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
         outcome = (1.0 if g["home_score"] > g["away_score"]
                    else 0.0 if g["home_score"] < g["away_score"] else 0.5)
         records.append((season, division, g.get("date"), exp, outcome))
+        if on_game is not None:
+            on_game(g, home, away, model)
     return records, model
 
 

@@ -9,9 +9,11 @@ Usage: python -m analysis.rankings
 """
 
 import csv
+import json
 import math
 import sqlite3
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -365,6 +367,74 @@ def best_rosters(con, season: int, model):
     return out, source
 
 
+# Players below this many games get no stored trajectory. Matches the site's
+# display floor: nothing links to a player the table will not show.
+HISTORY_MIN_GAMES = 30
+
+
+def write_history(con, games, rosters, clubs, snaps, model):
+    """Emit data/history.json — per-event rating trajectories for the drill-down.
+
+    Keyed on (subject, event) rather than (subject, game): a weekend tournament
+    is one point on the curve, which is how people remember a season and which
+    keeps the file to ~3 MB instead of ~12. `snaps` arrives already populated by
+    the on_game hook, so these are the SAME numbers the CSVs were written from
+    — a second replay could drift from the first if any config read changed.
+    """
+    evinfo = {r[0]: r[1:] for r in con.execute(
+        "SELECT event_id, name, start_date, season, COALESCE(division,'club') "
+        "FROM events")}
+    keep = {p for p, st in model.players.items()
+            if not str(p).startswith("ghost:") and st.games >= HISTORY_MIN_GAMES}
+    used = sorted({e for subj, evs in snaps.items() for e in evs
+                   if subj[0] == "p" and subj[1] in keep} |
+                  {e for subj, evs in snaps.items() for e in evs if subj[0] == "c"})
+    ix = {e: i for i, e in enumerate(used)}
+    # Division as 1/0, not an initial: "club"[:1] and "college"[:1] are both
+    # "c", which silently labelled every club event as college in the UI.
+    events = [[evinfo[e][1][:10], evinfo[e][0][:46], evinfo[e][2],
+               1 if evinfo[e][3] == "college" else 0]
+              for e in used]
+
+    def encode(evs):
+        # Delta-encoded event indices keep the common case to 1-2 digits.
+        items = sorted(evs.items(), key=lambda kv: evinfo[kv[0]][1] or "")
+        idx, rat, prev = [], [], 0
+        for e, payload in items:
+            i = ix[e]
+            idx.append(i - prev)
+            prev = i
+            rat.append(payload)
+        return [idx, rat]
+
+    players, teams = {}, {}
+    for (kind, subj), evs in snaps.items():
+        if kind == "p":
+            if subj in keep:
+                players[str(subj)] = encode({e: r for e, (r, _n) in evs.items()})
+        else:
+            teams[subj] = encode({e: [r, n] for e, (r, n) in evs.items()})
+
+    # The team tables key on an event-team's display name; the model keys on the
+    # normalized club identity from load_maps. Those differ (and deliberately so
+    # — CLUB_ALIASES merges "Rhino" into "Rhino Slam!"), so ship the mapping or
+    # every club drill-down comes up empty.
+    alias = {}
+    for etid, full, dn in con.execute(
+            "SELECT event_team_id, full_name, display_name FROM event_teams"):
+        key = clubs.get(etid)
+        if key and key in teams:
+            alias[full or dn] = key
+
+    out = DB_PATH.parent / "history.json"
+    out.write_text(json.dumps({"events": events, "players": players,
+                               "teams": teams, "teamKey": alias},
+                              separators=(",", ":")))
+    print(f"wrote {out} ({len(players):,} players, {len(teams):,} clubs, "
+          f"{len(alias):,} club aliases, {len(events):,} events, "
+          f"{out.stat().st_size/1024/1024:.1f} MB)")
+
+
 def main(cfg: EloConfig | None = None):
     cfg = cfg or EloConfig(**PUBLISHED)
     con = sqlite3.connect(DB_PATH)
@@ -372,7 +442,27 @@ def main(cfg: EloConfig | None = None):
     rosters, clubs = load_maps(con)
     stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con),
                          key=lambda e: e[0])
-    _, model = replay("player", games, rosters, clubs, cfg, stat_events)
+
+    # Trajectories are captured from the ONE authoritative replay via the hook,
+    # keyed (kind, subject) -> event_id -> payload. Last write per event wins,
+    # so each point is the rating after that subject's final game of the event.
+    etev = dict(con.execute("SELECT event_team_id, event_id FROM event_teams"))
+    snaps = defaultdict(dict)
+
+    def capture(g, home, away, model):
+        for side, etid in ((home, g["home_id"]), (away, g["away_id"])):
+            eid = etev.get(etid)
+            if eid is None or not isinstance(side, list):
+                continue
+            club = clubs.get(etid)
+            if club:
+                snaps[("c", club)][eid] = (round(model.team_rating(side)), len(side))
+            for p in side:
+                if not str(p).startswith("ghost:"):
+                    snaps[("p", p)][eid] = (round(model.players[p].rating), 0)
+
+    _, model = replay("player", games, rosters, clubs, cfg, stat_events,
+                      on_game=capture)
 
     latest = last_appearance(con)
     out = DB_PATH.parent / "player_elo.csv"
@@ -414,6 +504,7 @@ def main(cfg: EloConfig | None = None):
                 w.writerow([i, club, round(rating, 1), size, season, evname, sd])
         print(f"wrote {team_out} ({len(rated)} teams, season {season}, "
               f"{basis} rosters)")
+    write_history(con, games, rosters, clubs, snaps, model)
     con.close()
 
 
