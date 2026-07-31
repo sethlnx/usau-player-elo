@@ -25,6 +25,17 @@ class NotFound(Exception):
     """Raised on a 404, including ones replayed from the negative cache."""
 
 
+class UrlUnavailable(Exception):
+    """One URL keeps failing while the site as a whole is answering fine.
+
+    Some event pages reset the connection on every request — a server-side
+    fault, not a block. `Denver-Round-Robin-2019` does it consistently while
+    every neighbouring event returns 200. Conflating that with a WAF block
+    halts an entire backfill on one bad row, so it is raised separately and
+    build_db skips the event and carries on.
+    """
+
+
 BASE_URL = "https://play.usaultimate.org"
 RAW_DIR = Path(__file__).resolve().parent.parent / "data" / "raw"
 USER_AGENT = (
@@ -36,6 +47,11 @@ USER_AGENT = (
 # Faster pace = more throughput but earlier blocks (resumable, so VPN-switch and rerun).
 RATE_LIMIT_SECONDS = float(os.environ.get("USAU_RATE_LIMIT", "1.5"))
 JITTER_SECONDS = float(os.environ.get("USAU_JITTER", "0.75"))
+# Optional file holding a single float: the current base delay. Re-read (on
+# mtime change) before every request, so a long backfill can be ramped up or
+# backed off WHILE it runs instead of only between attempts. Absent or
+# unreadable, RATE_LIMIT_SECONDS stands.
+RATE_FILE = os.environ.get("USAU_RATE_FILE")
 # Probes to confirm a block is sustained (not a one-off 500), then bail to the
 # caller so a human can switch VPN. Default stays short (no grinding through
 # long sleeps), but observed WAF behavior is a count budget that refills over
@@ -46,21 +62,54 @@ BLOCK_PROBE_SECONDS = tuple(
 _last_request_time = 0.0
 _live_request_count = 0  # network requests this process (cache hits excluded)
 _run_started = time.monotonic()
+_rate_cache = (0.0, RATE_LIMIT_SECONDS)   # (mtime, delay)
+
+
+def _current_delay() -> float:
+    global _rate_cache
+    if not RATE_FILE:
+        return RATE_LIMIT_SECONDS
+    try:
+        mtime = os.stat(RATE_FILE).st_mtime
+        if mtime != _rate_cache[0]:
+            with open(RATE_FILE) as f:
+                _rate_cache = (mtime, max(0.0, float(f.read().strip())))
+        return _rate_cache[1]
+    except (OSError, ValueError):
+        return RATE_LIMIT_SECONDS
 
 
 def _throttle():
     global _last_request_time
-    wait = _last_request_time + RATE_LIMIT_SECONDS + random.uniform(0, JITTER_SECONDS) - time.monotonic()
+    base = _current_delay()
+    wait = _last_request_time + base + random.uniform(0, JITTER_SECONDS) - time.monotonic()
     if wait > 0:
         time.sleep(wait)
     _last_request_time = time.monotonic()
 
 
+CONTROL_URL = BASE_URL + "/events/tournament/"
+
+
+def _site_reachable() -> bool:
+    """Is the site answering at all? Used to tell a bad URL from a WAF block."""
+    try:
+        r = requests.get(CONTROL_URL, headers={"User-Agent": USER_AGENT}, timeout=30)
+        return r.status_code < 500
+    except (requests.Timeout, requests.ConnectionError):
+        return False
+
+
 def _request_with_backoff(send) -> requests.Response:
-    """Run send(); a lone 5xx/timeout is retried briefly, a sustained one raises SiteBlocked.
+    """Run send(); retry a lone failure, then decide WHY it failed.
 
     The WAF blocks two ways: 500s on everything, or hanging connections until
-    they time out. Both count as block signals and enter the same probe ladder.
+    they time out. But an individual event page can also reset the connection
+    forever while the rest of the site is perfectly healthy. Those need
+    opposite responses — stop and switch exit, versus skip this row and carry
+    on — so before entering the probe ladder we ask a control URL which case
+    this is. Without that check one broken event halts a whole backfill, and
+    the operator goes hunting for a block that was never there.
     """
     global _live_request_count, _last_request_time
     _throttle()
@@ -80,6 +129,19 @@ def _request_with_backoff(send) -> requests.Response:
     elapsed = time.monotonic() - _run_started
     print(f"    [fetch] first {what} at live request #{_live_request_count}, "
           f"{elapsed:.0f}s into run", flush=True)
+
+    if _site_reachable():
+        time.sleep(2)                      # one more go, in case it was a blip
+        _last_request_time = time.monotonic()
+        resp, err = attempt()
+        if resp is not None and resp.status_code < 500:
+            resp.raise_for_status()
+            return resp
+        what2 = str(resp.status_code) if resp is not None else type(err).__name__
+        print(f"    [fetch] {what2} again, but {CONTROL_URL} is fine "
+              f"— treating as a bad URL, not a block", flush=True)
+        raise UrlUnavailable(f"{what2} on this URL while the site is up")
+
     # confirm the block is real with escalating probes
     for probe in BLOCK_PROBE_SECONDS:
         print(f"    [fetch] {what} — probing again in {probe}s", flush=True)

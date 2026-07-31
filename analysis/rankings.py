@@ -51,30 +51,29 @@ from elo.engine import EloConfig
 #
 # Re-fit whenever the engine's update dynamics change — these constants are
 # properties of the replay, not of the sport. History of this fit:
-#   cliff, 2021-2025 corpus            sqrt(551^2/n + 53^2)
-#   exponential, 2021-2025             sqrt(415^2/n + 48^2)
-#   hyperbolic + reg=0.15, 2017-2026   sqrt(275^2/n + 51^2)
-#   hyperbolic + reg=0.0,  2017-2026   96.0  (flat)
-#   + softmax tau=600, k=44            sqrt(340^2/n + 98^2)
+#   cliff, 2021-2025 corpus              sqrt(551^2/n + 53^2)
+#   exponential, 2021-2025               sqrt(415^2/n + 48^2)
+#   hyperbolic + reg=0.15, 2017-2026     sqrt(275^2/n + 51^2)
+#   hyperbolic + reg=0.0,  2017-2026     96.0  (flat)
+#   + softmax tau=600, k=44              sqrt(340^2/n + 98^2)
+#   + college 2017-2020 backfill, k=48   113.0 (flat)
 #
-# The 1/n term is BACK, though weakly. Under the plain roster mean it fitted to
-# exactly zero: a rating's uncertainty did not fall with experience at all,
-# because the hyperbolic multiplier never decays and reg=0 removed every pull
-# toward an anchor. Softmax weighting restores a little convergence by a
-# different route - a game's delta is shared by the whole roster, but the team
-# rating a delta is computed FROM now leans on the players who are actually
-# identified, so evidence concentrates instead of smearing evenly across 25
-# names. Split-half reads 105.6 / 105.9 / 103.4 / 98.5 at mean n = 63 / 97 /
-# 145 / 210 - a real if shallow decline, where before there was none.
+# The 1/n term went back to exactly zero. Softmax weighting had bought a
+# shallow decline in the previous fit; adding 15,466 college games and widening
+# the provisional window (N 8 -> 14) wiped it out. Split-half reads 111.5 /
+# 113.7 / 111.9 / 113.5 at mean n = 63 / 97 / 145 / 216 — no trend at all
+# across a 3.4x range in games played, on 15,000+ players.
 #
-# Read the levels honestly: the floor rose 96 -> 98 and the band is WIDER at
-# every n a player actually reaches (±180 at n=30, ±168 at n=100, ±163 at
-# n=300, against a flat ±158). Better game prediction has been bought with
-# slightly less certainty about any individual, which is the same trade the
-# reg=0 note below describes. The gradient is the honest part: experience now
-# buys something, where under the previous config it bought nothing.
+# So a rating's uncertainty does not fall with experience, and the honest band
+# is a flat ±186. That is WIDER than the ±158 of two configs ago. The cause is
+# structural and already documented below: hyperbolic never decays to 1, so
+# every game still moves a veteran, and offseason_regression=0 removed the only
+# pull toward an anchor. More evidence buys better PREDICTION — TEST logloss
+# 0.4580 -> 0.4517 — while leaving any individual rating no better pinned down.
+# Anyone wanting convergence has to pay for it with reg > 0; the price is
+# quantified in the reg note further down.
 def rating_sigma(games: int) -> float:
-    return math.sqrt(340.0 ** 2 / max(games, 1) + 98.0 ** 2)
+    return 113.0
 
 
 Z90 = 1.645  # two-sided 90% interval
@@ -109,17 +108,24 @@ def latest_rosters(con, season: int, basis: str = "completed"):
     off a tournament it has not played makes the table jump on registration
     timing rather than on results.
 
-    "upcoming" takes the NEXT event a club has registered for — the squad it
-    is about to field rather than the one it last fielded. Strictly ahead of
-    today, because an event with a NULL end_date is indistinguishable from an
-    in-progress one and its roster is already stale. Only clubs registered for
-    a future event appear, so this table is a fraction of the size and is NOT
-    a full national ranking.
+    "upcoming" takes the next roster a club will field that is not yet in the
+    books — a future registration OR an event being played right now. The
+    earlier rule was `start_date > today`, which silently emptied the table on
+    the morning of the tournament it was built for: the U.S. Open dropped from
+    13 teams to 1 the moment its start date arrived, and every rating on the
+    site's U.S. Open tab went null.
+
+    An event still counts while `end_date >= today`. A NULL end_date is only
+    trusted when the event has not started, since a null-dated event already
+    under way is indistinguishable from a stale one whose roster has rotted.
+    Only clubs with such an event appear, so this table is a fraction of the
+    size and is NOT a full national ranking.
     """
     if basis == "completed":
         when, order = "ev.end_date IS NOT NULL AND ev.end_date <= date('now')", "ASC"
     elif basis == "upcoming":
-        when, order = "ev.start_date > date('now')", "DESC"
+        when, order = ("(ev.end_date >= date('now') OR "
+                       " (ev.end_date IS NULL AND ev.start_date >= date('now')))"), "DESC"
     else:
         raise ValueError(f"basis must be 'completed' or 'upcoming', got {basis!r}")
     rows = con.execute(f"""
@@ -275,13 +281,45 @@ def latest_rosters(con, season: int, basis: str = "completed"):
 # provisional_multiplier 7->8 on train point estimates; a paired bootstrap ON
 # TRAIN put all three inside its own noise. k 40->44 was later re-selected on
 # VAL, where it is real; the other two remain rejected.
+#
+# COLLEGE 2017-2020 BACKFILL. The corpus gained 15,466 college games, taking
+# FIT from 892 college games against 8,697 club to 14,320 against 8,697, and
+# bridge players from 8,145 to 12,905. Re-running the published config on it
+# made things WORSE (TEST 0.4529 -> 0.4580), which is the protocol note above
+# doing its job: the config had been fitted to a corpus where college barely
+# existed before 2021.
+#
+# The reason is one parameter. division_bases["college"] was UNIDENTIFIABLE on
+# the old corpus — flat to five decimals from 700 to 1450 — because club
+# logloss cannot see a division that has almost no games in the window. It was
+# a pure prior, and it was wrong. With real college history it becomes sharply
+# identifiable and wants 1350, not 1150. That one move recovers the entire
+# regression on its own (TEST 0.4580 -> 0.4529).
+#
+# Re-selected on VAL, then pruned one move at a time (kept only if reverting
+# costs >0.0003 VAL). Five survive; the 8-move descent scored TEST 0.45148 and
+# these five score 0.45165, so the other three were fitting VAL:
+#   college_base   1150 -> 1350   +0.00355   see above
+#   provisional_games  8 -> 14    +0.00153   more college debutants to absorb
+#   scale_college   300 -> 260    +0.00096   now measurable, and club-like
+#   prov_multiplier   7 -> 6      +0.00076   flatter, longer newcomer window
+#   k                44 -> 48     +0.00047
+# Rejected as noise: tau 600->700 (+0.00006), stat_transfer_beta 3->5
+# (+0.00014). Beta staying at 3 matters — on FIT alone it climbs to 50 and
+# wrecks the holdout, the same cold-start trap home_advantage fell into.
+#
+# TEST 2024-25: logloss 0.4580 -> 0.4517, accuracy 0.7830 -> 0.7855, brier
+# 0.1497 -> 0.1468; paired 90% CI [-0.00898, -0.00374]. Against the config
+# published BEFORE the backfill (0.4529 / 0.7822) it is a genuine net gain.
+# Per-season the change hurts 2017-2019 (-0.002 to -0.006) and helps 2021-2025
+# (+0.005 to +0.014) — the healthy direction, not a cold-start artifact.
 PUBLISHED = dict(tau=600.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=3.0,
                  provisional_shape="hyperbolic",
-                 provisional_multiplier=7.0, provisional_games=8,
-                 k=44.0, home_advantage=0.0, offseason_regression=0.0,
-                 division_scale={"club": 260.0, "college": 300.0},
-                 division_bases={"club": 1500.0, "college": 1150.0,
+                 provisional_multiplier=6.0, provisional_games=14,
+                 k=48.0, home_advantage=0.0, offseason_regression=0.0,
+                 division_scale={"club": 260.0, "college": 260.0},
+                 division_bases={"club": 1500.0, "college": 1350.0,
                                  "ufa": 1550.0})
 
 
