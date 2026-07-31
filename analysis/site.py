@@ -889,6 +889,8 @@ const TK = H.teamKey || {};    // display name -> normalized club key
 const TN = H.teamNames || {};  // normalized club key -> current display spelling
 const CN = H.clubNames || [];  // affiliation index -> normalized club key
 const ROST = H.rosters || {};  // "<clubKey>|<eventIdx>" -> delta-encoded people
+const BR = H.bestRosters || {};   // clubKey -> [event, date, person deltas]
+const BSEASON = H.bestSeason;     // the season BR applies to (the current one)
 const PEOPLE = H.people || [], PPID = H.peoplePid || [];
 const HEV = H.events;   // [date, name, season, divisionCode]
 // player_id -> its row in the ranked table, so a drill-down rebuilds its own
@@ -994,13 +996,12 @@ function histTable(pts, isTeam, ckey) {
 
 /* Roster indices are delta-encoded and ascending; `people` is name-sorted, so
    ascending index is already ascending name. */
-function rosterOf(rk) {
-  const enc = ROST[rk];
-  if (!enc) return [];
+function decDeltas(enc) {
   const out = []; let i = 0;
   for (let k = 0; k < enc.length; k++) { i += enc[k]; out.push(i); }
   return out;
 }
+function rosterOf(rk) { return ROST[rk] ? decDeltas(ROST[rk]) : []; }
 /* Names as links, or plain text for anyone below the trajectory floor: he was
    on the roster and is not dropped, there is just nothing to open. */
 function nameList(ids) {
@@ -1037,19 +1038,24 @@ function rosterSeasons(ckey) {
     season: e[0],
     eis: e[1].sort((a, b) => (HEV[b][0] || '').localeCompare(HEV[a][0] || ''))}));
 }
-/* ONE roster per season: the union of every event's listed squad that year.
-   A club re-registers each tournament, so the events a player was actually
-   listed for is the one thing unioning loses — it comes back as the Ev
-   column rather than as a second roster. */
+/* ONE roster per season. For past seasons that is the union of every played
+   event's listed squad. For the CURRENT season it is the best full-strength
+   roster reported to USAU — the same squad team_elo_best.csv rates the club
+   off — which may be registered for an event not yet played; the Ev column
+   then says how many of the season's played events each man was actually
+   listed for, 0 meaning registered only. Clubs with no current registration
+   (college teams; best rosters are club-division only) fall back to the union. */
 function rosterPane(ckey, season) {
-  const grp = rosterSeasons(ckey).find(g => g.season === season);
-  if (!grp) return '';
+  const grp = rosterSeasons(ckey).find(g => g.season === season) || {eis: []};
+  const br = season === BSEASON ? BR[ckey] : null;
   const seen = new Map();
   grp.eis.forEach(ei => rosterOf(ckey + '|' + ei).forEach(
     i => seen.set(i, (seen.get(i) || 0) + 1)));
-  const rows = [...seen.keys()].map(i => {
+  const ids = br ? decDeltas(br[2]) : [...seen.keys()];
+  if (!ids.length) return '';
+  const rows = ids.map(i => {
     const pid = PPID[i], r = PBY.get(String(pid));
-    return {pid, name: PEOPLE[i], ev: seen.get(i),
+    return {pid, name: PEOPLE[i], ev: seen.get(i) || 0,
             elo: r ? r[1] : null, rank: r ? r[7] : null};
   });
   // Strongest first; anyone below the rating floor has no number to sort on
@@ -1066,16 +1072,27 @@ function rosterPane(ckey, season) {
       : `<span class="muted">${esc(r.name)}</span>`) +
     `</td><td class="n">${r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
     `<td class="n">${r.ev}</td></tr>`).join('');
-  const evs = grp.eis.map(ei => esc(HEV[ei][1])).join(', ');
-  return `<p class="rsum">${rows.length} players · ${grp.eis.length} event` +
-    `${grp.eis.length === 1 ? '' : 's'}: ${evs}</p>` +
+  const sum = br
+    ? `${rows.length} players — best full-strength roster reported to USAU, ` +
+      `registered for ${esc(br[0])} (${br[1]}). This is the squad the ` +
+      `"best" club table rates off; Ev counts the ${grp.eis.length} played ` +
+      `event${grp.eis.length === 1 ? '' : 's'} this season, 0 meaning ` +
+      `registered but not yet played with.`
+    : `${rows.length} players · ${grp.eis.length} event` +
+      `${grp.eis.length === 1 ? '' : 's'}: ` +
+      grp.eis.map(ei => esc(HEV[ei][1])).join(', ');
+  return `<p class="rsum">${sum}</p>` +
     `<table class="hist"><thead><tr><th class="n">#</th><th>Player</th>` +
-    `<th class="n">Elo</th><th class="n" title="Events listed for, of ` +
+    `<th class="n">Elo</th><th class="n" title="Played events listed for, of ` +
     `${grp.eis.length} this season">Ev</th></tr></thead>` +
     `<tbody>${body}</tbody></table>`;
 }
 function rosterSection(ckey) {
   const groups = rosterSeasons(ckey);
+  // A club whose only current-season listing is an upcoming registration has
+  // no played roster yet — the best roster alone justifies the season tab.
+  if (BR[ckey] && !groups.some(g => g.season === BSEASON))
+    groups.unshift({season: BSEASON, eis: []});
   if (!groups.length) return '';
   const cur = groups[0].season;
   return `<details class="rsec" data-ck="${esc(ckey)}">` +

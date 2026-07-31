@@ -71,15 +71,19 @@ recomputed over that population.
 Clicking any name opens a drill-down: the rating curve, the full event history,
 and — for a player — **which club he turned out for** at each event; for a club,
 **rosters by season** behind a disclosure, tabbed newest-first. One table per
-season, sorted strongest first, carrying each player's overall rank and Elo. A
-club re-registers each tournament, so the season roster is the union of every
-event's listed squad — Dark Star's 2026 is 30 players across three events of 22,
-26 and 25 — and the `Ev` column says how many of them each player was listed for,
-which is the only thing unioning loses. Every name in the panel is itself a link,
-with a `‹ Back` stack, and the open subject is reflected in the URL hash
-(`#p/<player_id>`, `#c/<club key>`) so it is shareable and the browser Back button
-works. A player below the 30-game floor has no rank or Elo to show and is listed
-as plain text: he was on the roster, but there is nothing to open.
+season, sorted strongest first, carrying each player's overall rank and Elo.
+Past seasons show the union of every played event's listed squad — a club
+re-registers each tournament — with an `Ev` column saying how many a player was
+listed for. **The current season shows the best full-strength roster reported to
+USAU instead**: the same squad `team_elo_best.csv` rates the club off, which may
+be registered for an event not yet played. Truck Stop's 2026 tab is its 23-man
+U.S. Open registration with twelve players at `Ev 0` — registered, not yet
+played with. Clubs with no current club-division registration (college teams)
+fall back to the union. Every name in the panel is itself a link, with a
+`‹ Back` stack, and the open subject is reflected in the URL hash
+(`#p/<player_id>`, `#c/<club key>`) so it is shareable and the browser Back
+button works. A player below the 30-game floor has no rank or Elo to show and is
+listed as plain text: he was on the roster, but there is nothing to open.
 
 Rosters and affiliations ride inside `data/history.json`, which keeps the page a
 single file that works from `file://` — `fetch()` does not. That costs weight:

@@ -409,7 +409,7 @@ def best_rosters(con, season: int, model):
 HISTORY_MIN_GAMES = 30
 
 
-def write_history(con, games, rosters, clubs, snaps, model):
+def write_history(con, games, rosters, clubs, snaps, model, season):
     """Emit data/history.json — per-event rating trajectories for the drill-down.
 
     Keyed on (subject, event) rather than (subject, game): a weekend tournament
@@ -504,6 +504,23 @@ def write_history(con, games, rosters, clubs, snaps, model):
         person = (name, str(pid))
         seen.add(person)
         roster_rows.append((f"{key}|{i}", person))
+    # The most recent season's roster tab shows the club's BEST reported
+    # full-strength squad — the same selection team_elo_best.csv rates off —
+    # which may belong to an event not yet played and therefore absent from
+    # `used`. Its people must land in the shared index, so collect them
+    # before it is built. best_rosters keys on the display name, which is
+    # exactly what `alias` maps back to the normalized club key.
+    pname = dict(con.execute("SELECT player_id, display_name FROM players"))
+    best, bsrc = best_rosters(con, season, model)
+    best_ref = {}
+    for club_dn, pids in best.items():
+        key = alias.get(club_dn)
+        if not key:
+            continue
+        persons = [(pname[p], str(p)) for p in pids if p in pname]
+        seen.update(persons)
+        evname, sd = bsrc[club_dn]
+        best_ref[key] = (evname, sd, persons)
     # Deduped on (name, player_id), never on name alone: the resolver splits an
     # ambiguous name into distinct identities, so two entries legitimately read
     # the same and `peoplePid` has to stay parallel.
@@ -520,6 +537,13 @@ def write_history(con, games, rosters, clubs, snaps, model):
             enc.append(m - prev)
             prev = m
         rosters_out[rkey] = enc
+    best_out = {}
+    for key, (evname, sd, persons) in best_ref.items():
+        enc, prev = [], 0
+        for m in sorted(person_ix[p] for p in persons):
+            enc.append(m - prev)
+            prev = m
+        best_out[key] = [evname, sd, enc]
 
     # H.teams is keyed on the LOWERCASED normalized identity ('rhino slam!'),
     # which is not a thing to render. Pick the spelling from the club's most
@@ -543,12 +567,13 @@ def write_history(con, games, rosters, clubs, snaps, model):
                                "clubNames": list(club_ix),
                                "teamNames": team_names,
                                "rosters": rosters_out, "people": people,
-                               "peoplePid": people_pid},
+                               "peoplePid": people_pid,
+                               "bestRosters": best_out, "bestSeason": season},
                               separators=(",", ":")))
     print(f"wrote {out} ({len(players):,} players, {len(teams):,} clubs, "
           f"{len(alias):,} club aliases, {len(events):,} events, "
-          f"{len(rosters_out):,} rosters, {len(people):,} people, "
-          f"{len(team_names):,} club names, "
+          f"{len(rosters_out):,} rosters, {len(best_out):,} best rosters, "
+          f"{len(people):,} people, {len(team_names):,} club names, "
           f"{out.stat().st_size/1024/1024:.1f} MB)")
 
 
@@ -622,7 +647,7 @@ def main(cfg: EloConfig | None = None):
                 w.writerow([i, club, round(rating, 1), size, season, evname, sd])
         print(f"wrote {team_out} ({len(rated)} teams, season {season}, "
               f"{basis} rosters)")
-    write_history(con, games, rosters, clubs, snaps, model)
+    write_history(con, games, rosters, clubs, snaps, model, season)
     con.close()
 
 
