@@ -94,7 +94,9 @@ def build():
     ev, field, sched = usopen(con)
     con.close()
 
-    players = [r for r in load_csv("player_elo.csv") if int(r["games"]) >= MIN_GAMES]
+    all_players = load_csv("player_elo.csv")
+    total_rated = len(all_players)
+    players = [r for r in all_players if int(r["games"]) >= MIN_GAMES]
     clubs = {
         "completed": load_csv("team_elo.csv"),
         "best": load_csv("team_elo_best.csv"),
@@ -124,9 +126,11 @@ def build():
     payload = {
         "generated": ev[2] if ev else None,
         "minGames": MIN_GAMES,
+        "totalRated": total_rated,
         "scale": PUBLISHED["division_scale"]["club"],
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
-                     int(r["games"]), r["last_club"], int(r["last_season"])]
+                     int(r["games"]), r["last_club"], int(r["last_season"]),
+                     int(r["rank"])]
                     for r in players],
         "clubs": {k: [[int(r["rank"]), r["club"], float(r["elo"]),
                        int(r["roster_size"]), r["roster_event"]]
@@ -389,19 +393,30 @@ $('#basis').onchange = drawClubs;
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
   const only26 = $('#only26').checked, ming = +$('#ming').value;
-  let rows = D.players.filter(p => p[4] >= ming);
-  if (only26) rows = rows.filter(p => p[6] === 2026);
-  if (q) rows = rows.filter(p => p[0].toLowerCase().includes(q) ||
-                                 String(p[5]).toLowerCase().includes(q));
+  // Rank is a property of the player within the POPULATION the toggles define,
+  // so it is assigned before the search runs. Searching is a lookup, not a
+  // re-ranking: find a player and his number is the one he actually holds,
+  // and results come back sparse (#12, #47, #103) rather than renumbered 1..n.
+  let pop = D.players.filter(p => p[4] >= ming);
+  if (only26) pop = pop.filter(p => p[6] === 2026);
+  const rankOf = new Map();
+  pop.forEach((p, i) => rankOf.set(p, i + 1));
+  const rows = q ? pop.filter(p => p[0].toLowerCase().includes(q) ||
+                                   String(p[5]).toLowerCase().includes(q))
+                 : pop;
   const shown = rows.slice(0, 300);
-  $('#ptb').innerHTML = shown.map((p, i) =>
-    `<tr><td class="rk">${i+1}</td><td>${esc(p[0])}</td>` +
+  $('#ptb').innerHTML = shown.map(p =>
+    `<tr><td class="rk" title="#${p[7]} of all ${D.totalRated.toLocaleString()} rated players">` +
+    `${rankOf.get(p)}</td><td>${esc(p[0])}</td>` +
     `<td class="n">${p[1].toFixed(0)}</td>` +
     `<td class="band">[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]</td>` +
     `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(p[5])}</td>` +
     `<td class="n">${p[6]}</td></tr>`).join('');
-  $('#pcount').textContent =
-    `${rows.length.toLocaleString()} match` + (rows.length > 300 ? ' — showing first 300' : '');
+  $('#pcount').textContent = q
+    ? `${rows.length.toLocaleString()} of ${pop.length.toLocaleString()} match` +
+      (rows.length > 300 ? ' — showing first 300' : '')
+    : `${pop.length.toLocaleString()} players` +
+      (pop.length > 300 ? ' — showing first 300' : '');
 }
 ['input','change'].forEach(e => {
   $('#q').addEventListener(e, drawPlayers);
@@ -409,10 +424,14 @@ function drawPlayers() {
   $('#ming').addEventListener(e, drawPlayers);
 });
 $('#pnote').textContent =
-  `Ranks renumber with the filter. Bands are 90% intervals on the rating as an estimate ` +
-  `of current skill. Players below ${D.minGames} games are omitted: under that the engine's ` +
-  `provisional multiplier is still moving a rating faster than results justify. ` +
-  `Ratings never decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default.`;
+  `Searching does not renumber anything — a player keeps the rank he holds in the ` +
+  `current list, so results come back sparse. The two toggles do change the rank, ` +
+  `because they change who is being ranked; hover a rank to see the player's ` +
+  `position across all ${D.totalRated.toLocaleString()} rated players. ` +
+  `Bands are 90% intervals on the rating as an estimate of current skill. Players ` +
+  `below ${D.minGames} games are omitted: under that the engine's provisional ` +
+  `multiplier is still moving a rating faster than results justify. Ratings never ` +
+  `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default.`;
 
 /* ---------- U.S. Open ---------- */
 const U = D.usopen, R = U.ratings, SCALE = D.scale;
