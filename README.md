@@ -39,11 +39,25 @@ overlapping sets would have each division overwriting the other's rows.
 `docs/index.html`, no server and no network needed.
 
 `analysis/site.py` emits it: club rankings on three roster bases, a searchable
-player table, per-player and per-club rating curves with full play history, and
-a U.S. Open tracker whose bracket you fill in as games finish, re-running a
-40,000-sim Monte Carlo in the browser against whatever you have entered. It
-reads only the published artifacts and never replays the model, so the page
-cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
+player table, a **Trends** tab drawing the 25 highest-peaking players or clubs as
+one line per season, and a U.S. Open tracker whose bracket you fill in as games
+finish, re-running a 40,000-sim Monte Carlo in the browser against whatever you
+have entered. It reads only the published artifacts and never replays the model,
+so the page cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
+
+Clicking any name opens a drill-down: the rating curve, the full event history,
+and — for a player — **which club he turned out for** at each event; for a club,
+the **roster it listed** at each event, expanded inline. Every name in the panel
+is itself a link, with a `‹ Back` stack, and the open subject is reflected in the
+URL hash (`#p/<player_id>`, `#c/<club key>`) so it is shareable and the browser
+Back button works. A roster member below the 30-game trajectory floor is listed
+as plain text: he was on the roster, but there is nothing to open.
+
+Rosters and affiliations ride inside `data/history.json`, which keeps the page a
+single file that works from `file://` — `fetch()` does not. That costs weight:
+10.5 MB raw, 3.7 MB gzipped, which is what Pages actually serves. Roster members
+are keyed on `(name, player_id)` pairs, never on name alone, for the reason in
+the data notes below: display names are not unique.
 
 ## Layout
 

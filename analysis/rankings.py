@@ -446,11 +446,34 @@ def write_history(con, games, rosters, clubs, snaps, model):
             rat.append(payload)
         return [idx, rat]
 
+    # Which club a player turned out for, per event. Stored run-length — a
+    # career is a handful of clubs, not one per event — as a flat array of
+    # [startIdx, clubIdx] pairs where startIdx counts positions in THIS
+    # player's own point list. 18% of points start a run, so this is ~5x
+    # smaller than one index per point. clubIdx of -1 means the event-team
+    # never resolved to a club identity.
+    club_ix = {c: i for i, c in enumerate(sorted(
+        {club for (kind, subj), evs in snaps.items() if kind == "p" and subj in keep
+         for _r, club in evs.values() if club}))}
+
+    def encode_player(evs):
+        items = sorted(evs.items(), key=lambda kv: evinfo[kv[0]][1] or "")
+        idx, rat, runs, prev, cur = [], [], [], 0, object()
+        for pos, (e, (r, club)) in enumerate(items):
+            i = ix[e]
+            idx.append(i - prev)
+            prev = i
+            rat.append(r)
+            if club != cur:
+                cur = club
+                runs += [pos, club_ix.get(club, -1)]
+        return [idx, rat, runs]
+
     players, teams = {}, {}
     for (kind, subj), evs in snaps.items():
         if kind == "p":
             if subj in keep:
-                players[str(subj)] = encode({e: r for e, (r, _n) in evs.items()})
+                players[str(subj)] = encode_player(evs)
         else:
             teams[subj] = encode({e: [r, n] for e, (r, n) in evs.items()})
 
@@ -465,12 +488,67 @@ def write_history(con, games, rosters, clubs, snaps, model):
         if key and key in teams:
             alias[full or dn] = key
 
+    # Rosters come from a direct query, not from `snaps`: the replay only ever
+    # sees a player the club actually played a game with, and what the panel
+    # should show is the roster as LISTED — including the guy who never took
+    # the field.
+    seen = set()
+    roster_rows = []
+    for eid, etid, pid, name in con.execute("""
+            SELECT et.event_id, et.event_team_id, rp.player_id, p.display_name
+            FROM roster_players rp JOIN event_teams et USING(event_team_id)
+            JOIN players p ON p.player_id = rp.player_id"""):
+        i, key = ix.get(eid), clubs.get(etid)
+        if i is None or key not in teams:
+            continue
+        person = (name, str(pid))
+        seen.add(person)
+        roster_rows.append((f"{key}|{i}", person))
+    # Deduped on (name, player_id), never on name alone: the resolver splits an
+    # ambiguous name into distinct identities, so two entries legitimately read
+    # the same and `peoplePid` has to stay parallel.
+    person_ix = {p: i for i, p in enumerate(sorted(seen))}
+    people = [p[0] for p in sorted(seen)]
+    people_pid = [p[1] for p in sorted(seen)]
+    grouped = {}
+    for rkey, person in roster_rows:
+        grouped.setdefault(rkey, set()).add(person_ix[person])
+    rosters_out = {}
+    for rkey, members in grouped.items():
+        enc, prev = [], 0
+        for m in sorted(members):
+            enc.append(m - prev)
+            prev = m
+        rosters_out[rkey] = enc
+
+    # H.teams is keyed on the LOWERCASED normalized identity ('rhino slam!'),
+    # which is not a thing to render. Pick the spelling from the club's most
+    # recent event: deterministic, and it gives what they are called now rather
+    # than whichever alias sorts first.
+    latest = {}
+    for etid, name, sd in con.execute(
+            "SELECT et.event_team_id, COALESCE(et.full_name, et.display_name), "
+            "ev.start_date FROM event_teams et JOIN events ev USING(event_id)"):
+        key = clubs.get(etid)
+        if key not in teams:
+            continue
+        sd = sd or ""
+        if key not in latest or sd >= latest[key][0]:
+            latest[key] = (sd, name)
+    team_names = {k: v[1] for k, v in latest.items()}
+
     out = DB_PATH.parent / "history.json"
     out.write_text(json.dumps({"events": events, "players": players,
-                               "teams": teams, "teamKey": alias},
+                               "teams": teams, "teamKey": alias,
+                               "clubNames": list(club_ix),
+                               "teamNames": team_names,
+                               "rosters": rosters_out, "people": people,
+                               "peoplePid": people_pid},
                               separators=(",", ":")))
     print(f"wrote {out} ({len(players):,} players, {len(teams):,} clubs, "
           f"{len(alias):,} club aliases, {len(events):,} events, "
+          f"{len(rosters_out):,} rosters, {len(people):,} people, "
+          f"{len(team_names):,} club names, "
           f"{out.stat().st_size/1024/1024:.1f} MB)")
 
 
@@ -498,7 +576,8 @@ def main(cfg: EloConfig | None = None):
                 snaps[("c", club)][eid] = (round(model.team_rating(side)), len(side))
             for p in side:
                 if not str(p).startswith("ghost:"):
-                    snaps[("p", p)][eid] = (round(model.players[p].rating), 0)
+                    snaps[("p", p)][eid] = (round(model.players[p].rating),
+                                            club or "")
 
     _, model = replay("player", games, rosters, clubs, cfg, stat_events,
                       on_game=capture)
