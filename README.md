@@ -39,12 +39,22 @@ overlapping sets would have each division overwriting the other's rows.
 `docs/index.html`, no server and no network needed.
 
 `analysis/site.py` emits it: club rankings on three roster bases, a searchable
-player table, a **Trends** tab drawing the 25 highest-peaking players or clubs as
-one line per season, filterable to a single division, and a U.S. Open tracker
-whose bracket you fill in as games finish, re-running a 40,000-sim Monte Carlo in
-the browser against whatever you have entered. It reads only the published
-artifacts and never replays the model, so the page cannot drift from
-`data/player_elo.csv` and `data/team_elo*.csv`.
+player table, a **Trends** tab drawing one line per season for every player or
+club that has ever closed a season in the top 25, filterable to a single
+division, and a U.S. Open tracker whose bracket you fill in as games finish,
+re-running a 40,000-sim Monte Carlo in the browser against whatever you have
+entered. It reads only the published artifacts and never replays the model, so
+the page cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
+
+That selection is a union across seasons, so it is 67–164 lines depending on the
+view rather than a fixed 25 — the point being that a club that owned 2019 and has
+since folded sits on the chart beside this year's best. At that density no
+stroke can identify a line on its own (8 hues x 8 dash patterns gives 64
+combinations), so the interaction carries it: hovering a line or legend row
+isolates it and drops the rest, and **hovering anywhere else in the chart re-ranks
+the legend on the season under the cursor**, showing that season's rating. A
+subject that did not play that season sinks to the bottom rather than sorting as
+zero, which would rank a club that skipped the year above one that played badly.
 
 The division filter selects **events, not teams**. 301 club identities play in
 more than one division, so classifying a whole identity would misfile every one
@@ -57,11 +67,13 @@ recomputed over that population.
 
 Clicking any name opens a drill-down: the rating curve, the full event history,
 and — for a player — **which club he turned out for** at each event; for a club,
-the **roster it listed** at each event, expanded inline. Every name in the panel
-is itself a link, with a `‹ Back` stack, and the open subject is reflected in the
-URL hash (`#p/<player_id>`, `#c/<club key>`) so it is shareable and the browser
-Back button works. A roster member below the 30-game trajectory floor is listed
-as plain text: he was on the roster, but there is nothing to open.
+**rosters by season**, tabbed newest-first, listing every event that season with
+the squad it registered. A club re-registers each tournament, so a season is not
+one roster: each event gets its own block, with the union count above them. Every
+name in the panel is itself a link, with a `‹ Back` stack, and the open subject is
+reflected in the URL hash (`#p/<player_id>`, `#c/<club key>`) so it is shareable
+and the browser Back button works. A roster member below the 30-game trajectory
+floor is listed as plain text: he was on the roster, but there is nothing to open.
 
 Rosters and affiliations ride inside `data/history.json`, which keeps the page a
 single file that works from `file://` — `fetch()` does not. That costs weight:
