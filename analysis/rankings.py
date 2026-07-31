@@ -59,6 +59,7 @@ from elo.engine import EloConfig
 #   hyperbolic + reg=0.0,  2017-2026     96.0  (flat)
 #   + softmax tau=600, k=44              sqrt(340^2/n + 98^2)
 #   + college 2017-2020 backfill, k=48   113.0 (flat)
+#   + D-III division, d3 base 1250       112.0 (flat)
 #
 # The 1/n term went back to exactly zero. Softmax weighting had bought a
 # shallow decline in the previous fit; adding 15,466 college games and widening
@@ -67,7 +68,7 @@ from elo.engine import EloConfig
 # across a 3.4x range in games played, on 15,000+ players.
 #
 # So a rating's uncertainty does not fall with experience, and the honest band
-# is a flat ±186. That is WIDER than the ±158 of two configs ago. The cause is
+# is a flat ±184. That is WIDER than the ±158 of two configs ago. The cause is
 # structural and already documented below: hyperbolic never decays to 1, so
 # every game still moves a veteran, and offseason_regression=0 removed the only
 # pull toward an anchor. More evidence buys better PREDICTION — TEST logloss
@@ -75,7 +76,7 @@ from elo.engine import EloConfig
 # Anyone wanting convergence has to pay for it with reg > 0; the price is
 # quantified in the reg note further down.
 def rating_sigma(games: int) -> float:
-    return 113.0
+    return 112.0
 
 
 Z90 = 1.645  # two-sided 90% interval
@@ -315,28 +316,43 @@ def latest_rosters(con, season: int, basis: str = "completed"):
 # published BEFORE the backfill (0.4529 / 0.7822) it is a genuine net gain.
 # Per-season the change hurts 2017-2019 (-0.002 to -0.006) and helps 2021-2025
 # (+0.005 to +0.014) — the healthy direction, not a cold-start artifact.
-# D-III (division "college-d3", 257 events / 4,950 games, 2017-2026). Its base
-# is NOT tuned, and that is deliberate.
+# D-III (division "college-d3", 257 events / 4,950 games, 2017-2026).
 #
-# 84% of D-III players also appear at D-I events — D-III programs play D-I
-# invites constantly — so D-III is not a separate pool the way club and college
-# are. Only 1,930 players are D-III-only. The base therefore sets the entry
-# point for a small minority and is barely identifiable from club logloss: the
-# whole range 800-1500 moves TEST by 0.0008.
+# Its base is 1250, and finding that took correcting a mistake worth writing
+# down: it was being scored on CLUB games. That is the wrong scoreboard. 84% of
+# D-III players also appear at D-I events — D-III programs play D-I invites
+# constantly — so only 1,930 players are D-III-only and the base barely moves
+# club logloss at all. Judged there it looks unidentifiable and the two halves
+# of the split fight: VAL is FLAT to 0.0001 across bases 100-700 while TEST
+# slides monotonically the other way, best near 1350-1500. Eight hundred Elo of
+# disagreement, which is what an unidentified parameter looks like.
 #
-# Worse, what signal there is points two ways. Against base=1100, moving to 600
-# helps VAL (-0.00074, CI [-0.00143,-0.00006]) and HURTS TEST (+0.00095, CI
-# [+0.00036,+0.00155]) — both significant, opposite directions. The per-season
-# gain runs +0.0009/+0.0006/0/0/+0.0016/0/-0.0007/-0.0012 from 2017 to 2025:
-# helps the cold-start years, decays, then goes negative. That is the signature
-# this file already warns about twice (home_advantage, stat_transfer_beta), and
-# the VAL "gain" turns out to be almost entirely one season, 2022.
+# Scored on the division it actually governs, it is sharp and unanimous:
+#     base        700     900    1100    1250    1350    1500    1700
+#     D-III VAL   .5333   .5065  .4879   .4819   .4829   .4930   .5247
+#     D-III TEST  .4851   .4705  .4612   .4599   .4628   .4739   .5034
+#     D-III acc   .7631   .7683  .7714   .7796   .7745   .7652   .7415
+# VAL, TEST and accuracy all bottom out at 1250 — the only parameter in the
+# whole sweep where they agree on an interior optimum. It also sits where D-III
+# players actually converge (median 1290), so debutants stop entering ~190 Elo
+# below their own eventual level.
 #
-# So it stays at the prior. 1100 puts D-III debutants converging at a median
-# 1290 against D-I's 1418 and club's 1633 — the right ordering, arrived at from
-# results rather than from the knob. Adding D-III does not improve club
-# prediction (TEST 0.4514 -> 0.4516, inside noise) and was never going to: it
-# buys COVERAGE, rating 13,111 D-III players who previously had none.
+# GENERAL LESSON: score a division's base on that division's games. Club
+# logloss is the headline metric but it cannot see a pool it barely touches,
+# and forcing the question through it produces exactly the VAL/TEST civil war
+# above.
+#
+# On club the move is neutral — paired TEST Δ -0.00018, CI [-0.00045,+0.00008].
+# It is published for D-III TEST logloss 0.4596 -> 0.4575, with college also
+# improving 0.4799 -> 0.4789. D-III accuracy slips 0.7765 -> 0.7724: better
+# calibrated, marginally worse at discrete calls, the same trade as the 2021
+# tune, and logloss is the target.
+#
+# A full 14-axis VAL descent was run alongside this and REJECTED. It gained
+# 0.0027 on VAL and exactly zero on TEST (0.45159 -> 0.45159) while dropping
+# accuracy — VAL overfitting, plainly. Its four club-side moves (mov_norm 6,
+# provisional_multiplier 5, provisional_games 24, college_scale 220) are inside
+# noise on TEST (Δ -0.00014, CI [-0.00099,+0.00077]) and make college worse.
 PUBLISHED = dict(tau=600.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=3.0,
                  provisional_shape="hyperbolic",
@@ -345,7 +361,7 @@ PUBLISHED = dict(tau=600.0, involvement_credit=False,
                  division_scale={"club": 260.0, "college": 260.0,
                                  "college-d3": 260.0},
                  division_bases={"club": 1500.0, "college": 1350.0,
-                                 "college-d3": 1100.0, "ufa": 1550.0})
+                                 "college-d3": 1250.0, "ufa": 1550.0})
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
