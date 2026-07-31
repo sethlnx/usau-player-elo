@@ -1,4 +1,4 @@
-"""Parse one event's men's schedule (club or college): games and team links."""
+"""Parse one event's schedule (club men/women/mixed, or college): games and teams."""
 
 import html as htmllib
 import re
@@ -9,11 +9,15 @@ from bs4 import BeautifulSoup
 from . import fetch
 
 # URL path segment per division. College's slug has no hyphen (verified: the
-# hyphenated form 404s, /schedule/Men/CollegeMen/ serves the page). D-III is
-# not a separate path — USAU files it under the same College Men schedule, so
-# the split is by event NAME, done in build_db.
+# hyphenated form 404s, /schedule/Men/CollegeMen/ serves the page). The club
+# gender slugs do carry it — /schedule/Mixed/Club-Mixed/ and
+# /schedule/Women/Club-Women/ both serve, their unhyphenated forms 404. D-III
+# is not a separate path — USAU files it under the same College Men schedule,
+# so the split is by event NAME, done in build_db.
 DIVISION_PATHS = {"club": "Men/Club-Men", "college": "Men/CollegeMen",
-                  "college-d3": "Men/CollegeMen"}
+                  "college-d3": "Men/CollegeMen",
+                  "club-women": "Women/Club-Women",
+                  "club-mixed": "Mixed/Club-Mixed"}
 
 
 def schedule_url(event_url: str, division: str = "club") -> str:
