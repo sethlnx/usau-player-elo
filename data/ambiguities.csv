@@ -25,7 +25,8 @@ aaron reynolds,auto-merged,club,2019,hail mary; richmond floodwall
 aaron richards,auto-merged,club,2023,jen city executives; kalakala wiffleball club
 aaron rosenthal,auto-merged,club,2022,redwolves; truck stop
 aaron shelton,auto-merged,college,2026,cal poly-slo-b (slob); cal poly-slo-c (sloc)
-aaron smith,auto-merged,college,2023,messiah (falcons); oklahoma christian (eagles)
+aaron smith,split,college,2023,messiah (falcons); oklahoma christian (eagles)
+aaron smith,split,college-d3,2023,messiah (falcons); oklahoma christian (eagles)
 aaron wei,auto-merged,club,2024,cash crop 2; raleigh-durham united
 aaron wida,auto-merged,club,2021,fungi; icy boyz
 aaron wida,auto-merged,club,2022,fungi; icey boyz
@@ -197,6 +198,7 @@ alex liu,split,college,2020,brown (brownian motion); illinois (rise)
 alex liu,split,college,2021,brown (brownian motion); illinois (rise)
 alex martin,split,college,2019,florida tech (florida tech competitive); oberlin (flying horsecows)
 alex martin,split,college,2020,florida tech (florida tech competitive); oberlin (flying horsecows)
+alex martin,split,college-d3,2019,florida tech (florida tech competitive); oberlin (flying horsecows)
 alex molkin,auto-merged,club,2017,black market ii; black market y
 alex mudd,auto-merged,college,2018,oklahoma (apes of wrath); oklahoma-b (apes of wrath b)
 alex nelson,split,college,2021,cal poly-slo (slocore); central florida (dogs of war)
@@ -295,6 +297,7 @@ andrew dizney,auto-merged,club,2023,bloomin' reptars; raptor
 andrew doe,auto-merged,college,2018,arizona state (prime); arizona state-b (pleasure ultimate)
 andrew dorf,auto-merged,college,2017,texas a&m-b (dozen matter); texas a&m-c (dozen exist)
 andrew doyle,auto-merged,college,2026,skidmore (wombats); stonehill (stonehill college men's ultimate)
+andrew doyle,auto-merged,college-d3,2026,skidmore (wombats); stonehill (stonehill college men's ultimate)
 andrew ehrig,auto-merged,college,2026,denver (sourdough); denver-b (sourdough b team)
 andrew elliott,auto-merged,club,2025,powderhogs; reál hogs fc-b
 andrew fletcher,split,college,2019,george washington-b (g-dub bippos); texas christian (high noon)
@@ -307,8 +310,9 @@ andrew gray,auto-merged,college,2022,carnegie mellon-b (poison control); trinity
 andrew grogan,auto-merged,club,2019,a-block; omen
 andrew hayse,auto-merged,college,2025,grand canyon (lopes); grand canyon-b (g-force)
 andrew holmes,auto-merged,college,2023,butler-b (big dog - developmental); whitworth (bangarang)
+andrew holmes,auto-merged,college-d3,2023,butler (butler big dog); whitworth (bangarang)
 andrew hooker,auto-merged,club,2017,boston baked beans; ironside
-andrew jones,auto-merged,college,2017,christopher newport (skymaul); columbia (uptown local)
+andrew jones,split,college,2017,christopher newport (skymaul); columbia (uptown local)
 andrew kim,split,college,2019,massachusetts-c (umass amherst developmental); north park (lost boys)
 andrew kiminski,auto-merged,club,2022,fungi; spicey-freshman
 andrew kitz,auto-merged,college,2019,boston college (eagles); boston college-b (boston college eagles b)
@@ -323,12 +327,14 @@ andrew lewis,split,college,2019,liberty (flames); tulane (tucks)
 andrew lewis,split,college,2020,liberty (flames); oregon state (beavers); tulane (tucks)
 andrew li,split,club,2017,brickhouse; triforce
 andrew li,split,college,2019,georgetown-b (black squirrels); north carolina (darkside); pennsylvania-b (null)
+andrew li,split,college-d3,2019,georgetown-b (black squirrels); pennsylvania-b (null)
 andrew london,auto-merged,club,2019,foggy bottom boys; hb woodlawn (hbw united)
 andrew macisaac,auto-merged,club,2023,bonsoon; expendables
 andrew macisaac,auto-merged,club,2024,bonsoon; expendables
 andrew macisaac,auto-merged,college,2022,arizona state (prime); arizona state-b (pleasure)
 andrew marshall,split,college,2018,brandeis (tron); rice (cloud 9)
 andrew marshall,split,college,2019,brandeis (tron); massachusetts-lowell (riverhawks)
+andrew marshall,split,college-d3,2018,brandeis (tron); rice (cloud 9)
 andrew mcnally,auto-merged,club,2018,bromintum; momintum
 andrew mcnally,auto-merged,club,2024,on ramp; parking lot
 andrew minocha,auto-merged,college,2026,santa clara (scab); santa clara-b (scratch)
@@ -347,7 +353,8 @@ andrew potter,auto-merged,college,2024,cincinnati (bearcats); cincinnati -b (bea
 andrew poulos,auto-merged,college,2019,west chester (west chester a); west chester-b (west chester)
 andrew rake,auto-merged,club,2024,on ramp; ronin
 andrew rake,auto-merged,college,2024,alabama (yellow hammer); alabama-c (yellowhammer c)
-andrew richter,auto-merged,college,2017,knox (river rats); truman state (jujitsu )
+andrew richter,split,college,2017,knox (river rats); truman state (jujitsu )
+andrew richter,split,college-d3,2017,knox (river rats); truman state (jujitsu )
 andrew rogers,split,club,2023,cash crop 2; crossfire
 andrew rogers,split,club,2024,banc; crossfire
 andrew roth,auto-merged,college,2023,illinois state (gnomes); illinois state-b (illinois state gnomes b)
@@ -559,9 +566,9 @@ benjamin adams,split,college,2017,indiana-b (hoosierdaddy!s); whitman (sweets)
 benjamin adams,split,college,2018,bryant (bryant craze); indiana (hoosiermama?s)
 benjamin adams,split,college,2019,bryant (bryant craze); indiana-b (hoosierdaddy!s)
 benjamin armstrong,auto-merged,college,2020,north carolina-b (batch); vanderbilt (armada)
-benjamin blackmun,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 benjamin brauer,auto-merged,club,2023,dinkytown doughboys; kenji's bbb
 benjamin broser,auto-merged,club,2017,fludwhale; richmond floodwall
+benjamin butler,split,college-d3,2025,davidson (duff); stonehill (stonehill college men's ultimate)
 benjamin carini,auto-merged,college,2026,dayton (flud); dayton-b (ud flud b)
 benjamin crosbie,auto-merged,club,2023,oakay; vicious cycle
 benjamin davis,split,college,2022,towson (pandamonium); towson -b (bamboozle)
@@ -581,7 +588,7 @@ benjamin hiniker,auto-merged,college,2025,iowa (ihuc); iowa-b (iowa-b (hucititis
 benjamin hodson,auto-merged,club,2018,ncfo; powderhogs
 benjamin holt,auto-merged,college,2024,arizona state (prime); arizona state-b (pleasure)
 benjamin johnson,split,college,2022,george mason (massacre); salisbury (buzz ultimate a)
-benjamin jones,auto-merged,college,2025,bentley (icehouse); toledo (savage)
+benjamin jones,split,college,2025,bentley (icehouse); toledo (savage)
 benjamin kass-mullet,auto-merged,club,2022,bag; dig
 benjamin kass-mullet,auto-merged,club,2023,diy; scoop
 benjamin kass-mullet,auto-merged,club,2025,dig; scoop
@@ -813,7 +820,8 @@ caleb ellington,auto-merged,college,2017,washington-b (washington b); washington
 caleb heeney,auto-merged,college,2020,missouri (missouri); university of missouri-b (missouri b)
 caleb mahle,auto-merged,college,2024,johns hopkins (dangerzone); johns hopkins-b (dangerzone b)
 caleb montgomery,auto-merged,club,2017,flying pig; solar eclipse
-caleb nelson,auto-merged,college,2018,north park (lost boys); northwestern-st paul (unw eagles)
+caleb nelson,split,college,2018,north park (lost boys); northwestern-st paul (unw eagles)
+caleb nelson,split,college-d3,2018,north park (lost boys); northwestern-st paul (unw eagles)
 caleb posey,split,club,2017,h.o.g. ultimate; jaybirds
 caleb posey,split,club,2019,h.o.g. ultimate; traffic (m)
 caleb rosen,auto-merged,college,2025,cal poly-slo-b (slob); cal poly-slo-c (sloc)
@@ -854,8 +862,8 @@ cannon spelman,auto-merged,club,2017,cincinnati flying piglet; the boys
 carl crawford,auto-merged,club,2023,retired; tirebizfriz
 carl whitesel,auto-merged,college,2018,california-san diego-b (air squids lite ); california-san diego-c (air squids select)
 carlin shaw,auto-merged,club,2022,raptor; reptar
-carlos avila,auto-merged,college,2022,depaul (duc); grace (lancer ultimate)
-carlos avila,auto-merged,college,2023,depaul (duc); grace (lancer ultimate)
+carlos avila,split,college,2022,depaul (duc); grace (lancer ultimate)
+carlos avila,split,college,2023,depaul (duc); grace (lancer ultimate)
 carlos huerta,auto-merged,club,2022,raptor; reptar
 carlos huerta,auto-merged,club,2023,bloomin' reptars; raptor
 carlson chiles,auto-merged,club,2021,black market i; black market ii
@@ -904,7 +912,6 @@ charles rieck,auto-merged,college,2018,montana (smokejump); montana-b (smokejump
 charles shannon,auto-merged,college,2025,mississippi state (dark horse); mississippi state-b (trenches )
 charles stimpson,auto-merged,club,2025,oak grove boys; puzzles
 charles wang,auto-merged,club,2019,ditto a; ditto b
-charles wasz,auto-merged,college,2017,air force (afterburn); air force academy-b (ucla in uniforms)
 charlie anderson,auto-merged,club,2026,dark star; oregon trainwreck
 charlie clark,split,club,2024,bang; texas duffy
 charlie fleming,auto-merged,college,2020,kentucky (kult); kentucky-b (kentucky )
@@ -957,6 +964,8 @@ christian johnson,split,college,2022,luther (lufda); oklahoma christian (eagles)
 christian johnson,split,college,2023,alabama-birmingham (inferno); luther (lufda); oklahoma christian (eagles)
 christian johnson,split,college,2024,alabama-birmingham (inferno); oklahoma christian (eagles)
 christian johnson,split,college,2025,alabama-birmingham (inferno); texas tech (tumbleweed)
+christian johnson,split,college-d3,2022,luther (lufda); oklahoma christian (eagles)
+christian johnson,split,college-d3,2023,luther (lufda); oklahoma christian (eagles)
 christian kingett,auto-merged,club,2017,first order; munch box
 christian lee,auto-merged,club,2024,atlanta arson; night owl
 christian marble,auto-merged,college,2020,missouri (missouri); university of missouri-b (missouri b)
@@ -973,6 +982,8 @@ christopher baines,auto-merged,club,2022,dawg pound; iso atmo
 christopher baines,auto-merged,club,2023,false summit; iso atmo
 christopher bond,auto-merged,club,2022,ballston booya; haze
 christopher brown,auto-merged,college,2022,mary washington (mother of george); williams (wufo)
+christopher brown,auto-merged,college-d3,2021,mary washington (mother of george); williams (wufo)
+christopher brown,auto-merged,college-d3,2022,mary washington (mother of george); williams (wufo)
 christopher bukacz,auto-merged,college,2019,west chester (west chester a); west chester-b (west chester)
 christopher chan,split,club,2024,helots; pipe
 christopher chan,split,club,2025,houndd; los buds
@@ -988,7 +999,7 @@ christopher king,split,college,2019,james madison (hellfish); james madison-b (s
 christopher king,split,college,2023,charlottesville clownies; james madison (hellfish)
 christopher lay,auto-merged,club,2019,phoenix; shrike
 christopher layden,auto-merged,college,2022,mit (grim beaver); texas (tuff)
-christopher lee,auto-merged,college,2023,northwestern (nut); suny-cortland (team rocket)
+christopher lee,split,college,2023,northwestern (nut); suny-cortland (team rocket)
 christopher leonard,auto-merged,college,2018,oklahoma (apes of wrath); oklahoma-b (apes of wrath b)
 christopher letai,auto-merged,college,2024,charlottesville clownies; virginia (night train)
 christopher lo,auto-merged,college,2019,washington-b (washington b); washington-c (washington c)
@@ -1057,10 +1068,10 @@ cole king,auto-merged,college,2022,colorado mines (entropy); colorado mines-b (e
 cole moore,auto-merged,club,2023,dig; diz
 cole osbrink,auto-merged,college,2017,montana (smokejump x); montana (smokejump)
 cole peterson,auto-merged,club,2024,dreadnought; dreadnought: battleship-b
-cole williams,auto-merged,college,2019,biola (afterdark); trinity (turbulence)
+cole williams,split,college,2019,biola (afterdark); trinity (turbulence)
+cole williams,split,college-d3,2019,biola (afterdark); trinity (turbulence)
 cole woodeshick,auto-merged,college,2018,texas a&m-b (dozen matter); texas a&m-c (dozen exist)
 colin altman,auto-merged,college,2018,maryland-baltimore county (booya); maryland-baltimore county-b (tembo)
-colin campbell,auto-merged,college,2018,messiah (falcons); messiah college-b (falcons)
 colin daines,auto-merged,college,2023,carnegie mellon (mr. yuk); carnegie mellon-b (poison control)
 colin donajkowski,auto-merged,club,2024,friendly fire; nox
 colin hayter,auto-merged,college,2025,dayton (flud); dayton-b (ud flud b)
@@ -1244,6 +1255,7 @@ daniel ramirez,auto-merged,club,2022,riverside messengers-b; stuff
 daniel robinson,auto-merged,club,2022,tanasi; tennessee folklore
 daniel ruppert,auto-merged,college,2019,lewis & clark (bacchus ); lewis & clark-b (bacchus - developmental)
 daniel ruskay-kidd,auto-merged,club,2025,roundhouse; yew nork yew nork
+daniel saks,auto-merged,college-d3,2018,air force (afterburn); air force-b (virgin airlines)
 daniel sawai,auto-merged,college,2026,colorado-b (cucu); colorado-c (rooster tussle)
 daniel schwartz,auto-merged,college,2017,washington state (suspicious package); washington state university (suspicious package y)
 daniel silva,auto-merged,club,2018,shore break; space coast ultimate; swamp horse
@@ -1447,7 +1459,6 @@ drew winkeler,auto-merged,college,2020,missouri (missouri); university of missou
 duncan fitzgerald,auto-merged,club,2018,dark star; rhino slam
 duncan norwood,auto-merged,college,2020,pacific lutheran (reign men); pacific lutheran-b (plu reign b)
 dustin becker,auto-merged,club,2017,garden party; garden state ultimate
-dustin berck,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 dustin campbell,auto-merged,club,2018,bromintum; momintum
 dyan peifer,auto-merged,college,2023,tufts-b (tufts b); tufts-c (tufts c)
 dylan brack,auto-merged,club,2022,oregon trainwreck; trainwreck and friends
@@ -1511,6 +1522,7 @@ elias mansbach,auto-merged,club,2017,defy the meta; shades
 elias warren-mohr,auto-merged,college,2020,towson (pandamonium); towson -b (bamboozle)
 elijah beard,auto-merged,club,2026,iso atmo; red lotus
 elijah beard,auto-merged,college,2026,colorado-b (cucu); colorado-c (rooster tussle)
+elijah collins,split,college-d3,2026,asbury (asbury ultimate); penn state-behrend (justdisc league)
 elijah ditto,auto-merged,college,2024,kansas (horrorzontals); kansas-b (kansas b (vertikills))
 elijah gornik,auto-merged,club,2024,i-69; on ramp
 elijah gornik,auto-merged,club,2025,i-69; on ramp
@@ -1535,6 +1547,7 @@ elliot tutaj-blaz,auto-merged,college,2025,wisconsin-b (fauxdags); wisconsin-c (
 elliott goldberg,auto-merged,club,2026,colorado cutthroat u-20 boys; colorado cutthroat u-20 boys two
 elliott haberman,auto-merged,college,2022,oregon state (beavers); oregon state-b (oregon state b)
 elliott haberman,auto-merged,college,2023,oregon state (beavers); oregon state-b (oregon state b)
+elliott hendricks,auto-merged,college-d3,2022,lehigh-b (lehigh-b); swarthmore (earthworms)
 elliott kimball,split,college,2025,lehigh (lehigh ); lehigh-b (lehigh-b)
 elliott mclaughlin,auto-merged,college,2025,dayton (flud); dayton-b (ud flud b)
 elliott moore,auto-merged,club,2018,doublewide; gamble
@@ -1543,7 +1556,6 @@ elton howard,auto-merged,club,2024,east lansing detroit lions; tydl
 ely klem,auto-merged,college,2019,lewis & clark (bacchus ); lewis & clark-b (bacchus - developmental)
 emanuel coleman,auto-merged,club,2022,old fat and saggy; trout
 emerson alexander,auto-merged,club,2025,colorado cutthroat u-17 boys; colorado cutthroat u-20 boys two
-emery slothower,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 emil broemmelsiek,auto-merged,club,2018,black market ii; blacker market; blackest market
 emmett andrews,auto-merged,club,2022,oregon trainwreck; trainwreck and friends
 emmett donnelly,auto-merged,college,2024,colorado state (hibida); colorado state-b (bibida)
@@ -1588,6 +1600,7 @@ eric tran,auto-merged,college,2023,california-san diego-b (air squids lite ); ca
 eric williams,auto-merged,college,2023,delaware (sideshow); spring hill (shuc)
 eric wilson,auto-merged,club,2018,flying pig; omen
 eric wilson,auto-merged,club,2019,flying pig; omen
+eric wunsch,auto-merged,college-d3,2018,air force (afterburn); air force-b (virgin airlines)
 eric zhang,split,club,2025,atlanta outlaws; magma bears
 eric zhang,split,college,2020,emory (emory juice); nyu (new york university )
 eric zhang,split,college,2021,emory (emory juice); nyu (new york university )
@@ -1624,9 +1637,9 @@ ethan hood,auto-merged,club,2024,bang; deluxe
 ethan kilpatrick,auto-merged,college,2023,mississippi state (dark horse); mississippi state-b (pony express)
 ethan kilpatrick,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches )
 ethan kim,auto-merged,college,2023,california-santa barbara-b (black out); virginia tech (burn)
-ethan king,auto-merged,club,2024,crossfire; frizz
-ethan king,auto-merged,college,2024,florida (florida); wesleyan (nietzsch factor)
-ethan king,auto-merged,college,2025,florida (florida); wesleyan (nietzsch factor)
+ethan king,split,club,2024,crossfire; frizz
+ethan king,split,college,2024,florida (florida); wesleyan (nietzsch factor)
+ethan king,split,college,2025,florida (florida); wesleyan (nietzsch factor)
 ethan landis,auto-merged,club,2024,chemical x; happy valley roofing and mustache supply
 ethan low,auto-merged,club,2023,blackfish; oni
 ethan low,auto-merged,club,2024,blackfish; joe fisher
@@ -1637,6 +1650,7 @@ ethan moldofsky,auto-merged,club,2024,little red wagon; ronin
 ethan moore,split,college,2023,illinois state (gnomes); illinois state-b (illinois state gnomes b)
 ethan moore,split,college,2025,illinois state (gnomes); james madison (hellfish)
 ethan moore,split,college,2026,illinois state (gnomes); james madison (hellfish)
+ethan nelson,auto-merged,college-d3,2024,air force (afterburn); rensselaer polytech (trudge)
 ethan niedzwiedz,auto-merged,club,2023,queen city kings; texas duffy
 ethan niedzwiedz,auto-merged,club,2024,dyno; texas duffy
 ethan niedzwiedz,auto-merged,club,2025,chain lightning; little red wagon
@@ -1653,8 +1667,9 @@ ethan snyderman,auto-merged,club,2025,arcane edge; long island riff raff
 ethan spraggon,auto-merged,college,2023,california-san diego-b (air squids lite ); california-san diego-c (air squids select)
 ethan teplitzky,auto-merged,college,2023,colorado-b (cucu); colorado-c (rooster tussle)
 ethan tsirulik,auto-merged,club,2019,helots; town hall stars
-ethan vander molen,auto-merged,college,2018,messiah (falcons); messiah college-b (falcons)
-ethan wagner,auto-merged,college,2023,kenyon (serf); whitworth (bangarang)
+ethan wagner,split,college,2023,kenyon (serf); whitworth (bangarang)
+ethan wagner,split,college-d3,2023,kenyon (serf); whitworth (bangarang)
+ethan wagner,split,college-d3,2024,kenyon (serf); whitworth (bangarang)
 ethan wang,split,club,2024,long island riff raff; nyu (new york university )
 ethan wang,split,college,2023,california-san diego (air squids); california-san diego-b (air squids lite ); california-san diego-c (air squids select)
 ethan wang,split,college,2024,california-san diego (air squids); johns hopkins (dangerzone); johns hopkins-b (dangerzone b)
@@ -1684,8 +1699,8 @@ evan foster,auto-merged,college,2026,carnegie mellon (mr. yuk); north park (viki
 evan frias,auto-merged,club,2023,milwaukee revival; timber
 evan garrison,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches )
 evan harris,auto-merged,college,2026,colorado state (hibida); colorado state-b (bibida)
-evan johnson,auto-merged,club,2017,defy the meta; shades
-evan johnson,auto-merged,college,2019,maryland-b (astro quakers); north carolina-asheville (unc asheville bulldogs)
+evan johnson,split,club,2017,defy the meta; shades
+evan johnson,split,college,2019,maryland-b (astro quakers); north carolina-asheville (unc asheville bulldogs)
 evan lutz,split,college,2025,depaul (duc); penn state (spank)
 evan lutz,split,college,2026,depaul (duc); penn state (spank)
 evan mclean,auto-merged,club,2017,foggy bottom boys; munch box
@@ -1723,7 +1738,6 @@ everest shapiro,auto-merged,club,2019,rougaroux; supercell
 everett arruda,auto-merged,club,2024,kansas city smokestack; nox
 everett woo,auto-merged,club,2025,buda u20b; la maquina -a
 ewan casper,auto-merged,club,2026,dark star; oregon trainwreck
-eytan zakai,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 ezra beidler-shenk,auto-merged,club,2023,adelphos; sepda night owl
 ezra gold,auto-merged,college,2024,tulane (tucks); tulane-b (tulane b)
 ezra kennedy,auto-merged,club,2025,popperton ultimate frisbee; powderhogs
@@ -1772,6 +1786,7 @@ gabe smith,auto-merged,college,2025,heartbreak; whitworth (bangarang)
 gabe thomas,split,college,2021,arkansas (ludicrous speed ); north carolina-wilmington (seamen)
 gabe thomas,split,college,2022,arkansas (ludicrous speed ); north carolina-wilmington (seamen)
 gabe westergren,auto-merged,club,2017,foggy bottom boys; jelly straus
+gabriel armstrong,split,college-d3,2019,cornell college (c-team); grove city (doomsday)
 gabriel bassin,auto-merged,club,2024,haymaker; haymaker x; roundhouse
 gabriel colton,auto-merged,club,2017,patrol; trollvolver
 gabriel colton,auto-merged,club,2023,dig; diz
@@ -1782,6 +1797,7 @@ gabriel henry,auto-merged,college,2023,messiah (falcons); messiah-b (b)
 gabriel hernandez,split,college,2021,suny-stony brook (panic); western michigan (dark horse)
 gabriel janus,auto-merged,college,2022,dayton (flud); dayton-b (ud flud b)
 gabriel johnson,split,college,2026,grand valley (lakers); kent state (klockwork); tarleton state (texan ultimate)
+gabriel johnson,split,college-d3,2019,ohio wesleyan (firedogs); union (tennessee) (union jaxx)
 gabriel kritz,auto-merged,college,2024,hofstra (flying dutchmen); maryland (maryland ultimate)
 gabriel lloyd,auto-merged,club,2025,bryce whitney fan club; zyzzyva
 gabriel martinez,auto-merged,club,2017,austin amigos; swangos
@@ -1827,7 +1843,6 @@ gavriel luis feria,auto-merged,college,2024,california-san diego-b (air squids l
 gene buonaccorsi,auto-merged,club,2017,beach wrench; big wrench
 geoffrey avila,auto-merged,college,2017,texas a&m-b (dozen matter); texas a&m-c (dozen exist)
 geoffrey cheng,auto-merged,club,2022,nox; stl moonar
-geordie van witbeck,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 george gust,auto-merged,club,2024,amigos-jv; riptide; texas united
 george liacouras,auto-merged,club,2025,john doe; la maquina -a
 george liu,auto-merged,college,2019,california-san diego-b (air squids lite ); california-san diego-c (air squids select)
@@ -1835,7 +1850,6 @@ george neely,auto-merged,club,2024,dallas delinquents; forge
 german aldana,auto-merged,club,2025,riverside; texas duffy
 gerry mcmanus,auto-merged,club,2025,iso atmo; x wives-a
 gianluca pagano,auto-merged,club,2023,garden state ultimate; pride of rowan newark
-gianni caiazzo,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 gianni landby,auto-merged,college,2019,washington-b (washington b); washington-c (washington c)
 gideon miller,auto-merged,college,2023,mississippi state (dark horse); mississippi state-b (pony express)
 gideon miller,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches ); mississippi state-c (trenches b)
@@ -2064,7 +2078,7 @@ jack griffin,split,club,2024,san antonio warhawks; sungho moon
 jack griffin,split,college,2026,massachusetts-lowell (riverhawks); yale (süperfly)
 jack guidry,auto-merged,club,2017,flash flood; premium; texas two step
 jack guidry,auto-merged,club,2021,rhino slam!; trainwreck and friends
-jack harman,auto-merged,college,2019,knox (river rats); radford (scoundrels)
+jack harman,split,college,2019,knox (river rats); radford (scoundrels)
 jack hayes,auto-merged,club,2019,foggy bottom boys; hb woodlawn (hbw united)
 jack healey,auto-merged,college,2025,richmond (spidermonkeys); richmond-b (spider pigs)
 jack hinchsliff,auto-merged,club,2017,interesting tummy birds; johnny bravo
@@ -2131,6 +2145,7 @@ jackson potts,auto-merged,club,2017,flash flood; texas swing
 jackson potts,auto-merged,club,2019,flash flood; texas united
 jackson riddle,auto-merged,club,2024,kfc; timber
 jackson russo,split,college,2022,bryant (bryant craze); suny-geneseo (snail)
+jackson russo,split,college-d3,2022,bryant (bryant craze); suny-geneseo (snail)
 jackson shannon,auto-merged,college,2025,clemson (joint chiefs of waft); clemson-b (joint biefs)
 jackson stoneham,auto-merged,college,2025,mississippi state (dark horse); mississippi state-b (trenches )
 jackson thomas,split,club,2026,charleston heat stroke; cookie mon$terz
@@ -2182,7 +2197,7 @@ jacob huls,auto-merged,college,2019,california-san diego-b (air squids lite ); c
 jacob jackson,split,club,2017,castle; premium
 jacob jespersen,auto-merged,club,2025,"bgf sl,ut; fat stacks; zombie tidal wave"
 jacob koons,auto-merged,club,2024,on ramp; parking lot
-jacob lane,auto-merged,college,2017,south florida (scallywags); wheaton (ma) (wulf)
+jacob lane,split,college,2017,south florida (scallywags); wheaton (ma) (wulf)
 jacob leblanc,auto-merged,college,2019,suny-cortland (team rocket); suny-cortland-b (team rocket)
 jacob luksik,auto-merged,college,2017,clemson (joint chiefs of waft); clemson-b (biefs)
 jacob marsh,split,club,2017,big wrench; john doe; paranoia
@@ -2242,6 +2257,7 @@ jake doyle,auto-merged,club,2018,garden state ultimate; trenton takers
 jake gershon,auto-merged,club,2019,festive salmon; overcast
 jake hadziev,auto-merged,club,2024,drought; endless sunset
 jake heimlich,auto-merged,club,2023,choice city hops; lafayette street dogs
+jake johnson,auto-merged,college-d3,2018,cedarville (swarm); vassar (swinging monks)
 jake kovalic,auto-merged,club,2019,mango tree; nain rouge
 jake loveland,auto-merged,college,2019,cal poly-slo-b (slob); cal poly-slo-c (cal poly slo c)
 jake loveland,auto-merged,college,2020,cal poly-slo-b (slob); cal poly-slo-c (cal poly slo c)
@@ -2304,7 +2320,7 @@ james morgan,auto-merged,college,2023,tulane (tucks); tulane-b (tulane b)
 james pardo,split,club,2022,bartle boys; shade
 james pardo,split,club,2023,bartle boys; shade; you need to calm down
 james pardo,split,club,2024,bartle boys; blueprint; suny-binghamton (suny-binghamton)
-james phillips,auto-merged,college,2017,bryant (bryant craze); stephen f austin (frontier)
+james phillips,split,college,2017,bryant (bryant craze); stephen f austin (frontier)
 james pollard,split,club,2017,ampersand; citywide special; guerrilla
 james pollard,split,club,2024,phantom; zyzzyva
 james popolow,auto-merged,college,2017,cal poly-slo (slocore); cal poly-slo-b (slob)
@@ -2429,6 +2445,7 @@ jeremiah smith,auto-merged,club,2025,cosmic u-20 boys; the incline
 jeremy baxter,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches ); mississippi state-c (trenches b)
 jeremy baxter,auto-merged,college,2025,mississippi state (dark horse); mississippi state-b (trenches )
 jeremy becker,auto-merged,club,2025,crossfire; gambit
+jeremy gordon,auto-merged,college-d3,2022,hamilton (hot saucers); puget sound (postmen)
 jeremy hess,auto-merged,club,2021,town hall stars; truck stop
 jeremy jacob lagace,auto-merged,club,2017,club m - manic; club m - rage
 jeremy keusch,auto-merged,club,2022,colonels; doublewide
@@ -2442,7 +2459,7 @@ jeremy teela,auto-merged,club,2025,"bgf sl,ut; fat stacks; zombie tidal wave"
 jeron dastrup,auto-merged,club,2022,haymaker; utah hatu
 jerry tan,auto-merged,college,2022,yale (süperfly); yale - y (süperfly - y)
 jerry wang,auto-merged,club,2023,diy; scoop
-jesse james,auto-merged,college,2025,bentley (icehouse); harvard (red line)
+jesse james,split,college,2025,bentley (icehouse); harvard (red line)
 jesse katz,auto-merged,college,2023,tulane (tucks); tulane-b (tulane b)
 jesse lauderbaugh,auto-merged,college,2023,dayton (flud); dayton-b (ud flud b)
 jesse newman,split,club,2017,dredge; syracuse doom
@@ -2483,6 +2500,7 @@ joe sidrys,auto-merged,club,2019,black market ii; blacker market x
 joe sidrys,auto-merged,club,2023,trident ii; trident iii
 joe spengel,auto-merged,club,2019,black market iii; blacker market x
 joe warner,auto-merged,club,2024,bonsoon; expendables
+joe zak,auto-merged,college-d3,2018,belmont (disco); pacific lutheran (reign)
 joel crandall,auto-merged,club,2018,inception; johnny encore
 joel crandall,auto-merged,club,2021,inception; johnny encore
 joel escobar amurrio,auto-merged,club,2024,crossfire; pgz
@@ -2507,12 +2525,14 @@ john buchanan,auto-merged,college,2020,christopher newport (skymaul); massachuse
 john carl begley,auto-merged,college,2020,tulane (tucks); tulane-b (tulane b)
 john david thor,auto-merged,college,2024,kansas (horrorzontals); kansas-b (kansas b (vertikills))
 john davis,split,college,2026,georgia tech (tribe); kansas state (wizards)
-john decaro,auto-merged,college,2019,college of new jersey (revolution); suny-new paltz (gunx)
+john decaro,split,college,2019,college of new jersey (revolution); suny-new paltz (gunx)
 john devlin,split,college,2019,catholic (bad habit); dallas (vortex)
+john devlin,split,college-d3,2019,catholic (bad habit); dallas (vortex)
 john dunlop,auto-merged,club,2019,inception; johnny encore
 john dunlop,auto-merged,club,2021,inception; johnny encore
 john dunlop,auto-merged,club,2025,(washed); little john
 john eyre,auto-merged,college,2018,baylor (stonewall a); baylor-b (stonewall b)
+john hall,auto-merged,college-d3,2022,shenandoah university (sound ultimate); worcester polytechnic institute (bullets ultimate)
 john helgeson,auto-merged,club,2023,dinkytown doughboys; kenji's bbb; mallard
 john hogan,auto-merged,college,2019,california-irvine (nightlife); california-irvine-b (bedtime)
 john hogan,auto-merged,college,2020,california-irvine (nightlife); california-irvine-b (bedtime)
@@ -2549,7 +2569,7 @@ john slot,auto-merged,club,2023,bloom; bloomin' reptars
 john slot,auto-merged,college,2024,central florida (dogs of war); central florida-b (havoc)
 john symeonidis,auto-merged,club,2023,bemo; loaded panda
 john taylor,auto-merged,college,2018,slippery rock (sru lion pride); south florida (scallywags)
-john van horn,auto-merged,college,2025,college of new jersey (revolution); princeton (clockwork)
+john van horn,split,college,2025,college of new jersey (revolution); princeton (clockwork)
 john walsh,split,club,2021,magma bears; s l u r p
 john whitmore,auto-merged,college,2022,dayton (flud); dayton-b (ud flud b)
 john whitmore,auto-merged,college,2023,dayton (flud); dayton-b (ud flud b)
@@ -2621,7 +2641,6 @@ jonathan wheeler,auto-merged,college,2024,dayton (flud); dayton-b (ud flud b)
 jonathan wheeler,auto-merged,college,2025,dayton (flud); dayton-b (ud flud b)
 jonathon morris,auto-merged,club,2021,johnny bravo; spicy
 jonathon morris,auto-merged,club,2023,fungi; makawua
-jones kill,auto-merged,college,2026,colorado mines (entropy); colorado mines-b (orediggers)
 joniah helperin-lange,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 jonny malks,auto-merged,club,2017,foggy bottom boys; truck stop
 jordan blunt,auto-merged,club,2017,austin amigos; swangos
@@ -2631,7 +2650,7 @@ jordan hill,split,club,2018,el niño; powderhogs
 jordan hill,split,college,2017,brigham young (chi); miami (florida) (umiami cartel)
 jordan huntoon,auto-merged,club,2021,ice bros; iso atmo
 jordan irvin,auto-merged,club,2021,bighorn; boulder united flatiron hammers
-jordan jackson,auto-merged,college,2017,susquehanna (moby disc); washington university-b (contraband)
+jordan jackson,split,college,2017,susquehanna (moby disc); washington university-b (contraband)
 jordan jaucian,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches ); mississippi state-c (trenches b)
 jordan kaufman,split,club,2017,big wrench; deathsquad
 jordan kaufman,split,college,2017,brandeis (tron); vermont (chill)
@@ -2764,6 +2783,8 @@ joshua schmidt,auto-merged,college,2020,stevens tech (stevens tech); stevens tec
 joshua smith,split,college,2017,duke (brimstone); kansas state (wizards)
 joshua smith,split,college,2019,duke (brimstone); kansas state (wizards)
 joshua vaden,auto-merged,college,2019,air force (afterburn); air force-b (virgin airlines)
+joshua vaden,auto-merged,college-d3,2018,air force (afterburn); air force-b (virgin airlines)
+joshua vaden,auto-merged,college-d3,2019,air force (afterburn); air force-b (virgin airlines)
 joshua van abel,auto-merged,club,2024,kfc; timber
 joshua wang,auto-merged,club,2023,dcviii; marc
 joshua wang,auto-merged,club,2024,dcviii; east lansing detroit lions
@@ -2806,6 +2827,8 @@ justin melkun,auto-merged,college,2017,rensselaer polytech (trudge b); rensselae
 justin miller,split,college,2017,shippensburg (scapegoats); shippensburg-b (scapegoats)
 justin miller,split,college,2019,ithaca (nawshus ultimate); navy (poseidon)
 justin miller,split,college,2020,navy (poseidon); portland (uprise)
+justin miller,split,college-d3,2019,ithaca (nawshus ultimate); navy (poseidon)
+justin miller,split,college-d3,2022,navy (poseidon); portland (uprise)
 justin morrison,auto-merged,club,2017,fludwhale; richmond floodwall
 justin petre,auto-merged,college,2024,texas a&m (dozen); texas a&m-b (dozen matter)
 justin reeverts,auto-merged,club,2018,black market; blacker market
@@ -2833,6 +2856,7 @@ kaleb istvan,auto-merged,college,2023,binghamton (suny-binghamton); suny-bingham
 kaleb zuckerman,auto-merged,college,2022,brown (brownian motion); brown-b (brown - b)
 kalid sudu,auto-merged,college,2018,kennesaw state (parliament); kennesaw state-b (kennesaw gold)
 kamil zabawa,auto-merged,college,2018,illinois-b (boomland); illinois-c (c-hawks)
+karl boerwinkle,auto-merged,college-d3,2018,air force (afterburn); air force-b (virgin airlines)
 kason nicholas,auto-merged,club,2025,colorado cutthroat u-17 boys; colorado cutthroat u-20 boys two
 kaushik jampala,auto-merged,club,2017,flash flood; texas swing
 kavon spivey,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches ); mississippi state-c (trenches b)
@@ -2877,6 +2901,7 @@ kevin castell,auto-merged,club,2019,low point; powderhogs
 kevin chen,split,college,2022,davidson (duff); north carolina-b (batch)
 kevin chow,auto-merged,club,2019,dna; komori
 kevin cleary,auto-merged,club,2017,black market; black market x
+kevin davis,split,college-d3,2018,truman state (jujitsu ); xavier (b.l.o.b.)
 kevin deangelis,auto-merged,club,2019,black market ii; blacker market y
 kevin deangelis,auto-merged,club,2021,black market i; castle
 kevin diaz,auto-merged,college,2022,suny binghamton-b (binghamton [b] y); suny-binghamton-b (suny-binghamton b)
@@ -2990,10 +3015,12 @@ kyle johnson,split,college,2017,george washington (g-dub hippos); north georgia 
 kyle johnson,split,college,2018,california-santa barbara (black tide); north georgia (summit)
 kyle johnson,split,college,2019,california-santa barbara (black tide); missouri s&t (miner threat); north georgia (summit)
 kyle johnson,split,college,2020,california-santa barbara (black tide); missouri s&t (miner threat); north georgia (summit)
+kyle johnson,split,college-d3,2018,missouri s&t (miner threat); north georgia (summit)
+kyle johnson,split,college-d3,2019,missouri s&t (miner threat); north georgia (summit)
 kyle jones,split,college,2019,illinois state-b (gnomes b); san diego state (federales )
 kyle lew,auto-merged,club,2019,little teapots; red dawn
 kyle milne,auto-merged,college,2017,montana (smokejump x); montana (smokejump)
-kyle moore,auto-merged,college,2017,muhlenberg (muhlenberg ultimate); ohio valley (scots club ultimate frisbee)
+kyle moore,auto-merged,college-d3,2017,muhlenberg (muhlenberg ultimate); ohio valley (scots club ultimate frisbee)
 kyle morgan,split,club,2021,genny never leaves; watchdogs
 kyle murray,auto-merged,club,2019,makawua; omen
 kyle ooley,auto-merged,club,2023,trident ii; triiident
@@ -3012,7 +3039,6 @@ kyle woodward,auto-merged,club,2017,fludwhale; richmond floodwall
 kyler jobe,auto-merged,college,2017,washington-b (washington b); washington-c (washington c)
 kyran buggy,auto-merged,college,2019,california-irvine (nightlife); california-irvine-b (bedtime)
 lachlan campbell,auto-merged,college,2024,alabama (yellow hammer); alabama-c (yellowhammer c)
-lachlan myers,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 lamar anderson,auto-merged,club,2023,dirty laundry; spring break '93
 lamson nguyen,auto-merged,club,2021,harvey cats; riverside
 landon evans,auto-merged,club,2025,gamble; haymaker
@@ -3049,7 +3075,6 @@ levi dohman,auto-merged,club,2023,kenji's bbb; sub zero
 levi jeske,auto-merged,club,2017,blackfish; dna
 levi pelletier,auto-merged,club,2025,red tide; resurgam ultimate
 levi smetana,auto-merged,college,2023,tulane (tucks); tulane-b (tulane b)
-liam bass,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 liam dimick,auto-merged,club,2024,buffalo frostbite; buffalo practice players
 liam drennan,auto-merged,college,2019,california-irvine (nightlife); california-irvine-b (bedtime)
 liam dunn,auto-merged,club,2023,bryce whitney fan club; red wolves
@@ -3084,13 +3109,11 @@ logan montminy,auto-merged,college,2019,florida tech (florida tech competitive);
 logan mueller,split,college,2017,washington university-b (contraband); wisconsin-stevens point (homegrown)
 logan mueller,split,college,2018,washington university-b (contraband); wisconsin-stevens point (homegrown)
 logan mueller,split,college,2019,washington university-b (contraband); wisconsin-stevens point (homegrown)
-logan nelson,auto-merged,college,2017,air force (afterburn); air force academy-b (ucla in uniforms)
 logan piercy,auto-merged,club,2025,gvl trout; philadelphia pacmen
 logan white,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches ); mississippi state-c (trenches b)
 logan williams,auto-merged,club,2023,blink-122 weekends; i-69
 lorenzo castaneda,auto-merged,college,2023,pennsylvania (void); pennsylvania-b (null)
 lorenzo dripps,auto-merged,college,2020,kentucky (kult); kentucky-b (kentucky )
-lorenzo holben,auto-merged,college,2026,lewis & clark (bacchus ); lewis & clark-b (bbacchus)
 louis douville beaudoin,auto-merged,club,2023,dig; diz
 louis nagle,auto-merged,club,2021,black market i; el niño
 louis nagle,auto-merged,club,2024,el niño; florida untied
@@ -3136,6 +3159,8 @@ luke hoven,auto-merged,college,2025,grand canyon (lopes); grand canyon-b (g-forc
 luke huffman,auto-merged,club,2023,colonels; raleigh-durham united
 luke huffman,auto-merged,college,2020,kentucky (kult); kentucky-b (kentucky )
 luke jackson,auto-merged,club,2025,heatwave; texas duffy
+luke johnson,split,college-d3,2018,biola (afterdark); kalamazoo (ultimate buzz)
+luke johnson,split,college-d3,2019,biola (afterdark); kalamazoo (ultimate buzz)
 luke laboy,auto-merged,club,2024,buffalo frostbite; buffalo practice players
 luke martelli,auto-merged,club,2019,madhouse; red circus
 luke merrill,auto-merged,club,2022,adelphos; right coast
@@ -3269,7 +3294,7 @@ matt giles,auto-merged,college,2018,baylor (stonewall a); baylor-b (stonewall b)
 matt henry,split,club,2018,black lung; rawhide
 matt jamison,auto-merged,club,2024,bonneville flatball club; sundance kids
 matt latvis,auto-merged,college,2025,syracuse (doom); syracuse university-b (boom)
-matt lawson,auto-merged,college,2017,dickinson (jive turkeys); youngstown state (aperture ultimate )
+matt lawson,split,college,2017,dickinson (jive turkeys); youngstown state (aperture ultimate )
 matt markiewicz,auto-merged,club,2023,arkansas (ludicrous speed ); stl moonar
 matt markiewicz,auto-merged,club,2024,dreadnought: battleship-b; stl moonar
 matt mcgoogan,auto-merged,club,2019,green means bro; vault
@@ -3291,7 +3316,8 @@ matteo bowman,auto-merged,club,2025,bay dog; unrestricted free agents
 matteo magnan,auto-merged,club,2022,raptor; reptar
 matteo magnan,auto-merged,club,2023,bloomin' reptars; raptor
 matteo maricich,auto-merged,college,2026,santa clara (scab); santa clara-b (scratch)
-matthew anderson,auto-merged,college,2019,anderson (alchemy ultimate); swarthmore (earthworms)
+matthew anderson,split,college,2019,anderson (alchemy ultimate); swarthmore (earthworms)
+matthew anderson,split,college-d3,2019,anderson (alchemy ultimate); swarthmore (earthworms)
 matthew berdel,auto-merged,club,2023,hardta spelots; helots
 matthew bergin,auto-merged,college,2026,lehigh (lehigh ); lehigh-b (lehigh-b)
 matthew biehl,auto-merged,college,2020,stevens tech (stevens tech); stevens tech-b (stevens tech)
@@ -3306,8 +3332,8 @@ matthew chak,auto-merged,college,2025,cal poly-slo-b (slob); cal poly-slo-c (slo
 matthew chamberlain,auto-merged,club,2023,marc; red wolves
 matthew chamberlain,auto-merged,club,2024,beacon; east lansing detroit lions
 matthew chmiel,auto-merged,college,2018,air force (afterburn); air force-b (virgin airlines)
-matthew collins,auto-merged,college,2019,miami (florida) (umiami vice); suny-cortland (team rocket); suny-cortland-b (team rocket)
-matthew collins,auto-merged,college,2020,miami (florida) (umiami vice); suny-stony brook (brick)
+matthew collins,split,college,2019,miami (florida) (umiami vice); suny-cortland (team rocket); suny-cortland-b (team rocket)
+matthew collins,split,college,2020,miami (florida) (umiami vice); suny-stony brook (brick)
 matthew cook,split,club,2018,big wrench; h.o.g. ultimate
 matthew cook,split,club,2019,h.o.g. ultimate; white sauce hot sauce
 matthew cook,split,club,2021,iditarod; white sauce hot sauce
@@ -3496,6 +3522,8 @@ michael johnson,split,club,2025,la maquina -a; romulus
 michael johnson,split,college,2022,berry (bucks); florida gulf coast (eagles ultimate)
 michael johnson,split,college,2023,berry (bucks); dickinson (junkyard turkeys)
 michael johnson,split,college,2024,berry (bucks); dickinson (junkyard turkeys)
+michael johnson,split,college-d3,2023,berry (bucks); dickinson (junkyard turkeys)
+michael johnson,split,college-d3,2024,berry (bucks); dickinson (junkyard turkeys)
 michael king,split,college,2018,arizona state (prime); olivet nazarene (black penguins)
 michael kovash,auto-merged,club,2023,mallard; mallard x
 michael lee,auto-merged,club,2017,brickhouse; triforce
@@ -3552,7 +3580,7 @@ michael walsh,split,club,2018,colorado cutthroat (colorado cutthroat); inception
 michael walsh,split,club,2019,inception; regiment
 michael walsh,split,club,2023,mutiny; regiment; sub zero
 michael weber,auto-merged,college,2017,california-santa barbara-b (black out); haverford (big donkey ultimate)
-michael wilson,auto-merged,college,2017,dartmouth (pain train); southern california (usc lockdown); texas a&m (dozen)
+michael wilson,split,college,2017,dartmouth (pain train); southern california (usc lockdown); texas a&m (dozen)
 michael wormley,auto-merged,club,2023,trident ii; trident iii
 michael wormley,auto-merged,club,2024,haymaker; haymaker x
 michael zhang,auto-merged,college,2019,north carolina-b (batch); stanford-b (stanford prison experiment)
@@ -4006,6 +4034,7 @@ peyton raggio,auto-merged,college,2024,mississippi state (dark horse); mississip
 peyton raggio,auto-merged,college,2025,mississippi state (dark horse); mississippi state-b (trenches )
 phil czajkowski,auto-merged,college,2017,rhode island (riut); rhode island -b (riut b)
 philip hawthorne,auto-merged,college,2018,air force (afterburn); air force-b (virgin airlines)
+philip hawthorne,auto-merged,college-d3,2018,air force (afterburn); air force-b (virgin airlines)
 philip ignatoff,auto-merged,club,2018,scooberdivers; shore break
 philip kamei,auto-merged,college,2017,rensselaer polytech (trudge b); rensselaer polytech (trudge)
 philip liu,auto-merged,club,2022,fli-b honeybees; magma bears
@@ -4147,7 +4176,8 @@ robert lewis,split,club,2025,h.i.p; psychedelic
 robert luo,auto-merged,club,2022,dallas united outlaws; make it rain
 robert matthew hankin,auto-merged,club,2021,degens of war; uproar
 robert mitchell,auto-merged,college,2023,messiah (falcons); messiah-b (b)
-robert mueller,auto-merged,college,2018,olivet nazarene (black penguins); wooster (ramjam)
+robert mueller,split,college,2018,olivet nazarene (black penguins); wooster (ramjam)
+robert mueller,split,college-d3,2018,olivet nazarene (black penguins); wooster (ramjam)
 robert patten,auto-merged,club,2021,garden state ultimate; helots
 robert singer,auto-merged,college,2019,brandeis (tron); brandeis-b (tron-b)
 robert thottam,auto-merged,college,2017,rhode island (riut); rhode island -b (riut b)
@@ -4211,7 +4241,7 @@ ryan gardiner,auto-merged,college,2019,west chester (west chester a); west chest
 ryan gutmann,auto-merged,college,2018,stevens tech (stevens tech); stevens tech-b (stevens tech)
 ryan hanley,auto-merged,club,2018,bromintum; momintum
 ryan hicks,split,college,2018,suny-albany-b (scam); syracuse (doom)
-ryan hill,auto-merged,college,2024,dartmouth-b (discomfort trolley); oklahoma state (ultimato)
+ryan hill,split,college,2024,dartmouth-b (discomfort trolley); oklahoma state (ultimato)
 ryan hoy,auto-merged,club,2018,blackfish; fight club
 ryan hummel,auto-merged,club,2023,cmen; omen
 ryan kelly,split,club,2024,beef depot; john doe
@@ -4276,6 +4306,8 @@ ryan santos,auto-merged,club,2019,lantern; yeuth-and-age-sia
 ryan segal,auto-merged,club,2025,(washed); little john
 ryan shaw,split,college,2018,berry (berry ); worcester polytech (bullets)
 ryan shaw,split,college,2019,berry (noble savages); worcester polytech (bullets ultimate)
+ryan shaw,split,college-d3,2018,berry (berry ); worcester polytech (bullets)
+ryan shaw,split,college-d3,2019,berry (noble savages); worcester polytech (bullets ultimate)
 ryan shigley,auto-merged,club,2022,bonafide scrubs; sockeye
 ryan shore,auto-merged,club,2023,trident ii; trident iii; triiident
 ryan smith,split,club,2017,black market; flash flood
@@ -4304,9 +4336,10 @@ ryan welch,split,club,2017,deaf fruit; imperial
 ryan welch,split,club,2021,cowtown cannons; mallard
 ryan welch,split,club,2022,cowtown cannons; mallard
 ryan welch,split,club,2023,mallard; mallard x
-ryan wells,auto-merged,club,2026,mayhem-dev; mischief
-ryan wells,auto-merged,college,2020,arizona (sunburn); colorado mines (entropy)
-ryan wells,auto-merged,college,2022,arizona (sunburn); colorado mines (entropy)
+ryan wells,split,club,2026,mayhem-dev; mischief
+ryan wells,split,college,2020,arizona (sunburn); colorado mines (entropy)
+ryan wells,split,college,2022,arizona (sunburn); colorado mines (entropy)
+ryan wells,split,college-d3,2019,colorado mines (entropy); colorado mines-b (entropy - b)
 ryan whisenhunt,auto-merged,club,2019,flash flood; texas united
 ryan williams,split,college,2025,claremont (braineaters); notre dame-b (opus d's)
 ryan williams,split,college,2026,claremont (braineaters); notre dame-b (opus d's)
@@ -4314,7 +4347,7 @@ ryan wolfe,auto-merged,club,2021,fungi; spicy
 ryan wolfe,auto-merged,club,2022,fungi; spicey-freshman
 ryan wolfe,auto-merged,college,2017,clemson (joint chiefs of waft); virginia-b (virginia-b)
 ryan wong,auto-merged,college,2019,washington-b (washington b); washington-c (washington c)
-ryan wu,auto-merged,college,2026,davidson (duff); ohio state (leadbelly)
+ryan wu,split,college,2026,davidson (duff); ohio state (leadbelly)
 ryan yamamoto,auto-merged,college,2019,california-san diego-b (air squids lite ); california-san diego-c (air squids select)
 rye strand,auto-merged,club,2025,town hall stars; yacht club
 ryland kane,auto-merged,college,2025,south florida (scallywags); south florida-b (scourge)
@@ -4380,6 +4413,7 @@ samuel goertzen,auto-merged,club,2022,dawg pound; iso atmo
 samuel graham,auto-merged,college,2025,clemson (joint chiefs of waft); clemson-b (joint biefs)
 samuel heslep,auto-merged,college,2017,texas a&m-b (dozen matter); texas a&m-c (dozen exist)
 samuel johnson,auto-merged,college,2023,georgia college (disconnected); john brown (ironfist)
+samuel johnson,auto-merged,college-d3,2023,georgia college (disconnected); john brown (ironfist)
 samuel lee,split,club,2017,banc; honey bashfords; singlewide
 samuel lee,split,club,2023,banc; blueprint; ronin
 samuel lee,split,club,2024,banc; ronin
@@ -4393,7 +4427,7 @@ samuel morrall,auto-merged,club,2023,red wolves; riverside messengers-b
 samuel morrall,auto-merged,club,2024,doublewide; metro
 samuel munnis,auto-merged,club,2024,chain lightning; little red wagon
 samuel nitkin,auto-merged,club,2021,ditto a; haymaker
-samuel ramos,auto-merged,college,2022,messiah (falcons); wisconsin- la crosse (badluc)
+samuel ramos,split,college,2022,messiah (falcons); wisconsin- la crosse (badluc)
 samuel richards,split,college,2017,st john's (minnesota) (saint john's ultimate); west chester (west chester a); west chester-b (west chester)
 samuel sutton,auto-merged,college,2025,syracuse (doom); syracuse university-b (boom)
 samuel swenson-reinhold,auto-merged,club,2021,fathom; tanasi
@@ -4434,9 +4468,10 @@ scott moore,auto-merged,club,2018,coastal empire; omen
 scott radlauer,auto-merged,club,2018,osaka spirits; socal condors
 scott sakow,auto-merged,club,2024,bloom; florida untied
 seamus burns,auto-merged,college,2018,florida tech (florida tech); florida tech-b (misfits)
-sean duffy,auto-merged,college,2018,massachusetts-lowell (riverhawks); muhlenberg (muhlenberg ultimate)
+sean duffy,split,college,2018,massachusetts-lowell (riverhawks); muhlenberg (muhlenberg ultimate)
 sean elesh,auto-merged,college,2022,tulane (tucks); tulane-b (tulane b)
-sean freeman,auto-merged,college,2018,john carroll (thor ultimate); navy (poseidon)
+sean freeman,split,college,2018,john carroll (thor ultimate); navy (poseidon)
+sean freeman,split,college-d3,2018,john carroll (thor ultimate); navy (poseidon)
 sean geran,auto-merged,club,2024,parlay; touch of grey
 sean glasgow,auto-merged,college,2023,mississippi state (dark horse); mississippi state-b (pony express)
 sean glasgow,auto-merged,college,2024,mississippi state (dark horse); mississippi state -b (trenches ); mississippi state-c (trenches b)
@@ -4675,6 +4710,7 @@ thomas horvath,auto-merged,club,2024,alibi; motive
 thomas kindred,auto-merged,club,2024,hydra; titans
 thomas langloh,auto-merged,club,2025,alliance; alliance 2; atliens
 thomas lemons,split,college,2017,army (army west point); muhlenberg (muhlenberg ultimate)
+thomas lemons,split,college-d3,2017,army (army west point); muhlenberg (muhlenberg ultimate)
 thomas loar,auto-merged,club,2024,carolina summer; space cowboys
 thomas mayer,auto-merged,college,2022,southern california (usc lockdown); southern california-b (usc blockdown)
 thomas nardini,auto-merged,college,2022,yale (süperfly); yale - y (süperfly - y)
@@ -4751,6 +4787,7 @@ trevor griesman,auto-merged,club,2024,lounar; phantom
 trevor kelley,auto-merged,club,2024,bonneville flatball club; sundance kids
 trevor riemer,auto-merged,college,2024,cincinnati (bearcats); cincinnati -b (bearcats b)
 trevor scott,auto-merged,club,2021,beachfront property; black market ii
+trevor smith,split,college-d3,2026,holy cross (purple heys); slippery rock (sru lions)
 trevor vandecoevering,auto-merged,college,2017,gonzaga (guru x); gonzaga (guru y)
 trevor walrath,auto-merged,college,2024,arizona state (prime); arizona state-b (pleasure)
 trevor yandow,auto-merged,club,2019,ender's outcasts; thunder boys
@@ -4782,7 +4819,6 @@ tyler chan,auto-merged,club,2017,ironside; somerville youth
 tyler curtis,auto-merged,college,2020,stevens tech (stevens tech); stevens tech-b (stevens tech)
 tyler davis,auto-merged,club,2019,buffalo open; dynasty
 tyler feeney,auto-merged,club,2024,amherst orlando magic; scoop
-tyler hallman,auto-merged,college,2018,messiah (falcons); messiah college-b (falcons)
 tyler hau,auto-merged,club,2025,buffalo frostbite; new jersey gemini
 tyler johnson,split,club,2025,colorado cutthroat u-17 boys; colorado cutthroat u-20 boys two; fort reno flatball club
 tyler johnson,split,club,2026,colorado cutthroat u-20 boys two; truck stop
@@ -4829,6 +4865,7 @@ vedanth talla,auto-merged,college,2023,california-san diego-b (air squids lite )
 venice fan,auto-merged,club,2026,knights of ni; mallard
 venice fan,auto-merged,college,2023,minnesota-b (ugly duckling); minnesota-c (rubber ducky)
 victor chen,auto-merged,college,2019,caltech (aftermath); rensselaer polytech (trudge)
+victor chen,auto-merged,college-d3,2019,caltech (aftermath); rensselaer polytech (trudge)
 victor xam,auto-merged,club,2024,joe fisher; oni
 victoriano garcia lll,auto-merged,college,2019,texas a&m-b (dozen matter); texas a&m-c (dozen exist)
 vikram deepak,auto-merged,college,2023,california (ursa major); charlottesville clownies
@@ -4934,8 +4971,8 @@ william plyler,auto-merged,college,2020,kentucky (kult); kentucky-b (kentucky )
 william sheridan,auto-merged,college,2024,cincinnati (bearcats); cincinnati -b (bearcats b)
 william sheridan,auto-merged,college,2025,cincinnati (bearcats); cincinnati -b (bearcats b)
 william smith,split,college,2019,mississippi (hydra); southern illinois-edwardsville (ultimate e-ville)
-william snyder,auto-merged,club,2024,offshore; socal condors
-william snyder,auto-merged,college,2025,california-santa cruz (slugs); haverford (big donkey ultimate)
+william snyder,split,club,2024,offshore; socal condors
+william snyder,split,college,2025,california-santa cruz (slugs); haverford (big donkey ultimate)
 william song,auto-merged,college,2024,johns hopkins (dangerzone); johns hopkins-b (dangerzone b)
 william sullivan,split,college,2022,ball state (cardinals); sacred heart (laces)
 william sullivan,split,college,2023,ball state (cardinals); sacred heart (laces)
@@ -5006,6 +5043,7 @@ zachary johnson,split,club,2025,barnstorm; fat stacks
 zachary johnson,split,college,2017,appalachian state (nomads); college of new jersey (revolution)
 zachary johnson,split,college,2018,appalachian state (nomads); college of new jersey (revolution)
 zachary johnson,split,college,2019,appalachian state (nomads); college of new jersey (revolution); dad?; rensselaer polytech-b (trudge)
+zachary johnston,split,college-d3,2026,cedarville (swarm); colorado college (wasabi)
 zachary lewis,split,college,2019,appalachian state (nomads); bradley (angry otters)
 zachary lewis,split,college,2021,cal state-long beach (pyramid scheme); cincinnati (bearcats)
 zachary lewis,split,college,2022,cal state-long beach (pyramid scheme); cincinnati (bearcats)

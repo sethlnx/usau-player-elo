@@ -29,6 +29,7 @@ class EloConfig:
     division_bases: dict = field(default_factory=lambda: {
         "club": 1500.0,
         "college": 1300.0,             # prior: college is a weaker level; tuned
+        "college-d3": 1100.0,          # prior: D-III below D-I; tuned
         "ufa": 1550.0,                 # prior: UFA rosters skew elite-club
     })
     k_scale: dict = field(default_factory=dict)  # per-division K multiplier

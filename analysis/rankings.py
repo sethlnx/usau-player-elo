@@ -315,16 +315,37 @@ def latest_rosters(con, season: int, basis: str = "completed"):
 # published BEFORE the backfill (0.4529 / 0.7822) it is a genuine net gain.
 # Per-season the change hurts 2017-2019 (-0.002 to -0.006) and helps 2021-2025
 # (+0.005 to +0.014) — the healthy direction, not a cold-start artifact.
+# D-III (division "college-d3", 257 events / 4,950 games, 2017-2026). Its base
+# is NOT tuned, and that is deliberate.
+#
+# 84% of D-III players also appear at D-I events — D-III programs play D-I
+# invites constantly — so D-III is not a separate pool the way club and college
+# are. Only 1,930 players are D-III-only. The base therefore sets the entry
+# point for a small minority and is barely identifiable from club logloss: the
+# whole range 800-1500 moves TEST by 0.0008.
+#
+# Worse, what signal there is points two ways. Against base=1100, moving to 600
+# helps VAL (-0.00074, CI [-0.00143,-0.00006]) and HURTS TEST (+0.00095, CI
+# [+0.00036,+0.00155]) — both significant, opposite directions. The per-season
+# gain runs +0.0009/+0.0006/0/0/+0.0016/0/-0.0007/-0.0012 from 2017 to 2025:
+# helps the cold-start years, decays, then goes negative. That is the signature
+# this file already warns about twice (home_advantage, stat_transfer_beta), and
+# the VAL "gain" turns out to be almost entirely one season, 2022.
+#
+# So it stays at the prior. 1100 puts D-III debutants converging at a median
+# 1290 against D-I's 1418 and club's 1633 — the right ordering, arrived at from
+# results rather than from the knob. Adding D-III does not improve club
+# prediction (TEST 0.4514 -> 0.4516, inside noise) and was never going to: it
+# buys COVERAGE, rating 13,111 D-III players who previously had none.
 PUBLISHED = dict(tau=600.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=3.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=14,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
-                 division_scale={"club": 260.0, "college": 260.0},
+                 division_scale={"club": 260.0, "college": 260.0,
+                                 "college-d3": 260.0},
                  division_bases={"club": 1500.0, "college": 1350.0,
-                                 "ufa": 1550.0})
-
-
+                                 "college-d3": 1100.0, "ufa": 1550.0})
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
@@ -390,10 +411,12 @@ def write_history(con, games, rosters, clubs, snaps, model):
                    if subj[0] == "p" and subj[1] in keep} |
                   {e for subj, evs in snaps.items() for e in evs if subj[0] == "c"})
     ix = {e: i for i, e in enumerate(used)}
-    # Division as 1/0, not an initial: "club"[:1] and "college"[:1] are both
-    # "c", which silently labelled every club event as college in the UI.
+    # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
+    # both "c", which silently labelled every club event as college. Three
+    # codes now — a binary flag sent every D-III event back to "club".
+    DIVCODE = {"club": 0, "college": 1, "college-d3": 2}
     events = [[evinfo[e][1][:10], evinfo[e][0][:46], evinfo[e][2],
-               1 if evinfo[e][3] == "college" else 0]
+               DIVCODE.get(evinfo[e][3], 0)]
               for e in used]
 
     def encode(evs):

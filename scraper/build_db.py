@@ -35,6 +35,7 @@ DIVISIONS = {
     "club-women": {"level": "Club-Women", "group": "Club - Women"},
     "club-mixed": {"level": "Club-Mixed", "group": "Club - Mixed"},
     "college": {"level": "College-Men", "group": "College - Men"},
+    "college-d3": {"level": "College-Men", "group": "College - Men"},
 }
 # WARNING (club-women / club-mixed): events.url is UNIQUE and events.division is
 # a single column, so an event cross-listed across divisions ("Cooler Classic 37
@@ -44,8 +45,18 @@ DIVISIONS = {
 # filters on it. Until events grows a division join table, run them into a
 # separate DB:  USAU_DB=data/usau_wm.db python -m scraper.build_db --division
 # club-women 2026   (the HTML cache in data/raw/cache/ is shared either way).
-# Championship-series events for divisions we exclude (college D-III / Dev).
-_COLLEGE_EXCLUDE = re.compile(r"D-III|\bDev\b|Developmental", re.I)
+# D-I and D-III share the College-Men competition level and the same schedule
+# URL, so the ONLY thing separating them is the event name. `college` takes
+# everything that is not D-III; `college-d3` takes exactly the D-III events.
+# The two sets are disjoint by construction, which matters because events.url
+# is UNIQUE and events.division is one column — overlapping sets would have
+# each division silently overwriting the other's rows.
+#
+# Matching is deliberately loose on the hyphen. USAU writes "D-III" for the
+# series but organisers write "DIII", "D3" and "D-3" for invites, and the old
+# strict r"D-III" let 279 D-III games leak into the D-I pool.
+_D3_MATCH = re.compile(r"D-?III\b|\bD-?3\b", re.I)
+_COLLEGE_EXCLUDE = re.compile(r"\bDev\b|Developmental", re.I)
 # Age-restricted club series. USAU files Masters (33+), Grandmasters (40+) and
 # Great Grand Masters (50+) under the Club-Men competition level, so the event
 # enumerator returns them alongside open club. They are a separate population
@@ -247,7 +258,13 @@ def main(seasons: list[int], division: str = "club"):
                   if any(group_name in g for g in e["groups"])
                   and "cancel" not in e["name"].lower()]
         if division == "college":
-            events = [e for e in events if not _COLLEGE_EXCLUDE.search(e["name"])]
+            events = [e for e in events
+                      if not _COLLEGE_EXCLUDE.search(e["name"])
+                      and not _D3_MATCH.search(e["name"])]
+        elif division == "college-d3":
+            events = [e for e in events
+                      if not _COLLEGE_EXCLUDE.search(e["name"])
+                      and _D3_MATCH.search(e["name"])]
         elif division.startswith("club"):
             events = [e for e in events if not _CLUB_EXCLUDE.search(e["name"])]
         print(f"== season {season}: {len(events)} {level} events", flush=True)

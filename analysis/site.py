@@ -852,7 +852,7 @@ function histTable(pts, isTeam) {
       `<span class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}${d}</span>`;
     return `<tr><td class="d">${p.date}</td>` +
            `<td>${esc(p.event)}<span class="muted" style="font-size:11.5px">` +
-           ` ${p.div ? 'college' : 'club'}</span></td>` +
+           ` ${['club','college','D-III'][p.div] || 'club'}</span></td>` +
            (isTeam ? `<td class="n">${p.n ?? ''}</td>` : '') +
            `<td class="r">${p.elo}</td><td class="dl">${dl}</td></tr>`;
   }).join('');

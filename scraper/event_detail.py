@@ -9,8 +9,11 @@ from bs4 import BeautifulSoup
 from . import fetch
 
 # URL path segment per division. College's slug has no hyphen (verified: the
-# hyphenated form 404s, /schedule/Men/CollegeMen/ serves the page).
-DIVISION_PATHS = {"club": "Men/Club-Men", "college": "Men/CollegeMen"}
+# hyphenated form 404s, /schedule/Men/CollegeMen/ serves the page). D-III is
+# not a separate path — USAU files it under the same College Men schedule, so
+# the split is by event NAME, done in build_db.
+DIVISION_PATHS = {"club": "Men/Club-Men", "college": "Men/CollegeMen",
+                  "college-d3": "Men/CollegeMen"}
 
 
 def schedule_url(event_url: str, division: str = "club") -> str:
