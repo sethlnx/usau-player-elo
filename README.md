@@ -40,10 +40,20 @@ overlapping sets would have each division overwriting the other's rows.
 
 `analysis/site.py` emits it: club rankings on three roster bases, a searchable
 player table, a **Trends** tab drawing the 25 highest-peaking players or clubs as
-one line per season, and a U.S. Open tracker whose bracket you fill in as games
-finish, re-running a 40,000-sim Monte Carlo in the browser against whatever you
-have entered. It reads only the published artifacts and never replays the model,
-so the page cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
+one line per season, filterable to a single division, and a U.S. Open tracker
+whose bracket you fill in as games finish, re-running a 40,000-sim Monte Carlo in
+the browser against whatever you have entered. It reads only the published
+artifacts and never replays the model, so the page cannot drift from
+`data/player_elo.csv` and `data/team_elo*.csv`.
+
+The division filter selects **events, not teams**. 301 club identities play in
+more than one division, so classifying a whole identity would misfile every one
+of them — Colorado College (Wasabi) has both club and college events in 2024, and
+its 2024 value is 1449 in the club view against 1512 in the college view. Within
+a division a season reads as the rating after that season's last event *in that
+division*, the population is only the subjects with an event there (968 club, 980
+college, 316 D-III of 1,953), and the "above season median" baseline is
+recomputed over that population.
 
 Clicking any name opens a drill-down: the rating curve, the full event history,
 and — for a player — **which club he turned out for** at each event; for a club,

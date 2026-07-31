@@ -416,6 +416,12 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
       <option value="p">Players</option>
       <option value="c">Clubs</option>
     </select>
+    <select id="tdiv">
+      <option value="all">All divisions</option>
+      <option value="0">Club</option>
+      <option value="1">College</option>
+      <option value="2">College D-III</option>
+    </select>
     <select id="tmode">
       <option value="elo">Elo</option>
       <option value="med">Above season median</option>
@@ -1088,6 +1094,8 @@ window.addEventListener('hashchange', routeHash);
 // Eight hues x four dash patterns = 32 distinguishable strokes for 25 lines.
 const DASH = ['none', '5 3', '2 3', '8 3 2 3'];
 const TOPN = 25;
+// Codes match the DIVCODE written into each event by analysis.rankings.
+const DIVLABEL = {all: 'all divisions', 0: 'club', 1: 'college', 2: 'college D-III'};
 const trendCache = {};
 
 function playerLabel(pid) {
@@ -1099,15 +1107,23 @@ function playerLabel(pid) {
 
 /* One value per season: the rating after that season's LAST event. Points are
    already chronological, so a plain overwrite lands on the last one. */
-function seasonData(kind) {
-  if (trendCache[kind]) return trendCache[kind];
+function seasonData(kind, div) {
+  const ck = kind + '|' + div;
+  if (trendCache[ck]) return trendCache[ck];
   const src = kind === 'p' ? H.players : H.teams;
+  const dv = div === 'all' ? null : +div;
   const all = [];
   for (const key in src) {
     const pts = decode(src[key]);
     if (!pts.length) continue;
     const vals = SEASONS.map(() => null);
     for (const p of pts) {
+      // A division selects POINTS, never whole subjects: 301 club keys play in
+      // more than one division, so any per-subject verdict misfiles all of
+      // them. Within a division the season value is the rating after that
+      // season's last event IN that division, and a subject with no event
+      // there drops out of the population entirely.
+      if (dv !== null && p.div !== dv) continue;
       const si = SIX.get(p.season);
       if (si !== undefined) vals[si] = p.elo;
     }
@@ -1129,8 +1145,8 @@ function seasonData(kind) {
   // season's top 25 would be an unbounded, unreadable number of lines.
   const top = all.sort((a, b) => b.peak - a.peak).slice(0, TOPN);
   top.forEach(s => s.label = kind === 'p' ? playerLabel(s.key) : clubLabel(s.key));
-  trendCache[kind] = {top, med};
-  return trendCache[kind];
+  trendCache[ck] = {top, med, n: all.length};
+  return trendCache[ck];
 }
 
 function trendChart(series, mode, med) {
@@ -1192,8 +1208,8 @@ function trendChart(series, mode, med) {
 
 let hotIdx = null, pinIdx = null;
 function drawTrends() {
-  const kind = $('#tsub').value, mode = $('#tmode').value;
-  const dat = seasonData(kind);
+  const kind = $('#tsub').value, mode = $('#tmode').value, div = $('#tdiv').value;
+  const dat = seasonData(kind, div);
   hotIdx = null; pinIdx = null;
   $('#tchart').innerHTML = trendChart(dat.top, mode, dat.med);
   $('#tlegend').innerHTML = dat.top.map((sr, i) => {
@@ -1208,13 +1224,15 @@ function drawTrends() {
       `<svg class="sw" viewBox="0 0 14 3"><line x1="0" y1="1.5" x2="14" y2="1.5" ` +
       `stroke="currentColor" stroke-width="3"` +
       (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `/></svg>` +
-      `<span class="lbl nmlink" ${link}>${esc(sr.label)}</span>` +
+      `<span class="lbl nmlink" ${link} title="${esc(sr.label)}">` +
+      `${esc(sr.label)}</span>` +
       `<span class="pk">${mode === 'med' && shown > 0 ? '+' : ''}` +
       `${Math.round(shown)}</span></div>`;
   }).join('');
   $('#tlegend').classList.remove('dim');
-  $('#tcount').textContent = `top ${dat.top.length} by best single season · ` +
-    `${SEASONS[0]}–${SEASONS[SEASONS.length - 1]}`;
+  $('#tcount').textContent = `top ${dat.top.length} of ` +
+    `${dat.n.toLocaleString()} ${kind === 'p' ? 'players' : 'clubs'} · ` +
+    `${DIVLABEL[div]} · ${SEASONS[0]}–${SEASONS[SEASONS.length - 1]}`;
 }
 
 // Two element writes plus one class on each root, never 25 inline styles.
@@ -1251,6 +1269,7 @@ $('#tlegend').addEventListener('click', e => {
   setHot(pinIdx);
 });
 $('#tsub').onchange = drawTrends;
+$('#tdiv').onchange = drawTrends;
 $('#tmode').onchange = drawTrends;
 $('#tnote').textContent =
   `One point per season: the rating after that season's last event. The lines are ` +
@@ -1259,7 +1278,10 @@ $('#tnote').textContent =
   `did not play breaks the line rather than being interpolated across. Hover a ` +
   `legend row to isolate it, click the row to pin, click the name to open its ` +
   `full history. "Above season median" subtracts the median of every rated ` +
-  `subject active that season.`;
+  `subject active that season. Narrowing the division keeps only events in it, ` +
+  `so a season reads as the rating after that season's last event in that ` +
+  `division — 301 club identities play in more than one, and each is ranked on ` +
+  `its own record in whichever division you are looking at.`;
 
 drawClubs(); drawPlayers(); drawUS(); routeHash();
 </script>
