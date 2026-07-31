@@ -51,10 +51,13 @@ view rather than a fixed 25 — the point being that a club that owned 2019 and 
 since folded sits on the chart beside this year's best. At that density no
 stroke can identify a line on its own (8 hues x 8 dash patterns gives 64
 combinations), so the interaction carries it: hovering a line or legend row
-isolates it and drops the rest, and **hovering anywhere else in the chart re-ranks
-the legend on the season under the cursor**, showing that season's rating. A
-subject that did not play that season sinks to the bottom rather than sorting as
-zero, which would rank a club that skipped the year above one that played badly.
+isolates it and drops the rest. **The legend is ranked on the most recent season
+by default** — it opens as the current table, not as an all-time-peak list — and
+hovering any other season in the chart re-ranks it on the one under the cursor,
+showing that season's rating; leaving returns to the current season. A subject
+that did not play the ranked season shows an em dash and sinks to the bottom
+rather than sorting as zero, which would rank a club that skipped the year above
+one that played badly.
 
 The division filter selects **events, not teams**. 301 club identities play in
 more than one division, so classifying a whole identity would misfile every one

@@ -1114,7 +1114,19 @@ function seasonData(kind, div) {
   });
   const top = all.filter(a => SEASONS.some((_, i) =>
     a.vals[i] !== null && cut[i] !== null && a.vals[i] >= cut[i]));
-  top.sort((a, b) => b.peak - a.peak);
+  // Ordered on the CURRENT season, so the series index — and with it the
+  // colour and dash — matches the default legend order and the strongest few
+  // get the eight solid hues. Ordering by one season's raw value is identical
+  // to ordering by that season's median-adjusted value, the median being a
+  // constant per season, so this holds in both modes. All-time peak only
+  // breaks ties among subjects that did not play it.
+  const LAST = SEASONS.length - 1;
+  top.sort((a, b) => {
+    const x = a.vals[LAST], y = b.vals[LAST];
+    if ((x === null) !== (y === null)) return x === null ? 1 : -1;
+    if (x !== null && x !== y) return y - x;
+    return b.peak - a.peak;
+  });
   top.forEach(s => s.label = kind === 'p' ? playerLabel(s.key) : clubLabel(s.key));
   trendCache[ck] = {top, med, n: all.length};
   return trendCache[ck];
@@ -1189,6 +1201,9 @@ function trendChart(series) {
 }
 
 let hotIdx = null, pinIdx = null, yearIdx = null;
+// The season the legend falls back to: the most recent one. Hovering moves it,
+// leaving the chart returns here rather than to an all-time ranking.
+const DEFYEAR = SEASONS.length - 1;
 // The chart, its baseline and its mode, so the legend can be re-sorted against
 // a season without re-deriving anything.
 let curSeries = [], curMed = [], curMode = 'elo';
@@ -1200,7 +1215,8 @@ function drawTrends() {
   const dat = seasonData(kind, div);
   hotIdx = null; pinIdx = null; yearIdx = null;
   curMode = mode; curMed = dat.med; curSeries = dat.top;
-  // Cached once per draw: the default legend order and its right-hand number.
+  // Only used to break ties between subjects with no value in the ranked
+  // season, which puts the better historical side first among the em dashes.
   curSeries.forEach(s => {
     let m = -Infinity;
     SEASONS.forEach((_, i) => {
@@ -1222,37 +1238,37 @@ function drawTrends() {
       `${esc(sr.label)}</span><span class="pk"></span></div>`;
   }).join('');
   $('#tlegend').classList.remove('dim');
-  orderLegend();
+  setYear(DEFYEAR);
   $('#tcount').textContent = `${curSeries.length} of ` +
     `${dat.n.toLocaleString()} ${kind === 'p' ? 'players' : 'clubs'} have closed ` +
     `a season in the top 25 · ${DIVLABEL[div]} · ` +
     `${SEASONS[0]}–${SEASONS[SEASONS.length - 1]}`;
 }
 
-/* Re-sorts the legend against the hovered season, or back to best-season order
-   when nothing is hovered. Rows are MOVED, never rebuilt: data-series stays put,
+/* Re-sorts the legend against the ranked season — whichever is hovered, or the
+   most recent by default. Rows are MOVED, never rebuilt: data-series stays put,
    so a line keeps its colour and the hover machinery keeps working. One
    fragment append, so one reflow rather than 164. */
 function orderLegend() {
   const leg = $('#tlegend'), rows = [...leg.children];
   if (!rows.length) return;
-  const i = yearIdx;
+  const i = yearIdx === null ? DEFYEAR : yearIdx;
   rows.sort((a, b) => {
     const x = curSeries[+a.dataset.series], y = curSeries[+b.dataset.series];
-    if (i === null) return y.best - x.best || +a.dataset.series - +b.dataset.series;
     const vx = seriesVal(x, i), vy = seriesVal(y, i);
-    // A subject with no season there sinks to the bottom rather than sorting as
-    // zero, which would rank a club that did not play above one that played badly.
+    // A subject that did not play that season sinks to the bottom rather than
+    // sorting as zero, which would rank a club that skipped the year above one
+    // that played badly.
     if (vx === null || vy === null) {
       if (vx === vy) return y.best - x.best;
       return vx === null ? 1 : -1;
     }
-    return vy - vx;
+    if (vx !== vy) return vy - vx;
+    return +a.dataset.series - +b.dataset.series;
   });
   const frag = document.createDocumentFragment();
   rows.forEach(r => {
-    const v = i === null ? curSeries[+r.dataset.series].best
-                         : seriesVal(curSeries[+r.dataset.series], i);
+    const v = seriesVal(curSeries[+r.dataset.series], i);
     const pk = r.querySelector('.pk');
     pk.textContent = v === null ? '—'
       : (curMode === 'med' && v > 0 ? '+' : '') + Math.round(v);
@@ -1260,9 +1276,8 @@ function orderLegend() {
     frag.appendChild(r);
   });
   leg.appendChild(frag);
-  $('#tlhead').textContent = i === null
-    ? `${rows.length} series · best season`
-    : `${rows.length} series · ranked on ${SEASONS[i]}`;
+  $('#tlhead').textContent = `${rows.length} series · ranked on ${SEASONS[i]}` +
+    (i === DEFYEAR ? ' (current)' : '');
 }
 
 function setYear(i) {
@@ -1299,7 +1314,8 @@ $('#tchart').addEventListener('mouseover', e => {
   const h = e.target.closest('.xh');
   if (h) { setHot(pinIdx); setYear(+h.dataset.yi); }
 });
-$('#tchart').addEventListener('mouseleave', () => { setHot(pinIdx); setYear(null); });
+$('#tchart').addEventListener('mouseleave',
+  () => { setHot(pinIdx); setYear(DEFYEAR); });
 $('#tlegend').addEventListener('click', e => {
   const lab = e.target.closest('[data-pid],[data-club]');
   if (lab) {
@@ -1319,16 +1335,18 @@ $('#tnote').textContent =
   `One point per season: the rating after that season's last event. Every subject ` +
   `that has ever closed a season inside the top 25 gets a line — 67 to 164 of them ` +
   `depending on the view, which is why the field thins out and hovering is how you ` +
-  `read an individual. Hover a line or a legend row to isolate it, click the row to ` +
-  `pin, click the name to open its full history. Hover anywhere else in the chart ` +
-  `and the legend re-ranks on the season under the cursor, showing that season's ` +
-  `rating; a subject that did not play it sinks to the bottom rather than sorting ` +
-  `as zero. A season a subject did not play breaks the line rather than being ` +
-  `interpolated across. "Above season median" subtracts the median of every rated ` +
-  `subject active that season. Narrowing the division keeps only events in it, ` +
-  `so a season reads as the rating after that season's last event in that ` +
-  `division — 301 club identities play in more than one, and each is ranked on ` +
-  `its own record in whichever division you are looking at.`;
+  `read an individual. The legend is ranked on the most recent season, not on an ` +
+  `all-time peak, so it opens as the current table; hover any other season in the ` +
+  `chart and it re-ranks on that one, showing that season's rating, and leaving ` +
+  `returns it to the current season. A subject that did not play the ranked ` +
+  `season shows an em dash and sinks to the bottom rather than sorting as zero. ` +
+  `Hover a line or a legend row to isolate it, click the row to pin, click the ` +
+  `name to open its full history. A season a subject did not play breaks the line ` +
+  `rather than being interpolated across. "Above season median" subtracts the ` +
+  `median of every rated subject active that season. Narrowing the division keeps ` +
+  `only events in it, so a season reads as the rating after that season's last ` +
+  `event in that division — 301 club identities play in more than one, and each ` +
+  `is ranked on its own record in whichever division you are looking at.`;
 
 drawClubs(); drawPlayers(); drawUS(); routeHash();
 </script>
