@@ -369,23 +369,25 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
 .tchart[data-dense].dim .sg{opacity:.08}
 .tchart[data-dense].dim .sg.hot{opacity:1;stroke-width:2.5}
 .lrow .pk.na{opacity:.42}
-/* roster-by-season browser in a club panel */
-.rsec{margin:2px 0 18px}
-.rsec h3{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
-  color:var(--ink-3);font-weight:600;margin:0 0 8px}
-.rtabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+/* roster-by-season browser in a club panel, collapsed by default */
+.rsec{margin:2px 0 18px;border:1px solid var(--line);border-radius:10px;
+  background:var(--surface)}
+.rsec > summary{cursor:pointer;list-style:none;padding:9px 13px;font-size:11.5px;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:600;
+  display:flex;align-items:center;gap:7px;user-select:none}
+.rsec > summary::-webkit-details-marker{display:none}
+.rsec > summary::before{content:'\25b8';font-size:10px}
+.rsec[open] > summary::before{content:'\25be'}
+.rsec > summary:hover{color:var(--ink)}
+.rtabs{display:flex;flex-wrap:wrap;gap:4px;padding:0 13px 10px}
 .rtab{font:inherit;font-size:12.5px;font-family:var(--mono);padding:3px 9px;
   border-radius:6px;cursor:pointer;border:1px solid var(--line-strong);
   background:var(--surface);color:var(--ink-2)}
 .rtab:hover{border-color:var(--accent);color:var(--ink)}
 .rtab.on{background:var(--chip);border-color:var(--accent);color:var(--ink);
   font-weight:600}
-.rsum{font-size:12px;color:var(--ink-3);margin:0 0 10px}
-.rev{margin-bottom:11px}
-.rev .revh{font-size:12px;color:var(--ink-3);margin-bottom:3px}
-.rev .revh b{color:var(--ink-2);font-weight:550}
-.rev .revb{font-size:12.5px;line-height:1.85;color:var(--ink-2)}
-.rev .revb .nmlink{color:var(--ink)}
+#rpane{padding:0 13px 13px}
+.rsum{font-size:12px;color:var(--ink-3);margin:0 0 9px;line-height:1.6}
 </style>
 
 <div id="scrim"></div>
@@ -1035,34 +1037,52 @@ function rosterSeasons(ckey) {
     season: e[0],
     eis: e[1].sort((a, b) => (HEV[b][0] || '').localeCompare(HEV[a][0] || ''))}));
 }
-/* One block per event, because a club's roster is not one thing per season —
-   it re-registers each tournament. The union count above them is the honest
-   answer to "who was on this club that year". */
+/* ONE roster per season: the union of every event's listed squad that year.
+   A club re-registers each tournament, so the events a player was actually
+   listed for is the one thing unioning loses — it comes back as the Ev
+   column rather than as a second roster. */
 function rosterPane(ckey, season) {
   const grp = rosterSeasons(ckey).find(g => g.season === season);
   if (!grp) return '';
-  const union = new Set();
-  const blocks = grp.eis.map(ei => {
-    const ids = rosterOf(ckey + '|' + ei);
-    ids.forEach(i => union.add(i));
-    const ev = HEV[ei];
-    return `<div class="rev"><div class="revh"><b>${esc(ev[1])}</b> · ${ev[0]} · ` +
-           `${ids.length} listed</div><div class="revb">${nameList(ids)}</div></div>`;
-  }).join('');
-  return (grp.eis.length > 1
-    ? `<p class="rsum">${union.size} players across ${grp.eis.length} events ` +
-      `this season.</p>`
-    : '') + blocks;
+  const seen = new Map();
+  grp.eis.forEach(ei => rosterOf(ckey + '|' + ei).forEach(
+    i => seen.set(i, (seen.get(i) || 0) + 1)));
+  const rows = [...seen.keys()].map(i => {
+    const pid = PPID[i], r = PBY.get(String(pid));
+    return {pid, name: PEOPLE[i], ev: seen.get(i),
+            elo: r ? r[1] : null, rank: r ? r[7] : null};
+  });
+  // Strongest first; anyone below the rating floor has no number to sort on
+  // and goes last alphabetically rather than being treated as a zero.
+  rows.sort((a, b) => {
+    if ((a.elo === null) !== (b.elo === null)) return a.elo === null ? 1 : -1;
+    if (a.elo !== null && a.elo !== b.elo) return b.elo - a.elo;
+    return a.name.localeCompare(b.name);
+  });
+  const body = rows.map(r =>
+    `<tr><td class="rk">${r.rank === null ? '—' : r.rank}</td><td>` +
+    (H.players[r.pid]
+      ? `<span class="nmlink" data-pid="${esc(r.pid)}">${esc(r.name)}</span>`
+      : `<span class="muted">${esc(r.name)}</span>`) +
+    `</td><td class="n">${r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
+    `<td class="n">${r.ev}</td></tr>`).join('');
+  const evs = grp.eis.map(ei => esc(HEV[ei][1])).join(', ');
+  return `<p class="rsum">${rows.length} players · ${grp.eis.length} event` +
+    `${grp.eis.length === 1 ? '' : 's'}: ${evs}</p>` +
+    `<table class="hist"><thead><tr><th class="n">#</th><th>Player</th>` +
+    `<th class="n">Elo</th><th class="n" title="Events listed for, of ` +
+    `${grp.eis.length} this season">Ev</th></tr></thead>` +
+    `<tbody>${body}</tbody></table>`;
 }
 function rosterSection(ckey) {
   const groups = rosterSeasons(ckey);
   if (!groups.length) return '';
   const cur = groups[0].season;
-  return `<div class="rsec" data-ck="${esc(ckey)}"><h3>Rosters by season</h3>` +
-    `<div class="rtabs">` + groups.map(g =>
+  return `<details class="rsec" data-ck="${esc(ckey)}">` +
+    `<summary>Rosters by season</summary><div class="rtabs">` + groups.map(g =>
       `<button class="rtab${g.season === cur ? ' on' : ''}" ` +
       `data-season="${g.season}">${g.season}</button>`).join('') +
-    `</div><div id="rpane">${rosterPane(ckey, cur)}</div></div>`;
+    `</div><div id="rpane">${rosterPane(ckey, cur)}</div></details>`;
 }
 
 function toggleRoster(el) {

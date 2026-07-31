@@ -67,13 +67,16 @@ recomputed over that population.
 
 Clicking any name opens a drill-down: the rating curve, the full event history,
 and — for a player — **which club he turned out for** at each event; for a club,
-**rosters by season**, tabbed newest-first, listing every event that season with
-the squad it registered. A club re-registers each tournament, so a season is not
-one roster: each event gets its own block, with the union count above them. Every
-name in the panel is itself a link, with a `‹ Back` stack, and the open subject is
-reflected in the URL hash (`#p/<player_id>`, `#c/<club key>`) so it is shareable
-and the browser Back button works. A roster member below the 30-game trajectory
-floor is listed as plain text: he was on the roster, but there is nothing to open.
+**rosters by season** behind a disclosure, tabbed newest-first. One table per
+season, sorted strongest first, carrying each player's overall rank and Elo. A
+club re-registers each tournament, so the season roster is the union of every
+event's listed squad — Dark Star's 2026 is 30 players across three events of 22,
+26 and 25 — and the `Ev` column says how many of them each player was listed for,
+which is the only thing unioning loses. Every name in the panel is itself a link,
+with a `‹ Back` stack, and the open subject is reflected in the URL hash
+(`#p/<player_id>`, `#c/<club key>`) so it is shareable and the browser Back button
+works. A player below the 30-game floor has no rank or Elo to show and is listed
+as plain text: he was on the roster, but there is nothing to open.
 
 Rosters and affiliations ride inside `data/history.json`, which keeps the page a
 single file that works from `file://` — `fetch()` does not. That costs weight:
