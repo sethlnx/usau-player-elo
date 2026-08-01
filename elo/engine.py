@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 class EloConfig:
     base_rating: float = 1500.0        # generic fallback (post-replay lookups)
     division_bases: dict = field(default_factory=lambda: {
-        "club": 1500.0,
+        "club-men": 1500.0,
         "college": 1300.0,             # prior: college is a weaker level; tuned
         "college-d3": 1100.0,          # prior: D-III below D-I; tuned
         "ufa": 1550.0,                 # prior: UFA rosters skew elite-club
@@ -114,7 +114,7 @@ class EloConfig:
 class PlayerState:
     rating: float
     games: int = 0
-    division: str = "club"  # last division played; offseason regression target
+    division: str = "club-men"  # last division played; offseason regression target
     inv_sum: float = 0.0    # sum of observed usage indices (1.0 = avg teammate)
     inv_events: int = 0
 
@@ -159,7 +159,7 @@ class PlayerElo:
         return sum(w * r for w, r in zip(weights, ratings)) / total
 
     def pregame_ratings(self, home_roster: list, away_roster: list,
-                        division: str = "club") -> tuple[float, float]:
+                        division: str = "club-men") -> tuple[float, float]:
         """(home, away) team ratings as play_game is about to see them.
 
         Materializes both rosters first. team_rating on its own would reach a
@@ -171,7 +171,7 @@ class PlayerElo:
         self._materialize(away_roster, division)
         return self.team_rating(home_roster), self.team_rating(away_roster)
 
-    def expect(self, ra: float, rb: float, division: str = "club") -> float:
+    def expect(self, ra: float, rb: float, division: str = "club-men") -> float:
         scale = self.cfg.division_scale.get(division, self.cfg.scale)
         return 1.0 / (1.0 + 10 ** ((rb - ra) / scale))
 
@@ -182,7 +182,7 @@ class PlayerElo:
 
     def play_game(self, home_roster: list, away_roster: list,
                   home_score: int, away_score: int,
-                  division: str = "club") -> float:
+                  division: str = "club-men") -> float:
         """Update ratings; returns the pre-game P(home wins)."""
         self._materialize(home_roster, division)
         self._materialize(away_roster, division)
@@ -303,7 +303,7 @@ class TeamElo:
         self.inner = PlayerElo(self.cfg)
 
     def play_game(self, home_key, away_key, home_score, away_score,
-                  division: str = "club") -> float:
+                  division: str = "club-men") -> float:
         return self.inner.play_game([home_key], [away_key],
                                     home_score, away_score, division)
 

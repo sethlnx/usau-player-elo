@@ -63,7 +63,7 @@ def migrate_url_key(con):
             start_date TEXT, end_date TEXT,
             club_men_teams INTEGER,
             has_schedule INTEGER,
-            division TEXT NOT NULL DEFAULT 'club',
+            division TEXT NOT NULL DEFAULT 'club-men',
             complete INTEGER NOT NULL DEFAULT 0,
             UNIQUE (url, division)
         );

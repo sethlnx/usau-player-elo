@@ -224,7 +224,7 @@ def main():
         print(f"  rated {division} {season}: {len(gg)} games, {pool.n_teams} teams",
               flush=True)
     train = [(d, o) for s, dv, _dt, d, o in raw
-             if s in TRAIN_SEASONS and dv == "club"]
+             if s in TRAIN_SEASONS and dv == "club-men"]
     scale = fit_scale(train)
     print(f"\nlogistic scale fit on {TRAIN_SEASONS} club: {scale}")
     records = [(s, dv, dt, _prob(d, scale), o) for s, dv, dt, d, o in raw]
@@ -232,10 +232,10 @@ def main():
     header = f"{'slice':<26}{'n':>7}{'accuracy':>10}{'brier':>8}{'logloss':>9}"
     print("\nUSAU algorithm baseline\n" + header + "\n" + "-" * len(header))
     slices = [
-        ("club 2024-25 (holdout)", {2024, 2025}, {"club"}),
-        ("club 2024", {2024}, {"club"}),
-        ("club 2025", {2025}, {"club"}),
-        ("club 2021-23 (train)", set(TRAIN_SEASONS), {"club"}),
+        ("club 2024-25 (holdout)", {2024, 2025}, {"club-men"}),
+        ("club 2024", {2024}, {"club-men"}),
+        ("club 2025", {2025}, {"club-men"}),
+        ("club 2021-23 (train)", set(TRAIN_SEASONS), {"club-men"}),
         ("college 2024-25*", {2024, 2025}, {"college"}),
     ]
     for label, ss, dd in slices:

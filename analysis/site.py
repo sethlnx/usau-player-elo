@@ -77,7 +77,7 @@ def usopen(con):
     """
     ev = con.execute(
         """SELECT event_id, name, start_date, end_date FROM events
-           WHERE name LIKE ? AND season=2026 AND COALESCE(division,'club')='club'""",
+           WHERE name LIKE ? AND season=2026 AND COALESCE(division,'club-men')='club-men'""",
         (USOPEN_EVENT,)).fetchone()
     if not ev:
         return None, [], []
@@ -207,7 +207,7 @@ def build():
         "generated": date.today().isoformat(),
         "minGames": MIN_GAMES,
         "totalRated": total_rated,
-        "scale": PUBLISHED["division_scale"]["club"],
+        "scale": PUBLISHED["division_scale"]["club-men"],
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
@@ -1035,6 +1035,11 @@ const HEV = H.events;   // [date, name, season, divisionCode]
 // against GC/GST. The deltas are what the game did to each CLUB's rating.
 const GC = H.gameClubs || [], GST = H.gameStages || [], GMS = H.games || {};
 const GCIX = new Map(GC.map((k, i) => [k, i]));
+// Per-event division tag in the drill-down table, indexed by DIVCODE. It used
+// to be a 3-slot array with an `|| 'club'` fallback, which silently labelled
+// every mixed and women's event as club men's the moment those divisions
+// existed. Keep this the same length as DIVCODE.
+const DIVTAG = ["men's", 'college', 'D-III', 'mixed', "women's"];
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -1152,7 +1157,7 @@ function histTable(pts, isTeam, ckey) {
       : esc(p.event);
     return `<tr><td class="d">${p.date}</td>` +
            `<td>${ev}<span class="muted" style="font-size:11.5px">` +
-           ` ${['club','college','D-III'][p.div] || 'club'}</span></td>` + mid +
+           ` ${DIVTAG[p.div] || DIVTAG[0]}</span></td>` + mid +
            `<td class="r">${p.elo}</td><td class="dl">${dl}</td></tr>`;
   }).join('');
   return `<table class="hist"><thead><tr><th>Date</th><th>Event</th>` +

@@ -60,23 +60,31 @@ from elo.engine import EloConfig
 #   + softmax tau=600, k=44              sqrt(340^2/n + 98^2)
 #   + college 2017-2020 backfill, k=48   113.0 (flat)
 #   + D-III division, d3 base 1250       112.0 (flat)
+#   + mixed/women, tau=900, beta=8       103.0 (flat)
 #
-# The 1/n term went back to exactly zero. Softmax weighting had bought a
-# shallow decline in the previous fit; adding 15,466 college games and widening
-# the provisional window (N 8 -> 14) wiped it out. Split-half reads 111.5 /
-# 113.7 / 111.9 / 113.5 at mean n = 63 / 97 / 145 / 216 — no trend at all
-# across a 3.4x range in games played, on 15,000+ players.
+# The 1/n term stays exactly zero. Split-half reads 103.4 / 102.1 / 104.1 /
+# 102.4 at mean n = 35 / 71 / 139 / 241 — no trend across a 6.8x range in
+# games played, on 43,000 players. Same structural finding as before: a
+# rating's uncertainty does not fall with experience, because hyperbolic never
+# decays to 1 and offseason_regression=0 leaves nothing pulling toward an
+# anchor. Anyone wanting convergence pays for it with reg > 0, and the descent
+# priced that: reg is an axis and it stayed at 0.
 #
-# So a rating's uncertainty does not fall with experience, and the honest band
-# is a flat ±184. That is WIDER than the ±158 of two configs ago. The cause is
-# structural and already documented below: hyperbolic never decays to 1, so
-# every game still moves a veteran, and offseason_regression=0 removed the only
-# pull toward an anchor. More evidence buys better PREDICTION — TEST logloss
-# 0.4580 -> 0.4517 — while leaving any individual rating no better pinned down.
-# Anyone wanting convergence has to pay for it with reg > 0; the price is
-# quantified in the reg note further down.
+# 112 -> 103 is not the ratings getting better pinned down in absolute terms.
+# tau 600 -> 900 flattens the softmax, which inflates the whole scale (top
+# rating 3199 -> 3444), so the band shrank while the ruler grew — roughly a
+# 15% tightening once expressed as a fraction of the spread. The honest band
+# is a flat +/-169.
+#
+# CAVEAT this fit does NOT capture: it is one number for everyone, and the
+# uncertainty is plainly not uniform. Bucketing by how much softmax weight a
+# player carries in their own team's rating, split-half sd/2 runs 161 for the
+# lowest-influence tenth against 101 for the highest. A player who never moves
+# their team's rating is barely measured at all (see low_info_anchor), and
+# this column says otherwise. Fixing it means a sigma that takes influence as
+# an argument, not just games.
 def rating_sigma(games: int) -> float:
-    return 112.0
+    return 103.0
 
 
 Z90 = 1.645  # two-sided 90% interval
@@ -101,7 +109,7 @@ def last_appearance(con):
 
 
 def latest_rosters(con, season: int, basis: str = "completed",
-                   division: str = "club"):
+                   division: str = "club-men"):
     """club key -> player_ids from one event roster, chosen by `basis`.
 
     Division-scoped: one call rates one division. Teams from two divisions
@@ -140,7 +148,7 @@ def latest_rosters(con, season: int, basis: str = "completed",
         FROM event_teams et
         JOIN events ev ON ev.event_id = et.event_id
         WHERE ev.season = ?
-          AND COALESCE(ev.division, 'club') = ?
+          AND COALESCE(ev.division, 'club-men') = ?
           AND {when}
         ORDER BY ev.start_date {order}
     """, (season, division)).fetchall()
@@ -431,16 +439,65 @@ def latest_rosters(con, season: int, basis: str = "completed",
 # this does. It is a disaster: club TEST 0.4498 -> 0.4737. Weighting the
 # credit starves the model of information about most of a roster, and the
 # roster IS the model. Equal credit stays.
-PUBLISHED = dict(tau=600.0, involvement_credit=False,
-                 involvement_shrink=1.0, stat_transfer_beta=3.0,
+# FIVE-DIVISION DESCENT (analysis/descent.py). 21 axes, 3 passes, selected on
+# VAL, then every surviving move dropped one at a time and kept only if
+# reverting cost >0.0003. It converged after two passes and TWELVE of the
+# thirteen improving moves were pruned as VAL noise. Three survive:
+#   tau                    600 -> 900   +0.00069 on reversion
+#   stat_transfer_beta       3 -> 8     +0.00033
+#   division_bases college 1350 -> 1250 +0.00046  (scored on college games)
+#
+# The objective changed and that is the substantive part. Selection is now the
+# n-weighted VAL logloss over all five divisions, not club men's alone: club
+# men's is 19,682 of 90,284 games, so tuning global knobs on it would let 78%
+# of the corpus be collateral. Per-division bases and scales are still scored
+# on their own division. The trade lands where you would expect — club men's
+# TEST gives up +0.00105 (CI [-0.00068, +0.00278], noise) while club-mixed
+# takes -0.00243 and college -0.00201, both CIs excluding zero. Weighted TEST
+# 0.45761 -> 0.45685. No division moves significantly the wrong way.
+#
+# THE PROVISIONAL WINDOW EARNS ITS PLACE, and it is not close. Swept at the
+# selected config, weighted VAL against the published point:
+#   multiplier   1      2      3      4     [6]     8      12
+#                +.0297 +.0154 +.0071 +.0025  —    +.0036 +.0231
+#   games        4      6      10    [14]    20     30     50
+#                +.0031 +.0014 +.0001  —    +.0007 +.0027 +.0071
+#   shape        cliff  linear exp   [hyperbolic]
+#                +.0092 +.0087 +.0039  —
+# Turning it OFF (multiplier 1) costs 0.0297 — twenty times the entire
+# descent's gain, and the single largest effect of any knob in this file.
+# M=6 and N=14 are interior optima and hyperbolic beats every other shape.
+#
+# Worth holding both facts at once: the same 6x window is what strands players
+# (see low_info_anchor — Alexander Vencill's whole 1,100-Elo hole was dug
+# inside it). It is simultaneously the most valuable mechanism in the model
+# and the source of its worst pathology. The answer is the anchor, not removal.
+#
+# low_info_anchor 0.01 -> 0.02, forced by tau. A flatter softmax pushes every
+# player's share toward an equal one, which is exactly the quantity the anchor
+# scales on, so at tau=900 the old 0.01 went slack: stranded players went
+# 54 -> 120 and the floor -554 -> 477. At 0.02 the anchor is both stronger and
+# CHEAPER than it was at tau=600 — 36 stranded, floor 657, and weighted VAL
+# actually improves (0.45930 -> 0.45917). Re-check this whenever tau moves.
+#
+# home_advantage was swept as a diagnostic and NOT adopted, though it now wins
+# on the numbers: 15 scores VAL 0.45784 against 0.45930 at zero, and TEST
+# 0.45492 against 0.45679. It was worthless on the club-only corpus and is
+# worth ~0.0015 on this one. The objection is unchanged and is not about the
+# score: games.home_id is the team USAU lists first, which is the seed, so the
+# knob imports USAU's own judgement into a model meant to rate teams from
+# results alone and makes every prediction depend on schedule listing order.
+# Adopt it only as a deliberate decision to accept that.
+PUBLISHED = dict(tau=900.0, involvement_credit=False,
+                 involvement_shrink=1.0, stat_transfer_beta=8.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=14,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
-                 low_info_anchor=0.01,
-                 division_scale={"club": 260.0, "college": 260.0,
+                 low_info_anchor=0.02,
+                 division_scale={"club-men": 260.0, "college": 260.0,
                                  "college-d3": 260.0, "club-mixed": 260.0,
                                  "club-women": 200.0},
-                 division_bases={"club": 1500.0, "college": 1350.0,
+                 division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0})
 # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
@@ -448,13 +505,13 @@ PUBLISHED = dict(tau=600.0, involvement_credit=False,
 # now — a binary flag sent every D-III event back to "club". Codes are
 # positional: history.json stores them per event, player_elo.csv packs them
 # into a bitmask, and the site's DIVLABEL mirrors them. APPEND, never reorder.
-DIVCODE = {"club": 0, "college": 1, "college-d3": 2,
+DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "club-mixed": 3, "club-women": 4}
 # Divisions the team tables cover, in display order. College is excluded: a
 # college roster is a season-long squad rather than an event entry, so
 # "the roster it last played" does not mean the same thing there, and the
 # three roster bases the tables are built on would not be comparable.
-TEAM_DIVISIONS = ["club", "club-mixed", "club-women"]
+TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
@@ -466,7 +523,7 @@ TEAM_DIVISIONS = ["club", "club-mixed", "club-women"]
 FULL_SQUAD_FRACTION = 0.8
 
 
-def best_rosters(con, season: int, model, division: str = "club"):
+def best_rosters(con, season: int, model, division: str = "club-men"):
     """club key -> player_ids: the club's highest-rated FULL squad.
 
     "Best version" in the sense of the strongest lineup a club has actually
@@ -480,7 +537,7 @@ def best_rosters(con, season: int, model, division: str = "club"):
                ev.name, ev.start_date, et.event_team_id
         FROM event_teams et
         JOIN events ev ON ev.event_id = et.event_id
-        WHERE ev.season = ? AND COALESCE(ev.division, 'club') = ?
+        WHERE ev.season = ? AND COALESCE(ev.division, 'club-men') = ?
         ORDER BY ev.start_date
     """, (season, division)).fetchall()
     rosters, clubs = load_maps(con)
@@ -519,7 +576,7 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
     onto. That is one flat table for the whole corpus, not one per subject.
     """
     evinfo = {r[0]: r[1:] for r in con.execute(
-        "SELECT event_id, name, start_date, season, COALESCE(division,'club') "
+        "SELECT event_id, name, start_date, season, COALESCE(division,'club-men') "
         "FROM events")}
     keep = {p for p, st in model.players.items()
             if not str(p).startswith("ghost:") and st.games >= HISTORY_MIN_GAMES}
@@ -764,7 +821,7 @@ def main(cfg: EloConfig | None = None):
     # turned out, not that they have a separate rating there.
     div_mask = defaultdict(int)
     for pid, division in con.execute("""
-            SELECT DISTINCT rp.player_id, COALESCE(ev.division, 'club')
+            SELECT DISTINCT rp.player_id, COALESCE(ev.division, 'club-men')
             FROM roster_players rp
             JOIN event_teams et USING (event_team_id)
             JOIN events ev ON ev.event_id = et.event_id"""):

@@ -74,9 +74,9 @@ def main(write_overrides: bool = False):
     games = bt.load_games(con)
     rosters, clubs = bt.load_maps(con)
     et_div = dict(con.execute("""
-        SELECT et.event_team_id, COALESCE(ev.division, 'club')
+        SELECT et.event_team_id, COALESCE(ev.division, 'club-men')
         FROM event_teams et JOIN events ev ON ev.event_id = et.event_id"""))
-    split_rosters = {etid: [(pid, et_div.get(etid, "club")) for pid in pids]
+    split_rosters = {etid: [(pid, et_div.get(etid, "club-men")) for pid in pids]
                      for etid, pids in rosters.items()}
     cfg = EloConfig()
     _, full = bt.replay("player", games, rosters, clubs, cfg)

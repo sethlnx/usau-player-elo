@@ -31,7 +31,7 @@ DB_PATH = Path(os.environ.get(
     "USAU_DB", Path(__file__).resolve().parent.parent / "data" / "usau.db"))
 
 DIVISIONS = {
-    "club": {"level": "Club-Men", "group": "Club - Men"},
+    "club-men": {"level": "Club-Men", "group": "Club - Men"},
     "club-women": {"level": "Club-Women", "group": "Club - Women"},
     "club-mixed": {"level": "Club-Mixed", "group": "Club - Mixed"},
     "college": {"level": "College-Men", "group": "College - Men"},
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS events (
     start_date TEXT, end_date TEXT,
     club_men_teams INTEGER,
     has_schedule INTEGER,
-    division TEXT NOT NULL DEFAULT 'club',
+    division TEXT NOT NULL DEFAULT 'club-men',
     complete INTEGER NOT NULL DEFAULT 0,
     UNIQUE (url, division)
 );
@@ -130,7 +130,7 @@ def parse_dates(dates_text: str) -> tuple[str | None, str | None]:
     return iso[0], iso[1]
 
 
-def upsert_event(con, season: int, ev: dict, division: str = "club") -> int:
+def upsert_event(con, season: int, ev: dict, division: str = "club-men") -> int:
     start, end = parse_dates(ev["dates"])
     group_name = DIVISIONS[division]["group"]
     group = next((g for g in ev["groups"] if group_name in g), "")
@@ -149,7 +149,7 @@ def upsert_event(con, season: int, ev: dict, division: str = "club") -> int:
                        (ev["url"], division)).fetchone()[0]
 
 
-def scrape_event(con, event_id: int, ev: dict, season: int, division: str = "club",
+def scrape_event(con, event_id: int, ev: dict, season: int, division: str = "club-men",
                  session=None) -> str:
     start, end = parse_dates(ev["dates"])
     # A schedule cached on or before the event's last day may be missing final
@@ -219,7 +219,7 @@ def _ensure_columns(con):
     """Older DBs predate some columns; add them with backfill-safe defaults."""
     cols = [r[1] for r in con.execute("PRAGMA table_info(events)")]
     if "division" not in cols:
-        con.execute("ALTER TABLE events ADD COLUMN division TEXT NOT NULL DEFAULT 'club'")
+        con.execute("ALTER TABLE events ADD COLUMN division TEXT NOT NULL DEFAULT 'club-men'")
     if "complete" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN complete INTEGER NOT NULL DEFAULT 0")
     if "slot" not in [r[1] for r in con.execute("PRAGMA table_info(games)")]:
@@ -272,7 +272,7 @@ def _mark_if_complete(con, event_id: int):
         con.execute("UPDATE events SET complete=1 WHERE event_id=?", (event_id,))
 
 
-def main(seasons: list[int], division: str = "club"):
+def main(seasons: list[int], division: str = "club-men"):
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     con = connect(DB_PATH)
     con.executescript(SCHEMA)
@@ -341,7 +341,7 @@ def main(seasons: list[int], division: str = "club"):
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
-    division = "club"
+    division = "club-men"
     if "--division" in argv:
         i = argv.index("--division")
         division = argv[i + 1]

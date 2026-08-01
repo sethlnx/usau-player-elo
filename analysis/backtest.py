@@ -40,7 +40,7 @@ def load_games(con) -> list[dict]:
     rows = con.execute("""
         SELECT g.event_id, g.game_key, g.date, g.time, g.home_id, g.away_id,
                g.home_score, g.away_score, ev.season, ev.start_date, ev.end_date,
-               COALESCE(ev.division, 'club'), g.stage
+               COALESCE(ev.division, 'club-men'), g.stage
         FROM games g JOIN events ev USING (event_id)
         WHERE g.home_id IS NOT NULL AND g.away_id IS NOT NULL
           AND g.home_score IS NOT NULL AND g.away_score IS NOT NULL
@@ -227,7 +227,7 @@ def load_maps(con):
         etid: norm_club(full, disp) + CLUB_SUFFIX.get(division, "")
         for etid, full, disp, division in con.execute(
             """SELECT et.event_team_id, et.full_name, et.display_name,
-                      COALESCE(ev.division, 'club')
+                      COALESCE(ev.division, 'club-men')
                FROM event_teams et JOIN events ev ON ev.event_id = et.event_id""")
     }
     return rosters, clubs
@@ -272,7 +272,7 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
         max_season = g["season"] if max_season is None else max(max_season, g["season"])
 
         season = g["season"]
-        division = g.get("division", "club")
+        division = g.get("division", "club-men")
         if model_kind == "player":
             home = rosters.get(g["home_id"]) or [f"ghost:{clubs.get(g['home_id'])}:{season}"]
             away = rosters.get(g["away_id"]) or [f"ghost:{clubs.get(g['away_id'])}:{season}"]
@@ -319,7 +319,7 @@ def metrics(records, seasons=None, divisions=None, max_month=None):
 
 def compare(cfg: EloConfig | None = None,
             eval_seasons=(2024, 2025),
-            eval_divisions=("club",)):
+            eval_divisions=("club-men",)):
     """Headline eval is on CLUB games: the question is whether adding college
     signal improves club prediction, so college games train but don't score.
 
@@ -393,7 +393,7 @@ def compare(cfg: EloConfig | None = None,
     # college bridge carries the prediction; college games sanity-check that
     # the shared pool isn't bought at the other division's expense.
     slices = [
-        ("club thru July", set(eval_seasons), {"club"}, 7),
+        ("club men's thru July", set(eval_seasons), {"club-men"}, 7),
         ("college", set(eval_seasons), {"college"}, None),
     ]
     print("\nslices (player models):")
@@ -407,40 +407,22 @@ def compare(cfg: EloConfig | None = None,
     return results
 
 
-def tune(train_seasons=(2021, 2022, 2023), divisions=("club",)):
-    """Grid search for the player model, scored on club games of the train
-    seasons. Adds the unified-model knobs (college base, rookie discount) to
-    the previously-tuned k/tau; offseason regression stays 0 (won before)."""
-    con = sqlite3.connect(DB_PATH)
-    games = load_games(con)
-    rosters, clubs = load_maps(con)
-    con.close()
-    best = None
-    for tau in (100, 150, 300):
-        for k in (40, 60, 80):
-            for college_base in (1200.0, 1300.0, 1400.0):
-                for delta in (0.0, 50.0, 100.0):
-                    cfg = EloConfig(
-                        tau=tau, k=k, offseason_regression=0.0,
-                        rookie_discount=delta,
-                        division_bases={"club": 1500.0, "college": college_base})
-                    records, _ = replay("player", games, rosters, clubs, cfg)
-                    m = metrics(records, set(train_seasons), set(divisions))
-                    key = m.get("logloss", float("inf"))
-                    marker = ""
-                    if best is None or key < best[0]:
-                        best = (key, cfg)
-                        marker = "  <-- best"
-                    print(f"tau={tau:<4} k={k:<3} col_base={college_base:<7} "
-                          f"delta={delta:<5} logloss={key:.4f} "
-                          f"acc={m.get('accuracy', 0):.4f}{marker}", flush=True)
-    print("\nbest config:", best[1])
-    return best[1]
+def tune(*_a, **_kw):
+    """Retired. Use analysis.descent.
+
+    This was a 4-axis grid over tau/k/college_base/rookie_discount scored on
+    2021-2023 club games. Every part of that is now wrong: the split is
+    FIT/VAL/TEST rather than train-on-the-eval-seasons, selection runs over
+    all five divisions rather than club men's, and the axes it did not cover
+    (the provisional window above all) turn out to matter far more than the
+    ones it did.
+    """
+    raise NotImplementedError(
+        "analysis.backtest.tune is retired — run `python -m analysis.descent` "
+        "(21 axes, FIT/VAL/TEST, pruned on paired VAL cost)")
 
 
 if __name__ == "__main__":
     if "--tune" in sys.argv:
-        best_cfg = tune()
-        compare(best_cfg)
-    else:
-        compare()
+        sys.exit("run `python -m analysis.descent` instead")
+    compare()

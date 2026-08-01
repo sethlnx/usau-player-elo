@@ -14,17 +14,17 @@ from . import fetch
 # /schedule/Women/Club-Women/ both serve, their unhyphenated forms 404. D-III
 # is not a separate path — USAU files it under the same College Men schedule,
 # so the split is by event NAME, done in build_db.
-DIVISION_PATHS = {"club": "Men/Club-Men", "college": "Men/CollegeMen",
+DIVISION_PATHS = {"club-men": "Men/Club-Men", "college": "Men/CollegeMen",
                   "college-d3": "Men/CollegeMen",
                   "club-women": "Women/Club-Women",
                   "club-mixed": "Mixed/Club-Mixed"}
 
 
-def schedule_url(event_url: str, division: str = "club") -> str:
+def schedule_url(event_url: str, division: str = "club-men") -> str:
     return event_url.rstrip("/") + "/schedule/" + DIVISION_PATHS[division] + "/"
 
 
-def fetch_schedule(event_url: str, division: str = "club", session=None,
+def fetch_schedule(event_url: str, division: str = "club-men", session=None,
                    refresh: bool = False) -> str | None:
     """Schedule HTML for the division, or None if the event has no page."""
     try:

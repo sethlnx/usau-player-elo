@@ -61,7 +61,7 @@ def main(n_teams: int = 15, n_players: int = 25):
         for i, (r, club, n) in enumerate(rated[:n_teams], 1):
             print(f"{i:>3}. {club:<34}{r:7.1f}  ({n} rostered)")
 
-    usau_table("club", "MEN'S CLUB")
+    usau_table("club-men", "MEN'S CLUB")
     usau_table("college", "COLLEGE")
 
     ufa_year = con.execute("SELECT max(year) FROM ufa_teams").fetchone()[0]

@@ -361,9 +361,9 @@ def run(half_life=HALF_LIFE, window=WINDOW_DAYS, quick=False):
             print(f"  [{n}/{len(dates)}] {date.fromordinal(d)}", flush=True)
 
     train = [(diff, o) for s, dv, _dt, diff, o in raw
-             if s in TRAIN_SEASONS and dv == "club"]
+             if s in TRAIN_SEASONS and dv == "club-men"]
     if not train:
-        train = [(diff, o) for _s, dv, _dt, diff, o in raw if dv == "club"]
+        train = [(diff, o) for _s, dv, _dt, diff, o in raw if dv == "club-men"]
     scale = fit_scale(train)
     print(f"\nlogistic scale fit on {TRAIN_SEASONS} club: {scale}", flush=True)
     records = [(s, dv, dt, _prob(diff, scale), o) for s, dv, dt, diff, o in raw]
@@ -371,17 +371,17 @@ def run(half_life=HALF_LIFE, window=WINDOW_DAYS, quick=False):
     header = f"{'slice':<28}{'n':>7}{'accuracy':>10}{'brier':>8}{'logloss':>9}"
     print("\nUSAU-form player batch re-rating\n" + header + "\n" + "-" * len(header))
     for label, ss, dd in [
-        ("club 2024-25 (holdout)", {2024, 2025}, {"club"}),
-        ("club 2024", {2024}, {"club"}),
-        ("club 2025", {2025}, {"club"}),
-        ("club 2021-23 (train)", set(TRAIN_SEASONS), {"club"}),
+        ("club 2024-25 (holdout)", {2024, 2025}, {"club-men"}),
+        ("club 2024", {2024}, {"club-men"}),
+        ("club 2025", {2025}, {"club-men"}),
+        ("club 2021-23 (train)", set(TRAIN_SEASONS), {"club-men"}),
         ("college 2024-25", {2024, 2025}, {"college"}),
     ]:
         m = metrics(records, ss, dd)
         if m["n"]:
             print(f"{label:<28}{m['n']:>7}{m['accuracy']:>10.4f}"
                   f"{m['brier']:>8.4f}{m['logloss']:>9.4f}", flush=True)
-    m = metrics(records, {2024, 2025}, {"club"}, max_month=7)
+    m = metrics(records, {2024, 2025}, {"club-men"}, max_month=7)
     if m["n"]:
         print(f"{'club 2024-25 thru July':<28}{m['n']:>7}{m['accuracy']:>10.4f}"
               f"{m['brier']:>8.4f}{m['logloss']:>9.4f}", flush=True)

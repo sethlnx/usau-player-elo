@@ -50,7 +50,7 @@ AMBIGUITY_REPORT = DB_PATH.parent / "ambiguities.csv"
 # so "has played men's" is a division fact, not an inference. Mixed belongs to
 # neither: it is the bridge, and a mixed player's group is read off the
 # Pronouns column USAU publishes on the roster page.
-MENS_DIVISIONS = {"club", "college", "college-d3"}
+MENS_DIVISIONS = {"club-men", "college", "college-d3"}
 WOMENS_DIVISIONS = {"club-women"}
 MIXED_DIVISIONS = {"club-mixed"}
 

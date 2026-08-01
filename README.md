@@ -177,8 +177,8 @@ first number would look broken; reporting only the second would hide the
 tournament.
 
 The per-game number is the CLUB's move even in a player panel, and it is
-labelled as such. The engine amplifies each game's delta by where a man sits in
-his provisional window, so teammates do not move together: Tyler Monroe took
+labelled as such. The engine amplifies each game's delta by where a player sits in
+their provisional window, so teammates do not move together: Tyler Monroe took
 `+64` out of the U.S. Open weekend his club rated `+55` for. His own total is
 the Δ on the row; recovering his per-game share would mean re-deriving the
 engine in JavaScript, which is exactly what this page refuses to do.
@@ -244,7 +244,7 @@ the reason in the data notes below: display names are not unique.
   published rankings exclude them; the fully intermingled variant lives in
   `data/*_elo_intermingled.csv`.
 - `analysis/` — backtest (headline eval on club; slices for early-club and
-  college), tuning grid, CSV exports, and `bridge_audit.py` — ranks bridge
+  college), the `descent.py` selection harness, CSV exports, and `bridge_audit.py` — ranks bridge
   links by false-merge suspicion (height contradictions across every division
   the bridge spans, how far merging moved the rating against a replay with
   every cross-division link severed, geography); `--write-overrides`
@@ -309,9 +309,11 @@ the reason in the data notes below: display names are not unique.
   `offseason_regression` at 0 nothing pulls him back. Whatever the 6x
   provisional window did in his first 14 games was permanent: 340 players with
   100+ games sat below 900 Elo, 13 below zero, one of them on a 54-46 record
-  recovering at +0.78 Elo/game. `low_info_anchor` (0.01) decays such a rating
+  recovering at +0.78 Elo/game. `low_info_anchor` (0.02) decays such a rating
   toward its division base in proportion to how little weight it carries,
-  which cuts that to 54 and a floor of +554 for +0.00141 club TEST logloss.
+  which cuts that to 36 and a floor of +657. Re-check it whenever tau moves:
+  a flatter softmax pushes every share toward equal, which is what the anchor
+  scales on, so tau 600 -> 900 made 0.01 go slack (54 stranded -> 120).
   Note what this says about the selection protocol: deleting all 340 from
   every roster moved TEST by <=0.0012, so logloss could not see them at all.
   It is the one published knob chosen against a pathology rather than a score.
@@ -358,20 +360,47 @@ the reason in the data notes below: display names are not unique.
   three parameters, each scoring well only while the ratings knew nothing.
   Print a candidate's PER-SEASON gain: helping only 2017-2019 and decaying
   toward zero is the signature of a cold-start artifact.
-- TEST 2024-25 club: accuracy 0.7855, Brier 0.1465, logloss 0.4511 — against
-  0.7625 for team-level Elo with carryover and 0.7019 for a reimplementation
-  of USAU's own v2.0 algorithm. The weak spot is championship events, where
-  the model delivers 0.674 accuracy against the 0.76 its own probabilities
-  imply; more data at other tiers has not moved it.
+- Selection scores the n-weighted VAL logloss across ALL FIVE divisions, not
+  club men's alone — club men's is 19,682 of 90,284 games, so tuning global
+  knobs on it would let 78% of the corpus be collateral. Per-division bases
+  and scales are still scored on their own division's games.
+  `python -m analysis.descent` is the harness: 21 axes, 3 passes, every
+  surviving move dropped one at a time and kept only if reverting costs
+  >0.0003 VAL. The last run converged in two passes and pruned twelve of
+  thirteen improving moves as VAL noise.
+- **The provisional window is the most valuable mechanism in the model.**
+  Swept at the selected config, weighted VAL against the published point:
+  multiplier 1/2/3/4/[6]/8/12 gives +.0297/+.0154/+.0071/+.0025/—/+.0036/
+  +.0231, games 4/6/10/[14]/20/30/50 gives +.0031/+.0014/+.0001/—/+.0007/
+  +.0027/+.0071, and hyperbolic beats exponential by .0039, linear by .0087,
+  cliff by .0092. Turning it OFF costs 0.0297 — twenty times the entire
+  descent's gain. It is also what strands players (see the `low_info_anchor`
+  caveat below): the most valuable mechanism here and the source of the worst
+  pathology are the same mechanism.
+- TEST 2024-25 club men's: accuracy 0.7797, Brier 0.1471, logloss 0.4515 —
+  against 0.7631 for team-level Elo with carryover and 0.7019 for a
+  reimplementation of USAU's own v2.0 algorithm. Weighted across all five
+  divisions, TEST logloss is 0.45685. The weak spot is championship events,
+  where the model delivers ~0.67 accuracy against the 0.76 its own
+  probabilities imply; more data at other tiers has not moved it.
+- `home_advantage` now WINS on the numbers and is still not adopted: 15 scores
+  VAL 0.45784 against 0.45930 at zero. It was worthless on the club-only
+  corpus and is worth ~0.0015 on this one. The objection is not about the
+  score — `games.home_id` is the team USAU lists first, which is the seed, so
+  the knob imports USAU's judgement into a results-only model and makes every
+  prediction depend on schedule listing order.
 - `lo90`/`hi90` bound CURRENT SKILL, not future movement, and they DO NOT
-  converge with games: `rating_sigma` is a flat 112, a ±184 band whether a
-  player has 50 games or 300. Split-half reads 108.9 / 109.7 / 112.5 / 115.1
-  at mean n = 63 / 97 / 145 / 215. The cause is structural: the hyperbolic
-  provisional multiplier never decays to 1, so every game still moves a
-  veteran, and `offseason_regression=0` removed the only pull toward an
-  anchor. That is the price of the configuration's predictive gain, and
-  `reg > 0` is the only lever that buys convergence back. Re-fit whenever the
-  update dynamics change — it is a property of the replay, not of the sport.
+  converge with games: `rating_sigma` is a flat 103, a ±169 band whether a
+  player has 50 games or 300. Split-half reads 103.4 / 102.1 / 104.1 / 102.4
+  at mean n = 35 / 71 / 139 / 241 — no trend across a 6.8x range. The cause is
+  structural: the hyperbolic provisional multiplier never decays to 1, so
+  every game still moves a veteran, and `offseason_regression=0` removed the
+  only pull toward an anchor (the descent has reg as an axis; it stayed at 0).
+  Re-fit whenever the update dynamics change — it is a property of the replay,
+  not of the sport. It is also ONE number for a population where the
+  uncertainty is plainly not uniform: bucketed by how much softmax weight a
+  player carries, split-half sd/2 runs 161 for the lowest-influence tenth
+  against 101 for the highest.
 - Join `player_elo.csv` on `player_id`, never on `player`. Names that survive
   as separate identities are still split per club, so display names are not
   unique. Four names also contain commas (`Gregory Plaia, Jr`), so parse the
