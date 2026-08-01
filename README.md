@@ -301,6 +301,20 @@ the reason in the data notes below: display names are not unique.
   Clamping never moves a game later, so no stat event reaches the model earlier
   than before. Held-out club accuracy moved 0.7662 -> 0.7667 (published
   config); the fix is for correctness, not for the score.
+- **A rating is only as identified as the player's influence on their team.**
+  Softmax decides how much a player moves the team rating; the delta is
+  applied equally. At the bottom those come apart — a player 2,300 Elo below
+  his roster's best carries 0.4% of a 25-man team rating, so results say
+  nothing about him while he keeps absorbing team-level noise, and with
+  `offseason_regression` at 0 nothing pulls him back. Whatever the 6x
+  provisional window did in his first 14 games was permanent: 340 players with
+  100+ games sat below 900 Elo, 13 below zero, one of them on a 54-46 record
+  recovering at +0.78 Elo/game. `low_info_anchor` (0.01) decays such a rating
+  toward its division base in proportion to how little weight it carries,
+  which cuts that to 54 and a floor of +554 for +0.00141 club TEST logloss.
+  Note what this says about the selection protocol: deleting all 340 from
+  every roster moved TEST by <=0.0012, so logloss could not see them at all.
+  It is the one published knob chosen against a pathology rather than a score.
 - `player_id` is NOT stable across `identity.resolve` runs: it drops and
   rebuilds the `players` table, and ids fall out of an unordered scan. Join
   `player_elo.csv` to a DB from the same run, and re-export after re-resolving.

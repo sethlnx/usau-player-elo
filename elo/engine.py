@@ -80,6 +80,34 @@ class EloConfig:
     involvement_clamp: tuple = (0.25, 3.0)
     stat_transfer_beta: float = 0.0     # B: Elo per net-stat vs team mean (0 = off)
     stat_transfer_clamp: float = 60.0   # per-event cap on a B transfer
+    # Fraction of the gap to base closed per game for a player carrying NO
+    # softmax weight, scaled by how far below an equal share they sit.
+    #
+    # Softmax decides how much a player INFLUENCES the team rating; the delta
+    # is applied equally regardless. Those two come apart at the bottom: a
+    # player 2,300 Elo below his roster's best carries 0.4% of a 25-man team
+    # rating against an equal share of 4%, so the results say essentially
+    # nothing about him, yet he keeps absorbing team-level noise. With
+    # offseason_regression at 0 there is nothing to pull him back, so wherever
+    # the 6x provisional window left him is where he stays: 340 players with
+    # 100+ games sat below 900 and 13 below zero, one of them on a 54-46
+    # record whose rating moved +0.78/game across 100 games.
+    #
+    # No influence means no evidence, so the rating decays to its prior at a
+    # rate set by how little influence it has. Selection could not settle this
+    # on logloss — deleting all 340 from every roster moves TEST by <=0.0012,
+    # so the objective is blind to them. It is chosen against the pathology
+    # instead, at the measured price:
+    #   pull   Vencill   100+g below 900   floor   d club TEST
+    #   0      209       340               -315     —
+    #   0.005  768       149               +227    +0.00068
+    #   0.01   1062       54               +554    +0.00141
+    #   0.02   1321       10               +779    +0.00298
+    #   0.04   1466        0               +953    +0.00584
+    # Published at 0.01. Other divisions are free there (mixed -0.00006,
+    # college 0.00000, D-III +0.00015, women's +0.00053) and the top of the
+    # table does not move (Joe White 3194 -> 3199).
+    low_info_anchor: float = 0.0
 
 
 @dataclass
@@ -216,6 +244,21 @@ class PlayerElo:
             return 1.0 + (m - 1.0) * n / (n + games)
         raise ValueError(f"unknown provisional_shape {shape!r}")
 
+    def _softmax_shares(self, roster: list) -> list:
+        """Each player's share of the team rating, 1.0 being an equal share.
+
+        Read BEFORE the delta lands, so it describes the roster the game was
+        actually predicted from.
+        """
+        n = len(roster)
+        if n < 2 or math.isinf(self.cfg.tau):
+            return [1.0] * n
+        ratings = [self._state(p).rating for p in roster]
+        m = max(ratings)
+        weights = [math.exp((r - m) / self.cfg.tau) for r in ratings]
+        total = sum(weights)
+        return [w * n / total for w in weights]
+
     def _apply(self, roster: list, delta: float, division: str):
         if self.cfg.involvement_credit and len(roster) > 1:
             usages = [self._usage(self._state(p)) for p in roster]
@@ -223,10 +266,17 @@ class PlayerElo:
             mults = [u / mean_u for u in usages]   # roster mean stays exactly 1
         else:
             mults = [1.0] * len(roster)
-        for pid, m in zip(roster, mults):
+        anchor = self.cfg.low_info_anchor
+        shares = self._softmax_shares(roster) if anchor > 0 else None
+        for i, (pid, m) in enumerate(zip(roster, mults)):
             st = self._state(pid)
             prov = self.provisional(st.games)
             st.rating += delta * m * prov
+            # Only ever pulls players BELOW an equal share: someone carrying
+            # the team rating is measured by the result and needs no prior.
+            if shares is not None and shares[i] < 1.0:
+                base = self.cfg.division_bases.get(division, self.cfg.base_rating)
+                st.rating += anchor * (1.0 - shares[i]) * (base - st.rating)
             st.games += 1
             st.division = division
 

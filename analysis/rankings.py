@@ -395,11 +395,48 @@ def latest_rosters(con, season: int, basis: str = "completed",
 # club TEST 2024-25 moves 0.45140 -> 0.44977, paired 90% CI
 # [-0.00412, +0.00086] — a CI spanning zero. Two divisions were added to the
 # ratings without moving the division the site was built on.
+# low_info_anchor 0.01, and it is the first knob here NOT chosen on logloss —
+# it costs logloss. See EloConfig.low_info_anchor for the mechanism and the
+# full price list.
+#
+# The pathology: softmax decides a player's INFLUENCE on the team rating while
+# the delta is applied equally, and at the bottom those come apart completely.
+# A player 2,300 Elo below his roster's best carries 0.4% of a 25-man team
+# rating, so results say nothing about him, but he keeps absorbing team-level
+# noise — and with offseason_regression at 0 nothing pulls him back. Whatever
+# the 6x provisional window did in his first 14 games is permanent. Alexander
+# Vencill went 10-27 as a college B-teamer, fell 1251 -> 157 at -30/game, then
+# went 54-46 over 100 games and recovered +0.78/game: 340 players with 100+
+# games sat below 900 Elo and 13 below zero.
+#
+# Why the protocol at the top of this file could not catch it: delete all 340
+# from every roster and TEST logloss moves by at most 0.0012 in any division.
+# They are inert. A rating no objective can see is unidentified, not low, and
+# selecting on logloss will happily publish nonsense for it. Any future knob
+# governing players who do not move the team rating needs the same treatment —
+# judge it on the pathology, and state the logloss it costs.
+#
+# The price at 0.01, paired 90% CI, TEST 2024-25:
+#   club        0.44977 -> 0.45117  +0.00141  [+0.00102, +0.00179]
+#   club-mixed  0.46755 -> 0.46749  -0.00006  [-0.00037, +0.00026]
+#   club-women  0.37539 -> 0.37591  +0.00053  [+0.00007, +0.00100]
+#   college     0.47854 -> 0.47854  +0.00000  [-0.00024, +0.00023]
+#   college-d3  0.45754 -> 0.45769  +0.00015  [-0.00021, +0.00050]
+# Club is a real cost, not noise. It buys 340 stranded ratings down to 54, a
+# floor of +554 instead of -315, and leaves the top of the table alone (Joe
+# White 3194 -> 3199, Kameryn Groom 3104 -> 3098).
+#
+# The rejected alternative was crediting the delta in PROPORTION to softmax
+# weight, which makes accountability match influence and sounds righter than
+# this does. It is a disaster: club TEST 0.4498 -> 0.4737. Weighting the
+# credit starves the model of information about most of a roster, and the
+# roster IS the model. Equal credit stays.
 PUBLISHED = dict(tau=600.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=3.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=14,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
+                 low_info_anchor=0.01,
                  division_scale={"club": 260.0, "college": 260.0,
                                  "college-d3": 260.0, "club-mixed": 260.0,
                                  "club-women": 200.0},
