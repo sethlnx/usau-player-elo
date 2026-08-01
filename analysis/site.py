@@ -213,12 +213,16 @@ def build():
         with open(loo_path, newline="") as f:
             loo = {r["player_id"]: float(r["loo"]) for r in csv.DictReader(f)}
 
+    # Thresholds, not the raw sign. Since roster_shrink compressed the table,
+    # 541 of the measured 1,000 sit inside |loo| < 0.001 — genuinely
+    # indistinguishable, and flagging on `loo <= 0` would mark 394 players on
+    # the strength of noise. Only a clearly negative reading is called out.
     def loo_code(pid):
-        """2 supported, 1 weak, 0 not load-bearing, -1 not measured."""
+        """2 supported, 1 indistinguishable, 0 not load-bearing, -1 unmeasured."""
         v = loo.get(pid)
         if v is None:
             return -1
-        return 2 if v >= 0.004 else 1 if v > 0 else 0
+        return 0 if v <= -0.002 else 2 if v >= 0.003 else 1
 
     payload = {
         "generated": date.today().isoformat(),
@@ -730,14 +734,13 @@ $('#cdiv').onchange = drawClubs;
    printed beside it understates the uncertainty, and saying so is more honest
    than inventing a wider one — converting a logloss delta into an Elo
    interval is not something this corpus can calibrate. */
-const LOOCLASS = {0: 'unsupported', 1: 'weaksup', 2: '', '-1': ''};
+const LOOCLASS = {0: 'unsupported', 1: '', 2: '', '-1': ''};
 const LOOTIP = {
   0: 'Removing this player from every roster does NOT hurt the prediction of ' +
      'their own teams\u2019 games — the results are explained at least as well ' +
-     'without this rating. Treat the number as unpinned: the band shown is the ' +
-     'population figure and is too narrow here.',
-  1: 'Only weakly load-bearing — removing this player barely changes how well ' +
-     'their teams\u2019 games are predicted.',
+     'without this rating. Treat the number as unpinned.',
+  1: 'Measured, and the effect is too small to call either way: the games ' +
+     'neither clearly support this rating nor clearly contradict it.',
   2: 'Load-bearing — removing this player measurably degrades the prediction ' +
      'of their own teams\u2019 games, so the rating carries real information.',
   '-1': 'Not measured — leave-one-out covers the top 1,000 by rating.'

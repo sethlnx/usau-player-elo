@@ -108,6 +108,38 @@ class EloConfig:
     # college 0.00000, D-III +0.00015, women's +0.00053) and the top of the
     # table does not move (Joe White 3194 -> 3199).
     low_info_anchor: float = 0.0
+    # Per-game pull of every rostered player toward the team rating they just
+    # played under. This is the answer to within-roster identification, and it
+    # is FREE at the team level by construction: T is the softmax-weighted
+    # mean, so
+    #     dT = sum_i w_i * lam * (T - r_i) = lam * (T - sum_i w_i r_i) = 0.
+    # Team strength is untouched to first order; only the SPREAD inside the
+    # roster is compressed. That is exactly the quantity the games cannot see.
+    #
+    # Why it is needed: the delta is applied to every rostered player equally,
+    # so nothing in the update distinguishes teammates. Any spread that
+    # satisfies the weighted mean is equally consistent with every result, and
+    # the spread we ended up with came from provisional-window history and
+    # stat transfers rather than from evidence. Left alone it ran away — 219
+    # of the top 1,000 ratings were anti-predictive (dropping the player from
+    # every roster did not hurt their own teams' predictions), the best player
+    # read 3444 against a best club of 2528, and corr(club, player) over the
+    # top 300 was 0.697. A player is as good as their team until playing
+    # somewhere else proves otherwise; lam sets how fast that prior applies
+    # and roster turnover is what overcomes it.
+    #
+    # REJECTED, with numbers, because it is the obvious idea and it is wrong:
+    # crediting the delta in proportion to softmax weight, m_i ∝ w_i^a
+    # renormalised so sum_i w_i m_i = 1 (a=0 is equal credit). It makes both
+    # the score AND the pathology worse, monotonically —
+    #     a     0        0.25     0.5      1.0      1.5
+    #     VAL   .45917   .46010   .46122   .46429   .46856
+    #     top   3444     3483     3522     3810     4074
+    # Paying the star more when the team wins accelerates the runaway. The
+    # earlier, cruder version of that idea (unnormalised, so every update
+    # overshot by up to 1.4x on a concentrated roster) cost 0.024 and was
+    # rejected for the wrong reason; this is the right one.
+    roster_shrink: float = 0.0
 
 
 @dataclass
@@ -267,11 +299,17 @@ class PlayerElo:
         else:
             mults = [1.0] * len(roster)
         anchor = self.cfg.low_info_anchor
+        lam = self.cfg.roster_shrink
         shares = self._softmax_shares(roster) if anchor > 0 else None
+        # Read BEFORE anyone moves, so every player shrinks toward the same
+        # team rating the game was predicted from.
+        team = self.team_rating(roster) if lam > 0 and len(roster) > 1 else None
         for i, (pid, m) in enumerate(zip(roster, mults)):
             st = self._state(pid)
             prov = self.provisional(st.games)
             st.rating += delta * m * prov
+            if team is not None:
+                st.rating += lam * (team - st.rating)
             # Only ever pulls players BELOW an equal share: someone carrying
             # the team rating is measured by the result and needs no prior.
             if shares is not None and shares[i] < 1.0:

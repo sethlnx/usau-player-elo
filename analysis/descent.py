@@ -50,6 +50,7 @@ PRUNE_EPS = 0.0003
 
 # Grids. Each axis is (name, values); dict-valued knobs address one key.
 AXES = [
+    ("roster_shrink",          [0.0, 0.003, 0.006, 0.01, 0.015, 0.025]),
     ("k",                      [32.0, 40.0, 44.0, 48.0, 56.0, 64.0]),
     ("tau",                    [400.0, 500.0, 600.0, 700.0, 900.0, math.inf]),
     ("provisional_multiplier", [1.0, 2.0, 3.0, 4.0, 6.0, 8.0]),
@@ -58,7 +59,7 @@ AXES = [
     ("offseason_regression",   [0.0, 0.03, 0.07, 0.12, 0.20]),
     ("mov_norm",               [5.0, 6.0, 7.0, 8.0, 10.0]),
     ("use_mov",                [True, False]),
-    ("stat_transfer_beta",     [0.0, 2.0, 3.0, 5.0, 8.0]),
+    ("stat_transfer_beta",     [0.0, 2.0, 3.0, 5.0, 8.0, 12.0]),
     ("stat_transfer_clamp",    [40.0, 60.0, 90.0]),
     ("involvement_credit",     [False, True]),
     ("involvement_shrink",     [1.0, 4.0]),

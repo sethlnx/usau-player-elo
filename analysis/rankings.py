@@ -61,30 +61,29 @@ from elo.engine import EloConfig
 #   + college 2017-2020 backfill, k=48   113.0 (flat)
 #   + D-III division, d3 base 1250       112.0 (flat)
 #   + mixed/women, tau=900, beta=8       103.0 (flat)
+#   + roster_shrink 0.015, tau=500       sqrt(470^2/n + 49^2)
 #
-# The 1/n term stays exactly zero. Split-half reads 103.4 / 102.1 / 104.1 /
-# 102.4 at mean n = 35 / 71 / 139 / 241 — no trend across a 6.8x range in
-# games played, on 43,000 players. Same structural finding as before: a
-# rating's uncertainty does not fall with experience, because hyperbolic never
-# decays to 1 and offseason_regression=0 leaves nothing pulling toward an
-# anchor. Anyone wanting convergence pays for it with reg > 0, and the descent
-# priced that: reg is an axis and it stayed at 0.
+# THE 1/n TERM IS BACK, and this is the first configuration in that history
+# where a rating converges with experience. Split-half reads 88.3 / 77.2 /
+# 63.6 / 48.5 at mean n = 38 / 71 / 139 / 241 — a real decline across a 6.3x
+# range, on 39,000 players, where every previous config was flat.
 #
-# 112 -> 103 is not the ratings getting better pinned down in absolute terms.
-# tau 600 -> 900 flattens the softmax, which inflates the whole scale (top
-# rating 3199 -> 3444), so the band shrank while the ruler grew — roughly a
-# 15% tightening once expressed as a fraction of the spread. The honest band
-# is a flat +/-169.
+# roster_shrink is the reason. Every earlier fit was flat because nothing
+# pulled a rating toward anything: hyperbolic never decays to 1 and
+# offseason_regression sits at 0, so a veteran's rating was still a random
+# walk. Shrinking each player toward the team rating they just played under
+# supplies the missing anchor, and it supplies it CONTINUOUSLY rather than
+# once between seasons, so more games now genuinely pin a player down. The
+# floor is 49 rather than the ~50 of the old cliff-shaped fits, and the band
+# runs +/-163 at 30 games down to +/-92 at 300.
 #
-# CAVEAT this fit does NOT capture: it is one number for everyone, and the
-# uncertainty is plainly not uniform. Bucketing by how much softmax weight a
-# player carries in their own team's rating, split-half sd/2 runs 161 for the
-# lowest-influence tenth against 101 for the highest. A player who never moves
-# their team's rating is barely measured at all (see low_info_anchor), and
-# this column says otherwise. Fixing it means a sigma that takes influence as
-# an argument, not just games.
+# CAVEAT this fit still does NOT capture: it is one number per game count, and
+# identifiability is not uniform at a given count — see analysis/identify.py,
+# which measures per-player whether a rating is load-bearing at all. Under
+# this config 2 of a 12-player probe are still not, down from 5. A sigma
+# taking identifiability as an argument remains the honest end state.
 def rating_sigma(games: int) -> float:
-    return 103.0
+    return math.sqrt(470.0 ** 2 / max(games, 1) + 49.0 ** 2)
 
 
 Z90 = 1.645  # two-sided 90% interval
@@ -488,14 +487,53 @@ def latest_rosters(con, season: int, basis: str = "completed",
 # knob imports USAU's own judgement into a model meant to rate teams from
 # results alone and makes every prediction depend on schedule listing order.
 # Adopt it only as a deliberate decision to accept that.
-PUBLISHED = dict(tau=900.0, involvement_credit=False,
+# ROSTER SHRINK, and it changes more than one number. The overrating problem
+# was structural: the delta is applied to every rostered player EQUALLY, so
+# nothing in the update distinguishes teammates and any within-roster spread
+# is equally consistent with every result. The spread we had came from
+# provisional history and stat transfers, and it ran away — 219 of the top
+# 1,000 ratings were anti-predictive, the best player read 3444 against a best
+# club of 2528, and corr(club rating, player rating) over rostered 2026
+# players was 0.697. See EloConfig.roster_shrink for the mechanism and for the
+# credit-reallocation family that was tried first and made both the score and
+# the pathology monotonically worse.
+#
+# Re-running the full 22-axis descent with it as an axis moved four knobs, and
+# two of them are corrections to choices that were compensating for its
+# absence:
+#   roster_shrink       0 -> 0.015   +0.00389 on reversion, by far the largest
+#   tau               900 -> 500     +0.00102   was flattening the softmax to
+#                                    spread teammates the shrink now handles
+#   provisional_games  14 -> 10      +0.00045   less head start to bank
+#   scale club-mixed  260 -> 220     +0.00069
+#
+# Every division improves on TEST, which has not happened before:
+#   club-men    0.45222 -> 0.45193      college     0.47654 -> 0.47425
+#   club-mixed  0.46506 -> 0.46444      college-d3  0.46012 -> 0.45591
+#   club-women  0.37786 -> 0.37663      weighted    0.45685 -> 0.45389
+#
+# low_info_anchor RETIRED (0.02 -> 0.0). It existed to rescue players stranded
+# at the bottom, and paid logloss to do it. The shrink pulls toward the team
+# rating from BOTH sides, so it does that job for free and better: stranded
+# players (100+ games under 900 Elo) go 36 -> 3, the floor rises 657 -> 821,
+# and there is no longer a negative rating anywhere in the corpus. Keeping the
+# anchor on top would cost 0.0007 TEST to convert 3 stranded into 0; not worth
+# a second mechanism. The knob stays in EloConfig, unused, because the
+# reasoning behind it is still the clearest statement of the failure mode.
+#
+# What it does to the table: top rating 3444 -> 2645 against a best club of
+# 2371, corr 0.697 -> 0.857, and the #1 player is now Adam Rees of Revolver —
+# the best player on the best club, which is what a sane rating system should
+# produce and what this one did not. Travis Dunn, the case that started this,
+# goes 3322 -> 2493 and his leave-one-out flips -0.0036 -> +0.0053.
+PUBLISHED = dict(tau=500.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=8.0,
                  provisional_shape="hyperbolic",
-                 provisional_multiplier=6.0, provisional_games=14,
+                 provisional_multiplier=6.0, provisional_games=10,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
-                 low_info_anchor=0.02,
+                 low_info_anchor=0.0, roster_shrink=0.015,
                  division_scale={"club-men": 260.0, "college": 260.0,
-                                 "college-d3": 260.0, "club-mixed": 260.0,
+                                 "college-d3": 260.0, "club-mixed": 220.0,
                                  "club-women": 200.0},
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,

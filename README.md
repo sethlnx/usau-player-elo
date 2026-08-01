@@ -380,13 +380,13 @@ the reason in the data notes below: display names are not unique.
   +.0231, games 4/6/10/[14]/20/30/50 gives +.0031/+.0014/+.0001/—/+.0007/
   +.0027/+.0071, and hyperbolic beats exponential by .0039, linear by .0087,
   cliff by .0092. Turning it OFF costs 0.0297 — twenty times the entire
-  descent's gain. It is also what strands players (see the `low_info_anchor`
-  caveat below): the most valuable mechanism here and the source of the worst
-  pathology are the same mechanism.
-- TEST 2024-25 club men's: accuracy 0.7797, Brier 0.1471, logloss 0.4515 —
+  descent's gain. It is also what gave the runaway its head start, which is
+  why `roster_shrink` rather than removal is the answer: the most valuable
+  mechanism here and the source of the worst pathology are the same one.
+- TEST 2024-25 club men's: accuracy 0.7841, Brier 0.1464, logloss 0.4501 —
   against 0.7631 for team-level Elo with carryover and 0.7019 for a
   reimplementation of USAU's own v2.0 algorithm. Weighted across all five
-  divisions, TEST logloss is 0.45685. The weak spot is championship events,
+  divisions, TEST logloss is 0.45389. The weak spot is championship events,
   where the model delivers ~0.67 accuracy against the 0.76 its own
   probabilities imply; more data at other tiers has not moved it.
 - `home_advantage` now WINS on the numbers and is still not adopted: 15 scores
@@ -395,42 +395,47 @@ the reason in the data notes below: display names are not unique.
   score — `games.home_id` is the team USAU lists first, which is the seed, so
   the knob imports USAU's judgement into a results-only model and makes every
   prediction depend on schedule listing order.
-- `lo90`/`hi90` bound CURRENT SKILL, not future movement, and they DO NOT
-  converge with games: `rating_sigma` is a flat 103, a ±169 band whether a
-  player has 50 games or 300. Split-half reads 103.4 / 102.1 / 104.1 / 102.4
-  at mean n = 35 / 71 / 139 / 241 — no trend across a 6.8x range. The cause is
-  structural: the hyperbolic provisional multiplier never decays to 1, so
-  every game still moves a veteran, and `offseason_regression=0` removed the
-  only pull toward an anchor (the descent has reg as an axis; it stayed at 0).
+- `lo90`/`hi90` bound CURRENT SKILL, not future movement, and they finally DO
+  converge with games: `rating_sigma` is `sqrt(470^2/n + 49^2)`, ±163 at 30
+  games narrowing to ±92 at 300. Split-half reads 88.3 / 77.2 / 63.6 / 48.5 at
+  mean n = 38 / 71 / 139 / 241. Every previous configuration in this project
+  was FLAT — nothing pulled a rating toward anything, since hyperbolic never
+  decays to 1 and `offseason_regression` is 0. `roster_shrink` supplies that
+  anchor continuously, so more games now genuinely pin a player down.
   Re-fit whenever the update dynamics change — it is a property of the replay,
   not of the sport. It is also ONE number for a population where the
   uncertainty is plainly not uniform: bucketed by how much softmax weight a
   player carries, split-half sd/2 runs 161 for the lowest-influence tenth
   against 101 for the highest.
-- **22% of the top 1,000 ratings are not load-bearing.** Drop a player from
-  every roster, replay, and score the games their own teams played: 219 of
-  1,000 are explained at least as well WITHOUT their rating. Travis Dunn
-  (3322, Nighthawk) reads -0.0036, against +0.0119 for Kameryn Groom. The page
-  marks those bands with a "?" rather than printing them as if measured.
-  The cause is structural: the game delta is applied to every rostered player
-  EQUALLY, so the only channels separating teammates are the provisional
-  window and stat transfers, and a rating can drift somewhere the games never
-  pin down. It shows up as a scale detachment — every top player sits 580-1240
-  above their own club, the best player reads 3399 against a best club of
-  2578, and corr(club Elo, player Elo) across the top 300 is only +0.378. A
-  club's rating is a softmax mean over 20+ people, so one star moves it ~150
-  and their own number is barely constrained by results. It gets worse the
-  flatter the weighting: top rating runs 3205 / 3296 / 3444 / 3579 / 3727 at
-  tau 400 / 600 / 900 / 1500 / inf. Read a player's position as "how far above
-  their own teammates", not as a club-comparable number.
-  Two cheaper measures were tried and both FAIL, which is why `identify.py`
-  costs a replay per player: split-half is flat at 101-110 across softmax
-  share, gap over roster median and teammate count, because both halves are
-  reproducibly biased the same way; a static recompute using final ratings
-  correlates only +0.237 with the real thing and gets the sign wrong on the
-  two worst cases. No band widening is published off this, because converting
-  a logloss delta into an Elo interval is not something this corpus can
-  calibrate — the flag says "unpinned", it does not claim how unpinned.
+- **Within-roster credit is the model's hardest problem, and `roster_shrink`
+  is the answer to it.** The game delta is applied to every rostered player
+  EQUALLY, so nothing in the update distinguishes teammates: any spread that
+  satisfies the team's weighted mean is equally consistent with every result.
+  The spread came from provisional history and stat transfers instead, and it
+  ran away. Before the fix: 219 of the top 1,000 ratings were anti-predictive
+  (dropping the player from every roster did not hurt their own teams'
+  predictions), the best player read 3444 against a best club of 2528, and
+  corr(club rating, player rating) was 0.697.
+  The fix shrinks every rostered player toward the team rating they just
+  played under, which is FREE at the team level by construction — T is the
+  softmax-weighted mean, so `sum_i w_i * lam * (T - r_i) = 0` and only the
+  spread moves. Top rating 3444 -> 2645 against a best club of 2371, corr
+  0.697 -> 0.857, and the #1 player became Adam Rees of Revolver: the best
+  player on the best club. It also improved every division's TEST logloss and
+  retired `low_info_anchor`, which had been paying logloss to rescue the
+  opposite tail.
+  The obvious alternative — pay the star more, `m_i` proportional to softmax
+  weight — is WRONG, and measurably: renormalised so the team rating still
+  moves by exactly the delta, VAL runs .45917 / .46010 / .46122 / .46429 /
+  .46856 at alpha 0 / 0.25 / 0.5 / 1 / 1.5 while the top rating climbs 3444 ->
+  4074. Paying the star more when the team wins accelerates the runaway.
+- `analysis/identify.py` still measures the residue per player: drop them from
+  every roster, replay, score their own teams' games. The page marks a band
+  whose rating is not load-bearing with a "?". Two cheaper measures were tried
+  and both FAIL: split-half is flat across softmax share, gap over roster
+  median and teammate count, because both halves are reproducibly biased the
+  same way; a static recompute off final ratings correlates +0.237 and gets
+  the sign wrong on the worst cases. Hence one replay per player, top 1,000.
 - Join `player_elo.csv` on `player_id`, never on `player`. Names that survive
   as separate identities are still split per club, so display names are not
   unique. Four names also contain commas (`Gregory Plaia, Jr`), so parse the
