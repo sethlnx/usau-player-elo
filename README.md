@@ -102,11 +102,23 @@ fall back to the union. Every name in the panel is itself a link, with a
 button works. A player below the 30-game floor has no rank or Elo to show and is
 listed as plain text: he was on the roster, but there is nothing to open.
 
-Rosters and affiliations ride inside `data/history.json`, which keeps the page a
-single file that works from `file://` — `fetch()` does not. That costs weight:
-10.5 MB raw, 3.7 MB gzipped, which is what Pages actually serves. Roster members
-are keyed on `(name, player_id)` pairs, never on name alone, for the reason in
-the data notes below: display names are not unique.
+**Every event row opens onto the games behind it.** The curve is one point per
+tournament, which is the right grain for a season and the wrong one for "why
+did Truck Stop drop 190 at Pro Elite Challenge East" — so clicking an event
+expands it into that weekend's games: stage, opponent (itself a link), W/L and
+score, with the record summarised. For a player they are the games of the club
+he turned out for, which is exactly what moved his rating: the engine applies a
+game's delta to every rostered player equally. Only games the model scored are
+listed, so an expanded event is the whole evidence for the Δ printed beside it
+— forfeits, cancellations and unseeded bracket slots never appear.
+
+Rosters, affiliations and all 58,007 scored games ride inside
+`data/history.json`, which keeps the page a single file that works from
+`file://` — `fetch()` does not. That costs weight: 11.7 MB raw, 4.0 MB gzipped,
+which is what Pages actually serves. The games are grouped by event and stored
+once each, not once per side, which is the difference between 1.1 MB and 2.2.
+Roster members are keyed on `(name, player_id)` pairs, never on name alone, for
+the reason in the data notes below: display names are not unique.
 
 ## Layout
 

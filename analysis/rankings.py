@@ -412,11 +412,16 @@ HISTORY_MIN_GAMES = 30
 def write_history(con, games, rosters, clubs, snaps, model, season):
     """Emit data/history.json — per-event rating trajectories for the drill-down.
 
-    Keyed on (subject, event) rather than (subject, game): a weekend tournament
-    is one point on the curve, which is how people remember a season and which
-    keeps the file to ~3 MB instead of ~12. `snaps` arrives already populated by
-    the on_game hook, so these are the SAME numbers the CSVs were written from
-    — a second replay could drift from the first if any config read changed.
+    Trajectories are keyed on (subject, event) rather than (subject, game): a
+    weekend tournament is one point on the curve, which is how people remember
+    a season and which keeps the file to ~3 MB instead of ~12. `snaps` arrives
+    already populated by the on_game hook, so these are the SAME numbers the
+    CSVs were written from — a second replay could drift from the first if any
+    config read changed.
+
+    The games behind each step ride along separately, grouped by event and
+    stored once each (see below), which is what the per-event dropdowns open
+    onto. That is one flat table for the whole corpus, not one per subject.
     """
     evinfo = {r[0]: r[1:] for r in con.execute(
         "SELECT event_id, name, start_date, season, COALESCE(division,'club') "
@@ -545,16 +550,47 @@ def write_history(con, games, rosters, clubs, snaps, model, season):
             prev = m
         best_out[key] = [evname, sd, enc]
 
+    # Individual game results, so an event in the drill-down opens onto the
+    # games behind it. Grouped by event and stored ONCE per game rather than
+    # once per side: a club's row filters its event's list on its own index,
+    # and a player's row does the same through the club he turned out for.
+    # Per-team-event storage would duplicate all 58,000 games for nothing.
+    #
+    # These are the games the REPLAY scored — load_games' filtered, date-clamped
+    # corpus — so an expanded event is exactly the evidence behind the rating
+    # step printed beside it. What USAU lists but the model never saw (forfeits,
+    # cancellations, an unseeded bracket slot) is absent by construction.
+    club_ord = sorted({c for g in games
+                       for c in (clubs.get(g["home_id"]), clubs.get(g["away_id"]))
+                       if c})
+    club_num = {c: i for i, c in enumerate(club_ord)}
+    stages, stage_num = [], {}
+    game_rows: dict[int, list] = {}
+    for g in games:
+        i, hk, ak = (ix.get(g["event_id"]),
+                     clubs.get(g["home_id"]), clubs.get(g["away_id"]))
+        if i is None or hk is None or ak is None:
+            continue
+        st = g["stage"] or ""
+        if st not in stage_num:
+            stage_num[st] = len(stages)
+            stages.append(st)
+        game_rows.setdefault(i, []).append([club_num[hk], club_num[ak],
+                                            g["home_score"], g["away_score"],
+                                            stage_num[st]])
+
     # H.teams is keyed on the LOWERCASED normalized identity ('rhino slam!'),
     # which is not a thing to render. Pick the spelling from the club's most
     # recent event: deterministic, and it gives what they are called now rather
-    # than whichever alias sorts first.
+    # than whichever alias sorts first. Opponents are named too, not just
+    # subjects with a trajectory — a club the model rated but never snapshotted
+    # still turns up across the net in someone else's expanded event.
     latest = {}
     for etid, name, sd in con.execute(
             "SELECT et.event_team_id, COALESCE(et.full_name, et.display_name), "
             "ev.start_date FROM event_teams et JOIN events ev USING(event_id)"):
         key = clubs.get(etid)
-        if key not in teams:
+        if key not in teams and key not in club_num:
             continue
         sd = sd or ""
         if key not in latest or sd >= latest[key][0]:
@@ -568,12 +604,15 @@ def write_history(con, games, rosters, clubs, snaps, model, season):
                                "teamNames": team_names,
                                "rosters": rosters_out, "people": people,
                                "peoplePid": people_pid,
-                               "bestRosters": best_out, "bestSeason": season},
+                               "bestRosters": best_out, "bestSeason": season,
+                               "gameClubs": club_ord, "gameStages": stages,
+                               "games": game_rows},
                               separators=(",", ":")))
     print(f"wrote {out} ({len(players):,} players, {len(teams):,} clubs, "
           f"{len(alias):,} club aliases, {len(events):,} events, "
           f"{len(rosters_out):,} rosters, {len(best_out):,} best rosters, "
           f"{len(people):,} people, {len(team_names):,} club names, "
+          f"{sum(len(v) for v in game_rows.values()):,} games, "
           f"{out.stat().st_size/1024/1024:.1f} MB)")
 
 

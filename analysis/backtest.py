@@ -40,7 +40,7 @@ def load_games(con) -> list[dict]:
     rows = con.execute("""
         SELECT g.event_id, g.game_key, g.date, g.time, g.home_id, g.away_id,
                g.home_score, g.away_score, ev.season, ev.start_date, ev.end_date,
-               COALESCE(ev.division, 'club')
+               COALESCE(ev.division, 'club'), g.stage
         FROM games g JOIN events ev USING (event_id)
         WHERE g.home_id IS NOT NULL AND g.away_id IS NOT NULL
           AND g.home_score IS NOT NULL AND g.away_score IS NOT NULL
@@ -53,7 +53,7 @@ def load_games(con) -> list[dict]:
     # ends below 4 total points.
     games = []
     for (eid, key, date, time_, hid, aid, hs, as_, season,
-         start, end, division) in rows:
+         start, end, division, stage) in rows:
         # A date outside its event's window is a source typo — a 2024 regional
         # game stamped 2001-09-23, a 2022 invite stamped 2020-03-05 (year wrong,
         # month/day right). 269 of 30,598 rows. It matters because the replay
@@ -70,6 +70,7 @@ def load_games(con) -> list[dict]:
         games.append({
             "sort": (eff, _parse_time(time_), eid, key),
             "date": eff, "season": season, "division": division,
+            "event_id": eid, "stage": stage,
             "home_id": hid, "away_id": aid, "home_score": hs, "away_score": as_,
         })
     games.sort(key=lambda g: g["sort"])

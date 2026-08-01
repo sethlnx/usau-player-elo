@@ -429,6 +429,21 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
 .hist tr.rost td{background:var(--chip);font-size:12.5px;line-height:1.85;
   color:var(--ink-2)}
 .hist tr.rost .nmlink{color:var(--ink)}
+/* An event row opens onto the games behind it. Same caret as the roster
+   disclosure above, so the two read as the same gesture. */
+.hist .disc{cursor:pointer;user-select:none}
+.hist .disc::before{content:'\25b8';display:inline-block;width:12px;font-size:10px;
+  color:var(--ink-3);transition:transform .12s ease}
+.hist tr.open .disc::before{transform:rotate(90deg)}
+.hist .disc:hover{color:var(--accent)}
+.hist tr.gms > td{background:var(--chip);padding:7px 12px 9px 26px}
+.gsum{font-size:11.5px;color:var(--ink-3);margin:0 0 5px;
+  text-transform:uppercase;letter-spacing:.04em}
+.gtbl{width:100%;border-collapse:collapse}
+.gtbl td{border:0;padding:2px 10px 2px 0;font-size:13px}
+.gtbl td.st{font-size:11.5px;color:var(--ink-3);white-space:nowrap;width:34%}
+.gtbl td.wl{font-family:var(--mono);font-size:12px;width:22px;text-align:center}
+.gtbl td.sc{font-family:var(--mono);font-size:12.5px;text-align:right;width:62px}
 /* hovering a season column reorders the legend by that season */
 .tchart .xh{fill:transparent}
 .tchart .yg{stroke:var(--line-strong);stroke-width:1;opacity:0}
@@ -937,6 +952,24 @@ const BR = H.bestRosters || {};   // clubKey -> [event, date, person deltas]
 const BSEASON = H.bestSeason;     // the season BR applies to (the current one)
 const PEOPLE = H.people || [], PPID = H.peoplePid || [];
 const HEV = H.events;   // [date, name, season, divisionCode]
+// Games behind each event, grouped by event index and stored once per game:
+// [homeClubIx, awayClubIx, homeScore, awayScore, stageIx] against GC/GST.
+const GC = H.gameClubs || [], GST = H.gameStages || [], GMS = H.games || {};
+const GCIX = new Map(GC.map((k, i) => [k, i]));
+/* One club's games at one event, from its own side of the net. Only the games
+   the model scored are here, so an expanded event IS the Δ beside it. */
+function gamesAt(ckey, evIdx) {
+  const rows = GMS[evIdx], me = GCIX.get(ckey);
+  if (!rows || me === undefined) return [];
+  const out = [];
+  for (const r of rows) {
+    const home = r[0] === me;
+    if (!home && r[1] !== me) continue;
+    out.push({opp: GC[home ? r[1] : r[0]], mine: home ? r[2] : r[3],
+              theirs: home ? r[3] : r[2], stage: GST[r[4]] || ''});
+  }
+  return out;
+}
 // player_id -> its row in the ranked table, so a drill-down rebuilds its own
 // header instead of reading it off whichever element happened to be clicked.
 const PBY = new Map(D.players.map(p => [String(p[8]), p]));
@@ -1027,8 +1060,17 @@ function histTable(pts, isTeam, ckey) {
           `${esc(clubLabel(p.club))}</span>`
         : `<span class="muted">—</span>`) + `</td>`;
     }
+    // The event opens onto its games — a club's own, a player's through the
+    // club he turned out for. A player whose event-team never resolved to a
+    // club identity has nothing to open, and neither does an event whose games
+    // the model dropped.
+    const gk = isTeam ? ckey : p.club;
+    const ev = gk && gamesAt(gk, p.evIdx).length
+      ? `<span class="disc" data-games="${esc(gk + '|' + p.evIdx)}">` +
+        `${esc(p.event)}</span>`
+      : esc(p.event);
     return `<tr><td class="d">${p.date}</td>` +
-           `<td>${esc(p.event)}<span class="muted" style="font-size:11.5px">` +
+           `<td>${ev}<span class="muted" style="font-size:11.5px">` +
            ` ${['club','college','D-III'][p.div] || 'club'}</span></td>` + mid +
            `<td class="r">${p.elo}</td><td class="dl">${dl}</td></tr>`;
   }).join('');
@@ -1036,6 +1078,40 @@ function histTable(pts, isTeam, ckey) {
          (isTeam ? '<th class="n">Roster</th>' : '<th>Team</th>') +
          `<th class="n">Elo after</th><th class="n">Δ</th></tr></thead>` +
          `<tbody>${rows}</tbody></table>`;
+}
+
+/* The games behind one event, in the order the model replayed them. The W-L
+   is the evidence for the Δ on the row that opened it. */
+function gamesPane(ckey, evIdx) {
+  const gs = gamesAt(ckey, evIdx);
+  const w = gs.filter(g => g.mine > g.theirs).length;
+  const body = gs.map(g => {
+    const won = g.mine > g.theirs;
+    const opp = H.teams[g.opp]
+      ? `<span class="nmlink" data-club="${esc(g.opp)}">` +
+        `${esc(clubLabel(g.opp))}</span>`
+      : esc(clubLabel(g.opp));
+    return `<tr><td class="st">${esc(g.stage)}</td><td>${opp}</td>` +
+           `<td class="wl ${won ? 'up' : 'dn'}">${won ? 'W' : 'L'}</td>` +
+           `<td class="sc">${g.mine}–${g.theirs}</td></tr>`;
+  }).join('');
+  return `<p class="gsum">${esc(clubLabel(ckey))} · ${gs.length} game` +
+         `${gs.length === 1 ? '' : 's'} · ${w}-${gs.length - w}</p>` +
+         `<table class="gtbl"><tbody>${body}</tbody></table>`;
+}
+
+function toggleGames(el) {
+  const tr = el.closest('tr'), nx = tr.nextElementSibling;
+  if (nx && nx.classList.contains('gms')) {
+    nx.remove(); tr.classList.remove('open'); return;
+  }
+  // lastIndexOf, because a club key is free to contain the separator.
+  const rk = el.dataset.games, c = rk.lastIndexOf('|');
+  const row = document.createElement('tr');
+  row.className = 'gms';
+  row.innerHTML = `<td colspan="5">${gamesPane(rk.slice(0, c), +rk.slice(c + 1))}</td>`;
+  tr.after(row);
+  tr.classList.add('open');
 }
 
 /* Roster indices are delta-encoded and ascending; `people` is name-sorted, so
@@ -1195,7 +1271,10 @@ function openDetail(kind, key, opts) {
     `<h2>${esc(title)}</h2><div class="meta">${parts.join(' · ')}</div>` + chart(pts) +
     `<p class="note" style="margin:0 0 14px">Each point is the rating after that ` +
     `event — a weekend tournament is one step, not one point per game. ` +
-    `${pts.length} event${pts.length === 1 ? '' : 's'} on record.</p>` +
+    `${pts.length} event${pts.length === 1 ? '' : 's'} on record; click one in ` +
+    `the table for the games behind it` +
+    (kind === 'p' ? ', which are the games of the club he turned out for — the ' +
+     'engine moves every rostered player by the same delta' : '') + `.</p>` +
     (kind === 'c' ? rosterSection(ckey) : '') +
     (pts.length ? histTable(pts, kind === 'c', ckey) : '');
   if (opts.push !== false) {
@@ -1240,8 +1319,8 @@ $('#ptb').addEventListener('click', e => {
 $('#ctb').addEventListener('click', e => {
   const el = e.target.closest('[data-club]'); if (el) openDetail('c', el.dataset.club);
 });
-/* Every link inside the panel: roster-size cells, affiliation cells, and the
-   people inside an expanded roster. */
+/* Every link and disclosure inside the panel: roster-size cells, event rows,
+   affiliation cells, and the people inside an expanded roster. */
 $('#dbody').addEventListener('click', e => {
   const tb = e.target.closest('.rtab');
   if (tb) {
@@ -1251,6 +1330,8 @@ $('#dbody').addEventListener('click', e => {
       rosterPane(sec.dataset.ck, +tb.dataset.season);
     return;
   }
+  const g = e.target.closest('[data-games]');
+  if (g) { toggleGames(g); return; }
   const r = e.target.closest('[data-roster]');
   if (r) { toggleRoster(r); return; }
   const p = e.target.closest('[data-pid]');
