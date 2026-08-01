@@ -1,89 +1,128 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
-1,Revolver,revolver,club-men,2359.6,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-2,PoNY,pony,club-men,2305.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-3,Chicago Machine,chicago machine,club-men,2299.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-4,DiG,dig,club-men,2288.6,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-5,Rhino Slam!,rhino slam!,club-men,2288.4,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-6,Truck Stop,truck stop,club-men,2239.3,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-7,Sockeye,sockeye,club-men,2166.2,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-8,Ring of Fire,ring of fire,club-men,2160.8,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-9,Sub Zero,sub zero,club-men,2144.1,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-10,Johnny Bravo,johnny bravo,club-men,2138.8,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-11,Warao,warao,club-men,1820.5,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-12,EVOLUTION,evolution,club-men,1706.3,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-13,Cookie Mon$terz,cookie mon$terz,club-men,1629.6,17,2026,Midas the III,2026-08-22
-1,XIST,xist (mixed),club-mixed,2284.0,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-2,Hybrid,hybrid (mixed),club-mixed,2257.4,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-3,Slow,slow (mixed),club-mixed,2169.5,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-4,shame.,shame. (mixed),club-mixed,2166.6,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-5,Drag'n Thrust,drag'n thrust (mixed),club-mixed,2103.0,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-6,Toro,toro (mixed),club-mixed,2080.5,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-7,Austin Disco Club,austin disco club (mixed),club-mixed,2068.4,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-8,Sprocket,sprocket (mixed),club-mixed,2055.0,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-9,Rally,rally (mixed),club-mixed,1998.4,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-10,Seattle Mixtape,seattle mixtape (mixed),club-mixed,1981.2,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-11,Space Force,space force (mixed),club-mixed,1893.5,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-12,Townies,townies (mixed),club-mixed,1802.9,24,2026,Lehigh Valley Invite 2026,2026-08-01
+1,Revolver,revolver,club-men,2375.3,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+2,Rhino Slam!,rhino slam!,club-men,2288.8,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+3,Chicago Machine,chicago machine,club-men,2282.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+4,PoNY,pony,club-men,2280.7,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+5,DiG,dig,club-men,2263.6,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+6,Truck Stop,truck stop,club-men,2225.1,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+7,Sockeye,sockeye,club-men,2201.9,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+8,Ring of Fire,ring of fire,club-men,2163.0,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+9,Sub Zero,sub zero,club-men,2162.8,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+10,Johnny Bravo,johnny bravo,club-men,2139.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+11,Mad Men,mad men,club-men,1989.3,25,2026,Lehigh Valley Invite 2026,2026-08-01
+12,Haymaker,haymaker,club-men,1957.8,25,2026,Lehigh Valley Invite 2026,2026-08-01
+13,Oak Grove Boys,oak grove boys,club-men,1892.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
+14,Warao,warao,club-men,1816.1,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+15,H.I.P,h.i.p,club-men,1790.9,16,2026,PB&J 2026,2026-08-01
+16,ZOO,zoo,club-men,1756.8,20,2026,PB&J 2026,2026-08-01
+17,Zodiac,zodiac,club-men,1749.4,17,2026,Lehigh Valley Invite 2026,2026-08-01
+18,Garden State Ultimate,garden state ultimate,club-men,1739.1,26,2026,Lehigh Valley Invite 2026,2026-08-01
+19,UPDOG,updog,club-men,1721.3,23,2026,Lehigh Valley Invite 2026,2026-08-01
+20,Triumph,triumph,club-men,1710.2,26,2026,Lehigh Valley Invite 2026,2026-08-01
+21,EVOLUTION,evolution,club-men,1702.6,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+22,Rumspringa,rumspringa,club-men,1700.2,21,2026,Lehigh Valley Invite 2026,2026-08-01
+23,CITYWIDE Special,citywide special,club-men,1697.1,23,2026,Lehigh Valley Invite 2026,2026-08-01
+24,Club M - Manic,club m - manic,club-men,1671.2,19,2026,Lehigh Valley Invite 2026,2026-08-01
+25,John Doe,john doe,club-men,1639.8,26,2026,Lehigh Valley Invite 2026,2026-08-01
+26,MOB Ultimate,mob ultimate,club-men,1639.1,25,2026,Lehigh Valley Invite 2026,2026-08-01
+27,Cookie Mon$terz,cookie mon$terz,club-men,1629.5,17,2026,Midas the III,2026-08-22
+28,Crypt,crypt,club-men,1628.6,26,2026,Lehigh Valley Invite 2026,2026-08-01
+29,Gummy Bear Hitmen,gummy bear hitmen,club-men,1624.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
+30,EtobiCoke,etobicoke,club-men,1619.9,23,2026,Lehigh Valley Invite 2026,2026-08-01
+31,Rebels,rebels,club-men,1612.2,25,2026,Lehigh Valley Invite 2026,2026-08-01
+32,Texas Tea-A,texas tea-a,club-men,1603.5,23,2026,PB&J 2026,2026-08-01
+33,Forest City,forest city,club-men,1597.4,25,2026,Lehigh Valley Invite 2026,2026-08-01
+34,Rice Box,rice box,club-men,1537.5,23,2026,PB&J 2026,2026-08-01
+35,Alibi,alibi,club-men,1520.7,22,2026,Lehigh Valley Invite 2026,2026-08-01
+36,Beef Depot,beef depot,club-men,1499.7,23,2026,Lehigh Valley Invite 2026,2026-08-01
+37,Hazard,hazard,club-men,1494.7,21,2026,Lehigh Valley Invite 2026,2026-08-01
+38,Winc City Fog,winc city fog,club-men,1478.2,25,2026,Lehigh Valley Invite 2026,2026-08-01
+39,Texas Duffy,texas duffy,club-men,1469.9,22,2026,PB&J 2026,2026-08-01
+40,Dub Club,dub club,club-men,1466.3,25,2026,Lehigh Valley Invite 2026,2026-08-01
+41,Inferno Ultimate,inferno ultimate,club-men,1440.2,11,2026,Lehigh Valley Invite 2026,2026-08-01
+42,New Jersey Gemini,new jersey gemini,club-men,1433.7,26,2026,Lehigh Valley Invite 2026,2026-08-01
+43,EZ,ez,club-men,1424.6,21,2026,Lehigh Valley Invite 2026,2026-08-01
+44,San Antonio Warhawks,san antonio warhawks,club-men,1368.6,21,2026,PB&J 2026,2026-08-01
+45,Motive,motive,club-men,1325.5,22,2026,Lehigh Valley Invite 2026,2026-08-01
+46,Long Island Riff Raff,long island riff raff,club-men,1305.5,22,2026,Lehigh Valley Invite 2026,2026-08-01
+47,Forge,forge,club-men,1301.8,23,2026,PB&J 2026,2026-08-01
+48,Bodega Cats,bodega cats,club-men,1301.2,17,2026,Lehigh Valley Invite 2026,2026-08-01
+49,Black Gold,black gold,club-men,1258.1,17,2026,PB&J 2026,2026-08-01
+50,Chemical X,chemical x,club-men,1217.7,14,2026,Lehigh Valley Invite 2026,2026-08-01
+51,Deaf Fruit,deaf fruit,club-men,1143.1,15,2026,PB&J 2026,2026-08-01
+1,XIST,xist (mixed),club-mixed,2298.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+2,Hybrid,hybrid (mixed),club-mixed,2267.1,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+3,shame.,shame. (mixed),club-mixed,2168.1,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+4,Slow,slow (mixed),club-mixed,2166.1,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+5,Toro,toro (mixed),club-mixed,2085.0,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+6,Austin Disco Club,austin disco club (mixed),club-mixed,2075.4,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+7,Drag'n Thrust,drag'n thrust (mixed),club-mixed,2047.9,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+8,Rally,rally (mixed),club-mixed,2040.4,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+9,Sprocket,sprocket (mixed),club-mixed,2034.0,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+10,Seattle Mixtape,seattle mixtape (mixed),club-mixed,1981.5,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+11,Space Force,space force (mixed),club-mixed,1885.4,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+12,Townies,townies (mixed),club-mixed,1802.8,24,2026,Lehigh Valley Invite 2026,2026-08-01
 13,Twist,twist (mixed),club-mixed,1790.0,23,2026,Lehigh Valley Invite 2026,2026-08-01
-14,Revival,revival (mixed),club-mixed,1765.4,24,2026,Lehigh Valley Invite 2026,2026-08-01
-15,HVAC,hvac (mixed),club-mixed,1752.1,25,2026,Lehigh Valley Invite 2026,2026-08-01
-16,Funk,funk (mixed),club-mixed,1744.8,24,2026,Lehigh Valley Invite 2026,2026-08-01
+14,Funk,funk (mixed),club-mixed,1774.7,24,2026,Lehigh Valley Invite 2026,2026-08-01
+15,Revival,revival (mixed),club-mixed,1765.4,24,2026,Lehigh Valley Invite 2026,2026-08-01
+16,HVAC,hvac (mixed),club-mixed,1752.0,25,2026,Lehigh Valley Invite 2026,2026-08-01
 17,No Touching!,no touching! (mixed),club-mixed,1743.9,25,2026,Twin Cities Rollaround 2026,2026-08-02
 18,Pushovers,pushovers (mixed),club-mixed,1712.9,24,2026,Twin Cities Rollaround 2026,2026-08-02
-19,Voltaje U.C,voltaje u.c (mixed),club-mixed,1668.4,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-20,Ant Madness,ant madness (mixed),club-mixed,1662.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
-21,Madison United Mixed Ultimate,madison united mixed ultimate (mixed),club-mixed,1655.8,25,2026,Bid in the Bend 2026,2026-08-01
+19,Voltaje U.C,voltaje u.c (mixed),club-mixed,1666.4,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+20,Madison United Mixed Ultimate,madison united mixed ultimate (mixed),club-mixed,1662.1,25,2026,Bid in the Bend 2026,2026-08-01
+21,Ant Madness,ant madness (mixed),club-mixed,1648.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
 22,Team Earthling,team earthling (mixed),club-mixed,1622.9,7,2026,Intergalactic Championships,2026-12-30
-23,Axolotls,axolotls (mixed),club-mixed,1621.4,23,2026,Lehigh Valley Invite 2026,2026-08-01
-24,PS,ps (mixed),club-mixed,1612.5,25,2026,Lehigh Valley Invite 2026,2026-08-01
-25,NY Swipes,ny swipes (mixed),club-mixed,1608.6,23,2026,Lehigh Valley Invite 2026,2026-08-01
-26,Stackcats,stackcats (mixed),club-mixed,1604.1,26,2026,Bid in the Bend 2026,2026-08-01
-27,Farm Show,farm show (mixed),club-mixed,1579.3,26,2026,Lehigh Valley Invite 2026,2026-08-01
-28,Crucible,crucible (mixed),club-mixed,1548.7,26,2026,Bid in the Bend 2026,2026-08-01
-29,Jabba,jabba (mixed),club-mixed,1536.7,26,2026,Bid in the Bend 2026,2026-08-01
-30,Skooks,skooks (mixed),club-mixed,1527.6,15,2026,Lehigh Valley Invite 2026,2026-08-01
-31,Toast!,toast! (mixed),club-mixed,1526.2,23,2026,Bid in the Bend 2026,2026-08-01
+23,Stackcats,stackcats (mixed),club-mixed,1620.5,26,2026,Bid in the Bend 2026,2026-08-01
+24,Toast!,toast! (mixed),club-mixed,1614.0,23,2026,Bid in the Bend 2026,2026-08-01
+25,PS,ps (mixed),club-mixed,1613.1,25,2026,Lehigh Valley Invite 2026,2026-08-01
+26,NY Swipes,ny swipes (mixed),club-mixed,1608.6,23,2026,Lehigh Valley Invite 2026,2026-08-01
+27,Axolotls,axolotls (mixed),club-mixed,1599.5,23,2026,Lehigh Valley Invite 2026,2026-08-01
+28,Farm Show,farm show (mixed),club-mixed,1579.3,26,2026,Lehigh Valley Invite 2026,2026-08-01
+29,Duck Parade,duck parade (mixed),club-mixed,1554.1,25,2026,Bid in the Bend 2026,2026-08-01
+30,Crucible,crucible (mixed),club-mixed,1530.4,26,2026,Bid in the Bend 2026,2026-08-01
+31,Skooks,skooks (mixed),club-mixed,1528.0,15,2026,Lehigh Valley Invite 2026,2026-08-01
 32,Pandamonium,pandamonium (mixed),club-mixed,1507.1,24,2026,Twin Cities Rollaround 2026,2026-08-02
 33,FLI,fli (mixed),club-mixed,1506.9,22,2026,Lehigh Valley Invite 2026,2026-08-01
 34,Brooklyn Hive,brooklyn hive (mixed),club-mixed,1501.6,23,2026,Lehigh Valley Invite 2026,2026-08-01
-35,Duck Parade,duck parade (mixed),club-mixed,1500.0,25,2026,Bid in the Bend 2026,2026-08-01
-36,The Force,the force (mixed),club-mixed,1493.2,26,2026,Twin Cities Rollaround 2026,2026-08-02
-37,Mashed,mashed (mixed),club-mixed,1487.8,24,2026,Lehigh Valley Invite 2026,2026-08-01
-38,Team Martian,team martian (mixed),club-mixed,1487.1,7,2026,Intergalactic Championships,2026-12-30
+35,The Force,the force (mixed),club-mixed,1493.2,26,2026,Twin Cities Rollaround 2026,2026-08-02
+36,Mashed,mashed (mixed),club-mixed,1487.9,24,2026,Lehigh Valley Invite 2026,2026-08-01
+37,Team Martian,team martian (mixed),club-mixed,1487.1,7,2026,Intergalactic Championships,2026-12-30
+38,Jabba,jabba (mixed),club-mixed,1486.8,26,2026,Bid in the Bend 2026,2026-08-01
 39,Jumbo Slice,jumbo slice (mixed),club-mixed,1486.8,24,2026,Lehigh Valley Invite 2026,2026-08-01
-40,Thunderpants the Magic Dragon,thunderpants the magic dragon (mixed),club-mixed,1480.9,24,2026,Bid in the Bend 2026,2026-08-01
-41,ELevate,elevate (mixed),club-mixed,1469.1,26,2026,Bid in the Bend 2026,2026-08-01
-42,Skyhawks,skyhawks (mixed),club-mixed,1465.9,25,2026,Bid in the Bend 2026,2026-08-01
-43,Melt,melt (mixed),club-mixed,1452.8,25,2026,Twin Cities Rollaround 2026,2026-08-02
-44,Philly Twist,philly twist (mixed),club-mixed,1431.2,15,2026,Lehigh Valley Invite 2026,2026-08-01
+40,Thunderpants the Magic Dragon,thunderpants the magic dragon (mixed),club-mixed,1476.0,24,2026,Bid in the Bend 2026,2026-08-01
+41,Skyhawks,skyhawks (mixed),club-mixed,1462.0,25,2026,Bid in the Bend 2026,2026-08-01
+42,Melt,melt (mixed),club-mixed,1452.8,25,2026,Twin Cities Rollaround 2026,2026-08-02
+43,Philly Twist,philly twist (mixed),club-mixed,1431.3,15,2026,Lehigh Valley Invite 2026,2026-08-01
+44,ELevate,elevate (mixed),club-mixed,1425.6,26,2026,Bid in the Bend 2026,2026-08-01
 45,Great Minnesota Get Together,great minnesota get together (mixed),club-mixed,1414.5,25,2026,Twin Cities Rollaround 2026,2026-08-02
-46,STL CELESTIAL,stl celestial (mixed),club-mixed,1404.3,22,2026,Bid in the Bend 2026,2026-08-01
-47,Pixel,pixel (mixed),club-mixed,1363.7,19,2026,Bid in the Bend 2026,2026-08-01
-48,Columbus Cohesion,columbus cohesion (mixed),club-mixed,1317.2,17,2026,Bid in the Bend 2026,2026-08-01
-1,Fury,fury (women's),club-women,2371.0,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-2,Scandal,scandal (women's),club-women,2304.8,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-3,Brute Squad,brute squad (women's),club-women,2275.4,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-4,Molly Brown,molly brown (women's),club-women,2172.4,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-5,6ixers,6ixers (women's),club-women,2120.9,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-6,Seattle Riot,seattle riot (women's),club-women,2114.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-7,BENT,bent (women's),club-women,2113.0,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-8,Nightlock,nightlock (women's),club-women,2028.7,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-9,Flipside,flipside (women's),club-women,2022.3,21,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-10,Schwa,schwa (women's),club-women,1999.9,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-11,Iris,iris (women's),club-women,1950.3,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-12,Colorado Kelp,colorado kelp (women's),club-women,1866.3,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-13,Stella,stella (women's),club-women,1780.7,20,2026,Lehigh Valley Invite 2026,2026-08-01
-14,Vice,vice (women's),club-women,1671.8,23,2026,Lehigh Valley Invite 2026,2026-08-01
-15,Wave,wave (women's),club-women,1665.1,26,2026,Lehigh Valley Invite 2026,2026-08-01
-16,Zephyr,zephyr (women's),club-women,1660.3,26,2026,Lehigh Valley Invite 2026,2026-08-01
-17,Calypso,calypso (women's),club-women,1645.0,20,2026,Lehigh Valley Invite 2026,2026-08-01
-18,Dissent,dissent (women's),club-women,1588.0,22,2026,Lehigh Valley Invite 2026,2026-08-01
-19,Dish,dish (women's),club-women,1575.1,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
-20,Frosted,frosted (women's),club-women,1521.2,9,2026,Cooler Classic 37 (Men & Women),2026-08-08
-21,Compact Disc,compact disc (women's),club-women,1506.3,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
-22,Versa,versa (women's),club-women,1482.7,23,2026,Lehigh Valley Invite 2026,2026-08-01
-23,Incline,incline (women's),club-women,1461.7,20,2026,Lehigh Valley Invite 2026,2026-08-01
-24,Syrup!,syrup! (women's),club-women,1410.6,12,2026,Lehigh Valley Invite 2026,2026-08-01
-25,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1390.4,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
-26,SMISKI,smiski (women's),club-women,1354.6,14,2026,Lehigh Valley Invite 2026,2026-08-01
-27,Lakeshore Drive,lakeshore drive (women's),club-women,1302.6,18,2026,Cooler Classic 37 (Men & Women),2026-08-08
+46,STL CELESTIAL,stl celestial (mixed),club-mixed,1404.4,22,2026,Bid in the Bend 2026,2026-08-01
+47,Pixel,pixel (mixed),club-mixed,1357.9,19,2026,Bid in the Bend 2026,2026-08-01
+48,Columbus Cohesion,columbus cohesion (mixed),club-mixed,1295.3,17,2026,Bid in the Bend 2026,2026-08-01
+1,Fury,fury (women's),club-women,2371.7,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+2,Scandal,scandal (women's),club-women,2312.0,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+3,Brute Squad,brute squad (women's),club-women,2281.9,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+4,Molly Brown,molly brown (women's),club-women,2182.4,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+5,6ixers,6ixers (women's),club-women,2111.0,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+6,BENT,bent (women's),club-women,2104.9,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+7,Seattle Riot,seattle riot (women's),club-women,2102.2,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+8,Flipside,flipside (women's),club-women,2027.3,21,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+9,Nightlock,nightlock (women's),club-women,2027.0,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+10,Schwa,schwa (women's),club-women,2005.4,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+11,Iris,iris (women's),club-women,1941.3,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+12,Colorado Kelp,colorado kelp (women's),club-women,1859.1,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+13,Stella,stella (women's),club-women,1854.6,20,2026,Lehigh Valley Invite 2026,2026-08-01
+14,Zephyr,zephyr (women's),club-women,1705.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
+15,Calypso,calypso (women's),club-women,1692.4,20,2026,Lehigh Valley Invite 2026,2026-08-01
+16,Vice,vice (women's),club-women,1682.9,23,2026,Lehigh Valley Invite 2026,2026-08-01
+17,Wave,wave (women's),club-women,1639.8,26,2026,Lehigh Valley Invite 2026,2026-08-01
+18,Dish,dish (women's),club-women,1575.1,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
+19,Pine Baroness,pine baroness (women's),club-women,1569.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
+20,Dissent,dissent (women's),club-women,1539.6,22,2026,Lehigh Valley Invite 2026,2026-08-01
+21,Frosted,frosted (women's),club-women,1521.2,9,2026,Cooler Classic 37 (Men & Women),2026-08-08
+22,Incline,incline (women's),club-women,1516.4,20,2026,Lehigh Valley Invite 2026,2026-08-01
+23,Compact Disc,compact disc (women's),club-women,1506.3,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
+24,Versa,versa (women's),club-women,1453.5,23,2026,Lehigh Valley Invite 2026,2026-08-01
+25,Syrup!,syrup! (women's),club-women,1395.6,12,2026,Lehigh Valley Invite 2026,2026-08-01
+26,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1390.4,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
+27,SMISKI,smiski (women's),club-women,1304.0,14,2026,Lehigh Valley Invite 2026,2026-08-01
+28,Lakeshore Drive,lakeshore drive (women's),club-women,1302.6,18,2026,Cooler Classic 37 (Men & Women),2026-08-08

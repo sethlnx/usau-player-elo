@@ -38,42 +38,9 @@ SOURCES = [
     (DATA / "usau_women.db", "club-women", 2_000_000),
 ]
 
-EVENT_COLS = ["event_id", "season", "name", "url", "city", "state",
-              "start_date", "end_date", "club_men_teams", "has_schedule",
-              "division", "complete"]
-
-
-def migrate_url_key(con):
-    """events.url UNIQUE -> UNIQUE(url, division). No-op once applied."""
-    sql = con.execute(
-        "SELECT sql FROM sqlite_master WHERE type='table' AND name='events'"
-    ).fetchone()[0]
-    if "UNIQUE (url, division)" in sql:
-        return False
-    cols = ", ".join(EVENT_COLS)
-    con.executescript(f"""
-        PRAGMA foreign_keys=OFF;
-        BEGIN;
-        CREATE TABLE events_new (
-            event_id INTEGER PRIMARY KEY,
-            season INTEGER NOT NULL,
-            name TEXT NOT NULL,
-            url TEXT NOT NULL,
-            city TEXT, state TEXT,
-            start_date TEXT, end_date TEXT,
-            club_men_teams INTEGER,
-            has_schedule INTEGER,
-            division TEXT NOT NULL DEFAULT 'club-men',
-            complete INTEGER NOT NULL DEFAULT 0,
-            UNIQUE (url, division)
-        );
-        INSERT INTO events_new ({cols}) SELECT {cols} FROM events;
-        DROP TABLE events;
-        ALTER TABLE events_new RENAME TO events;
-        COMMIT;
-        PRAGMA foreign_keys=ON;
-    """)
-    return True
+# Schema and migration live in build_db, which owns them: every DB it writes
+# needs the (url, division) key, not just the one this script merges into.
+from .build_db import EVENT_COLS, migrate_url_key  # noqa: E402
 
 
 def drop_division(con, division):

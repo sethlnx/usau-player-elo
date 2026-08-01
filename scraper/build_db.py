@@ -215,6 +215,51 @@ def scrape_event(con, event_id: int, ev: dict, season: int, division: str = "clu
     return f"{len(games)} games, {len(teams)} teams, {fetched} rosters fetched"
 
 
+EVENT_COLS = ["event_id", "season", "name", "url", "city", "state",
+              "start_date", "end_date", "club_men_teams", "has_schedule",
+              "division", "complete"]
+
+
+def migrate_url_key(con):
+    """events.url UNIQUE -> UNIQUE(url, division). No-op once applied.
+
+    A tournament cross-listed across divisions is ONE url with one row per
+    division — the 2026 U.S. Open ICC runs men's, mixed and women's off the
+    same page. Under the bare UNIQUE the second division's upsert overwrote
+    the first's row. Lives here rather than in the merge script because every
+    DB build_db writes needs it, including the per-division scrape files.
+    """
+    sql = con.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='events'"
+    ).fetchone()
+    if not sql or "UNIQUE (url, division)" in sql[0]:
+        return False
+    cols = ", ".join(EVENT_COLS)
+    con.executescript(f"""
+        PRAGMA foreign_keys=OFF;
+        BEGIN;
+        CREATE TABLE events_new (
+            event_id INTEGER PRIMARY KEY,
+            season INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            url TEXT NOT NULL,
+            city TEXT, state TEXT,
+            start_date TEXT, end_date TEXT,
+            club_men_teams INTEGER,
+            has_schedule INTEGER,
+            division TEXT NOT NULL DEFAULT 'club-men',
+            complete INTEGER NOT NULL DEFAULT 0,
+            UNIQUE (url, division)
+        );
+        INSERT INTO events_new ({cols}) SELECT {cols} FROM events;
+        DROP TABLE events;
+        ALTER TABLE events_new RENAME TO events;
+        COMMIT;
+        PRAGMA foreign_keys=ON;
+    """)
+    return True
+
+
 def _ensure_columns(con):
     """Older DBs predate some columns; add them with backfill-safe defaults."""
     cols = [r[1] for r in con.execute("PRAGMA table_info(events)")]
@@ -224,6 +269,8 @@ def _ensure_columns(con):
         con.execute("ALTER TABLE events ADD COLUMN complete INTEGER NOT NULL DEFAULT 0")
     if "slot" not in [r[1] for r in con.execute("PRAGMA table_info(games)")]:
         con.execute("ALTER TABLE games ADD COLUMN slot TEXT")
+    if migrate_url_key(con):
+        print("migrated events: UNIQUE(url) -> UNIQUE(url, division)", flush=True)
 
 
 def _drop_reseeded(con, event_id: int, games: list[dict]):
