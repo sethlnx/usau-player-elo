@@ -22,6 +22,7 @@ USAU_DB=data/usau_women.db scraper/backfill.sh club-women data/usau_women.db 201
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv, data/history.json
+.venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
 .venv/bin/python -m analysis.site         # docs/index.html — standalone, no server
 ```
 
@@ -406,6 +407,30 @@ the reason in the data notes below: display names are not unique.
   uncertainty is plainly not uniform: bucketed by how much softmax weight a
   player carries, split-half sd/2 runs 161 for the lowest-influence tenth
   against 101 for the highest.
+- **22% of the top 1,000 ratings are not load-bearing.** Drop a player from
+  every roster, replay, and score the games their own teams played: 219 of
+  1,000 are explained at least as well WITHOUT their rating. Travis Dunn
+  (3322, Nighthawk) reads -0.0036, against +0.0119 for Kameryn Groom. The page
+  marks those bands with a "?" rather than printing them as if measured.
+  The cause is structural: the game delta is applied to every rostered player
+  EQUALLY, so the only channels separating teammates are the provisional
+  window and stat transfers, and a rating can drift somewhere the games never
+  pin down. It shows up as a scale detachment — every top player sits 580-1240
+  above their own club, the best player reads 3399 against a best club of
+  2578, and corr(club Elo, player Elo) across the top 300 is only +0.378. A
+  club's rating is a softmax mean over 20+ people, so one star moves it ~150
+  and their own number is barely constrained by results. It gets worse the
+  flatter the weighting: top rating runs 3205 / 3296 / 3444 / 3579 / 3727 at
+  tau 400 / 600 / 900 / 1500 / inf. Read a player's position as "how far above
+  their own teammates", not as a club-comparable number.
+  Two cheaper measures were tried and both FAIL, which is why `identify.py`
+  costs a replay per player: split-half is flat at 101-110 across softmax
+  share, gap over roster median and teammate count, because both halves are
+  reproducibly biased the same way; a static recompute using final ratings
+  correlates only +0.237 with the real thing and gets the sign wrong on the
+  two worst cases. No band widening is published off this, because converting
+  a logloss delta into an Elo interval is not something this corpus can
+  calibrate — the flag says "unpinned", it does not claim how unpinned.
 - Join `player_elo.csv` on `player_id`, never on `player`. Names that survive
   as separate identities are still split per club, so display names are not
   unique. Four names also contain commas (`Gregory Plaia, Jr`), so parse the

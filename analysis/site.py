@@ -202,6 +202,23 @@ def build():
     GCODE = {"m": 1, "w": 2}
     genders = {r["player_id"]: GCODE[r["gender"]]
                for r in all_players if r.get("gender") in GCODE}
+    # How load-bearing each rating is, from analysis/identify.py: a true
+    # leave-one-out, positive when the results are better explained WITH the
+    # player's rating than without it. Optional and partial by design — one
+    # replay per player, so it covers the top 1,000 rather than all 39,000 —
+    # and the page shows the flag only where it was actually measured.
+    loo_path = DB_PATH.parent / "player_loo.csv"
+    loo = {}
+    if loo_path.exists():
+        with open(loo_path, newline="") as f:
+            loo = {r["player_id"]: float(r["loo"]) for r in csv.DictReader(f)}
+
+    def loo_code(pid):
+        """2 supported, 1 weak, 0 not load-bearing, -1 not measured."""
+        v = loo.get(pid)
+        if v is None:
+            return -1
+        return 2 if v >= 0.004 else 1 if v > 0 else 0
 
     payload = {
         "generated": date.today().isoformat(),
@@ -211,7 +228,8 @@ def build():
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
-                     int(r["divisions"]), int(r["divisions_now"])]
+                     int(r["divisions"]), int(r["divisions_now"]),
+                     loo_code(r["player_id"])]
                     for r in players],
         "genders": {pid: g for pid, g in genders.items()
                     if pid in history.get("players", {})},
@@ -302,6 +320,11 @@ tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);
   font-size:13px}
 td.rk{color:var(--ink-3);font-family:var(--mono);font-size:12.5px;width:44px}
+/* An unpinned rating is marked, not silently printed as if it were measured.
+   Muted rather than alarming: it says "we cannot see this", not "this is wrong". */
+td.band.unsupported{color:var(--ink-3)}
+td.band.weaksup{color:var(--ink-2)}
+.unsup{color:var(--warn);font-weight:600;cursor:help}
 .muted{color:var(--ink-3)} .note{font-size:12.5px;color:var(--ink-3);margin-top:10px;
   line-height:1.6;max-width:820px}
 button.act.prim{border-color:var(--accent);color:var(--ink)}
@@ -700,6 +723,25 @@ $('#basis').onchange = drawClubs;
 $('#cdiv').onchange = drawClubs;
 
 /* ---------- players ---------- */
+/* Leave-one-out verdict per rating, measured in analysis/identify.py for the
+   top 1,000 only. It is a statement about IDENTIFIABILITY, not about the
+   player: within a roster every player takes the same delta, so a rating can
+   drift somewhere the games never pin down. Where that has happened the band
+   printed beside it understates the uncertainty, and saying so is more honest
+   than inventing a wider one — converting a logloss delta into an Elo
+   interval is not something this corpus can calibrate. */
+const LOOCLASS = {0: 'unsupported', 1: 'weaksup', 2: '', '-1': ''};
+const LOOTIP = {
+  0: 'Removing this player from every roster does NOT hurt the prediction of ' +
+     'their own teams\u2019 games — the results are explained at least as well ' +
+     'without this rating. Treat the number as unpinned: the band shown is the ' +
+     'population figure and is too narrow here.',
+  1: 'Only weakly load-bearing — removing this player barely changes how well ' +
+     'their teams\u2019 games are predicted.',
+  2: 'Load-bearing — removing this player measurably degrades the prediction ' +
+     'of their own teams\u2019 games, so the rating carries real information.',
+  '-1': 'Not measured — leave-one-out covers the top 1,000 by rating.'
+};
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
   const only26 = $('#only26').checked, ming = +$('#ming').value;
@@ -736,7 +778,8 @@ function drawPlayers() {
     `${rankOf.get(p)}</td>` +
     `<td><span class="nmlink" data-pid="${p[8]}">${esc(p[0])}</span></td>` +
     `<td class="n">${p[1].toFixed(0)}</td>` +
-    `<td class="band">[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]</td>` +
+    `<td class="band ${LOOCLASS[p[12]] || ''}" title="${esc(LOOTIP[p[12]] || '')}">` +
+    `[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]${p[12] === 0 ? ' <span class="unsup">?</span>' : ''}</td>` +
     `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(p[5])}</td>` +
     `<td class="n">${p[6]}</td></tr>`).join('');
   $('#pcount').textContent = q
@@ -757,7 +800,17 @@ $('#pnote').textContent =
   `current list, so results come back sparse. The toggles do change the rank, ` +
   `because they change who is being ranked; hover a rank to see the player's ` +
   `position across all ${D.totalRated.toLocaleString()} rated players. ` +
-  `Bands are 90% intervals on the rating as an estimate of current skill. Players ` +
+  `Bands are 90% intervals on the rating as an estimate of current skill, and ` +
+  `they are ONE population figure for everyone, which the "?" marks call out: ` +
+  `for the top 1,000 each rating was re-tested by dropping the player from ` +
+  `every roster and replaying, and a "?" means the results are explained at ` +
+  `least as well without it. Read the whole top of this table with that in ` +
+  `mind — the game delta is applied to every rostered player equally, so what ` +
+  `separates teammates is thin, and a player's position reflects how far they ` +
+  `sit above their own teammates as much as how good they are. It is also not ` +
+  `the club scale: the best player here reads ${Math.round(Math.max(...D.players.map(p=>p[1])))} ` +
+  `against a best club of about 2,580, because a club's rating is a mean over ` +
+  `20-plus people and one star barely moves it. Players ` +
   `below ${D.minGames} games are omitted: under that the engine's provisional ` +
   `multiplier is still moving a rating faster than results justify. Ratings never ` +
   `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default. ` +
