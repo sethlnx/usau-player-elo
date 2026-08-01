@@ -211,7 +211,7 @@ def build():
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
-                     int(r["divisions"])]
+                     int(r["divisions"]), int(r["divisions_now"])]
                     for r in players],
         "genders": {pid: g for pid, g in genders.items()
                     if pid in history.get("players", {})},
@@ -713,10 +713,18 @@ function drawPlayers() {
   // Gender-matching is evidence, not a partition: a player with none is in
   // neither filtered view, so the two never sum to the unfiltered count.
   if (gen !== 'all') pop = pop.filter(p => p[9] === +gen);
-  // Division is a bitmask of everywhere the player has turned out. The rating
-  // itself is one number across all of them — narrowing here selects WHO is
-  // listed, it does not recompute anyone against that division alone.
-  if (div !== 'all') pop = pop.filter(p => p[10] & (1 << +div));
+  // Division is a bitmask of where the player turned out, and WHICH mask
+  // depends on the season toggle. With "2026 rosters only" on, the question
+  // is who is in this division NOW, so it reads the last-season mask: Nathan
+  // Champoux has been on Hybrid since 2019 and stops being filed under club
+  // men's for two events in 2018. With the toggle off the list already spans
+  // every era, so the career mask is the honest match. The rating itself is
+  // one number across every division — narrowing selects WHO is listed, it
+  // does not recompute anyone against that division alone.
+  if (div !== 'all') {
+    const bit = 1 << +div;
+    pop = pop.filter(p => (only26 ? p[11] : p[10]) & bit);
+  }
   const rankOf = new Map();
   pop.forEach((p, i) => rankOf.set(p, i + 1));
   const rows = q ? pop.filter(p => p[0].toLowerCase().includes(q) ||
@@ -753,8 +761,9 @@ $('#pnote').textContent =
   `below ${D.minGames} games are omitted: under that the engine's provisional ` +
   `multiplier is still moving a rating faster than results justify. Ratings never ` +
   `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default. ` +
-  `Narrowing the division keeps players who have turned out in it; their rating ` +
-  `is still the one number they carry everywhere, not a per-division rating. ` +
+  `The division follows that toggle: with it on you get players who played ` +
+  `the division in 2026, with it off anyone who ever has. Their rating is ` +
+  `still the one number they carry everywhere, not a per-division rating. ` +
   `All five divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
 
 /* ---------- U.S. Open ---------- */

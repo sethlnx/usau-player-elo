@@ -815,17 +815,30 @@ def main(cfg: EloConfig | None = None):
     # rides on the player table rather than being re-derived here so the CSV,
     # the site and the DB can never disagree about who is in which bucket.
     gender = dict(con.execute("SELECT player_id, gender FROM players"))
-    # Which divisions a player has appeared in, as a bitmask over DIVCODE, so
+    # Which divisions a player has appeared in, as bitmasks over DIVCODE, so
     # the site can filter the flat table by division. A rating is one number
-    # across every division a player has played — the mask says where they
+    # across every division a player has played — a mask says where they
     # turned out, not that they have a separate rating there.
-    div_mask = defaultdict(int)
-    for pid, division in con.execute("""
-            SELECT DISTINCT rp.player_id, COALESCE(ev.division, 'club-men')
+    #
+    # TWO masks, because one is a trap. `divisions` is career-wide, and paired
+    # with the table's "2026 rosters only" default it answers a question
+    # nobody asked: Nathan Champoux last played club men's in 2018 and has
+    # been on Hybrid every season since, but a career mask still files him
+    # under men's, and every graduated player still shows up under college.
+    # 43% of the club men's list was stale that way. `divisions_now` covers
+    # only the player's LAST season, which is what "currently in this
+    # division" means for a population already filtered to that season.
+    div_ever, div_now = defaultdict(int), defaultdict(int)
+    for pid, season_played, division in con.execute("""
+            SELECT DISTINCT rp.player_id, ev.season,
+                   COALESCE(ev.division, 'club-men')
             FROM roster_players rp
             JOIN event_teams et USING (event_team_id)
             JOIN events ev ON ev.event_id = et.event_id"""):
-        div_mask[pid] |= 1 << DIVCODE.get(division, 0)
+        bit = 1 << DIVCODE.get(division, 0)
+        div_ever[pid] |= bit
+        if latest.get(pid) and season_played == latest[pid][2]:
+            div_now[pid] |= bit
     out = DB_PATH.parent / "player_elo.csv"
     with open(out, "w", newline="") as f:
         w = csv.writer(f)
@@ -833,7 +846,8 @@ def main(cfg: EloConfig | None = None):
         # names are split per-club into separate players, so several rows can
         # read "Julian Kagi" with different ratings. Join on the id, never the name.
         w.writerow(["rank", "player", "player_id", "elo", "sigma", "lo90", "hi90",
-                    "games", "last_club", "last_season", "gender", "divisions"])
+                    "games", "last_club", "last_season", "gender", "divisions",
+                    "divisions_now"])
         ranked = sorted(
             ((st.rating, pid, st.games) for pid, st in model.players.items()
              if not str(pid).startswith("ghost:") and st.games >= 5),
@@ -844,7 +858,7 @@ def main(cfg: EloConfig | None = None):
             w.writerow([i, name, pid, round(rating, 1), round(s, 1),
                         round(rating - Z90 * s, 1), round(rating + Z90 * s, 1),
                         ngames, club, season, gender.get(pid, ""),
-                        div_mask.get(pid, 0)])
+                        div_ever.get(pid, 0), div_now.get(pid, 0)])
     print(f"wrote {out} ({len(ranked)} players with 5+ games)")
 
     season = con.execute("SELECT max(season) FROM events WHERE has_schedule=1").fetchone()[0]

@@ -87,7 +87,11 @@ purpose. **Clubs** shows one division at a time (club men's / mixed /
 women's), ranked within it and searchable by club name or the event it was
 rated off, because those teams never play each other and a
 merged 1..n would invite a comparison the games cannot settle. **Players**
-keeps anyone who has turned out in the division; their rating is still the
+follows the "2026 rosters only" toggle: with it on you get players who played
+the division IN 2026, with it off anyone who ever has. That distinction is not
+cosmetic — a career-wide mask left 43% of the club men's list stale (Nathan
+Champoux last played men's in 2018 and has been on Hybrid since 2019, and
+every graduated player still sat under college). Either way the rating is the
 single number they carry everywhere, not a per-division rating. **Trends**
 selects POINTS rather than subjects, so a season reads as the rating after
 that season's last event in the division picked.
