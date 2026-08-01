@@ -1,4 +1,4 @@
-# USAU Player-Level Elo (Club Men's)
+# USAU Player-Level Elo
 
 ### → **[Live rankings and U.S. Open tracker](https://sethlnx.github.io/usau-player-elo/)**
 
@@ -16,6 +16,9 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m scraper.build_db --division club       2017 2018 2019 2021 2022 2023 2024 2025 2026
 .venv/bin/python -m scraper.build_db --division college    2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
 .venv/bin/python -m scraper.build_db --division college-d3 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
+USAU_DB=data/usau_mixed.db scraper/backfill.sh club-mixed data/usau_mixed.db 2017 … 2026
+USAU_DB=data/usau_women.db scraper/backfill.sh club-women data/usau_women.db 2017 … 2026
+.venv/bin/python -m scraper.merge_divisions  # fold the two into data/usau.db
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv, data/history.json
@@ -23,15 +26,48 @@ Full plan: `USAU_by_player_elo.md`.
 ```
 
 The scrape is slow, disk-cached and resumable; `data/usau.db` and the raw HTML
-cache are gitignored and rebuilt by the first three commands. There is no club
+cache are gitignored and rebuilt by the commands above. There is no club
 2020 — COVID cancelled the series — but college 2020 exists and is kept: the
 series was cancelled in March, the January-March regular season was not.
+
+**Five divisions, 90,284 games.** club men's (19,682), club mixed (23,851),
+club women's (8,426), college (33,375) and college D-III (4,950), 2017-2026.
+Mixed and women's are scraped into their own DBs and merged in afterwards.
+They have to be: `events.url` is UNIQUE per division because a tournament
+cross-listed across divisions is one url (260 club/mixed urls collide), and
+`event_id` is a local autoincrement, so the three files number unrelated
+events identically. `scraper/merge_divisions.py` re-keys with a per-source
+offset and is idempotent. Running the two scrapes into `data/usau.db`
+directly would have each division overwrite the other's tag.
 
 D-I and D-III share the College-Men competition level and the same schedule
 URL, so `--division college` takes every event whose name is not D-III and
 `--division college-d3` takes exactly those that are. The two sets are
-disjoint; `events.url` is UNIQUE and `events.division` is one column, so
-overlapping sets would have each division overwriting the other's rows.
+disjoint by name, which is what keeps them one row each.
+
+## Gender-matching
+
+Every division shares ONE rating scale, bridged by mixed: 10,814 names appear
+in both mixed and a men's division, 4,981 in both mixed and women's. Men's and
+women's do NOT bridge to each other — 279 names appear in both and
+`identity.resolve` splits every one of them, since no body plays both series.
+
+Read a cross-gender gap carefully. Club men's and club women's teams never
+play, so the only thing making their ratings commensurable is the mixed
+division both feed. That is an inference through a bridge, not a head-to-head
+result.
+
+Each identity gets a group, in this order: division play where it exists
+(women's → female-matching, men's → male-matching, 66,667 players), else the
+majority of the roster page's Pronouns column (2,280), else a first-name
+likelihood learned from the players the first two rules placed (7,886). The
+prior compares `P(name | gender)`, not the male share of a name: the labelled
+pool is 83% men, and a raw posterior threshold placed the remainder at 4.7 men
+per woman. Corrected it lands at 1.09, which is the external check — mixed
+rosters are gender-balanced by USAU's ratio rules. Held out on a balanced half
+of the labelled pool it is 98.6% accurate at 63% coverage. The 3,124 identities
+no rule places keep `gender=''` and appear only under "all genders";
+`players.gender_source` records which rule fired.
 
 ## Front end
 
@@ -39,12 +75,33 @@ overlapping sets would have each division overwriting the other's rows.
 `docs/index.html`, no server and no network needed.
 
 `analysis/site.py` emits it: club rankings on three roster bases, a searchable
-player table, a **Trends** tab drawing one line per season for every player or
-club that has ever closed a season in the top 25, filterable to a single
-division, and a U.S. Open tracker that re-runs a 40,000-sim Monte Carlo in the
-browser over whatever is left to play. It reads only the published artifacts
-and never replays the model, so the page cannot drift from
-`data/player_elo.csv` and `data/team_elo*.csv`.
+player table over all five divisions, a **Trends** tab drawing one line per
+season for every player or club that has ever closed a season in the top 25,
+and a U.S. Open tracker that re-runs a 40,000-sim Monte Carlo in the browser
+over whatever is left to play. It reads only the published artifacts and never
+replays the model, so the page cannot drift from `data/player_elo.csv` and
+`data/team_elo*.csv`.
+
+Every tab filters by division, and what that means differs by tab — on
+purpose. **Clubs** shows one division at a time (club men's / mixed /
+women's), ranked within it, because those teams never play each other and a
+merged 1..n would invite a comparison the games cannot settle. **Players**
+keeps anyone who has turned out in the division; their rating is still the
+single number they carry everywhere, not a per-division rating. **Trends**
+selects POINTS rather than subjects, so a season reads as the rating after
+that season's last event in the division picked.
+
+**Gender-matching** selects whole subjects everywhere, since nobody changes
+group between events; it is disabled for clubs, which have no group. Neither
+filtered gender view contains the 3,124 unplaced identities, so the two never
+sum to the unfiltered count. The U.S. Open tracker remains club men's.
+
+Club identity is the normalized name, so "Rhino" and "Rhino Slam!" are one
+club and a college program's D-I and D-III sides are one program. Mixed and
+women's keys carry a suffix on top of that: 73 club names (5 active in 2026)
+exist in more than one gender division, and men's Phoenix and women's Phoenix
+are two teams. The men's group keeps the bare key, so every pre-existing
+identity is byte-identical to before.
 
 That selection is a union across seasons, so it is 67–164 lines depending on the
 view rather than a fixed 25 — the point being that a club that owned 2019 and has
@@ -148,17 +205,20 @@ the reason in the data notes below: display names are not unique.
 - `identity/` — name→player resolution. A name on 2+ clubs in one
   (division, season) collides, but only SPLITS per club if the shards also
   contradict physically: different teams in overlapping date windows, which
-  one body cannot do. Of 2,578 collisions only 364 conflict; the other 2,214
+  one body cannot do. Of 6,296 collisions only 580 conflict; the other 5,716
   auto-merge, since the raw rule keyed on (name, club) and so shattered a
   career over one messy season — each shard then re-debuting at its division
   base and re-burning a 6x provisional window, which inflated whichever shard
-  sat on the strongest team. Every collision, split or merged, lands in
-  `data/ambiguities.csv` with its verdict; college↔club bridges log to
+  sat on the strongest team. A name spanning a men's division and the women's
+  division is the one case that always splits: 279 of them, two people each.
+  Every collision, split or merged, lands in `data/ambiguities.csv` with its
+  verdict; the 31,166 cross-division bridges log to
   `data/cross_division_links.csv`; review verdicts in
   `data/link_overrides.csv` (`block` = two people, `merge` = one person,
   `confirm` = bridge reviewed OK). A conflict proves two people, its absence
   only fails to disprove them, so same-named players in different regions who
-  never coincide do merge wrongly — `block` is the correction.
+  never coincide do merge wrongly — `block` is the correction. The same pass
+  writes `players.gender` / `players.gender_source`; see Gender-matching above.
 - `elo/` — the rating engine (`EloConfig` holds every knob). Debut players
   enter at their division's base rating (not teammate mean; the old
   context-init survives behind `EloConfig.context_init`), converging via an
@@ -185,8 +245,10 @@ the reason in the data notes below: display names are not unique.
   `data/*_elo_intermingled.csv`.
 - `analysis/` — backtest (headline eval on club; slices for early-club and
   college), tuning grid, CSV exports, and `bridge_audit.py` — ranks bridge
-  links by false-merge suspicion (height contradictions, rating shift,
-  geography); `--write-overrides` auto-blocks hard height conflicts.
+  links by false-merge suspicion (height contradictions across every division
+  the bridge spans, how far merging moved the rating against a replay with
+  every cross-division link severed, geography); `--write-overrides`
+  auto-blocks hard height conflicts.
   `usau_baseline.py` reimplements USA Ultimate's own iterative rankings
   algorithm (v2.0) from our game data and scores it walk-forward on the
   same holdout — the plan's "comparison model 4".

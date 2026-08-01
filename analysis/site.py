@@ -27,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import DB_PATH
-from analysis.rankings import PUBLISHED
+from analysis.rankings import DIVCODE, PUBLISHED, TEAM_DIVISIONS
 
 # docs/ rather than site/: GitHub Pages can serve a branch's root or its
 # /docs folder and nothing else, so putting the page here makes the project
@@ -193,6 +193,16 @@ def build():
     history = (json.loads(hist_path.read_text()) if hist_path.exists()
                else {"events": [], "players": {}, "teams": {}})
 
+    # Gender-matching group, decided in identity.resolve and carried on
+    # player_elo.csv: 1 = male-matching, 2 = female-matching, 0 = no evidence.
+    # It rides inline on each player row for the table, and as a pid -> code
+    # map for Trends, which works off history.json's own keys. The map is
+    # restricted to players the history file actually holds, since the table
+    # rows already carry their own code.
+    GCODE = {"m": 1, "w": 2}
+    genders = {r["player_id"]: GCODE[r["gender"]]
+               for r in all_players if r.get("gender") in GCODE}
+
     payload = {
         "generated": date.today().isoformat(),
         "minGames": MIN_GAMES,
@@ -200,10 +210,17 @@ def build():
         "scale": PUBLISHED["division_scale"]["club"],
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
-                     int(r["rank"]), r["player_id"]]
+                     int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
+                     int(r["divisions"])]
                     for r in players],
+        "genders": {pid: g for pid, g in genders.items()
+                    if pid in history.get("players", {})},
+        # Club rows carry both names: `club` as USAU prints it and `club_key`,
+        # the model identity the drill-down opens on. Ranks are per division,
+        # so the table shows one division at a time.
         "clubs": {k: [[int(r["rank"]), r["club"], float(r["elo"]),
-                       int(r["roster_size"]), r["roster_event"]]
+                       int(r["roster_size"]), r["roster_event"],
+                       DIVCODE.get(r["division"], 0), r["club_key"]]
                       for r in v] for k, v in clubs.items()},
         "history": history,
         "usopen": {
@@ -233,7 +250,7 @@ TEMPLATE = r"""<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>USAU Club Men's — Player-Elo Rankings</title>
+<title>USAU Player-Elo Rankings</title>
 <style>
 :root {
   --bg:#f4f5f4; --surface:#fcfcfb; --ink:#12140f; --ink-2:#52544c; --ink-3:#86887e;
@@ -481,11 +498,11 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   <div id="dbody"></div></div>
 <div id="tip"></div>
 <header>
-  <h1>USAU Club Men's — Player-Elo Rankings</h1>
+  <h1>USAU Player-Elo Rankings</h1>
   <div class="sub" id="sub"></div>
 </header>
 <nav>
-  <button data-t="clubs" class="on">Clubs</button>
+  <button data-t="clubs" class="on">Clubs (Men's)</button>
   <button data-t="players">Players</button>
   <button data-t="trends">Trends</button>
   <button data-t="usopen">U.S. Open 2026</button>
@@ -498,6 +515,11 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
       <option value="completed">Most recent completed roster</option>
       <option value="best">Best full-strength roster of 2026</option>
       <option value="upcoming">Next event roster</option>
+    </select>
+    <select id="cdiv">
+      <option value="0">Club Men's</option>
+      <option value="3">Club Mixed</option>
+      <option value="4">Club Women's</option>
     </select>
     <span class="count" id="ccount"></span>
   </div>
@@ -518,6 +540,19 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
       <option value="120">120+ games</option>
       <option value="200">200+ games</option>
     </select>
+    <select id="pdiv">
+      <option value="all">All divisions</option>
+      <option value="0">Club Men's</option>
+      <option value="1">College</option>
+      <option value="2">College D-III</option>
+      <option value="3">Club Mixed</option>
+      <option value="4">Club Women's</option>
+    </select>
+    <select id="pgen">
+      <option value="all">All genders</option>
+      <option value="1">Male-matching</option>
+      <option value="2">Female-matching</option>
+    </select>
     <span class="count" id="pcount"></span>
   </div>
   <table><thead><tr>
@@ -535,9 +570,16 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
     </select>
     <select id="tdiv">
       <option value="all">All divisions</option>
-      <option value="0">Club</option>
+      <option value="0">Club Men's</option>
       <option value="1">College</option>
       <option value="2">College D-III</option>
+      <option value="3">Club Mixed</option>
+      <option value="4">Club Women's</option>
+    </select>
+    <select id="tgen">
+      <option value="all">All genders</option>
+      <option value="1">Male-matching</option>
+      <option value="2">Female-matching</option>
     </select>
     <select id="tmode">
       <option value="elo">Elo</option>
@@ -587,6 +629,22 @@ const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct = v => (v*100).toFixed(1) + '%';
 
+/* The caveat that has to travel with any cross-gender comparison on this page.
+   Men's and women's players never meet, so their ratings are commensurable
+   only through the mixed division both play in — a bridge, not a head-to-head.
+   Read a female-matching rating as a position within a pool linked to the
+   men's pool by shared players, not as a prediction of a game that no USAU
+   series ever schedules. */
+const GENDER_NOTE =
+  `mixed division, where men's and women's players share a roster. That makes ` +
+  `a rating comparable ACROSS divisions only as far as the bridge carries: club ` +
+  `men's and club women's teams never play each other, so a cross-gender gap is ` +
+  `an inference through mixed, not a head-to-head result. Male- and ` +
+  `female-matching come from division play where it exists, the roster page's ` +
+  `Pronouns column otherwise, and a first-name likelihood (98.6% accurate on ` +
+  `held-out players) for the mixed-only remainder; players no rule places are ` +
+  `left out of both filtered views.`;
+
 /* ---------- tabs ---------- */
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
@@ -598,7 +656,9 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
 
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
-  `softmax-weighted mean of its event roster. Generated ${D.generated || ''}.`;
+  `softmax-weighted mean of its event roster. Clubs cover the three club ` +
+  `divisions, Players and Trends add college and college D-III. The U.S. Open ` +
+  `tracker is club men's. Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
 const CNOTE = {
@@ -612,27 +672,40 @@ const CNOTE = {
     'but for a club that fielded a B-squad last time out, this is the truer number.'
 };
 function drawClubs() {
-  const basis = $('#basis').value, rows = D.clubs[basis] || [];
+  const basis = $('#basis').value, div = +$('#cdiv').value;
+  // One division at a time, and the rank shown is the one the CSV assigned
+  // WITHIN it: club men's and club women's teams never play each other, so a
+  // merged 1..n would invite a comparison the games cannot settle.
+  const rows = (D.clubs[basis] || []).filter(r => r[5] === div);
   $('#ctb').innerHTML = rows.map(r =>
     `<tr><td class="rk">${r[0]}</td>` +
-    `<td><span class="nmlink" data-club="${esc(r[1])}">${esc(r[1])}</span></td>` +
+    `<td><span class="nmlink" data-club="${esc(r[6])}">${esc(r[1])}</span></td>` +
     `<td class="n">${r[2].toFixed(0)}</td><td class="n">${r[3]}</td>` +
     `<td class="muted" style="font-size:13px">${esc(r[4])}</td></tr>`).join('');
-  $('#ccount').textContent = `${rows.length} clubs`;
+  $('#ccount').textContent = `${rows.length} ${DIVLABEL[div]} clubs`;
   $('#cnote').textContent = CNOTE[basis];
 }
 $('#basis').onchange = drawClubs;
+$('#cdiv').onchange = drawClubs;
 
 /* ---------- players ---------- */
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
   const only26 = $('#only26').checked, ming = +$('#ming').value;
+  const gen = $('#pgen').value, div = $('#pdiv').value;
   // Rank is a property of the player within the POPULATION the toggles define,
   // so it is assigned before the search runs. Searching is a lookup, not a
-  // re-ranking: find a player and his number is the one he actually holds,
+  // re-ranking: find a player and their number is the one they actually hold,
   // and results come back sparse (#12, #47, #103) rather than renumbered 1..n.
   let pop = D.players.filter(p => p[4] >= ming);
   if (only26) pop = pop.filter(p => p[6] === 2026);
+  // Gender-matching is evidence, not a partition: a player with none is in
+  // neither filtered view, so the two never sum to the unfiltered count.
+  if (gen !== 'all') pop = pop.filter(p => p[9] === +gen);
+  // Division is a bitmask of everywhere the player has turned out. The rating
+  // itself is one number across all of them — narrowing here selects WHO is
+  // listed, it does not recompute anyone against that division alone.
+  if (div !== 'all') pop = pop.filter(p => p[10] & (1 << +div));
   const rankOf = new Map();
   pop.forEach((p, i) => rankOf.set(p, i + 1));
   const rows = q ? pop.filter(p => p[0].toLowerCase().includes(q) ||
@@ -657,16 +730,21 @@ function drawPlayers() {
   $('#q').addEventListener(e, drawPlayers);
   $('#only26').addEventListener(e, drawPlayers);
   $('#ming').addEventListener(e, drawPlayers);
+  $('#pgen').addEventListener(e, drawPlayers);
+  $('#pdiv').addEventListener(e, drawPlayers);
 });
 $('#pnote').textContent =
-  `Searching does not renumber anything — a player keeps the rank he holds in the ` +
-  `current list, so results come back sparse. The two toggles do change the rank, ` +
+  `Searching does not renumber anything — a player keeps the rank they hold in the ` +
+  `current list, so results come back sparse. The toggles do change the rank, ` +
   `because they change who is being ranked; hover a rank to see the player's ` +
   `position across all ${D.totalRated.toLocaleString()} rated players. ` +
   `Bands are 90% intervals on the rating as an estimate of current skill. Players ` +
   `below ${D.minGames} games are omitted: under that the engine's provisional ` +
   `multiplier is still moving a rating faster than results justify. Ratings never ` +
-  `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default.`;
+  `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default. ` +
+  `Narrowing the division keeps players who have turned out in it; their rating ` +
+  `is still the one number they carry everywhere, not a per-division rating. ` +
+  `All five divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
 
 /* ---------- U.S. Open ---------- */
 const U = D.usopen, R = U.ratings, SCALE = D.scale;
@@ -1063,7 +1141,7 @@ function histTable(pts, isTeam, ckey) {
         : `<span class="muted">—</span>`) + `</td>`;
     }
     // The event opens onto its games — a club's own, a player's through the
-    // club he turned out for. A player whose event-team never resolved to a
+    // club they turned out for. A player whose event-team never resolved to a
     // club identity has nothing to open, and neither does an event whose games
     // the model dropped.
     const gk = isTeam ? ckey : p.club;
@@ -1096,8 +1174,9 @@ function histTable(pts, isTeam, ckey) {
    total that looks wrong.
 
    In a player panel the moves are still the club's: the engine amplifies each
-   game's delta by where a man sits in his provisional window, so his share of
-   the same game differs from his teammates' and the row's Δ is his own. */
+   game's delta by where a player sits in their provisional window, so their
+   share of the same game differs from their teammates' and the row's Δ is
+   their own. */
 function gamesPane(ckey, evIdx, rowDelta, kind) {
   const gs = gamesAt(ckey, evIdx);
   const w = gs.filter(g => g.mine > g.theirs).length;
@@ -1152,8 +1231,8 @@ function decDeltas(enc) {
   return out;
 }
 function rosterOf(rk) { return ROST[rk] ? decDeltas(ROST[rk]) : []; }
-/* Names as links, or plain text for anyone below the trajectory floor: he was
-   on the roster and is not dropped, there is just nothing to open. */
+/* Names as links, or plain text for anyone below the trajectory floor: they
+   were on the roster and are not dropped, there is just nothing to open. */
 function nameList(ids) {
   return ids.map(i => H.players[PPID[i]]
     ? `<span class="nmlink" data-pid="${esc(PPID[i])}">${esc(PEOPLE[i])}</span>`
@@ -1286,11 +1365,16 @@ function openDetail(kind, key, opts) {
     ckey = TK[key] || key;
     title = clubLabel(ckey);
     // A college team, or a club inactive in 2026, is in no basis table at all;
-    // it still has a trajectory, so show that and omit the rank.
+    // it still has a trajectory, so show that and omit the rank. Matched on
+    // the model KEY, never the printed name: three divisions share names, and
+    // matching "Phoenix" by name opens the men's row on the women's club.
     const tbl = D.clubs[$('#basis').value] || [];
-    const row = tbl.find(r => r[1] === title);
-    if (row) parts.push(`Elo <b>${row[2].toFixed(0)}</b>`, `roster ${row[3]}`,
-                        `#${row[0]} of ${tbl.length} clubs`);
+    const row = tbl.find(r => r[6] === ckey);
+    if (row) {
+      const n = tbl.filter(r => r[5] === row[5]).length;
+      parts.push(`Elo <b>${row[2].toFixed(0)}</b>`, `roster ${row[3]}`,
+                 `#${row[0]} of ${n} ${DIVLABEL[row[5]]} clubs`);
+    }
   }
   const pts = decode(kind === 'p' ? H.players[key] : H.teams[ckey]);
   const peak = pts.length ? Math.max(...pts.map(p => p.elo)) : null;
@@ -1303,10 +1387,10 @@ function openDetail(kind, key, opts) {
     `event — a weekend tournament is one step, not one point per game. ` +
     `${pts.length} event${pts.length === 1 ? '' : 's'} on record; click one in ` +
     `the table for the games behind it` +
-    (kind === 'p' ? ', which are the games of the club he turned out for. The ' +
+    (kind === 'p' ? ', which are the games of the club they turned out for. The ' +
      'per-game move shown there is the club\'s: the engine amplifies each ' +
-     'delta by where a player sits in his provisional window, so the Δ on the ' +
-     'row is his own' : '') + `.</p>` +
+     'delta by where a player sits in their provisional window, so the Δ on the ' +
+     'row is their own' : '') + `.</p>` +
     (kind === 'c' ? rosterSection(ckey) : '') +
     (pts.length ? histTable(pts, kind === 'c', ckey) : '');
   if (opts.push !== false) {
@@ -1397,7 +1481,11 @@ const DASH = ['none', '5 3', '2 3', '8 3 2 3',
               '12 4', '1 3', '7 3 1 3', '3 3 9 3'];
 const TOPN = 25;   // the per-season cut a subject must have made, once, ever
 // Codes match the DIVCODE written into each event by analysis.rankings.
-const DIVLABEL = {all: 'all divisions', 0: 'club', 1: 'college', 2: 'college D-III'};
+const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: 'college',
+                  2: 'college D-III', 3: 'club mixed', 4: "club women's"};
+// Codes match the payload's gender map: 1 male-matching, 2 female-matching.
+const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
+const GEN = D.genders || {};
 const trendCache = {};
 
 function playerLabel(pid) {
@@ -1409,13 +1497,18 @@ function playerLabel(pid) {
 
 /* One value per season: the rating after that season's LAST event. Points are
    already chronological, so a plain overwrite lands on the last one. */
-function seasonData(kind, div) {
-  const ck = kind + '|' + div;
+function seasonData(kind, div, gen) {
+  const ck = kind + '|' + div + '|' + gen;
   if (trendCache[ck]) return trendCache[ck];
   const src = kind === 'p' ? H.players : H.teams;
   const dv = div === 'all' ? null : +div;
+  // Gender selects whole SUBJECTS, unlike division, which selects points: a
+  // person does not change gender-matching group between events, and clubs
+  // have no group at all, so the filter is inert on the club side.
+  const gv = (gen === 'all' || kind !== 'p') ? null : +gen;
   const all = [];
   for (const key in src) {
+    if (gv !== null && GEN[key] !== gv) continue;
     const pts = decode(src[key]);
     if (!pts.length) continue;
     const vals = SEASONS.map(() => null);
@@ -1552,7 +1645,11 @@ const seriesVal = (s, i) => s.vals[i] === null ? null
 
 function drawTrends() {
   const kind = $('#tsub').value, mode = $('#tmode').value, div = $('#tdiv').value;
-  const dat = seasonData(kind, div);
+  const gen = $('#tgen').value;
+  // Clubs carry no gender-matching group, so the control is disabled rather
+  // than silently ignored when the subject is clubs.
+  $('#tgen').disabled = kind !== 'p';
+  const dat = seasonData(kind, div, gen);
   hotIdx = null; pinIdx = null; yearIdx = null;
   curMode = mode; curMed = dat.med; curSeries = dat.top;
   // Only used to break ties between subjects with no value in the ranked
@@ -1581,7 +1678,7 @@ function drawTrends() {
   setYear(DEFYEAR);
   $('#tcount').textContent = `${curSeries.length} of ` +
     `${dat.n.toLocaleString()} ${kind === 'p' ? 'players' : 'clubs'} have closed ` +
-    `a season in the top 25 · ${DIVLABEL[div]} · ` +
+    `a season in the top 25 · ${DIVLABEL[div]}${kind === 'p' ? GENLABEL[gen] : ''} · ` +
     `${SEASONS[0]}–${SEASONS[SEASONS.length - 1]}`;
 }
 
@@ -1670,6 +1767,7 @@ $('#tlegend').addEventListener('click', e => {
 });
 $('#tsub').onchange = drawTrends;
 $('#tdiv').onchange = drawTrends;
+$('#tgen').onchange = drawTrends;
 $('#tmode').onchange = drawTrends;
 $('#tnote').textContent =
   `One point per season: the rating after that season's last event. Every subject ` +
@@ -1686,7 +1784,11 @@ $('#tnote').textContent =
   `median of every rated subject active that season. Narrowing the division keeps ` +
   `only events in it, so a season reads as the rating after that season's last ` +
   `event in that division — 301 club identities play in more than one, and each ` +
-  `is ranked on its own record in whichever division you are looking at.`;
+  `is ranked on its own record in whichever division you are looking at. Gender ` +
+  `works the other way and selects whole people, since nobody changes group ` +
+  `between events; it is inert for clubs. Both narrow the population, so the top ` +
+  `25 is recomputed inside whatever you have selected. All five divisions share ` +
+  `one rating scale, bridged by the ${GENDER_NOTE}`;
 
 drawClubs(); drawPlayers(); drawUS(); routeHash();
 </script>

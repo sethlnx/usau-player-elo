@@ -100,11 +100,14 @@ def last_appearance(con):
     return latest
 
 
-def latest_rosters(con, season: int, basis: str = "completed"):
-    """club -> player_ids from one club-event roster, chosen by `basis`.
+def latest_rosters(con, season: int, basis: str = "completed",
+                   division: str = "club"):
+    """club key -> player_ids from one event roster, chosen by `basis`.
 
-    Division-scoped because the team tables are club-only; college event teams
-    share the same season and would otherwise be ranked alongside them.
+    Division-scoped: one call rates one division. Teams from two divisions
+    share a season and would otherwise be ranked against each other, and 73
+    club names exist in more than one gender division, so a name alone is not
+    a unique row.
 
     "completed" takes each club's most recent finished event. This is the
     results-grounded default: USAU posts rosters weeks ahead, so rating a team
@@ -137,19 +140,23 @@ def latest_rosters(con, season: int, basis: str = "completed"):
         FROM event_teams et
         JOIN events ev ON ev.event_id = et.event_id
         WHERE ev.season = ?
-          AND COALESCE(ev.division, 'club') = 'club'
+          AND COALESCE(ev.division, 'club') = ?
           AND {when}
         ORDER BY ev.start_date {order}
-    """, (season,)).fetchall()
+    """, (season, division)).fetchall()
     # Last row wins: ASC keeps the latest completed event, DESC the soonest
     # upcoming one.
-    latest_etid, source = {}, {}
+    rosters, clubs = load_maps(con)
+    latest_etid, source, display = {}, {}, {}
     for club, sd, etid, evname in rows:
-        latest_etid[club] = etid
-        source[club] = (evname, sd)
-    rosters, _ = load_maps(con)
-    return ({club: rosters.get(etid, []) for club, etid in latest_etid.items()},
-            source)
+        key = clubs.get(etid)
+        if not key:
+            continue
+        latest_etid[key] = etid
+        source[key] = (evname, sd)
+        display[key] = club
+    return ({key: rosters.get(etid, []) for key, etid in latest_etid.items()},
+            source, display)
 
 
 # Published config. SOFTMAX-weighted team rating (tau=600) with stat-driven
@@ -353,15 +360,64 @@ def latest_rosters(con, season: int, basis: str = "completed"):
 # accuracy — VAL overfitting, plainly. Its four club-side moves (mov_norm 6,
 # provisional_multiplier 5, provisional_games 24, college_scale 220) are inside
 # noise on TEST (Δ -0.00014, CI [-0.00099,+0.00077]) and make college worse.
+# CLUB-MIXED and CLUB-WOMEN (822 + 549 events, 23,851 + 8,426 games,
+# 2017-2026). Both are rated on the SAME scale as the men's divisions rather
+# than in their own pools: 10,814 names appear in both mixed and a men's
+# division and 4,981 in both mixed and women's, so mixed is a dense bridge and
+# a player's rating follows them across it. Men's<->women's is NOT a bridge —
+# identity.resolve splits those 279 names as two people, since no body plays
+# both series.
+#
+# Bases chosen on VAL by the division's own games, per the D-III lesson above.
+# The two interact (they share players through mixed) so they were swept
+# jointly, 5x5 coarse then 3x5 fine, and (1500, 1600) is the joint optimum:
+#     mb\wb        1450     1500     1550     1600     1650
+#     1450       .44192   .44155   .44137   .44137   .44159
+#     1500       .44236   .44182   .44147  [.44131]  .44136
+#     1550       .44323   .44249   .44196   .44162   .44148
+# (n-weighted mean of mixed and women VAL logloss.) Read the flatness, not the
+# minimum: the whole grid spans 0.0019 and its interior spans 0.0005, so these
+# bases are identified to about +/-100 and no further. What the surface does
+# say is that neither pool wants to enter BELOW club — a women's debutant
+# priced at 1450 is worse than one priced at 1600 on every row.
+#
+# division_scale club-women 200, against 260 everywhere else, is the one sharp
+# result here: VAL runs .3861/.3755/.3702/.3678/[.3672]/.3676/.3702 across
+# 120/140/160/180/200/220/260 and TEST agrees, bottoming at the same place.
+# The women's division is simply more stratified — same-corpus logloss 0.375
+# against 0.450 for club — and a narrower scale is what turns a given rating
+# gap into the larger win probability that stratification implies. club-mixed
+# sits at an interior 260, matching club and college (230 -> .46870,
+# 260 -> .46847, 290 -> .46949).
+#
+# Effect on the existing club table: NONE, which is the point. Replaying the
+# published config on the pre-merge corpus and this one on the merged corpus,
+# club TEST 2024-25 moves 0.45140 -> 0.44977, paired 90% CI
+# [-0.00412, +0.00086] — a CI spanning zero. Two divisions were added to the
+# ratings without moving the division the site was built on.
 PUBLISHED = dict(tau=600.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=3.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=14,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
                  division_scale={"club": 260.0, "college": 260.0,
-                                 "college-d3": 260.0},
+                                 "college-d3": 260.0, "club-mixed": 260.0,
+                                 "club-women": 200.0},
                  division_bases={"club": 1500.0, "college": 1350.0,
-                                 "college-d3": 1250.0, "ufa": 1550.0})
+                                 "college-d3": 1250.0, "ufa": 1550.0,
+                                 "club-mixed": 1500.0, "club-women": 1600.0})
+# Division as a small int, not an initial: "club"[:1] and "college"[:1] are
+# both "c", which silently labelled every club event as college. Five codes
+# now — a binary flag sent every D-III event back to "club". Codes are
+# positional: history.json stores them per event, player_elo.csv packs them
+# into a bitmask, and the site's DIVLABEL mirrors them. APPEND, never reorder.
+DIVCODE = {"club": 0, "college": 1, "college-d3": 2,
+           "club-mixed": 3, "club-women": 4}
+# Divisions the team tables cover, in display order. College is excluded: a
+# college roster is a season-long squad rather than an event entry, so
+# "the roster it last played" does not mean the same thing there, and the
+# three roster bases the tables are built on would not be comparable.
+TEAM_DIVISIONS = ["club", "club-mixed", "club-women"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
@@ -373,35 +429,37 @@ PUBLISHED = dict(tau=600.0, involvement_credit=False,
 FULL_SQUAD_FRACTION = 0.8
 
 
-def best_rosters(con, season: int, model):
-    """club -> (player_ids, event, date): the club's highest-rated FULL squad.
+def best_rosters(con, season: int, model, division: str = "club"):
+    """club key -> player_ids: the club's highest-rated FULL squad.
 
     "Best version" in the sense of the strongest lineup a club has actually
     listed this season, completed or upcoming, rather than whichever roster
     happens to be most recent. Rosters below FULL_SQUAD_FRACTION of the club's
-    own largest are ineligible; see the note above.
+    own largest are ineligible; see the note above. Returns the same
+    (rosters, source, display) triple as latest_rosters.
     """
     rows = con.execute("""
         SELECT COALESCE(et.full_name, et.display_name) AS club,
                ev.name, ev.start_date, et.event_team_id
         FROM event_teams et
         JOIN events ev ON ev.event_id = et.event_id
-        WHERE ev.season = ? AND COALESCE(ev.division, 'club') = 'club'
+        WHERE ev.season = ? AND COALESCE(ev.division, 'club') = ?
         ORDER BY ev.start_date
-    """, (season,)).fetchall()
-    rosters, _ = load_maps(con)
-    cand = {}
+    """, (season, division)).fetchall()
+    rosters, clubs = load_maps(con)
+    cand, display = {}, {}
     for club, evname, sd, etid in rows:
-        pids = rosters.get(etid)
-        if pids:
-            cand.setdefault(club, []).append((pids, evname, sd))
+        pids, key = rosters.get(etid), clubs.get(etid)
+        if pids and key:
+            cand.setdefault(key, []).append((pids, evname, sd))
+            display[key] = club
     out, source = {}, {}
-    for club, entries in cand.items():
+    for key, entries in cand.items():
         floor = FULL_SQUAD_FRACTION * max(len(p) for p, _, _ in entries)
         full = [e for e in entries if len(e[0]) >= floor]
         pids, evname, sd = max(full, key=lambda e: model.team_rating(e[0]))
-        out[club], source[club] = pids, (evname, sd)
-    return out, source
+        out[key], source[key] = pids, (evname, sd)
+    return out, source, display
 
 
 # Players below this many games get no stored trajectory. Matches the site's
@@ -432,10 +490,6 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
                    if subj[0] == "p" and subj[1] in keep} |
                   {e for subj, evs in snaps.items() for e in evs if subj[0] == "c"})
     ix = {e: i for i, e in enumerate(used)}
-    # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
-    # both "c", which silently labelled every club event as college. Three
-    # codes now — a binary flag sent every D-III event back to "club".
-    DIVCODE = {"club": 0, "college": 1, "college-d3": 2}
     events = [[evinfo[e][1][:10], evinfo[e][0][:46], evinfo[e][2],
                DIVCODE.get(evinfo[e][3], 0)]
               for e in used]
@@ -513,19 +567,19 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
     # full-strength squad — the same selection team_elo_best.csv rates off —
     # which may belong to an event not yet played and therefore absent from
     # `used`. Its people must land in the shared index, so collect them
-    # before it is built. best_rosters keys on the display name, which is
-    # exactly what `alias` maps back to the normalized club key.
+    # before it is built. best_rosters now keys on the model's club key
+    # directly, so no name round-trip through `alias` is needed.
     pname = dict(con.execute("SELECT player_id, display_name FROM players"))
-    best, bsrc = best_rosters(con, season, model)
     best_ref = {}
-    for club_dn, pids in best.items():
-        key = alias.get(club_dn)
-        if not key:
-            continue
-        persons = [(pname[p], str(p)) for p in pids if p in pname]
-        seen.update(persons)
-        evname, sd = bsrc[club_dn]
-        best_ref[key] = (evname, sd, persons)
+    for division in TEAM_DIVISIONS:
+        best, bsrc, _display = best_rosters(con, season, model, division)
+        for key, pids in best.items():
+            if key not in teams:
+                continue
+            persons = [(pname[p], str(p)) for p in pids if p in pname]
+            seen.update(persons)
+            evname, sd = bsrc[key]
+            best_ref[key] = (evname, sd, persons)
     # Deduped on (name, player_id), never on name alone: the resolver splits an
     # ambiguous name into distinct identities, so two entries legitimately read
     # the same and `peoplePid` has to stay parallel.
@@ -661,6 +715,23 @@ def main(cfg: EloConfig | None = None):
                       on_game=capture)
 
     latest = last_appearance(con)
+    # Gender-matching group, decided in identity.resolve: 'm' if the identity
+    # ever played a men's division, 'w' for the women's division, else the
+    # pronoun majority off their mixed roster rows, else '' for unknown. It
+    # rides on the player table rather than being re-derived here so the CSV,
+    # the site and the DB can never disagree about who is in which bucket.
+    gender = dict(con.execute("SELECT player_id, gender FROM players"))
+    # Which divisions a player has appeared in, as a bitmask over DIVCODE, so
+    # the site can filter the flat table by division. A rating is one number
+    # across every division a player has played — the mask says where they
+    # turned out, not that they have a separate rating there.
+    div_mask = defaultdict(int)
+    for pid, division in con.execute("""
+            SELECT DISTINCT rp.player_id, COALESCE(ev.division, 'club')
+            FROM roster_players rp
+            JOIN event_teams et USING (event_team_id)
+            JOIN events ev ON ev.event_id = et.event_id"""):
+        div_mask[pid] |= 1 << DIVCODE.get(division, 0)
     out = DB_PATH.parent / "player_elo.csv"
     with open(out, "w", newline="") as f:
         w = csv.writer(f)
@@ -668,7 +739,7 @@ def main(cfg: EloConfig | None = None):
         # names are split per-club into separate players, so several rows can
         # read "Julian Kagi" with different ratings. Join on the id, never the name.
         w.writerow(["rank", "player", "player_id", "elo", "sigma", "lo90", "hi90",
-                    "games", "last_club", "last_season"])
+                    "games", "last_club", "last_season", "gender", "divisions"])
         ranked = sorted(
             ((st.rating, pid, st.games) for pid, st in model.players.items()
              if not str(pid).startswith("ghost:") and st.games >= 5),
@@ -678,7 +749,8 @@ def main(cfg: EloConfig | None = None):
             s = rating_sigma(ngames)
             w.writerow([i, name, pid, round(rating, 1), round(s, 1),
                         round(rating - Z90 * s, 1), round(rating + Z90 * s, 1),
-                        ngames, club, season])
+                        ngames, club, season, gender.get(pid, ""),
+                        div_mask.get(pid, 0)])
     print(f"wrote {out} ({len(ranked)} players with 5+ games)")
 
     season = con.execute("SELECT max(season) FROM events WHERE has_schedule=1").fetchone()[0]
@@ -686,20 +758,32 @@ def main(cfg: EloConfig | None = None):
                          ("upcoming", "team_elo_upcoming.csv"),
                          ("best", "team_elo_best.csv")):
         team_out = DB_PATH.parent / fname
-        rosters_by_club, source = (best_rosters(con, season, model)
-                                   if basis == "best"
-                                   else latest_rosters(con, season, basis))
         with open(team_out, "w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["rank", "club", "elo", "roster_size", "season",
-                        "roster_event", "roster_event_date"])
-            rated = [(model.team_rating(pids), club, len(pids))
-                     for club, pids in rosters_by_club.items() if pids]
-            for i, (rating, club, size) in enumerate(sorted(rated, reverse=True), 1):
-                evname, sd = source[club]
-                w.writerow([i, club, round(rating, 1), size, season, evname, sd])
-        print(f"wrote {team_out} ({len(rated)} teams, season {season}, "
-              f"{basis} rosters)")
+            # club_key is the model's identity and what the site links on;
+            # `club` is the name USAU prints. They differ (aliases, and the
+            # suffix that keeps men's and women's Phoenix apart).
+            w.writerow(["rank", "club", "club_key", "division", "elo",
+                        "roster_size", "season", "roster_event",
+                        "roster_event_date"])
+            total = 0
+            # Ranked WITHIN a division: the divisions never play each other,
+            # so one merged 1..n would invite a comparison the games do not
+            # support. The site shows one division at a time for the same reason.
+            for division in TEAM_DIVISIONS:
+                by_club, source, display = (
+                    best_rosters(con, season, model, division)
+                    if basis == "best"
+                    else latest_rosters(con, season, basis, division))
+                rated = [(model.team_rating(pids), key, len(pids))
+                         for key, pids in by_club.items() if pids]
+                for i, (rating, key, size) in enumerate(sorted(rated, reverse=True), 1):
+                    evname, sd = source[key]
+                    w.writerow([i, display[key], key, division, round(rating, 1),
+                                size, season, evname, sd])
+                total += len(rated)
+        print(f"wrote {team_out} ({total} teams across {len(TEAM_DIVISIONS)} "
+              f"divisions, season {season}, {basis} rosters)")
     write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
     con.close()
 

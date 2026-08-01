@@ -58,6 +58,15 @@ RATE_FILE = os.environ.get("USAU_RATE_FILE")
 # time, so USAU_BLOCK_PROBES can opt into a longer escalating schedule.
 BLOCK_PROBE_SECONDS = tuple(
     int(s) for s in os.environ.get("USAU_BLOCK_PROBES", "5,15,30").split(","))
+# Optional egress proxy, e.g. a Mullvad per-server SOCKS5
+# (socks5h://us-sea-wg-socks5-001.relays.mullvad.net:1080). Lets a backfill
+# rotate exit IPs per run without reconnecting the tunnel (which stalls every
+# other connection on the machine). Applies to ALL requests INCLUDING the
+# control probe: the block classifier must look through the same exit the data
+# requests use, or a blocked exit reads as "site fine" and healthy events get
+# wrongly skipped as UrlUnavailable.
+_PROXY = os.environ.get("USAU_PROXY")
+PROXIES = {"http": _PROXY, "https": _PROXY} if _PROXY else None
 
 _last_request_time = 0.0
 _live_request_count = 0  # network requests this process (cache hits excluded)
@@ -94,7 +103,8 @@ CONTROL_URL = BASE_URL + "/events/tournament/"
 def _site_reachable() -> bool:
     """Is the site answering at all? Used to tell a bad URL from a WAF block."""
     try:
-        r = requests.get(CONTROL_URL, headers={"User-Agent": USER_AGENT}, timeout=30)
+        r = requests.get(CONTROL_URL, headers={"User-Agent": USER_AGENT},
+                         timeout=30, proxies=PROXIES)
         return r.status_code < 500
     except (requests.Timeout, requests.ConnectionError):
         return False
@@ -185,7 +195,8 @@ def get(url: str, session: requests.Session | None = None, refresh: bool = False
     req = session or requests
     try:
         resp = _request_with_backoff(
-            lambda: req.get(url, headers={"User-Agent": USER_AGENT}, timeout=60))
+            lambda: req.get(url, headers={"User-Agent": USER_AGENT},
+                            timeout=60, proxies=PROXIES))
     except requests.HTTPError as e:
         if e.response is not None and e.response.status_code == 404:
             miss.parent.mkdir(parents=True, exist_ok=True)
@@ -211,7 +222,8 @@ def post(url: str, data: dict, session: requests.Session, refresh: bool = False)
     if path.exists() and not refresh:
         return path.read_text()
     resp = _request_with_backoff(
-        lambda: session.post(url, data=data, headers={"User-Agent": USER_AGENT}, timeout=60))
+        lambda: session.post(url, data=data, headers={"User-Agent": USER_AGENT},
+                             timeout=60, proxies=PROXIES))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(resp.text)
     return resp.text

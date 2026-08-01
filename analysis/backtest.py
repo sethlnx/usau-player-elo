@@ -208,15 +208,27 @@ def load_ufa_games(con) -> tuple[list, dict, dict]:
     return games, rosters_add, clubs_add
 
 
+# A club identity is its normalized name — deliberately, so "Rhino" and
+# "Rhino Slam!" are one club and a college program's D-I and D-III sides are
+# one program. Across GENDER divisions that breaks down: men's Phoenix and
+# women's Phoenix are two teams from one org, and 73 club names (5 active in
+# 2026) collide that way. Mixed and women's keys therefore carry a suffix.
+# The men's group keeps the bare name so every existing key — history.json,
+# CLUB_ALIASES, the U.S. Open tracker — is byte-identical to before.
+CLUB_SUFFIX = {"club-mixed": " (mixed)", "club-women": " (women's)"}
+
+
 def load_maps(con):
     """(rosters, clubs): event_team_id -> [player_id] and -> club key."""
     rosters: dict[str, list[int]] = {}
     for etid, pid in con.execute("SELECT event_team_id, player_id FROM roster_players"):
         rosters.setdefault(etid, []).append(pid)
     clubs = {
-        etid: norm_club(full, disp)
-        for etid, full, disp in con.execute(
-            "SELECT event_team_id, full_name, display_name FROM event_teams")
+        etid: norm_club(full, disp) + CLUB_SUFFIX.get(division, "")
+        for etid, full, disp, division in con.execute(
+            """SELECT et.event_team_id, et.full_name, et.display_name,
+                      COALESCE(ev.division, 'club')
+               FROM event_teams et JOIN events ev ON ev.event_id = et.event_id""")
     }
     return rosters, clubs
 

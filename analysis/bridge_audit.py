@@ -1,9 +1,16 @@
-"""Rank college<->club bridge links by false-merge suspicion.
+"""Rank cross-division bridge links by false-merge suspicion.
 
 For every bridge in data/cross_division_links.csv, gather the evidence the
 name match ignores — listed heights on each side, team cities, and how far
-the merged history moves the player's rating versus a club-only replay —
-and write a review queue to data/bridge_audit.csv (most suspect first).
+the merged history moves the player's rating versus a replay with every
+cross-division link severed — and write a review queue to
+data/bridge_audit.csv (most suspect first).
+
+Five divisions, so both halves are division-generic. Heights are compared
+pairwise across every division the bridge spans and the widest gap is the
+verdict; the rating baseline re-keys each roster slot to (player, division),
+which is exactly the merge this file is auditing, rather than the old
+club-only replay that could only see college<->club.
 
 A hard height contradiction (both sides listed, medians >= 4" apart, 2+
 samples each) is as close to proof of two different people as this data
@@ -60,13 +67,20 @@ def main(write_overrides: bool = False):
             "SELECT player_id, norm_name FROM players WHERE ambiguous=0"):
         pid_of[nname] = pid
 
-    # rating shift: merged history vs club-only replay
+    # Rating shift: the merged replay against one where a bridge is severed —
+    # every roster slot re-keyed to (player_id, division), so a player who
+    # spans divisions is replayed as one identity per division. The difference
+    # at a bridge IS what merging bought or cost it.
     games = bt.load_games(con)
     rosters, clubs = bt.load_maps(con)
+    et_div = dict(con.execute("""
+        SELECT et.event_team_id, COALESCE(ev.division, 'club')
+        FROM event_teams et JOIN events ev ON ev.event_id = et.event_id"""))
+    split_rosters = {etid: [(pid, et_div.get(etid, "club")) for pid in pids]
+                     for etid, pids in rosters.items()}
     cfg = EloConfig()
     _, full = bt.replay("player", games, rosters, clubs, cfg)
-    _, clubonly = bt.replay("player", [g for g in games if g["division"] == "club"],
-                            rosters, clubs, cfg)
+    _, severed = bt.replay("player", games, split_rosters, clubs, cfg)
     con.close()
 
     links_file = DATA / "cross_division_links.csv"
@@ -79,28 +93,32 @@ def main(write_overrides: bool = False):
             nname = row["norm_name"]
             if overrides.get(nname) in ("block", "confirm"):
                 continue
-            hc = heights.get((nname, "college"), [])
-            hb = heights.get((nname, "club"), [])
-            med_c = statistics.median(hc) if hc else None
-            med_b = statistics.median(hb) if hb else None
-            hdiff = abs(med_c - med_b) if med_c and med_b else None
-            conflict = (hdiff is not None and hdiff >= HEIGHT_CONFLICT_INCHES
-                        and len(hc) >= MIN_HEIGHT_SAMPLES
-                        and len(hb) >= MIN_HEIGHT_SAMPLES)
+            divisions = [d for d in row["divisions"].split("; ") if d]
+            meds = {d: statistics.median(heights[(nname, d)])
+                    for d in divisions
+                    if len(heights.get((nname, d), [])) >= MIN_HEIGHT_SAMPLES}
+            hdiff = (max(meds.values()) - min(meds.values())) if len(meds) > 1 else None
+            conflict = hdiff is not None and hdiff >= HEIGHT_CONFLICT_INCHES
             pid = pid_of.get(nname)
             fs = full.players.get(pid) if pid else None
-            cs = clubonly.players.get(pid) if pid else None
-            shift = (fs.rating - cs.rating) if fs and cs else 0.0
+            # Severed, the player exists once per division; the largest of
+            # those is the identity the merge grew out of.
+            shards = [severed.players[(pid, d)] for d in divisions
+                      if (pid, d) in severed.players] if pid else []
+            base = max(shards, key=lambda s: s.games) if shards else None
+            shift = (fs.rating - base.rating) if fs and base else 0.0
             audit.append({
                 "norm_name": nname,
                 "height_conflict": int(conflict),
                 "rating_shift": round(shift, 1),
-                "med_height_college": med_c, "n_h_college": len(hc),
-                "med_height_club": med_b, "n_h_club": len(hb),
-                "college_teams": row["college_teams"],
-                "club_teams": row["club_teams"],
-                "college_cities": "; ".join(sorted(cities.get((nname, "college"), []))),
-                "club_cities": "; ".join(sorted(cities.get((nname, "club"), []))),
+                "height_gap_in": round(hdiff, 1) if hdiff is not None else None,
+                "divisions": row["divisions"],
+                "med_heights": "; ".join(f"{d} {meds[d]:.0f}\"" for d in sorted(meds)),
+                "n_heights": "; ".join(
+                    f"{d} {len(heights.get((nname, d), []))}" for d in divisions),
+                "teams": row["teams"],
+                "cities": "; ".join(sorted(
+                    {c for d in divisions for c in cities.get((nname, d), set())})),
             })
 
     audit.sort(key=lambda a: (-a["height_conflict"], -abs(a["rating_shift"])))

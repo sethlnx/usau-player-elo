@@ -10,6 +10,10 @@ Strategy:
   club summer) never collides — that's a bridge player, and linking them is
   the whole point of the unified rating. Cross-division links are logged to
   their own review file since they carry the most false-merge risk.
+- EXCEPT across gender divisions. USAU's men's divisions (club, college,
+  college-d3) and its women's division are not two halves of one career: a
+  name in both is two people, so those shards are always split. Mixed bridges
+  to either freely, which is what puts every division on one rating scale.
 - The date conflict is asymmetric evidence: present, it proves two people;
   absent, it merely fails to disprove them. Same-named players in different
   regions who never coincide therefore merge, and a bad merge corrupts two
@@ -35,11 +39,81 @@ import csv
 import re
 import sqlite3
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "usau.db"
 AMBIGUITY_REPORT = DB_PATH.parent / "ambiguities.csv"
+
+# Gender-matching groups. The club/college/college-d3 divisions are all
+# Club-Men / College-Men competition levels (see scraper.build_db.DIVISIONS),
+# so "has played men's" is a division fact, not an inference. Mixed belongs to
+# neither: it is the bridge, and a mixed player's group is read off the
+# Pronouns column USAU publishes on the roster page.
+MENS_DIVISIONS = {"club", "college", "college-d3"}
+WOMENS_DIVISIONS = {"club-women"}
+MIXED_DIVISIONS = {"club-mixed"}
+
+
+def division_gender(division: str) -> str | None:
+    if division in MENS_DIVISIONS:
+        return "m"
+    if division in WOMENS_DIVISIONS:
+        return "w"
+    return None
+
+
+def pronoun_gender(pronouns: str | None) -> str | None:
+    """'H' -> m, 'S/T' -> w, anything ambiguous or absent -> None.
+
+    USAU stores the roster Pronouns column as slash-joined initials: H(e),
+    S(he), T(hey), Z(e). Only a clean he-or-she reading is used. 'T' alone,
+    the Z forms and the 42 rows carrying both H and S say nothing about which
+    gender-matching ratio the player counts against, so they stay unknown
+    rather than being guessed into a bucket.
+    """
+    if not pronouns:
+        return None
+    tokens = {t.strip().upper() for t in pronouns.split("/") if t.strip()}
+    has_h, has_s = "H" in tokens, "S" in tokens
+    if has_h and not has_s:
+        return "m"
+    if has_s and not has_h:
+        return "w"
+    return None
+
+
+# First-name likelihood fallback, applied only after division and pronoun
+# evidence are exhausted. Both thresholds were measured, not picked: see the
+# note at the call site in main().
+NAME_MIN_SIGHTINGS = 5
+NAME_MIN_SHARE = 0.95
+
+
+def first_name(display_name: str) -> str:
+    """ASCII-folded lowercase first token — the key the prior is built on."""
+    s = unicodedata.normalize("NFKD", display_name)
+    s = s.encode("ascii", "ignore").decode().strip().lower()
+    parts = s.split()
+    return parts[0] if parts else ""
+
+
+def name_gender(name_counts, class_total, fn: str) -> str | None:
+    """P(first name | gender) vote, or None when the name is too rare or mixed.
+
+    Compares likelihoods rather than the raw male share so the 83/17 class
+    imbalance of the labelled pool cannot drag every borderline name male.
+    """
+    seen = name_counts.get(fn)
+    if not seen or seen["m"] + seen["w"] < NAME_MIN_SIGHTINGS:
+        return None
+    lm = seen["m"] / max(class_total["m"], 1)
+    lw = seen["w"] / max(class_total["w"], 1)
+    if lm + lw == 0:
+        return None
+    gender, share = ("m", lm / (lm + lw)) if lm >= lw else ("w", lw / (lm + lw))
+    return gender if share >= NAME_MIN_SHARE else None
+
 
 SCHEMA = """
 DROP TABLE IF EXISTS players;
@@ -48,7 +122,9 @@ CREATE TABLE players (
     player_id INTEGER PRIMARY KEY,
     display_name TEXT NOT NULL,
     norm_name TEXT NOT NULL,
-    ambiguous INTEGER DEFAULT 0
+    ambiguous INTEGER DEFAULT 0,
+    gender TEXT NOT NULL DEFAULT '',
+    gender_source TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE roster_players (
     event_team_id TEXT NOT NULL,
@@ -152,7 +228,8 @@ def main():
     merged = {n for n, a in overrides.items() if a == "merge"}
     rows = con.execute("""
         SELECT re.event_team_id, re.name, et.full_name, et.display_name,
-               ev.season, ev.division, ev.start_date, ev.end_date, ev.event_id
+               ev.season, ev.division, ev.start_date, ev.end_date, ev.event_id,
+               re.pronouns
         FROM roster_entries re
         JOIN event_teams et ON et.event_team_id = re.event_team_id
         JOIN events ev ON ev.event_id = et.event_id
@@ -162,20 +239,35 @@ def main():
     appearances = defaultdict(lambda: defaultdict(set))
     divisions_of = defaultdict(set)   # nname -> {division}, for the bridge log
     windows = defaultdict(list)   # nname -> [(club, start, end, event_id)]
-    roster_rows = []  # (event_team_id, raw_name, nname, club, season, division)
+    roster_rows = []  # (event_team_id, raw_name, nname, club, season, division, pg)
     display_for = {}
+    # nname -> {'m','w'} from DIVISION play only, which is the hard evidence.
+    genders_of = defaultdict(set)
     for (etid, raw_name, full_name, disp, season, division,
-         start_date, end_date, event_id) in rows:
+         start_date, end_date, event_id, pronouns) in rows:
         nname = norm_name(raw_name)
         if not nname:
             continue
         club = norm_club(full_name, disp)
         appearances[nname][(division, season)].add(club)
         divisions_of[nname].add(division)
+        dg = division_gender(division)
+        if dg:
+            genders_of[nname].add(dg)
         if start_date:
             windows[nname].append((club, start_date, end_date, event_id))
-        roster_rows.append((etid, raw_name, nname, club, season, division))
+        roster_rows.append((etid, raw_name, nname, club, season, division,
+                            pronoun_gender(pronouns)))
         display_for.setdefault(nname, re.sub(r"\s+", " ", raw_name).strip())
+
+    # A name played in BOTH a men's division and the women's division is two
+    # people, not a bridge — 275 names, and no body is eligible for both
+    # series. Their shards are split by gender group, and their mixed rows are
+    # routed by the roster page's own Pronouns column. Mixed rows that pronouns
+    # cannot place get a third shard: guessing would corrupt a real career,
+    # while an unplaced shard only loses the link (see the asymmetry note
+    # below). 181 of the 275 also play mixed, so this is a handful of rows.
+    split_gender = {n for n, gs in genders_of.items() if len(gs) > 1}
 
     # ambiguous = 2+ clubs within the SAME (division, season). Cross-division
     # same-season appearances are bridge players, not collisions.
@@ -203,12 +295,15 @@ def main():
 
     con.executescript(SCHEMA)
     player_ids: dict[tuple, int] = {}   # identity key -> player_id
+    display_of: dict[int, str] = {}     # player_id -> display name, for the name prior
 
-    def player_for(nname: str, club: str, division: str) -> int:
+    def player_for(nname: str, club: str, division: str, pg: str | None) -> int:
         if nname in ambiguous_names:
             key = (nname, club)
         elif nname in blocked:          # reviewed: college/club are two people
             key = (nname, division)
+        elif nname in split_gender:
+            key = (nname, division_gender(division) or pg or "?")
         else:
             key = (nname,)
         if key not in player_ids:
@@ -216,16 +311,74 @@ def main():
                 "INSERT INTO players (display_name, norm_name, ambiguous) VALUES (?,?,?)",
                 (display_for[nname], nname, int(nname in ambiguous_names)))
             player_ids[key] = cur.lastrowid
+            display_of[cur.lastrowid] = display_for[nname]
         return player_ids[key]
 
+    # Gender-matching evidence per resolved identity. Division play is
+    # decisive: any women's-division appearance makes a player female-matching,
+    # any men's-division appearance male-matching, and the split above
+    # guarantees no identity now holds both. Mixed-only players fall back to
+    # the pronoun majority across their roster rows, and stay unknown when
+    # that is silent or contradictory.
     seen = set()
-    for etid, raw_name, nname, club, season, division in roster_rows:
-        pid = player_for(nname, club, division)
+    div_evidence: dict[int, set] = defaultdict(set)
+    pro_evidence: dict[int, list] = defaultdict(list)
+    for etid, raw_name, nname, club, season, division, pg in roster_rows:
+        pid = player_for(nname, club, division, pg)
+        dg = division_gender(division)
+        if dg:
+            div_evidence[pid].add(dg)
+        elif pg:
+            pro_evidence[pid].append(pg)
         if (etid, raw_name) not in seen:
             seen.add((etid, raw_name))
             con.execute(
                 "INSERT OR IGNORE INTO roster_players (event_team_id, name, player_id) VALUES (?,?,?)",
                 (etid, raw_name, pid))
+
+    genders, sources = {}, {}
+    for pid in player_ids.values():
+        dg = div_evidence.get(pid, set())
+        if len(dg) == 1:
+            genders[pid], sources[pid] = next(iter(dg)), "division"
+            continue
+        votes = pro_evidence.get(pid, [])
+        m, w = votes.count("m"), votes.count("w")
+        g = "m" if m > w else "w" if w > m else ""
+        genders[pid] = g
+        sources[pid] = "pronouns" if g else ""
+
+    # Third pass, for mixed-only players USAU published no pronouns for: a
+    # first-name likelihood learned from the players the first two passes DID
+    # place. 11,010 identities reach here, and dropping them all would empty
+    # the site's gender filter of a tenth of the corpus.
+    #
+    # It must be a LIKELIHOOD, P(name | gender), not the raw share of a name
+    # that is male. The labelled pool is 83% men, so a posterior threshold
+    # passes male names trivially and female names almost never: it placed the
+    # unplaced at 4.7 men per woman. Dividing by each class's total removes
+    # that, and the calibration check is external — mixed rosters are
+    # gender-balanced by USAU's ratio rules, so the answer should come out near
+    # even. It does: 1.09 men per woman.
+    #
+    # Held out on a BALANCED half of the labelled pool (balanced for the same
+    # reason), min 5 sightings and a 0.95 likelihood share score 98.6% accurate
+    # at 63% coverage; on the real unplaced population it places 72%. The other
+    # 3,124 keep gender='' and show only under "all genders" — a rare first
+    # name is not evidence of anything.
+    name_counts, class_total = defaultdict(Counter), Counter()
+    for pid, g in genders.items():
+        if g:
+            name_counts[first_name(display_of[pid])][g] += 1
+            class_total[g] += 1
+    for pid, g in genders.items():
+        if g:
+            continue
+        guess = name_gender(name_counts, class_total, first_name(display_of[pid]))
+        if guess:
+            genders[pid], sources[pid] = guess, "name"
+    con.executemany("UPDATE players SET gender=?, gender_source=? WHERE player_id=?",
+                    [(g, sources[pid], pid) for pid, g in genders.items() if g])
     con.commit()
 
     # Every raw collision is logged, split or not: the auto-merged ones are now
@@ -240,31 +393,39 @@ def main():
                     w.writerow([nname, verdict, division, season,
                                 "; ".join(sorted(clubs))])
 
-    # bridge players: same (unambiguous) name in both divisions -> one identity.
-    # Highest false-merge risk in the system, so log every one for review.
+    # bridge players: same (unambiguous) name in two or more divisions -> one
+    # identity. Highest false-merge risk in the system, so log every one for
+    # review. Gender-split names are excluded: they are no longer one identity.
     bridge_report = AMBIGUITY_REPORT.parent / "cross_division_links.csv"
     n_bridges = 0
     with open(bridge_report, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["norm_name", "college_teams", "club_teams", "review"])
+        w.writerow(["norm_name", "divisions", "teams", "review"])
         for nname in sorted(divisions_of):
             if (len(divisions_of[nname]) > 1 and nname not in ambiguous_names
-                    and nname not in blocked):
-                college = sorted({c for (d, s), cs in appearances[nname].items()
-                                  if d == "college" for c in cs})
-                club = sorted({c for (d, s), cs in appearances[nname].items()
-                               if d == "club" for c in cs})
-                w.writerow([nname, "; ".join(college), "; ".join(club),
-                            overrides.get(nname, "")])
+                    and nname not in blocked and nname not in split_gender):
+                teams = sorted({c for _k, cs in appearances[nname].items()
+                                for c in cs})
+                w.writerow([nname, "; ".join(sorted(divisions_of[nname])),
+                            "; ".join(teams), overrides.get(nname, "")])
                 n_bridges += 1
 
     n_players = con.execute("SELECT count(*) FROM players").fetchone()[0]
     n_links = con.execute("SELECT count(*) FROM roster_players").fetchone()[0]
+    by_gender = dict(con.execute(
+        "SELECT gender, count(*) FROM players GROUP BY gender"))
     print(f"{n_players} players, {n_links} roster links; "
           f"{len(raw_ambiguous)} name collisions -> {len(ambiguous_names)} split "
           f"per-club on a same-weekend conflict, "
           f"{len(raw_ambiguous) - len(ambiguous_names)} auto-merged; "
-          f"{n_bridges} college<->club bridge players\n"
+          f"{len(split_gender)} names split across men's/women's; "
+          f"{n_bridges} cross-division bridge players\n"
+          f"gender-matching: {by_gender.get('m', 0)} male, "
+          f"{by_gender.get('w', 0)} female, {by_gender.get('', 0)} unknown "
+          f"(by " + ", ".join(
+              f"{src or 'none'} {n}" for src, n in con.execute(
+                  "SELECT gender_source, count(*) FROM players "
+                  "WHERE gender<>'' GROUP BY gender_source ORDER BY 2 DESC")) + ")\n"
           f"reports: {AMBIGUITY_REPORT}, {bridge_report}")
     con.close()
 

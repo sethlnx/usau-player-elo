@@ -37,14 +37,15 @@ DIVISIONS = {
     "college": {"level": "College-Men", "group": "College - Men"},
     "college-d3": {"level": "College-Men", "group": "College - Men"},
 }
-# WARNING (club-women / club-mixed): events.url is UNIQUE and events.division is
-# a single column, so an event cross-listed across divisions ("Cooler Classic 37
-# (Men & Women)") shares one row and upsert_event overwrites division with
-# whichever ran last. Scraping these into the main usau.db will therefore
-# reassign the division of cross-listed Club-Men events and skew any query that
-# filters on it. Until events grows a division join table, run them into a
-# separate DB:  USAU_DB=data/usau_wm.db python -m scraper.build_db --division
-# club-women 2026   (the HTML cache in data/raw/cache/ is shared either way).
+# club-women / club-mixed are scraped into their own DBs (data/usau_mixed.db,
+# data/usau_women.db) and folded in afterwards by scraper/merge_divisions.py,
+# which re-keys event_id and imports them under their own division. Keep doing
+# that: it is the merge, not the scrape, that resolves the cross-listing.
+# events is keyed UNIQUE(url, division), so a tournament cross-listed across
+# divisions ("Cooler Classic 37 (Men & Women)") holds one row PER division
+# instead of one row whose division is whichever scrape ran last. Scraping two
+# divisions into one DB is therefore no longer silently lossy, but the caches
+# and rotation budget are per-run, so the split DBs remain the way to run it.
 # D-I and D-III share the College-Men competition level and the same schedule
 # URL, so the ONLY thing separating them is the event name. `college` takes
 # everything that is not D-III; `college-d3` takes exactly the D-III events.
@@ -79,13 +80,14 @@ CREATE TABLE IF NOT EXISTS events (
     event_id INTEGER PRIMARY KEY,
     season INTEGER NOT NULL,
     name TEXT NOT NULL,
-    url TEXT NOT NULL UNIQUE,
+    url TEXT NOT NULL,
     city TEXT, state TEXT,
     start_date TEXT, end_date TEXT,
     club_men_teams INTEGER,
     has_schedule INTEGER,
     division TEXT NOT NULL DEFAULT 'club',
-    complete INTEGER NOT NULL DEFAULT 0
+    complete INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (url, division)
 );
 CREATE TABLE IF NOT EXISTS event_teams (
     event_team_id TEXT PRIMARY KEY,
@@ -137,13 +139,14 @@ def upsert_event(con, season: int, ev: dict, division: str = "club") -> int:
         """INSERT INTO events (season, name, url, city, state, start_date, end_date,
                                club_men_teams, division)
            VALUES (?,?,?,?,?,?,?,?,?)
-           ON CONFLICT(url) DO UPDATE SET season=excluded.season, name=excluded.name,
+           ON CONFLICT(url, division) DO UPDATE SET season=excluded.season, name=excluded.name,
              city=excluded.city, state=excluded.state, start_date=excluded.start_date,
              end_date=excluded.end_date, club_men_teams=excluded.club_men_teams,
              division=excluded.division""",
         (season, ev["name"], ev["url"], ev["city"], ev["state"], start, end,
          int(m.group(1)) if m else None, division))
-    return con.execute("SELECT event_id FROM events WHERE url=?", (ev["url"],)).fetchone()[0]
+    return con.execute("SELECT event_id FROM events WHERE url=? AND division=?",
+                       (ev["url"], division)).fetchone()[0]
 
 
 def scrape_event(con, event_id: int, ev: dict, season: int, division: str = "club",
@@ -303,13 +306,15 @@ def main(seasons: list[int], division: str = "club"):
         print(f"== season {season}: {len(events)} {level} events", flush=True)
         skipped = 0
         for ev in sorted(events, key=lambda e: e["dates"]):
-            # Complete only counts for the division it was scraped under: an
-            # event cross-listed in club AND college shares one row (url is
-            # unique), and each division has its own schedule page to scrape.
-            prior = con.execute("SELECT division, complete FROM events WHERE url=?",
-                                (ev["url"],)).fetchone()
+            # Complete only counts for the division it was scraped under: each
+            # division has its own schedule page, and events is keyed
+            # (url, division) so a cross-listed tournament holds a row per
+            # division rather than one row they overwrite in turn.
+            prior = con.execute(
+                "SELECT complete FROM events WHERE url=? AND division=?",
+                (ev["url"], division)).fetchone()
             event_id = upsert_event(con, season, ev, division)
-            if prior and prior[1] and prior[0] == division:
+            if prior and prior[0]:
                 skipped += 1
                 continue
             try:
