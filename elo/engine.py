@@ -130,6 +130,19 @@ class PlayerElo:
         total = sum(weights)
         return sum(w * r for w, r in zip(weights, ratings)) / total
 
+    def pregame_ratings(self, home_roster: list, away_roster: list,
+                        division: str = "club") -> tuple[float, float]:
+        """(home, away) team ratings as play_game is about to see them.
+
+        Materializes both rosters first. team_rating on its own would reach a
+        debutant through _state and create him at the GLOBAL base instead of
+        his division's — which is exactly what _materialize's docstring forbids
+        reading around, and it silently moves every rating downstream.
+        """
+        self._materialize(home_roster, division)
+        self._materialize(away_roster, division)
+        return self.team_rating(home_roster), self.team_rating(away_roster)
+
     def expect(self, ra: float, rb: float, division: str = "club") -> float:
         scale = self.cfg.division_scale.get(division, self.cfg.scale)
         return 1.0 / (1.0 + 10 ** ((rb - ra) / scale))

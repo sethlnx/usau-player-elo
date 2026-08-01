@@ -953,7 +953,8 @@ const BSEASON = H.bestSeason;     // the season BR applies to (the current one)
 const PEOPLE = H.people || [], PPID = H.peoplePid || [];
 const HEV = H.events;   // [date, name, season, divisionCode]
 // Games behind each event, grouped by event index and stored once per game:
-// [homeClubIx, awayClubIx, homeScore, awayScore, stageIx] against GC/GST.
+// [homeClubIx, awayClubIx, homeScore, awayScore, stageIx, homeDelta, awayDelta]
+// against GC/GST. The deltas are what the game did to each CLUB's rating.
 const GC = H.gameClubs || [], GST = H.gameStages || [], GMS = H.games || {};
 const GCIX = new Map(GC.map((k, i) => [k, i]));
 /* One club's games at one event, from its own side of the net. Only the games
@@ -966,7 +967,8 @@ function gamesAt(ckey, evIdx) {
     const home = r[0] === me;
     if (!home && r[1] !== me) continue;
     out.push({opp: GC[home ? r[1] : r[0]], mine: home ? r[2] : r[3],
-              theirs: home ? r[3] : r[2], stage: GST[r[4]] || ''});
+              theirs: home ? r[3] : r[2], stage: GST[r[4]] || '',
+              d: (home ? r[5] : r[6]) || 0});
   }
   return out;
 }
@@ -1066,7 +1068,8 @@ function histTable(pts, isTeam, ckey) {
     // the model dropped.
     const gk = isTeam ? ckey : p.club;
     const ev = gk && gamesAt(gk, p.evIdx).length
-      ? `<span class="disc" data-games="${esc(gk + '|' + p.evIdx)}">` +
+      ? `<span class="disc" data-games="${esc(gk + '|' + p.evIdx)}" ` +
+        `data-kind="${isTeam ? 'c' : 'p'}" data-d="${d === null ? '' : d}">` +
         `${esc(p.event)}</span>`
       : esc(p.event);
     return `<tr><td class="d">${p.date}</td>` +
@@ -1080,11 +1083,29 @@ function histTable(pts, isTeam, ckey) {
          `<tbody>${rows}</tbody></table>`;
 }
 
-/* The games behind one event, in the order the model replayed them. The W-L
-   is the evidence for the Δ on the row that opened it. */
-function gamesPane(ckey, evIdx) {
+/* The games behind one event, in the order the model replayed them, each with
+   what it did to the CLUB's rating.
+
+   Those game moves rarely add up to the Δ on the row, and the gap is the
+   interesting part: a club's rating is the softmax mean of whoever took the
+   field, so between two events it also moves because a different squad showed
+   up (and because those players played elsewhere in between). Truck Stop's
+   U.S. Open row reads +248 off +53 of actual results — the other +195 is the
+   A-squad replacing the B-squad that went 2-4 at Pro Elite Challenge East.
+   A club panel therefore splits the row into both parts rather than showing a
+   total that looks wrong.
+
+   In a player panel the moves are still the club's: the engine amplifies each
+   game's delta by where a man sits in his provisional window, so his share of
+   the same game differs from his teammates' and the row's Δ is his own. */
+function gamesPane(ckey, evIdx, rowDelta, kind) {
   const gs = gamesAt(ckey, evIdx);
   const w = gs.filter(g => g.mine > g.theirs).length;
+  const tot = gs.reduce((s, g) => s + g.d, 0);
+  const sgn = v => (v >= 0 ? '+' : '') + v;
+  const swing = v => v === 0
+    ? `<span class="muted">0</span>`
+    : `<span class="${v > 0 ? 'up' : 'dn'}">${sgn(v)}</span>`;
   const body = gs.map(g => {
     const won = g.mine > g.theirs;
     const opp = H.teams[g.opp]
@@ -1093,10 +1114,17 @@ function gamesPane(ckey, evIdx) {
       : esc(clubLabel(g.opp));
     return `<tr><td class="st">${esc(g.stage)}</td><td>${opp}</td>` +
            `<td class="wl ${won ? 'up' : 'dn'}">${won ? 'W' : 'L'}</td>` +
-           `<td class="sc">${g.mine}–${g.theirs}</td></tr>`;
+           `<td class="sc">${g.mine}–${g.theirs}</td>` +
+           `<td class="dl">${swing(g.d)}</td></tr>`;
   }).join('');
-  return `<p class="gsum">${esc(clubLabel(ckey))} · ${gs.length} game` +
-         `${gs.length === 1 ? '' : 's'} · ${w}-${gs.length - w}</p>` +
+  const rest = rowDelta === null ? 0 : rowDelta - tot;
+  const head = `${esc(clubLabel(ckey))} · ${gs.length} game` +
+    `${gs.length === 1 ? '' : 's'} · ${w}-${gs.length - w} · ` +
+    (kind === 'c'
+      ? `${swing(tot)} from results` +
+        (Math.abs(rest) >= 1 ? ` · ${swing(rest)} from a changed roster` : '')
+      : `club ${swing(tot)}`);
+  return `<p class="gsum">${head}</p>` +
          `<table class="gtbl"><tbody>${body}</tbody></table>`;
 }
 
@@ -1107,9 +1135,11 @@ function toggleGames(el) {
   }
   // lastIndexOf, because a club key is free to contain the separator.
   const rk = el.dataset.games, c = rk.lastIndexOf('|');
+  const d = el.dataset.d === '' ? null : +el.dataset.d;
   const row = document.createElement('tr');
   row.className = 'gms';
-  row.innerHTML = `<td colspan="5">${gamesPane(rk.slice(0, c), +rk.slice(c + 1))}</td>`;
+  row.innerHTML = `<td colspan="5">` +
+    `${gamesPane(rk.slice(0, c), +rk.slice(c + 1), d, el.dataset.kind)}</td>`;
   tr.after(row);
   tr.classList.add('open');
 }
@@ -1273,8 +1303,10 @@ function openDetail(kind, key, opts) {
     `event — a weekend tournament is one step, not one point per game. ` +
     `${pts.length} event${pts.length === 1 ? '' : 's'} on record; click one in ` +
     `the table for the games behind it` +
-    (kind === 'p' ? ', which are the games of the club he turned out for — the ' +
-     'engine moves every rostered player by the same delta' : '') + `.</p>` +
+    (kind === 'p' ? ', which are the games of the club he turned out for. The ' +
+     'per-game move shown there is the club\'s: the engine amplifies each ' +
+     'delta by where a player sits in his provisional window, so the Δ on the ' +
+     'row is his own' : '') + `.</p>` +
     (kind === 'c' ? rosterSection(ckey) : '') +
     (pts.length ? histTable(pts, kind === 'c', ckey) : '');
   if (opts.push !== false) {

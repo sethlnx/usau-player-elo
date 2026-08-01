@@ -409,7 +409,7 @@ def best_rosters(con, season: int, model):
 HISTORY_MIN_GAMES = 30
 
 
-def write_history(con, games, rosters, clubs, snaps, model, season):
+def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season):
     """Emit data/history.json — per-event rating trajectories for the drill-down.
 
     Trajectories are keyed on (subject, event) rather than (subject, game): a
@@ -560,6 +560,12 @@ def write_history(con, games, rosters, clubs, snaps, model, season):
     # corpus — so an expanded event is exactly the evidence behind the rating
     # step printed beside it. What USAU lists but the model never saw (forfeits,
     # cancellations, an unseeded bracket slot) is absent by construction.
+    #
+    # Each row carries what the game did to the two CLUB ratings, captured
+    # across play_game in the same replay. Club, not player: the engine scales
+    # a game's delta by each man's own provisional multiplier, so a roster does
+    # not move as one number — the club's softmax-weighted rating does, and it
+    # is the number the panel can state without re-deriving anything.
     club_ord = sorted({c for g in games
                        for c in (clubs.get(g["home_id"]), clubs.get(g["away_id"]))
                        if c})
@@ -575,9 +581,10 @@ def write_history(con, games, rosters, clubs, snaps, model, season):
         if st not in stage_num:
             stage_num[st] = len(stages)
             stages.append(st)
+        hd, ad = game_deltas.get((g["event_id"], g["game_key"]), (0, 0))
         game_rows.setdefault(i, []).append([club_num[hk], club_num[ak],
                                             g["home_score"], g["away_score"],
-                                            stage_num[st]])
+                                            stage_num[st], hd, ad])
 
     # H.teams is keyed on the LOWERCASED normalized identity ('rhino slam!'),
     # which is not a thing to render. Pick the spelling from the club's most
@@ -629,15 +636,22 @@ def main(cfg: EloConfig | None = None):
     # so each point is the rating after that subject's final game of the event.
     etev = dict(con.execute("SELECT event_team_id, event_id FROM event_teams"))
     snaps = defaultdict(dict)
+    # The same capture at game grain, club side only: (event, game) -> the two
+    # club-rating changes across that game.
+    game_deltas = {}
 
-    def capture(g, home, away, model):
-        for side, etid in ((home, g["home_id"]), (away, g["away_id"])):
+    def capture(g, home, away, model, pre):
+        gkey = (g["event_id"], g["game_key"])
+        for n, (side, etid) in enumerate(((home, g["home_id"]), (away, g["away_id"]))):
             eid = etev.get(etid)
             if eid is None or not isinstance(side, list):
                 continue
             club = clubs.get(etid)
             if club:
-                snaps[("c", club)][eid] = (round(model.team_rating(side)), len(side))
+                after = model.team_rating(side)
+                snaps[("c", club)][eid] = (round(after), len(side))
+                if pre is not None:
+                    game_deltas.setdefault(gkey, [0, 0])[n] = round(after - pre[n])
             for p in side:
                 if not str(p).startswith("ghost:"):
                     snaps[("p", p)][eid] = (round(model.players[p].rating),
@@ -686,7 +700,7 @@ def main(cfg: EloConfig | None = None):
                 w.writerow([i, club, round(rating, 1), size, season, evname, sd])
         print(f"wrote {team_out} ({len(rated)} teams, season {season}, "
               f"{basis} rosters)")
-    write_history(con, games, rosters, clubs, snaps, model, season)
+    write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
     con.close()
 
 

@@ -102,21 +102,35 @@ fall back to the union. Every name in the panel is itself a link, with a
 button works. A player below the 30-game floor has no rank or Elo to show and is
 listed as plain text: he was on the roster, but there is nothing to open.
 
-**Every event row opens onto the games behind it.** The curve is one point per
-tournament, which is the right grain for a season and the wrong one for "why
-did Truck Stop drop 190 at Pro Elite Challenge East" — so clicking an event
-expands it into that weekend's games: stage, opponent (itself a link), W/L and
-score, with the record summarised. For a player they are the games of the club
-he turned out for, which is exactly what moved his rating: the engine applies a
-game's delta to every rostered player equally. Only games the model scored are
-listed, so an expanded event is the whole evidence for the Δ printed beside it
-— forfeits, cancellations and unseeded bracket slots never appear.
+**Every event row opens onto the games behind it, with what each did to the
+rating.** The curve is one point per tournament, which is the right grain for a
+season and the wrong one for "why did Truck Stop drop 190 at Pro Elite
+Challenge East" — so clicking an event expands it into that weekend's games:
+stage, opponent (itself a link), W/L, score, and the club's rating change.
+Only games the model scored are listed, so an expanded event is the whole
+evidence for the Δ printed beside it; forfeits, cancellations and unseeded
+bracket slots never appear.
+
+**A club panel splits the row's Δ in two, because the games rarely explain it.**
+A club's rating is the softmax mean of whoever took the field, so between two
+events it moves both on results and on personnel. Truck Stop's U.S. Open row
+reads `+248` off `+55 from results` and `+193 from a changed roster` — the
+A-squad replacing the B-squad that went 2-4 in Colorado. Reporting only the
+first number would look broken; reporting only the second would hide the
+tournament.
+
+The per-game number is the CLUB's move even in a player panel, and it is
+labelled as such. The engine amplifies each game's delta by where a man sits in
+his provisional window, so teammates do not move together: Tyler Monroe took
+`+64` out of the U.S. Open weekend his club rated `+55` for. His own total is
+the Δ on the row; recovering his per-game share would mean re-deriving the
+engine in JavaScript, which is exactly what this page refuses to do.
 
 Rosters, affiliations and all 58,007 scored games ride inside
 `data/history.json`, which keeps the page a single file that works from
-`file://` — `fetch()` does not. That costs weight: 11.7 MB raw, 4.0 MB gzipped,
+`file://` — `fetch()` does not. That costs weight: 12.1 MB raw, 4.2 MB gzipped,
 which is what Pages actually serves. The games are grouped by event and stored
-once each, not once per side, which is the difference between 1.1 MB and 2.2.
+once each, not once per side, which is the difference between 1.5 MB and 3.
 Roster members are keyed on `(name, player_id)` pairs, never on name alone, for
 the reason in the data notes below: display names are not unique.
 
@@ -150,6 +164,13 @@ the reason in the data notes below: display names are not unique.
   context-init survives behind `EloConfig.context_init`), converging via an
   aggressive provisional multiplier. Offseason regression targets the
   division base of each player's last division.
+  CAUTION: `team_rating` reaches unknown players through `_state`, which
+  creates them at the GLOBAL base — `_materialize`, inside `play_game`, is what
+  knows the division. Read a rating before that runs and every debutant in a
+  non-club division enters 150-250 Elo too high, silently, for the whole
+  replay. Use `pregame_ratings`, which materializes first; it exists because
+  the per-game deltas in the site's drill-down needed a before-picture and the
+  obvious `team_rating` call moved Truck Stop 123 Elo.
   Per-player stats (G/A/D/T, reported at Nationals-level events) feed two
   mechanisms, ingested only after an event ends: `involvement_credit` splits
   each game delta by a shrunk usage index (roster-mean preserved), and

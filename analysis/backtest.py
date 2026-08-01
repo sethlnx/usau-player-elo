@@ -70,7 +70,7 @@ def load_games(con) -> list[dict]:
         games.append({
             "sort": (eff, _parse_time(time_), eid, key),
             "date": eff, "season": season, "division": division,
-            "event_id": eid, "stage": stage,
+            "event_id": eid, "game_key": key, "stage": stage,
             "home_id": hid, "away_id": aid, "home_score": hs, "away_score": as_,
         })
     games.sort(key=lambda g: g["sort"])
@@ -229,10 +229,11 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
     a team-event's stat lines reach the model only once the replay passes the
     event's end date, so they never inform predictions of that same event.
 
-    on_game(game, home_roster, away_roster, model) fires after each game is
-    applied. It exists so a caller can record rating trajectories from the one
-    authoritative pass rather than monkeypatching the engine or replaying a
-    second time and hoping the two agree.
+    on_game(game, home_roster, away_roster, model, pre) fires after each game is
+    applied, `pre` being the two team ratings from just before it. It exists so
+    a caller can record rating trajectories from the one authoritative pass
+    rather than monkeypatching the engine or replaying a second time and hoping
+    the two agree.
     """
     if model_kind == "player":
         model = PlayerElo(cfg)
@@ -270,12 +271,19 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
             home = clubs.get(g["home_id"], g["home_id"])
             away = clubs.get(g["away_id"], g["away_id"])
 
+        # The hook wants the rating change across this game. pregame_ratings,
+        # not team_rating: reading a rating before play_game has materialized
+        # the rosters creates debutants at the global base instead of their
+        # division's, which silently shifts the whole replay. Only paid for
+        # when someone asked for a hook.
+        pre = (model.pregame_ratings(home, away, division)
+               if on_game is not None and isinstance(home, list) else None)
         exp = model.play_game(home, away, g["home_score"], g["away_score"], division)
         outcome = (1.0 if g["home_score"] > g["away_score"]
                    else 0.0 if g["home_score"] < g["away_score"] else 0.5)
         records.append((season, division, g.get("date"), exp, outcome))
         if on_game is not None:
-            on_game(g, home, away, model)
+            on_game(g, home, away, model, pre)
     return records, model
 
 
