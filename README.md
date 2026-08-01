@@ -74,8 +74,8 @@ no rule places keep `gender=''` and appear only under "all genders";
 **https://sethlnx.github.io/usau-player-elo/** — a single self-contained
 `docs/index.html`, no server and no network needed.
 
-`analysis/site.py` emits it: club rankings on three roster bases, a searchable
-player table over all five divisions, a **Trends** tab drawing one line per
+`analysis/site.py` emits it: searchable club rankings on three roster bases, a
+searchable player table over all five divisions, a **Trends** tab drawing one line per
 season for every player or club that has ever closed a season in the top 25,
 and a U.S. Open tracker that re-runs a 40,000-sim Monte Carlo in the browser
 over whatever is left to play. It reads only the published artifacts and never
@@ -84,7 +84,8 @@ replays the model, so the page cannot drift from `data/player_elo.csv` and
 
 Every tab filters by division, and what that means differs by tab — on
 purpose. **Clubs** shows one division at a time (club men's / mixed /
-women's), ranked within it, because those teams never play each other and a
+women's), ranked within it and searchable by club name or the event it was
+rated off, because those teams never play each other and a
 merged 1..n would invite a comparison the games cannot settle. **Players**
 keeps anyone who has turned out in the division; their rating is still the
 single number they carry everywhere, not a per-division rating. **Trends**

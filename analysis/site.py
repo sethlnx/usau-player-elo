@@ -502,7 +502,7 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   <div class="sub" id="sub"></div>
 </header>
 <nav>
-  <button data-t="clubs" class="on">Clubs (Men's)</button>
+  <button data-t="clubs" class="on">Club Team Rankings</button>
   <button data-t="players">Players</button>
   <button data-t="trends">Trends</button>
   <button data-t="usopen">U.S. Open 2026</button>
@@ -511,6 +511,7 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
 
 <section id="clubs" class="on">
   <div class="bar">
+    <input type="search" id="cq" placeholder="Search club…" autocomplete="off">
     <select id="basis">
       <option value="completed">Most recent completed roster</option>
       <option value="best">Best full-strength roster of 2026</option>
@@ -676,15 +677,25 @@ function drawClubs() {
   // One division at a time, and the rank shown is the one the CSV assigned
   // WITHIN it: club men's and club women's teams never play each other, so a
   // merged 1..n would invite a comparison the games cannot settle.
-  const rows = (D.clubs[basis] || []).filter(r => r[5] === div);
+  const q = $('#cq').value.trim().toLowerCase();
+  const pop = (D.clubs[basis] || []).filter(r => r[5] === div);
+  // Search is a lookup, not a re-ranking, the same as the player table: a club
+  // keeps the number it holds in its division, so hits come back sparse
+  // (#3, #17, #41). Matches the printed name and the event it was rated off.
+  const rows = q ? pop.filter(r => r[1].toLowerCase().includes(q) ||
+                                   String(r[4]).toLowerCase().includes(q))
+                 : pop;
   $('#ctb').innerHTML = rows.map(r =>
     `<tr><td class="rk">${r[0]}</td>` +
     `<td><span class="nmlink" data-club="${esc(r[6])}">${esc(r[1])}</span></td>` +
     `<td class="n">${r[2].toFixed(0)}</td><td class="n">${r[3]}</td>` +
     `<td class="muted" style="font-size:13px">${esc(r[4])}</td></tr>`).join('');
-  $('#ccount').textContent = `${rows.length} ${DIVLABEL[div]} clubs`;
+  $('#ccount').textContent = q
+    ? `${rows.length} of ${pop.length} ${DIVLABEL[div]} clubs match`
+    : `${pop.length} ${DIVLABEL[div]} clubs`;
   $('#cnote').textContent = CNOTE[basis];
 }
+['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
 $('#cdiv').onchange = drawClubs;
 
