@@ -18,8 +18,10 @@ Usage: python -m analysis.site   ->   docs/index.html
 
 import csv
 import json
+import re
 import sqlite3
 import sys
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -37,10 +39,20 @@ OUT = DB_PATH.parent.parent / "docs" / "index.html"
 # games a rating still sits inside the engine's provisional window.
 MIN_GAMES = 30
 
-# The U.S. Open field is 12 teams in 4 pools of 3. Every row of the schedule
-# carries a mislabelled "Pool D" stage, so pools are derived from the co-play
-# graph instead: each team plays exactly its own pool.
+# The U.S. Open field is 12 teams in 4 pools of 3, then a bracket. USAU does
+# not label the pools anywhere in the data — every opening-round fixture sits
+# in one table headed "Pool D" — so they are recovered from the fixtures
+# themselves: a pool is a set of teams that have all played each other. The two
+# same-stage games that cross two of those sets are the winners' crossover,
+# which seeds the quarters and must stay out of the pool standings. Deriving
+# pools from the co-play graph instead (what this did before day one) collapses
+# the field into two components of six the moment the crossovers are seeded.
 USOPEN_EVENT = "%U.S. Open%"
+
+# Bracket columns in playing order. The placement columns USAU also publishes
+# (Third Place, Fifth Semifinals, Fifth Place, Seventh Place) are dropped:
+# nothing in them can reach the title, which is what the tracker prices.
+BRACKET_ROUNDS = ["Prequarterfinals", "Quarterfinals", "Semifinals", "Final"]
 
 
 def load_csv(name):
@@ -49,44 +61,79 @@ def load_csv(name):
         return list(csv.DictReader(f))
 
 
+def _slot_order(game):
+    """Sort key: USAU's own fixture numbering, which runs in playing order —
+    pool rows, then the bracket column by column."""
+    digits = re.sub(r"\D", "", game["slot"] or "")
+    return int(digits) if digits else 0
+
+
 def usopen(con):
-    """(event row, [team names], [(date, time, home, away)]) for the men's ICC."""
+    """(event row, [team names], [game dicts]) for the men's ICC.
+
+    Teamless fixtures are kept (LEFT JOIN): a semifinal nobody has qualified
+    for is still a slot the bracket has to draw. `slot` distinguishes a pool
+    row (the page's numeric row id) from a bracket game ("game411460").
+    """
     ev = con.execute(
         """SELECT event_id, name, start_date, end_date FROM events
            WHERE name LIKE ? AND season=2026 AND COALESCE(division,'club')='club'""",
         (USOPEN_EVENT,)).fetchone()
     if not ev:
         return None, [], []
-    eid = ev[0]
-    games = con.execute(
-        """SELECT g.date, g.time, h.display_name, a.display_name
+    rows = con.execute(
+        """SELECT g.slot, g.stage, g.date, g.time, h.display_name, a.display_name,
+                  g.home_score, g.away_score, g.status
            FROM games g
-           JOIN event_teams h ON h.event_team_id=g.home_id
-           JOIN event_teams a ON a.event_team_id=g.away_id
-           WHERE g.event_id=? ORDER BY g.date, g.time""", (eid,)).fetchall()
+           LEFT JOIN event_teams h ON h.event_team_id=g.home_id
+           LEFT JOIN event_teams a ON a.event_team_id=g.away_id
+           WHERE g.event_id=?""", (ev[0],)).fetchall()
+    games = [{"slot": slot, "stage": stage, "date": d, "time": t,
+              "home": home, "away": away, "hs": hs, "as": as_,
+              "done": status == "Final" and (hs or 0) + (as_ or 0) > 0}
+             for slot, stage, d, t, home, away, hs, as_, status in rows]
+    games.sort(key=_slot_order)
     teams = [r[0] for r in con.execute(
         """SELECT COALESCE(full_name, display_name) FROM event_teams
-           WHERE event_id=? ORDER BY 1""", (eid,))]
-    return ev, teams, [tuple(g) for g in games]
+           WHERE event_id=? ORDER BY 1""", (ev[0],))]
+    return ev, teams, games
 
 
-def derive_pools(games):
-    """Pools from the co-play graph: pool play is a round robin, so the
-    connected components of 'played each other' ARE the pools."""
-    adj = {}
-    for _d, _t, h, a in games:
-        adj.setdefault(h, set()).add(a)
-        adj.setdefault(a, set()).add(h)
-    pools, seen = [], set()
-    for t in sorted(adj):
-        if t in seen:
-            continue
-        comp = {t} | adj[t]
-        for u in list(comp):
-            comp |= adj.get(u, set())
-        pools.append(sorted(comp))
-        seen |= comp
-    return {chr(65 + i): p for i, p in enumerate(pools)}
+def pool_round(games):
+    """(pools, crossovers) for the opening round robin.
+
+    A pool is a maximal set of teams that have all played each other, grown one
+    fixture at a time in slot order — so the round robin has built the pools by
+    the time the crossovers arrive, and a game joining two finished pools is a
+    crossover rather than evidence that they are one pool. Each intra-pool game
+    gets a `pool` index for the standings.
+
+    A later placement round robin (USAU files the 9-12 pool as "Pool E") fails
+    the same test, so crossovers are held to the stage that built the pools.
+    """
+    rows = [g for g in games
+            if (g["slot"] or "").isdigit() and g["home"] and g["away"]]
+    pairs = {frozenset((g["home"], g["away"])) for g in rows}
+    pools, where, cross = [], {}, []
+    for g in rows:
+        h, a = g["home"], g["away"]
+        ph, pa = where.get(h), where.get(a)
+        if ph is not None and ph == pa:
+            g["pool"] = ph                      # intra-pool: counts to standings
+        elif ph is None and pa is None:
+            where[h] = where[a] = g["pool"] = len(pools)
+            pools.append([h, a])
+        elif ph is None or pa is None:
+            joiner, idx = (h, pa) if ph is None else (a, ph)
+            if all(frozenset((joiner, t)) in pairs for t in pools[idx]):
+                where[joiner] = g["pool"] = idx
+                pools[idx].append(joiner)
+            else:
+                cross.append(g)
+        else:
+            cross.append(g)
+    stage = rows[0]["stage"] if rows else None
+    return pools, [g for g in cross if g["stage"] == stage]
 
 
 def build():
@@ -110,18 +157,34 @@ def build():
     upcoming = {r["club"]: float(r["elo"]) for r in clubs["upcoming"]}
     ratings = {t: upcoming.get(t) for t in field}
 
-    # Pool LETTERS are load-bearing: the bracket pairing rule below is written
-    # in terms of them, so an arbitrary labelling silently picks an arbitrary
-    # bracket. derive_pools returns components in alphabetical-team order,
-    # which is meaningless. Relabel so A holds the strongest team, B the next,
-    # and sort within each pool strongest first. Still an assumption about the
-    # pairing, but a deterministic and seed-coherent one.
-    raw_pools = derive_pools(sched) if sched else {}
-    ordered = sorted(raw_pools.values(),
-                     key=lambda ts: -max((ratings.get(t) or 0) for t in ts))
-    pools = {}
-    for i, ts in enumerate(ordered):
-        pools[chr(65 + i)] = sorted(ts, key=lambda t: -(ratings.get(t) or 0))
+    # Pool letters are cosmetic — USAU publishes none — so label them by
+    # strength: A holds the strongest team, and each pool sorts strongest
+    # first. They no longer decide anything. The bracket used to be guessed
+    # from these letters ("2nd of one pool plays 3rd of another"); it is now
+    # read from USAU's published slots, which day one has filled in.
+    raw_pools, crossovers = pool_round(sched)
+    rank_of = sorted(range(len(raw_pools)),
+                     key=lambda i: -max((ratings.get(t) or 0) for t in raw_pools[i]))
+    letter = {idx: chr(65 + n) for n, idx in enumerate(rank_of)}
+    pools = {letter[i]: sorted(ts, key=lambda t: -(ratings.get(t) or 0))
+             for i, ts in enumerate(raw_pools)}
+
+    def game(g, pool=None):
+        out = {"slot": g["slot"], "date": g["date"], "time": g["time"],
+               "home": g["home"], "away": g["away"], "done": g["done"]}
+        if g["done"]:
+            out["hs"], out["as"] = g["hs"], g["as"]
+        if pool is not None:
+            out["pool"] = pool
+        return out
+
+    pool_games = [game(g, letter[g["pool"]]) for g in sched if "pool" in g]
+    by_stage = {}
+    for g in sched:
+        if not (g["slot"] or "").isdigit():
+            by_stage.setdefault(g["stage"], []).append(g)
+    bracket = [{"name": r, "games": [game(g) for g in by_stage.get(r, [])]}
+               for r in BRACKET_ROUNDS]
 
     # Trajectories for the drill-down, written by analysis.rankings from the
     # same replay that produced the CSVs. Optional: if it is missing the page
@@ -131,7 +194,7 @@ def build():
                else {"events": [], "players": {}, "teams": {}})
 
     payload = {
-        "generated": ev[2] if ev else None,
+        "generated": date.today().isoformat(),
         "minGames": MIN_GAMES,
         "totalRated": total_rated,
         "scale": PUBLISHED["division_scale"]["club"],
@@ -149,8 +212,9 @@ def build():
             "end": ev[3] if ev else "",
             "pools": pools,
             "ratings": ratings,
-            "schedule": [{"date": d, "time": t, "home": h, "away": a}
-                         for d, t, h, a in sched],
+            "poolGames": pool_games,
+            "crossovers": [game(g) for g in crossovers],
+            "bracket": bracket,
         },
     }
 
@@ -159,9 +223,10 @@ def build():
     (OUT.parent / ".nojekyll").write_text("")
     kb = OUT.stat().st_size / 1024
     print(f"wrote {OUT} ({kb:,.0f} KB) + .nojekyll")
+    played = sum(g["done"] for g in sched)
     print(f"  {len(payload['players']):,} players (>={MIN_GAMES} games), "
           f"{len(clubs['completed'])} clubs, {len(field)} U.S. Open teams, "
-          f"{len(sched)} scheduled games, {len(pools)} pools")
+          f"{len(pools)} pools, {played}/{len(sched)} fixtures played")
 
 
 TEMPLATE = r"""<!doctype html>
@@ -243,6 +308,11 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
 .g .t.w{background:color-mix(in srgb,var(--win) 15%,transparent);border-color:var(--win);
   font-weight:600}
 .g .t.l{opacity:.44}
+/* A played game is not a control: the result came from USAU's schedule, not
+   from a click, so the line drops its affordances and keeps its highlight. */
+.g .t.fact,.m .t.fact{cursor:default}
+.g .t.fact:hover{border-color:transparent}
+.m .t.fact:hover{background:none}
 .g .p{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
 .g .vs{color:var(--ink-3);font-size:11px}
 .stand{width:100%;font-size:13px;margin-top:8px}
@@ -474,20 +544,21 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   <div class="bar">
     <button class="act prim" id="simGame">Simulate next game</button>
     <button class="act prim" id="simRound">Simulate next round</button>
-    <button class="act" id="reset">Clear all results</button>
+    <button class="act" id="reset">Clear entered results</button>
     <span class="count" id="ucount"></span>
   </div>
   <h3 style="font-size:13px;margin:14px 0 9px;color:var(--ink-2)">
-    Pool play — click a team to record the winner</h3>
+    Pool play <span class="muted" style="font-weight:400">— played results are
+    fixed; click a team to call an unplayed game</span></h3>
   <div class="grid" id="pools"></div>
   <h3 style="font-size:13px;margin:22px 0 9px;color:var(--ink-2)">Bracket</h3>
   <div class="bracket" id="bracket"></div>
   <div class="champline" id="champline"></div>
   <h3 style="font-size:13px;margin:22px 0 9px;color:var(--ink-2)">
-    Title odds — re-simulated from whatever you have entered</h3>
+    Title odds — re-simulated from the games already played</h3>
   <table class="odds"><thead><tr>
     <th class="n">#</th><th>Team</th><th class="n">Elo</th>
-    <th class="n">Win pool</th><th class="n">Reach SF</th><th class="n">Title</th>
+    <th class="n">Reach SF</th><th class="n">Reach final</th><th class="n">Title</th>
     <th class="bar-c"></th>
   </tr></thead><tbody id="otb"></tbody></table>
   <p class="note" id="unote"></p>
@@ -585,237 +656,213 @@ $('#pnote').textContent =
 /* ---------- U.S. Open ---------- */
 const U = D.usopen, R = U.ratings, SCALE = D.scale;
 const POOLS = U.pools, PK = Object.keys(POOLS).sort();
-const SCHED = U.schedule;
-// v2: prequarter/quarter slot ids were renumbered so column i feeds column
-// i+1, which changes what 'pq0' refers to. Bumping the key discards saved
-// state rather than silently reinterpreting it against the new bracket.
-const KEY = 'usopen2026.v2';
+const PGAMES = U.poolGames, XGAMES = U.crossovers, RNDS = U.bracket;
+const SFI = RNDS.findIndex(rd => rd.name === 'Semifinals'), FI = RNDS.length - 1;
+const ABBR = {Prequarterfinals:'PQ', Quarterfinals:'QF', Semifinals:'SF', Final:'F'};
+
+/* Played games are FACTS. They live in the page, come from USAU's own
+   schedule, and no click can move them; what is stored in your browser is only
+   the calls you make on games not yet played. State is keyed on the fixture's
+   SLOT id, which is USAU's game number and never moves. v3: it used to be
+   keyed on positions in a schedule array, and day one renumbered those the
+   moment TBD slots were seeded with real game ids. */
+const KEY = 'usopen2026.v3';
 let S = load();
 function load() {
   let v;
   try { v = JSON.parse(localStorage.getItem(KEY)); } catch (e) { v = null; }
   v = v || {};
-  // `sim` marks which results came from the simulate buttons rather than from
-  // you. Defaulted here so state saved before it existed still loads.
-  return {pool: v.pool || {}, br: v.br || {}, sim: v.sim || {}};
+  return {w: v.w || {}, sim: v.sim || {}};
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 const P = (a,b) => 1 / (1 + Math.pow(10, ((R[b]||1500) - (R[a]||1500)) / SCALE));
-const poolOf = t => PK.find(k => POOLS[k].includes(t));
+const winner = g => g.done ? (g.hs > g.as ? g.home : g.away) : null;
+// A call only stands while it names one of the two teams actually in the slot:
+// an upstream result can change who is standing there.
+const called = (g,h,a) => (S.w[g.slot] === h || S.w[g.slot] === a) ? S.w[g.slot] : null;
+const settled = (g,h,a) => winner(g) || called(g,h,a);
 
-/* Pool standings from entered results. Returns {wins, order} where order is
-   the pool sorted by wins then rating - rating breaks ties because we do not
-   model point differential. */
-function standings(k, res) {
+/* Resolve every bracket slot. USAU publishes participants as soon as it knows
+   them - day one filled the prequarters AND the quarters - so a slot reads its
+   teams off the fixture and only falls back to a feed while it is still TBD.
+   That feed is the one structural assumption left in the bracket: a round half
+   the size of the one before it takes the winners of games 2i and 2i+1, which
+   is how USAU's own columns line up. The old code had to guess the whole
+   pairing from pool finishes; none of that survives contact with the real
+   bracket. */
+function resolve(pick) {
+  const out = [];
+  RNDS.forEach((rd, r) => {
+    const prev = out[r-1], feed = prev && prev.length === 2 * rd.games.length;
+    out.push(rd.games.map((g, i) => {
+      const home = g.home || (feed ? prev[2*i].w : null);
+      const away = g.away || (feed ? prev[2*i+1].w : null);
+      return {g, home, away, w: (home && away) ? pick(g, home, away) : null};
+    }));
+  });
+  return out;
+}
+
+/* Pool standings. Ties break on rating - point differential is not modelled. */
+function standings(k) {
   const ts = POOLS[k], w = {};
   ts.forEach(t => w[t] = 0);
-  SCHED.forEach((g, i) => {
-    if (poolOf(g.home) !== k) return;
-    const r = res[i];
-    if (r === 'h') w[g.home]++; else if (r === 'a') w[g.away]++;
+  PGAMES.forEach(g => {
+    if (g.pool !== k) return;
+    const x = settled(g, g.home, g.away);
+    if (x) w[x]++;
   });
-  const order = ts.slice().sort((x,y) => (w[y]-w[x]) || (R[y]-R[x]));
-  return {w, order};
+  return {w, order: ts.slice().sort((x,y) => (w[y]-w[x]) || (R[y]-R[x]))};
 }
-function poolComplete(k) {
-  return SCHED.every((g,i) => poolOf(g.home) !== k || S.pool[i]);
-}
+let SEED = {};   // team -> "A1", its pool finish; rebuilt whenever a result moves
 
-/* Prequarter pairing: 2nd of one pool vs 3rd of another, cross-pool; quarters
-   are pool winners against prequarter winners. This is an ASSUMPTION - USAU
-   has not published the pairing - and it is flagged in the note below.
-
-   The arrays are ordered so prequarter i feeds quarter i. That is purely a
-   presentation concern and it is the whole reason the columns line up: the
-   bracket is identical to the previous indexing, just renumbered so row i of
-   one column is the input to row i of the next. */
-const PQ = [['B',1,'C',2], ['C',1,'B',2], ['A',1,'D',2], ['D',1,'A',2]];
-const QF = [['A',0], ['D',0], ['B',0], ['C',0]];
-const PQL = PQ.map(([p1,i1,p2,i2]) => [p1+(i1+1), p2+(i2+1)]);
-const QFL = QF.map(([p,si],i) => [p+(si+1), 'W PQ'+(i+1)]);
-const SFL = [['W QF1','W QF2'], ['W QF3','W QF4']];
-const FL  = ['W SF1','W SF2'];
-
-function bracketFrom(res, br) {
-  // A pool's finishing order is a FACT only once its games are all played.
-  // Before that, standings() is just a projection ordered by rating, so the
-  // displayed bracket must say TBD rather than invent a matchup.
-  const ord = {};
-  PK.forEach(k => {
-    const o = standings(k, res).order;
-    ord[k] = poolComplete(k) ? o : [null, null, null];
-  });
-  const pq = PQ.map(([p1,i1,p2,i2]) => [ord[p1][i1], ord[p2][i2]]);
-  const pick = (id, a, b, rnd) => {
-    if (!a || !b) return null;
-    const locked = br[id];
-    if (locked === a || locked === b) return locked;
-    return rnd ? (Math.random() < P(a,b) ? a : b) : null;
-  };
-  const pqw = pq.map((m,i) => pick('pq'+i, m[0], m[1], false));
-  const qf = QF.map(([p,si],i) => [ord[p][si], pqw[i]]);
-  const qfw = qf.map((m,i) => pick('qf'+i, m[0], m[1], false));
-  const sf = [[qfw[0], qfw[1]], [qfw[2], qfw[3]]];
-  const sfw = sf.map((m,i) => pick('sf'+i, m[0], m[1], false));
-  const fin = [sfw[0], sfw[1]];
-  const champ = pick('f0', fin[0], fin[1], false);
-  return {ord, pq, pqw, qf, qfw, sf, sfw, fin, champ};
-}
-
-/* Monte Carlo conditioned on every result entered so far. */
+/* Monte Carlo over what is left, conditioned on every result already in.
+   With the quarters published, pool play no longer feeds anything, so the
+   remaining uncertainty is the bracket itself. */
 function simulate(n) {
-  const teams = Object.keys(R);
-  const pool = {}, semi = {}, title = {};
-  teams.forEach(t => { pool[t]=0; semi[t]=0; title[t]=0; });
-  const poolIdx = SCHED.map((g,i) => i).filter(i => poolOf(SCHED[i].home));
+  const sf = {}, fin = {}, ti = {};
+  Object.keys(R).forEach(t => { sf[t] = 0; fin[t] = 0; ti[t] = 0; });
+  const pick = (g,h,a) => settled(g,h,a) || (Math.random() < P(h,a) ? h : a);
+  const bump = (tally, t) => { if (t) tally[t] = (tally[t] || 0) + 1; };
   for (let s = 0; s < n; s++) {
-    const res = {};
-    poolIdx.forEach(i => {
-      const g = SCHED[i];
-      res[i] = S.pool[i] || (Math.random() < P(g.home, g.away) ? 'h' : 'a');
-    });
-    const ord = {}; PK.forEach(k => ord[k] = standings(k, res).order);
-    PK.forEach(k => pool[ord[k][0]]++);
-    const rp = (id,a,b) => {
-      const lk = S.br[id];
-      if (lk === a || lk === b) return lk;
-      return Math.random() < P(a,b) ? a : b;
-    };
-    const pqw = PQ.map(([p1,i1,p2,i2],i) => rp('pq'+i, ord[p1][i1], ord[p2][i2]));
-    const qfw = QF.map(([p,si],i) => rp('qf'+i, ord[p][si], pqw[i]));
-    const s1 = rp('sf0', qfw[0], qfw[1]), s2 = rp('sf1', qfw[2], qfw[3]);
-    semi[qfw[0]]++; semi[qfw[1]]++; semi[qfw[2]]++; semi[qfw[3]]++;
-    title[rp('f0', s1, s2)]++;
+    const B = resolve(pick);
+    if (SFI >= 0) B[SFI].forEach(m => { bump(sf, m.home); bump(sf, m.away); });
+    const f = B[FI][0];
+    if (f) { bump(fin, f.home); bump(fin, f.away); bump(ti, f.w); }
   }
-  return {pool, semi, title, n};
+  return {sf, fin, ti, n};
 }
 
-function gameRow(i) {
-  const g = SCHED[i], r = S.pool[i];
-  const ph = P(g.home, g.away);
-  const sd = S.sim['p'+i] ? ' simd' : '';
-  const cls = s => r ? (r === s ? 't w' + sd : 't l') : 't';
-  return `<div class="g">` +
-    `<div class="${cls('h')}" data-g="${i}" data-s="h">` +
-      `<span>${esc(g.home)}</span><span class="p">${pct(ph)}</span></div>` +
-    `<span class="vs">v</span>` +
-    `<div class="${cls('a')}" data-g="${i}" data-s="a">` +
-      `<span>${esc(g.away)}</span><span class="p">${pct(1-ph)}</span></div></div>`;
+/* One fixture line. A played game shows its score where an unplayed one shows
+   the model's probability, so the two read in the same shape; the pre-game
+   number survives as the row's tooltip, which is where an upset shows up. */
+function gameRow(g) {
+  const w = settled(g, g.home, g.away), ph = P(g.home, g.away);
+  const sd = S.sim[g.slot] ? ' simd' : '', fact = g.done ? ' fact' : '';
+  const side = (t, own, p) => {
+    const cls = (w ? (w === t ? 't w' + sd : 't l') : 't') + fact;
+    const hook = g.done ? '' : ` data-g="${g.slot}" data-w="${esc(t)}"`;
+    return `<div class="${cls}"${hook}><span>${esc(t)}</span>` +
+           `<span class="p">${g.done ? own : pct(p)}</span></div>`;
+  };
+  const tip = g.done ? ` title="model gave ${esc(g.home)} ${pct(ph)} before the game"` : '';
+  return `<div class="g"${tip}>${side(g.home, g.hs, ph)}` +
+         `<span class="vs">v</span>${side(g.away, g.as, 1-ph)}</div>`;
 }
 
 function drawPools() {
-  $('#pools').innerHTML = PK.map(k => {
-    const st = standings(k, S.pool);
-    const idx = SCHED.map((g,i)=>i).filter(i => poolOf(SCHED[i].home) === k);
-    const played = idx.filter(i => S.pool[i]).length;
-    return `<div class="card"><h3>Pool ${k} — ${played}/${idx.length} played</h3>` +
-      idx.map(gameRow).join('') +
+  const cards = PK.map(k => {
+    const st = standings(k), gs = PGAMES.filter(g => g.pool === k);
+    const done = gs.filter(g => settled(g, g.home, g.away)).length;
+    return `<div class="card"><h3>Pool ${k} — ${done}/${gs.length} played</h3>` +
+      gs.map(gameRow).join('') +
       `<table class="stand">` + st.order.map((t,j) =>
         `<tr><td><span class="seed">${j+1}</span>${esc(t)}` +
         `<span class="muted" style="font-size:11.5px"> ${R[t] ? R[t].toFixed(0) : '—'}</span></td>` +
         `<td class="w">${st.w[t]}W</td></tr>`).join('') + `</table></div>`;
-  }).join('');
+  });
+  if (XGAMES.length)
+    cards.push(`<div class="card"><h3>Crossover — seeds the quarters</h3>` +
+               XGAMES.map(gameRow).join('') + `</div>`);
+  $('#pools').innerHTML = cards.join('');
 }
 
-/* One match box. `lbl` is the pair of seed descriptors ("A1" / "W PQ2") so a
-   slot still says what feeds it while the teams are unknown. `place` is the
-   grid position, `span` the height of the incoming vertical connector in px -
-   0 for a one-to-one feed, one row pitch for a semi, two for the final. */
-function slot(id, a, b, lbl, place, span, opts) {
+/* One match box. The seed chip carries the team's pool finish once it is
+   known, and the feed that will fill the slot ("W QF1") while it is not.
+   `place` is the grid position, `span` the height of the incoming vertical
+   connector - 0 for a one-to-one feed, one row pitch for a semi, two for the
+   final. */
+function slot(m, r, i, place, span, opts) {
   opts = opts || {};
-  const line = (x, other, seed) => {
-    const sd = `<span class="sd">${seed}</span>`;
-    if (!x) return `<div class="t tbd">${sd}<span class="nm">TBD</span></div>`;
-    const w = S.br[id], sm = S.sim['b'+id] ? ' simd' : '';
-    const cls = w ? (w === x ? 't w' + sm : 't l') : 't';
-    const p = other ? `<span class="p">${pct(P(x, other))}</span>` : '';
-    return `<div class="${cls}" data-b="${id}" data-w="${esc(x)}">` +
-           `${sd}<span class="nm">${esc(x)}</span>${p}</div>`;
+  const g = m.g, w = m.w, sm = S.sim[g.slot] ? ' simd' : '';
+  const prev = RNDS[r-1], feed = prev && prev.games.length === 2 * RNDS[r].games.length;
+  const lbl = j => feed ? 'W ' + ABBR[prev.name] + (2*i + j + 1) : 'TBD';
+  const line = (x, other, j) => {
+    const chip = `<span class="sd">${x ? (SEED[x] || '') : lbl(j)}</span>`;
+    if (!x) return `<div class="t tbd">${chip}<span class="nm">TBD</span></div>`;
+    const cls = (w ? (w === x ? 't w' + sm : 't l') : 't') + (g.done ? ' fact' : '');
+    const hook = g.done ? '' : ` data-b="${g.slot}" data-w="${esc(x)}"`;
+    const val = g.done ? (x === g.home ? g.hs : g.as) : (other ? pct(P(x, other)) : '');
+    return `<div class="${cls}"${hook}>${chip}<span class="nm">${esc(x)}</span>` +
+           `<span class="p">${val}</span></div>`;
   };
-  const cin = span === null ? '' :
-    `<i class="cin" style="--span:${span}px"></i>`;
+  const cin = span === null ? '' : `<i class="cin" style="--span:${span}px"></i>`;
   return `<div class="m${opts.champ ? ' champ' : ''}${opts.out ? ' out' : ''}" ` +
-         `style="${place}">${cin}${line(a,b,lbl[0])}${line(b,a,lbl[1])}</div>`;
+         `style="${place}">${cin}${line(m.home, m.away, 0)}${line(m.away, m.home, 1)}</div>`;
 }
 
 function drawBracket() {
-  const B = bracketFrom(S.pool, S.br);
-  // Row pitch must match the CSS custom properties --mh and --rg.
-  const PITCH = 66 + 10;
+  const B = resolve(settled);
+  // Row pitch must match the CSS custom properties --mh and --rg; the grid is
+  // four rows deep, so a round of n games gets a 4/n row step.
+  const PITCH = 66 + 10, ROWS = 4;
   const at = (col, row, span) =>
-    `grid-column:${col};grid-row:${row}${span ? ' / span ' + span : ''}`;
-  const head = ['Prequarters','Quarters','Semis','Final'].map((h,i) =>
-    `<div class="round" style="${at(i+1,1)}"><h4>${h}</h4></div>`).join('');
-  const pq = B.pq.map((m,i) =>
-    slot('pq'+i, m[0], m[1], PQL[i], at(1, i+2), null, {out:true})).join('');
-  const qf = B.qf.map((m,i) =>
-    slot('qf'+i, m[0], m[1], QFL[i], at(2, i+2), 0, {out:true})).join('');
-  const sf = B.sf.map((m,i) =>
-    slot('sf'+i, m[0], m[1], SFL[i], at(3, 2*i+2, 2), PITCH, {out:true})).join('');
-  const fin = slot('f0', B.fin[0], B.fin[1], FL, at(4, 2, 4), 2*PITCH,
-                   {champ: !!B.champ});
-  $('#bracket').innerHTML = head + pq + qf + sf + fin;
-  $('#champline').innerHTML = B.champ
-    ? `Champion: <b>${esc(B.champ)}</b>`
-    : `<span class="muted">Record pool results above, then click through the ` +
-      `bracket. Each slot shows the seed that feeds it until the teams are known.</span>`;
+    `grid-column:${col};grid-row:${row}${span > 1 ? ' / span ' + span : ''}`;
+  const head = RNDS.map((rd, r) =>
+    `<div class="round" style="${at(r+1, 1)}"><h4>${esc(rd.name)}</h4></div>`).join('');
+  const cols = RNDS.map((rd, r) => {
+    const step = ROWS / rd.games.length, nPrev = r ? RNDS[r-1].games.length : 0;
+    const span = r === 0 ? null : (nPrev === 2 * rd.games.length ? PITCH * (ROWS / nPrev) : 0);
+    return B[r].map((m, i) =>
+      slot(m, r, i, at(r+1, i*step + 2, step), span,
+           {out: r < FI, champ: r === FI && !!m.w})).join('');
+  }).join('');
+  $('#bracket').innerHTML = head + cols;
+  const champ = B[FI][0] && B[FI][0].w;
+  $('#champline').innerHTML = champ
+    ? `Champion: <b>${esc(champ)}</b>`
+    : `<span class="muted">Click through the bracket, or simulate it. Each slot ` +
+      `shows the pool finish or the game that feeds it until the teams are known.</span>`;
 }
 
 function drawOdds() {
   const N = 40000, r = simulate(N);
-  const rows = Object.keys(R).sort((a,b) => r.title[b]-r.title[a] || R[b]-R[a]);
-  const top = r.title[rows[0]] / N || 1;
+  const rows = Object.keys(R).sort((a,b) => r.ti[b]-r.ti[a] || r.sf[b]-r.sf[a] || R[b]-R[a]);
+  const top = r.ti[rows[0]] / N || 1;
+  const cell = v => v ? pct(v) : '<span class="muted">—</span>';
   $('#otb').innerHTML = rows.map((t,i) =>
     `<tr><td class="rk">${i+1}</td><td>${esc(t)}</td>` +
     `<td class="n">${R[t] ? R[t].toFixed(0) : '—'}</td>` +
-    `<td class="n">${pct(r.pool[t]/N)}</td><td class="n">${pct(r.semi[t]/N)}</td>` +
-    `<td class="n"><b>${pct(r.title[t]/N)}</b></td>` +
-    `<td class="bar-c"><div class="oddsbar" style="width:${100*(r.title[t]/N)/top}%"></div></td>` +
+    `<td class="n">${cell(r.sf[t]/N)}</td><td class="n">${cell(r.fin[t]/N)}</td>` +
+    `<td class="n"><b>${cell(r.ti[t]/N)}</b></td>` +
+    `<td class="bar-c"><div class="oddsbar" style="width:${100*(r.ti[t]/N)/top}%"></div></td>` +
     `</tr>`).join('');
-  const done = Object.keys(S.pool).length + Object.keys(S.br).length;
+  const all = PGAMES.concat(XGAMES, ...RNDS.map(rd => rd.games));
+  const done = all.filter(g => g.done).length;
+  const mine = all.filter(g => !g.done && S.w[g.slot]).length;
   $('#ucount').textContent =
-    `${N.toLocaleString()} simulations · ${done} result${done===1?'':'s'} entered`;
+    `${N.toLocaleString()} simulations · ${done}/${all.length} games played` +
+    (mine ? ` · ${mine} called by hand` : '');
 }
 
-function drawUS() { drawPools(); drawBracket(); drawOdds(); updateSimButtons(); }
+function drawUS() {
+  SEED = {};
+  PK.forEach(k => standings(k).order.forEach((t,i) => SEED[t] = k + (i+1)));
+  drawPools(); drawBracket(); drawOdds(); updateSimButtons();
+}
 
 /* ---- simulation controls ----
-   "Next" means the earliest undecided game in playing order: pool play first
-   in schedule order, then prequarters, quarters, semis, final. A bracket slot
-   only counts as playable once both its participants are known, which is why
-   this walks the rounds in order rather than scanning a flat list. */
-const ROUNDS = ['Pool play', 'Prequarters', 'Quarters', 'Semis', 'Final'];
-
+   "Next" means the earliest game still open in playing order: pool play and
+   crossovers first, then the bracket round by round. A bracket slot is only
+   playable once both its participants are known. */
 function pending() {
-  const poolIdx = SCHED.map((g,i) => i)
-                       .filter(i => poolOf(SCHED[i].home) && !S.pool[i]);
-  if (poolIdx.length) return {round:0, items: poolIdx.map(i => ({kind:'pool', i}))};
-  const B = bracketFrom(S.pool, S.br);
-  const stages = [['pq', B.pq], ['qf', B.qf], ['sf', B.sf], ['f', [B.fin]]];
-  for (let r = 0; r < stages.length; r++) {
-    const [pfx, ms] = stages[r], items = [];
-    ms.forEach((m, i) => {
-      const id = pfx === 'f' ? 'f0' : pfx + i;
-      if (m[0] && m[1] && !S.br[id]) items.push({kind:'br', id, a:m[0], b:m[1]});
-    });
-    if (items.length) return {round: r+1, items};
+  const pool = PGAMES.concat(XGAMES)
+                     .filter(g => !settled(g, g.home, g.away))
+                     .map(g => ({g, home: g.home, away: g.away}));
+  if (pool.length) return {name: 'Pool play', items: pool};
+  const B = resolve(settled);
+  for (let r = 0; r < RNDS.length; r++) {
+    const items = B[r].filter(m => m.home && m.away && !m.w);
+    if (items.length) return {name: RNDS[r].name, items};
   }
   return null;
 }
 
 /* Draw one result from the model's own probability, not the favourite. */
-function playOne(it) {
-  if (it.kind === 'pool') {
-    const g = SCHED[it.i];
-    S.pool[it.i] = Math.random() < P(g.home, g.away) ? 'h' : 'a';
-    S.sim['p'+it.i] = 1;
-    S.br = {};            // a pool result can change who is in the bracket
-    Object.keys(S.sim).forEach(k => { if (k[0] === 'b') delete S.sim[k]; });
-  } else {
-    S.br[it.id] = Math.random() < P(it.a, it.b) ? it.a : it.b;
-    S.sim['b'+it.id] = 1;
-  }
+function playOne(m) {
+  S.w[m.g.slot] = Math.random() < P(m.home, m.away) ? m.home : m.away;
+  S.sim[m.g.slot] = 1;
 }
 
 function updateSimButtons() {
@@ -828,10 +875,8 @@ function updateSimButtons() {
   }
   g.disabled = r.disabled = false;
   const it = p.items[0];
-  const nm = it.kind === 'pool' ? `${SCHED[it.i].home} v ${SCHED[it.i].away}`
-                                : `${it.a} v ${it.b}`;
-  g.textContent = `Simulate next game — ${nm}`;
-  r.textContent = `Simulate ${ROUNDS[p.round]} — ${p.items.length} game` +
+  g.textContent = `Simulate next game — ${it.home} v ${it.away}`;
+  r.textContent = `Simulate ${p.name} — ${p.items.length} game` +
                   (p.items.length === 1 ? '' : 's');
 }
 
@@ -845,42 +890,41 @@ $('#simRound').onclick = () => {
   save(); drawUS();
 };
 
-$('#pools').addEventListener('click', e => {
-  const el = e.target.closest('[data-g]'); if (!el) return;
-  const i = el.dataset.g;
-  S.pool[i] = (S.pool[i] === el.dataset.s) ? undefined : el.dataset.s;
-  if (!S.pool[i]) delete S.pool[i];
-  delete S.sim['p'+i];             // typed by hand, so no longer simulated
-  S.br = {};                       // pool change can invalidate every bracket slot
-  Object.keys(S.sim).forEach(k => { if (k[0] === 'b') delete S.sim[k]; });
+function call(sl, team) {
+  if (S.w[sl] === team) delete S.w[sl]; else S.w[sl] = team;
+  delete S.sim[sl];               // typed by hand, so no longer simulated
   save(); drawUS();
+}
+$('#pools').addEventListener('click', e => {
+  const el = e.target.closest('[data-g]');
+  if (el) call(el.dataset.g, el.dataset.w);
 });
 $('#bracket').addEventListener('click', e => {
-  const el = e.target.closest('[data-b]'); if (!el) return;
-  const id = el.dataset.b, w = el.dataset.w;
-  S.br[id] = (S.br[id] === w) ? undefined : w;
-  if (!S.br[id]) delete S.br[id];
-  delete S.sim['b'+id];
-  save(); drawUS();
+  const el = e.target.closest('[data-b]');
+  if (el) call(el.dataset.b, el.dataset.w);
 });
-$('#reset').onclick = () => { S = {pool:{}, br:{}, sim:{}}; save(); drawUS(); };
+$('#reset').onclick = () => { S = {w:{}, sim:{}}; save(); drawUS(); };
 
 $('#unote').innerHTML =
   `Probabilities come from the published player-Elo model at club scale ${SCALE}, with ` +
   `each club rated off <b>the roster it registered for this event</b> — not off its last ` +
   `completed tournament. Neutral throughout: <code>home_advantage</code> is 0, so no ` +
   `seeding information enters.<br><br>` +
-  `<b>The bracket pairing is an assumption.</b> Pool winners bye to quarters and 2nd plays ` +
-  `3rd cross-pool in prequarters; USAU has not published the pairing. Pool-win probabilities ` +
-  `do not depend on it, title odds do.<br><br>` +
+  `<b>Played games are read from USAU's schedule</b>, scores and all, and cannot be ` +
+  `clicked away; the odds are conditioned on them. Pools are recovered from the ` +
+  `results — USAU labels every opening fixture "Pool D" — as the sets of teams that ` +
+  `have all played each other, which also separates out the two crossover games that ` +
+  `seed the quarters. The bracket itself is no longer guessed: prequarter and quarter ` +
+  `matchups are USAU's own. Only the semifinal feed is assumed, quarters 1-2 into one ` +
+  `semi and 3-4 into the other.<br><br>` +
   `<b>Simulated results are dashed and marked ~.</b> The two simulate buttons draw ` +
   `each result from the model's own probability, not from the favourite — so a 55% ` +
   `game goes the other way about 45% of the time, and running the same round twice ` +
   `will not always agree. Clicking a team yourself overrides the simulated pick and ` +
-  `clears the mark, so a real scoreline always beats a coin flip.<br><br>` +
+  `clears the mark.<br><br>` +
   `Three-way pool ties break on rating, because point differential is not modelled. ` +
   `Warao and EVOLUTION are international entrants with no USAU history, so their ratings ` +
-  `encode absence of evidence rather than measured weakness. Results you enter are kept in ` +
+  `encode absence of evidence rather than measured weakness. Calls you enter are kept in ` +
   `this browser only.`;
 
 /* ---------- drill-down: play history + rating curve ---------- */

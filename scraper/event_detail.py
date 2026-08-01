@@ -59,6 +59,14 @@ def parse_games(schedule_html: str, event_year: int) -> tuple[list[dict], dict]:
 
     Pool-play games are <tr data-game=...> rows; bracket games are
     <div class="bracket_game"> blocks. Both carry data-type spans.
+
+    Each game also carries the page's own SLOT id (the pool row's data-game,
+    the bracket div's id) — the fixture's identity, stable across the
+    tournament. game_key is not: an unplayed slot has no EventGameId link, so
+    it falls back to a synthetic key, and the moment USAU seeds the slot the
+    key becomes the real game id. Keyed on game_key alone a mid-event refetch
+    inserts the seeded game beside the placeholder it replaces; build_db uses
+    the slot to drop the stale row.
     """
     soup = BeautifulSoup(schedule_html, "lxml")
     games, teams = [], {}
@@ -87,6 +95,7 @@ def parse_games(schedule_html: str, event_year: int) -> tuple[list[dict], dict]:
         iso_date = f"{event_year}-{int(m.group(1)):02d}-{int(m.group(2)):02d}" if m else None
         games.append({
             "game_key": _game_id(row) or f"pool-{row['data-game']}",
+            "slot": row["data-game"],
             "stage": pool or "pool",
             "date": iso_date,
             "time": time_el.get_text(strip=True) if time_el else None,
@@ -113,6 +122,7 @@ def parse_games(schedule_html: str, event_year: int) -> tuple[list[dict], dict]:
                 time_str = m.group(4).strip() or None
         games.append({
             "game_key": _game_id(div) or f"bracket-{div.get('id', '')}",
+            "slot": div.get("id"),
             "stage": col.get_text(strip=True) if col else "bracket",
             "date": iso_date,
             "time": time_str,

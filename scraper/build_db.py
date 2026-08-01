@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS event_teams (
 CREATE TABLE IF NOT EXISTS games (
     event_id INTEGER NOT NULL REFERENCES events(event_id),
     game_key TEXT NOT NULL,
+    slot TEXT,
     stage TEXT, date TEXT, time TEXT,
     home_id TEXT, away_id TEXT,
     home_score INTEGER, away_score INTEGER,
@@ -170,11 +171,12 @@ def scrape_event(con, event_id: int, ev: dict, season: int, division: str = "clu
     for g in games:
         con.execute(
             """INSERT OR REPLACE INTO games
-               (event_id, game_key, stage, date, time, home_id, away_id,
+               (event_id, game_key, slot, stage, date, time, home_id, away_id,
                 home_score, away_score, status)
-               VALUES (?,?,?,?,?,?,?,?,?,?)""",
-            (event_id, g["game_key"], g["stage"], g["date"], g["time"],
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (event_id, g["game_key"], g["slot"], g["stage"], g["date"], g["time"],
              g["home_id"], g["away_id"], g["home_score"], g["away_score"], g["status"]))
+    _drop_reseeded(con, event_id, games)
 
     # Commit game/team rows now and after each roster: fetches below can sleep
     # through long probe ladders, and an open write txn would lock the DB out
@@ -217,6 +219,37 @@ def _ensure_columns(con):
         con.execute("ALTER TABLE events ADD COLUMN division TEXT NOT NULL DEFAULT 'club'")
     if "complete" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN complete INTEGER NOT NULL DEFAULT 0")
+    if "slot" not in [r[1] for r in con.execute("PRAGMA table_info(games)")]:
+        con.execute("ALTER TABLE games ADD COLUMN slot TEXT")
+
+
+def _drop_reseeded(con, event_id: int, games: list[dict]):
+    """Delete rows left behind when USAU seeds a slot that was TBD.
+
+    An unseeded fixture has no EventGameId, so parse_games keys it on the page
+    slot ("bracket-game411456"); once the teams are known the same slot carries
+    a real game id and inserts under a different key. Without this the event
+    accumulates a teamless twin of every bracket game as the tournament runs —
+    invisible to the model (it filters NULL teams) but not to anything reading
+    the schedule: the U.S. Open's four prequarterfinals became eight.
+
+    Matching is on the slot, so a row is only ever dropped by the fixture that
+    replaced it. Slots predating the column are NULL, hence the second pass on
+    the synthetic key form.
+    """
+    slots = [g["slot"] for g in games if g["slot"]]
+    if not slots:
+        return
+    keys = [g["game_key"] for g in games]
+    kq = ",".join("?" * len(keys))
+    con.execute(
+        f"""DELETE FROM games WHERE event_id=? AND slot IN ({",".join("?" * len(slots))})
+            AND game_key NOT IN ({kq})""", [event_id, *slots, *keys])
+    legacy = [f"{p}-{s}" for s in slots for p in ("pool", "bracket")]
+    con.execute(
+        f"""DELETE FROM games WHERE event_id=? AND slot IS NULL
+            AND game_key IN ({",".join("?" * len(legacy))})
+            AND game_key NOT IN ({kq})""", [event_id, *legacy, *keys])
 
 
 def _mark_if_complete(con, event_id: int):

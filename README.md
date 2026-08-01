@@ -41,10 +41,10 @@ overlapping sets would have each division overwriting the other's rows.
 `analysis/site.py` emits it: club rankings on three roster bases, a searchable
 player table, a **Trends** tab drawing one line per season for every player or
 club that has ever closed a season in the top 25, filterable to a single
-division, and a U.S. Open tracker whose bracket you fill in as games finish,
-re-running a 40,000-sim Monte Carlo in the browser against whatever you have
-entered. It reads only the published artifacts and never replays the model, so
-the page cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
+division, and a U.S. Open tracker that re-runs a 40,000-sim Monte Carlo in the
+browser over whatever is left to play. It reads only the published artifacts
+and never replays the model, so the page cannot drift from
+`data/player_elo.csv` and `data/team_elo*.csv`.
 
 That selection is a union across seasons, so it is 67–164 lines depending on the
 view rather than a fixed 25 — the point being that a club that owned 2019 and has
@@ -67,6 +67,23 @@ a division a season reads as the rating after that season's last event *in that
 division*, the population is only the subjects with an event there (968 club, 980
 college, 316 D-III of 1,953), and the "above season median" baseline is
 recomputed over that population.
+
+**The tracker takes played games from USAU, not from you.** Every fixture with
+a final score arrives with it, renders the score where an unplayed game renders
+the model's probability, and cannot be clicked away; the odds are conditioned
+on it. What you can still enter is a call on a game not yet played, kept in
+`localStorage` under the fixture's USAU game number.
+
+Two things it stops guessing once the tournament starts. **Pools** are the sets
+of teams that have all played each other, grown one fixture at a time — USAU
+labels every opening fixture "Pool D" and publishes no pool letters at all.
+Deriving them from the co-play graph, as this did until day one of 2026, merged
+the field into two components of six the moment the winners' crossover was
+seeded; the clique rule separates those two crossover games out instead, which
+is also what keeps them out of the pool standings. **The bracket** is read off
+USAU's published slots, which fill in as the tournament runs, replacing the old
+"2nd plays 3rd cross-pool" assumption. Only the semifinal feed is still
+assumed: quarters 1-2 into one semi, 3-4 into the other.
 
 Clicking any name opens a drill-down: the rating curve, the full event history,
 and — for a player — **which club he turned out for** at each event; for a club,
@@ -167,6 +184,16 @@ the data notes below: display names are not unique.
 - Schedules cached on/before an event's last day are refetched once the
   event is over (mid-event fetches lack final scores); current-season event
   enumeration bypasses the postback cache so new events appear.
+- A fixture's `games.game_key` is NOT stable while a tournament runs. An
+  unseeded slot has no `EventGameId`, so it is keyed on the page's own slot id
+  ("bracket-game411456"); the moment USAU puts teams in it the row arrives
+  under the real game id and the placeholder is orphaned. `games.slot` records
+  the slot itself — the fixture's identity, which never moves — and
+  `_drop_reseeded` deletes what a reseeding left behind. Without it a refetch
+  mid-event doubles the bracket: the U.S. Open's four prequarterfinals became
+  eight rows after day one, each played game shadowed by the teamless slot it
+  replaced. The model never saw them (it filters NULL teams) but anything
+  reading the schedule did.
 - 491 of 58,080 scored games (0.85%) carry a `games.date` outside their event's
   `[start_date, end_date]` window — year typos like `2020-03-05` on a 2022
   event whose window is `[2022-03-05, 2022-03-06]`, and one 2024 regional game

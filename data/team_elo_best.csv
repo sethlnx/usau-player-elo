@@ -1,14 +1,14 @@
 rank,club,elo,roster_size,season,roster_event,roster_event_date
-1,Revolver,2598.0,26,2026,2026 Pro Elite Challenge West,2026-07-11
-2,PoNY,2552.0,24,2026,2026 Pro Elite Challenge East,2026-06-27
-3,Rhino Slam!,2530.6,26,2026,2026 Pro Elite Challenge West,2026-07-11
-4,DiG,2472.3,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-5,Ring of Fire,2464.0,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-6,Chicago Machine,2380.7,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-7,Johnny Bravo,2363.8,23,2026,2026 Pro Elite Challenge West,2026-07-11
-8,Truck Stop,2362.0,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-9,Sockeye,2310.7,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-10,Sub Zero,2273.8,25,2026,2026 Pro Elite Challenge East,2026-06-27
+1,Revolver,2576.8,26,2026,2026 Pro Elite Challenge West,2026-07-11
+2,PoNY,2527.3,24,2026,2026 Pro Elite Challenge East,2026-06-27
+3,Rhino Slam!,2519.9,26,2026,2026 Pro Elite Challenge West,2026-07-11
+4,DiG,2465.2,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+5,Chicago Machine,2453.7,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+6,Truck Stop,2417.4,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+7,Ring of Fire,2383.8,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+8,Johnny Bravo,2332.6,23,2026,2026 Pro Elite Challenge West,2026-07-11
+9,Sockeye,2326.8,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+10,Sub Zero,2318.9,25,2026,2026 Pro Elite Challenge East,2026-06-27
 11,Philadelphia Pacmen,2273.4,24,2026,2026 Pro Elite Challenge East,2026-06-27
 12,GOAT,2240.7,25,2026,2026 Select Flight Invite East,2026-07-25
 13,Red Tide,2203.6,26,2026,Boston Invite 2026,2026-07-11
@@ -27,7 +27,7 @@ rank,club,elo,roster_size,season,roster_event,roster_event_date
 26,Sprout,2043.7,22,2026,Boston Invite 2026,2026-07-11
 27,Haymaker,2038.8,26,2026,Heavyweights 2026,2026-07-11
 28,Nighthawk,2024.3,20,2026,2026 Select Flight Invite East,2026-07-25
-29,Florida Untied,2018.3,22,2026,2026 Pro Elite Challenge West,2026-07-11
+29,Florida Untied,2017.4,22,2026,2026 Pro Elite Challenge West,2026-07-11
 30,SOUF,1986.5,24,2026,2026 Select Flight Invite - West,2026-07-25
 31,baNC,1979.1,25,2026,2026 Pro Elite Challenge East,2026-06-27
 32,Pittsburgh Temper,1965.9,23,2026,2026 Select Flight Invite East,2026-07-25
@@ -39,11 +39,11 @@ rank,club,elo,roster_size,season,roster_event,roster_event_date
 38,Colt,1941.2,26,2026,Boston Invite 2026,2026-07-11
 39,WOMP,1926.5,23,2026,Filling the Void 2026,2026-07-18
 40,Wretched Refuse,1915.5,25,2026,2nd Annual Deseret Invite,2026-07-11
-41,Mint,1906.2,16,2026,2026 Select Flight Invite East,2026-07-25
-42,Alamode,1906.2,24,2026,Texas 2 Finger 2026,2026-06-27
-43,Warao,1903.0,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-44,MOB Ultimate,1900.8,24,2026,MOB Invite 2026,2026-07-18
-45,Mallard,1900.2,26,2026,2026 Select Flight Invite East,2026-07-25
+41,Alamode,1906.2,24,2026,Texas 2 Finger 2026,2026-06-27
+42,Mint,1906.2,16,2026,2026 Select Flight Invite East,2026-07-25
+43,MOB Ultimate,1900.8,24,2026,MOB Invite 2026,2026-07-18
+44,Mallard,1900.2,26,2026,2026 Select Flight Invite East,2026-07-25
+45,Warao,1899.6,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
 46,Lounar,1877.1,23,2026,2026 Pro Elite Challenge West,2026-07-11
 47,Switchback,1874.2,17,2026,2026 Select Flight Invite - West,2026-07-25
 48,Portland TremOR,1872.5,24,2026,Eugene Summer Solstice 2026,2026-06-27
@@ -58,13 +58,13 @@ rank,club,elo,roster_size,season,roster_event,roster_event_date
 57,Club M - Manic,1844.8,18,2026,Philly Invite 2026,2026-06-20
 58,Town Hall Stars,1832.2,15,2026,Battle For the Beltway 2026,2026-07-19
 59,ISO Atmo,1829.4,25,2026,2026 Select Flight Invite - West,2026-07-25
-60,Fungi,1824.2,26,2026,2026 Pro Elite Challenge West,2026-07-11
+60,Fungi,1823.9,26,2026,2026 Pro Elite Challenge West,2026-07-11
 61,DAPPER,1822.8,23,2026,Witching Hour 2026,2026-06-27
 62,I-69,1822.6,20,2026,2026 Select Flight Invite East,2026-07-25
 63,ZOO,1818.4,26,2026,Texas 2 Finger 2026,2026-06-27
 64,Fuse,1815.6,24,2026,Heavyweights 2026,2026-07-11
 65,Lantern,1815.0,23,2026,Boston Invite 2026,2026-07-11
-66,(washed),1802.0,20,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
+66,(washed),1801.4,20,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
 67,OAT,1801.3,26,2026,2026 Select Flight Invite - West,2026-07-25
 68,Hazard,1797.8,21,2026,2026 Select Flight Invite East,2026-07-25
 69,Apollo,1793.7,24,2026,Club Terminus 2026,2026-06-27
@@ -83,14 +83,14 @@ rank,club,elo,roster_size,season,roster_event,roster_event_date
 82,Atlanta Arson,1759.0,23,2026,Club Terminus 2026,2026-06-27
 83,Black Lung,1758.2,20,2026,SCINNY 2026,2026-06-20
 84,Crypt,1756.8,26,2026,Filling the Void 2026,2026-07-18
-85,EVOLUTION,1751.4,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+85,EVOLUTION,1750.3,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
 86,Big Wrench,1743.2,26,2026,Boston Invite 2026,2026-07-11
 87,Knights of Ni,1742.1,21,2026,Heavyweights 2026,2026-07-11
 88,Cookie Mon$terz,1730.3,20,2026,Heatstroke,2026-06-06
 89,Sebastopol Orchard,1726.1,21,2026,Summer Bash 2026,2026-06-27
 90,BAG,1725.6,26,2026,Boston Invite 2026,2026-07-11
 91,Blackfish,1725.4,17,2026,2026 Select Flight Invite - West,2026-07-25
-92,Tugboat,1723.2,26,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
+92,Tugboat,1720.7,26,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
 93,Gummy Bear Hitmen,1715.5,26,2026,Witching Hour 2026,2026-06-27
 94,Magma Bears,1712.8,26,2026,Boston Invite 2026,2026-07-11
 95,Skipjack,1711.2,22,2026,San Diego Round Robin,2026-06-27
@@ -114,8 +114,8 @@ rank,club,elo,roster_size,season,roster_event,roster_event_date
 113,Space Cowboys,1652.6,26,2026,Filling the Void 2026,2026-07-18
 114,Texas Tea-A,1647.7,22,2026,Texas 2 Finger 2026,2026-06-27
 115,Forest City,1641.5,23,2026,Heavyweights 2026,2026-07-11
-116,Dreadnought,1635.4,24,2026,Texas 2 Finger 2026,2026-06-27
-117,Rice Box,1635.4,22,2026,Texas 2 Finger 2026,2026-06-27
+116,Rice Box,1635.4,22,2026,Texas 2 Finger 2026,2026-06-27
+117,Dreadnought,1635.1,24,2026,Texas 2 Finger 2026,2026-06-27
 118,Battleship,1633.8,18,2026,Heatstroke,2026-06-06
 119,Romulus,1632.4,26,2026,Club Terminus 2026,2026-06-27
 120,DAP LAB,1632.1,15,2026,Flickel City Classic,2026-07-11
@@ -135,11 +135,11 @@ rank,club,elo,roster_size,season,roster_event,roster_event_date
 134,The Incline,1586.2,24,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
 135,Zodiac,1578.8,25,2026,Heavyweights 2026,2026-07-11
 136,Seven Gills,1577.7,21,2026,Eugene Summer Solstice 2026,2026-06-27
-137,Texas Duffy,1577.6,20,2026,Riverside Classic 2026,2026-07-11
-138,El Niño,1577.5,20,2026,Witching Hour 2026,2026-06-27
+137,El Niño,1577.5,20,2026,Witching Hour 2026,2026-06-27
+138,Texas Duffy,1577.4,20,2026,Riverside Classic 2026,2026-07-11
 139,Battery,1576.5,26,2026,Summer Bash 2026,2026-06-27
 140,Harvest Moon,1559.8,24,2026,Club Terminus 2026,2026-06-27
-141,Rawhide,1556.7,18,2026,Texas 2 Finger 2026,2026-06-27
+141,Rawhide,1555.9,18,2026,Texas 2 Finger 2026,2026-06-27
 142,New Jersey Gemini,1550.4,23,2026,Philly Invite 2026,2026-06-20
 143,Resurgam Ultimate,1550.4,25,2026,Boston Invite 2026,2026-07-11
 144,Connecticut 9 to 5,1547.2,18,2026,2026 Antlerlock,2026-06-27
