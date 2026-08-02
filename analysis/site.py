@@ -1,7 +1,9 @@
 """Build a single self-contained HTML page for the published rankings.
 
-Three tabs: club rankings, player rankings, and a U.S. Open tracker whose
-bracket you fill in as games finish, re-simulating the title odds live.
+Five tabs: club rankings, player rankings, per-season Trends, a Tournaments
+browser showing every event's recovered pools and bracket plus the history of
+the series it belongs to, and a U.S. Open tracker whose bracket you fill in as
+games finish, re-simulating the title odds live.
 
 Everything is embedded in one file so it opens over file:// with no server
 and no network. Inputs are the published artifacts only - this script never
@@ -11,7 +13,8 @@ replays the model, so the page can never disagree with the CSVs:
     data/team_elo.csv            clubs, most recent COMPLETED event roster
     data/team_elo_best.csv       clubs, best full-strength roster of 2026
     data/team_elo_upcoming.csv   clubs, next event roster - the U.S. Open field
-    data/usau.db                 the U.S. Open schedule
+    data/usau.db                 every event's schedule - the U.S. Open
+                                 tracker, and the Tournaments browser
 
 Usage: python -m analysis.site   ->   docs/index.html
 """
@@ -28,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import DB_PATH
 from analysis.rankings import DIVCODE, PUBLISHED, TEAM_DIVISIONS
+from analysis.tournaments import build as build_tournaments
 
 # docs/ rather than site/: GitHub Pages can serve a branch's root or its
 # /docs folder and nothing else, so putting the page here makes the project
@@ -139,6 +143,10 @@ def pool_round(games):
 def build():
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
     ev, field, sched = usopen(con)
+    # Every event's recovered shape, for the Tournaments tab. Derived here
+    # rather than replayed: analysis.tournaments reads the same schedule the
+    # tracker does and infers pools and brackets from the results.
+    tourneys = build_tournaments(con)
     con.close()
 
     all_players = load_csv("player_elo.csv")
@@ -255,6 +263,7 @@ def build():
             "crossovers": [game(g) for g in crossovers],
             "bracket": bracket,
         },
+        "tourneys": tourneys,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -266,6 +275,8 @@ def build():
     print(f"  {len(payload['players']):,} players (>={MIN_GAMES} games), "
           f"{len(clubs['completed'])} clubs, {len(field)} U.S. Open teams, "
           f"{len(pools)} pools, {played}/{len(sched)} fixtures played")
+    print(f"  {len(tourneys['events']):,} tournaments in "
+          f"{len(tourneys['series']):,} series")
 
 
 TEMPLATE = r"""<!doctype html>
@@ -517,6 +528,55 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   font-weight:600}
 #rpane{padding:0 13px 13px}
 .rsum{font-size:12px;color:var(--ink-3);margin:0 0 9px;line-height:1.6}
+
+/* ---------- tournaments ---------- */
+.evtbl tr.ev{cursor:pointer}
+.evtbl tr.ev:hover td{background:var(--chip)}
+td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.tag{display:inline-block;font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.04em;padding:1px 6px;border-radius:4px;background:var(--chip);
+  color:var(--ink-3);font-weight:600;white-space:nowrap}
+.tag.t4{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--ink)}
+.tag.t3{background:color-mix(in srgb,var(--accent) 11%,transparent)}
+.crown{color:var(--accent);font-weight:600}
+#tvhead{margin:0 0 14px}
+#tvhead h2{font-size:20px;margin:0 0 3px;letter-spacing:-.01em}
+#tvhead .meta{color:var(--ink-3);font-size:13px}
+.sect{font-size:13px;margin:24px 0 9px;color:var(--ink-2)}
+.sect .muted{font-weight:400}
+/* Bracket geometry, parameterised. The U.S. Open tracker's grid is fixed at
+   four rounds; a recovered bracket runs from one round to seven, so columns,
+   rows and the connector pitch are all set inline per tournament. */
+.tbr{--mh:50px; --rg:8px; --cg:26px; display:grid; column-gap:var(--cg);
+  row-gap:var(--rg); align-items:center; margin-top:4px; overflow-x:auto}
+.tbr .m{background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:3px;position:relative;display:flex;flex-direction:column;
+  justify-content:center;gap:1px}
+.tbr .m.empty{background:none;border-style:dashed;opacity:.35}
+.tbr .t{display:flex;gap:6px;padding:2px 6px;border-radius:5px;font-size:12.5px;
+  align-items:baseline}
+.tbr .t.w{background:color-mix(in srgb,var(--win) 15%,transparent);font-weight:600}
+.tbr .t.l{opacity:.5}
+.tbr .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbr .p{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+.tbr .sd{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);
+  background:var(--chip);border-radius:3px;padding:1px 3px;min-width:22px;
+  text-align:center;flex:none}
+.tbr .m.out::after{content:'';position:absolute;left:100%;top:50%;
+  width:calc(var(--cg)/2);border-top:1px solid var(--line-strong)}
+.tbr .m > i.cin{position:absolute;right:100%;top:50%;transform:translateY(-50%);
+  width:calc(var(--cg)/2);height:var(--span,0px);
+  border-left:1px solid var(--line-strong)}
+.tbr .m > i.cin::after{content:'';position:absolute;left:0;top:50%;
+  width:calc(var(--cg)/2);border-top:1px solid var(--line-strong)}
+@media (max-width:860px){
+  .tbr{grid-template-columns:1fr !important;grid-template-rows:none !important;
+       row-gap:6px}
+  .tbr > *{grid-column:1 !important;grid-row:auto !important}
+  .tbr .m.out::after,.tbr .m > i.cin{display:none}
+}
+.stand td.pd{text-align:right;font-family:var(--mono);color:var(--ink-3);
+  font-size:11.5px;padding-left:8px}
 </style>
 
 <div id="scrim"></div>
@@ -531,6 +591,7 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
 <nav>
   <button data-t="clubs" class="on">Club Team Rankings</button>
   <button data-t="players">Players</button>
+  <button data-t="events">Tournaments</button>
   <button data-t="trends">Trends</button>
   <button data-t="usopen">U.S. Open 2026</button>
 </nav>
@@ -588,6 +649,44 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
     <th class="n">G</th><th>Last club</th><th class="n">Yr</th>
   </tr></thead><tbody id="ptb"></tbody></table>
   <p class="note" id="pnote"></p>
+</section>
+
+<section id="events">
+  <div id="tlist">
+    <div class="bar">
+      <input type="search" id="eq" placeholder="Search tournament, city…" autocomplete="off">
+      <select id="ediv">
+        <option value="all">All divisions</option>
+        <option value="0">Club Men's</option>
+        <option value="1">College</option>
+        <option value="2">College D-III</option>
+        <option value="3">Club Mixed</option>
+        <option value="4">Club Women's</option>
+      </select>
+      <select id="eyear"></select>
+      <select id="etier">
+        <option value="all">All tournaments</option>
+        <option value="series">Championship series</option>
+        <option value="4">Nationals &amp; majors</option>
+        <option value="3">Regionals</option>
+        <option value="2">Sectionals</option>
+        <option value="1">Conference</option>
+        <option value="0">Regular season</option>
+      </select>
+      <span class="count" id="ecount"></span>
+    </div>
+    <table class="evtbl"><thead><tr>
+      <th>Dates</th><th>Tournament</th><th>Division</th>
+      <th class="n">Teams</th><th>Champion</th><th class="n">Editions</th>
+    </tr></thead><tbody id="etb"></tbody></table>
+    <p class="note" id="enote"></p>
+  </div>
+  <div id="tview" style="display:none">
+    <div class="bar"><button class="act" id="eback">&lsaquo; All tournaments</button></div>
+    <div id="tvhead"></div>
+    <div id="tvbody"></div>
+    <p class="note" id="tvnote"></p>
+  </div>
 </section>
 
 <section id="trends">
@@ -674,19 +773,24 @@ const GENDER_NOTE =
   `left out of both filtered views.`;
 
 /* ---------- tabs ---------- */
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
-  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === b.dataset.t));
+function showTab(id) {
+  document.querySelectorAll('nav button').forEach(
+    x => x.classList.toggle('on', x.dataset.t === id));
+  document.querySelectorAll('section').forEach(
+    s => s.classList.toggle('on', s.id === id));
   // Reducing 26k trajectories to season maps is ~370k operations, so it runs on
   // first activation of the tab rather than at load. seasonData memoises.
-  if (b.dataset.t === 'trends' && !$('#tsvg')) drawTrends();
-});
+  if (id === 'trends' && !$('#tsvg')) drawTrends();
+}
+document.querySelectorAll('nav button').forEach(
+  b => b.onclick = () => showTab(b.dataset.t));
 
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
   `softmax-weighted mean of its event roster. Clubs cover the three club ` +
-  `divisions, Players and Trends add college and college D-III. The U.S. Open ` +
-  `tracker is club men's. Generated ${D.generated || ''}.`;
+  `divisions, Players and Trends add college and college D-III. Tournaments ` +
+  `covers every event in the corpus. The U.S. Open tracker is club men's. ` +
+  `Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
 const CNOTE = {
@@ -1495,15 +1599,21 @@ $('#dback').onclick = () => {
   const t = navStack[navStack.length - 1];
   openDetail(t.kind, t.key, {push: false});
 };
-function closeDetail() {
+/* `silent` is for the router, which is already acting on the hash it wants.
+   Otherwise closing returns to whatever the panel was opened ON TOP OF: a
+   tournament view stays put rather than being torn down with the panel that
+   a team name inside it opened. */
+function closeDetail(silent) {
   const was = cur;
   $('#detail').classList.remove('on'); $('#scrim').classList.remove('on');
   $('#tip').classList.remove('on'); $('#dback').classList.remove('on');
   navStack = []; cur = null;
-  if (was && location.hash && location.hash !== '#') location.hash = '#';
+  if (silent === true || !was || !location.hash) return;
+  const back = curEvent !== null ? '#t/' + EVS[curEvent][0] : '#';
+  if (location.hash !== back) location.hash = back;
 }
-$('#dclose').onclick = closeDetail;
-$('#scrim').onclick = closeDetail;
+$('#dclose').onclick = () => closeDetail();
+$('#scrim').onclick = () => closeDetail();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
 $('#detail').addEventListener('mousemove', e => {
@@ -1542,6 +1652,322 @@ $('#dbody').addEventListener('click', e => {
   if (c) openDetail('c', c.dataset.club);
 });
 
+/* ---------- tournaments: recovered pools and brackets ---------- */
+/* Everything USAU does not publish about an event's shape is recovered in
+   analysis/tournaments.py — pools as cliques in the co-play graph, bracket
+   rounds from the stage label with the feeders wired from the results. This
+   half only draws it. Games are encoded against the event's own field:
+   [homeLocal, awayLocal, homeScore, awayScore, dateIndex]. */
+const TV = D.tourneys || {teams: [], series: [], events: [], detail: {},
+                          rounds: [], tiers: []};
+const EVS = TV.events, EDET = TV.detail, ESER = TV.series, ETM = TV.teams;
+const EVBYID = new Map(EVS.map((e, i) => [e[0], i]));
+const EDIVL = ["Club Men's", 'College', 'College D-III', 'Club Mixed',
+               "Club Women's"];
+const EYEARS = [...new Set(EVS.map(e => e[2]))].sort((a, b) => b - a);
+// A bracket's key is the placing it decides; 'champ' is the title.
+const BRLABEL = {champ: 'Championship bracket', gtg: 'Game to go'};
+const brLabel = k => BRLABEL[k] ||
+  (/^\d+(st|nd|rd|th)$/.test(k) ? k + ' place bracket'
+                                : k.charAt(0).toUpperCase() + k.slice(1) + ' bracket');
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* "Aug 1-3, 2025", collapsing the month when a weekend does not cross one. */
+function daterange(a, b) {
+  if (!a) return '';
+  const p = s => [MON[+s.slice(5, 7) - 1], +s.slice(8, 10), s.slice(0, 4)];
+  const [m1, d1, y1] = p(a);
+  if (!b || b === a) return `${m1} ${d1}, ${y1}`;
+  const [m2, d2, y2] = p(b);
+  if (y1 !== y2) return `${m1} ${d1}, ${y1} \u2013 ${m2} ${d2}, ${y2}`;
+  return m1 === m2 ? `${m1} ${d1}\u2013${d2}, ${y1}`
+                   : `${m1} ${d1} \u2013 ${m2} ${d2}, ${y1}`;
+}
+
+/* ---------- list ---------- */
+/* Opens on the most recent season — "what happened lately" is the question
+   this tab is usually asked. `selected` is explicit: relying on a browser
+   auto-selecting the first option makes the default a side effect of the
+   order the options happened to be inserted in. */
+$('#eyear').innerHTML = '<option value="all">All years</option>' +
+  EYEARS.map((y, i) => `<option value="${y}"${i ? '' : ' selected'}>${y}</option>`).join('');
+
+function drawEvents() {
+  const q = $('#eq').value.trim().toLowerCase(), div = $('#ediv').value;
+  const yr = $('#eyear').value, tier = $('#etier').value;
+  let rows = EVS;
+  if (div !== 'all') rows = rows.filter(e => e[3] === +div);
+  if (yr !== 'all') rows = rows.filter(e => e[2] === +yr);
+  if (tier === 'series') rows = rows.filter(e => e[8] > 0);
+  else if (tier !== 'all') rows = rows.filter(e => e[8] === +tier);
+  if (q) rows = rows.filter(e => e[1].toLowerCase().includes(q) ||
+                                 e[6].toLowerCase().includes(q) ||
+                                 ESER[e[9]][0].toLowerCase().includes(q));
+  const total = rows.length;
+  // Most recent first. The cap is a DOM budget, not a filter: the count says
+  // how many matched so a narrower search is an obvious next move.
+  rows = rows.slice().sort((a, b) => (b[4] || '').localeCompare(a[4] || ''));
+  const shown = rows.slice(0, 400);
+  $('#etb').innerHTML = shown.map(e => {
+    const i = EVBYID.get(e[0]), det = EDET[i], n = ESER[e[9]][1].length;
+    const ch = e[10] >= 0 ? `<span class="crown">${esc(ETM[det.t[e[10]]])}</span>`
+                          : '<span class="muted">\u2014</span>';
+    // Division and championship tier are separate facts, so they get separate
+    // marks: colouring the division tag by tier read as if "Club Men's" itself
+    // meant something. Only Regionals and up carry a chip — Sectionals and
+    // Conference are most of the corpus, and the filter already finds them.
+    const chip = e[8] >= 3
+      ? `<span class="tag t${e[8]}">${esc(TV.tiers[e[8]])}</span> ` : '';
+    return `<tr class="ev" data-ev="${e[0]}"><td class="dt">${daterange(e[4], e[5])}</td>` +
+      `<td>${chip}${esc(e[1])}` +
+      `${e[6] ? ` <span class="muted">\u00b7 ${esc(e[6])}</span>` : ''}</td>` +
+      `<td><span class="tag">${esc(EDIVL[e[3]] || '')}</span></td>` +
+      `<td class="n">${e[7]}</td><td>${ch}</td>` +
+      `<td class="n">${n > 1 ? n : '<span class="muted">1</span>'}</td></tr>`;
+  }).join('');
+  $('#ecount').textContent = `${total.toLocaleString()} tournament` +
+    (total === 1 ? '' : 's') + (total > shown.length
+      ? ` \u00b7 showing the ${shown.length} most recent` : '');
+}
+['#eq', '#ediv', '#eyear', '#etier'].forEach(s => {
+  const el = $(s);
+  el.oninput = drawEvents; el.onchange = drawEvents;
+});
+$('#etb').addEventListener('click', e => {
+  const tr = e.target.closest('[data-ev]');
+  if (tr) location.hash = '#t/' + tr.dataset.ev;
+});
+
+/* ---------- standings ---------- */
+/* Wins first, then the head-to-head record INSIDE the tied group, then point
+   differential. Unlike the U.S. Open tracker — which prices games that have
+   not happened and so cannot use a margin — every game here has a score, so
+   the real tiebreakers are available and rating never enters. */
+function standingsOf(games, teams) {
+  const st = new Map(teams.map(t => [t, {t, w: 0, l: 0, pf: 0, pa: 0}]));
+  games.forEach(g => {
+    const h = st.get(g[0]), a = st.get(g[1]);
+    h.pf += g[2]; h.pa += g[3]; a.pf += g[3]; a.pa += g[2];
+    if (g[2] > g[3]) { h.w++; a.l++; } else if (g[3] > g[2]) { a.w++; h.l++; }
+  });
+  const rows = [...st.values()];
+  rows.forEach(r => r.pd = r.pf - r.pa);
+  rows.sort((x, y) => (y.w - x.w) || (y.pd - x.pd) || (y.pf - x.pf));
+  // Re-sort each equal-win block on the games its members played each other.
+  for (let i = 0; i < rows.length; ) {
+    let j = i;
+    while (j < rows.length && rows[j].w === rows[i].w) j++;
+    if (j - i > 1) {
+      const grp = new Set(rows.slice(i, j).map(r => r.t)), h2h = new Map();
+      grp.forEach(t => h2h.set(t, 0));
+      games.forEach(g => {
+        if (!grp.has(g[0]) || !grp.has(g[1]) || g[2] === g[3]) return;
+        const w = g[2] > g[3] ? g[0] : g[1];
+        h2h.set(w, h2h.get(w) + 1);
+      });
+      const blk = rows.slice(i, j).sort((x, y) =>
+        (h2h.get(y.t) - h2h.get(x.t)) || (y.pd - x.pd) || (y.pf - x.pf));
+      rows.splice(i, j - i, ...blk);
+    }
+    i = j;
+  }
+  return rows;
+}
+
+/* ---------- one tournament ---------- */
+let curEvent = null;
+
+function evTeamCell(name) {
+  // Clubs the model tracks open their trajectory; anyone else is plain text.
+  // Matched on the model KEY, since three divisions share printed names.
+  const k = TK[name];
+  return k && H.teams[k]
+    ? `<span class="nmlink" data-club="${esc(k)}">${esc(name)}</span>` : esc(name);
+}
+
+function drawTournament(i) {
+  const e = EVS[i], det = EDET[i];
+  if (!det) return;
+  const nm = l => ETM[det.t[l]];
+  const ser = ESER[e[9]], sibs = ser[1];
+  const facts = [daterange(e[4], e[5]), e[6], EDIVL[e[3]], TV.tiers[e[8]],
+                 `${e[7]} teams`].filter(Boolean).map(esc);
+  facts.push(e[10] >= 0 ? `champion <b>${esc(nm(e[10]))}</b>`
+                        : 'no champion on record');
+  $('#tvhead').innerHTML = `<h2>${esc(e[1])}</h2>` +
+    `<div class="meta">${facts.join(' \u00b7 ')}</div>`;
+
+  let html = '';
+  // Pools, lettered in playing order. A pool whose teams have already played
+  // in an earlier one is a placement round robin, and says so.
+  if (det.p.length) {
+    html += `<h3 class="sect">Pool play <span class="muted">\u2014 recovered ` +
+      `from the results; USAU publishes no pool labels worth the name</span></h3>` +
+      `<div class="grid">` + det.p.map(([later, gs], pi) => {
+        const teams = [...new Set(gs.flatMap(g => [g[0], g[1]]))];
+        const st = standingsOf(gs, teams);
+        return `<div class="card"><h3>Pool ${POOLTAG[pi]}` +
+          (later ? ' \u2014 placement' : '') + `</h3>` +
+          gs.map(g => evGameRow(g, nm)).join('') +
+          `<table class="stand">` + st.map((r, j) =>
+            `<tr><td><span class="seed">${POOLTAG[pi]}${j + 1}</span>` +
+            `${evTeamCell(nm(r.t))}</td><td class="w">${r.w}\u2013${r.l}</td>` +
+            `<td class="pd">${r.pd > 0 ? '+' : ''}${r.pd}</td></tr>`).join('') +
+          `</table></div>`;
+      }).join('') + `</div>`;
+  }
+  // A bracket of one game is a placement decider, not a bracket. Drawing it
+  // as a four-row grid headed "Final" wastes a section on "3rd place: DiG
+  // beat Mooncatchers", so the singletons collapse into one table alongside
+  // whatever the label placed nowhere at all.
+  const gcount = b => b[2].reduce((n, rd) => n + rd.filter(Boolean).length, 0);
+  const drawn = det.b.filter(b => gcount(b) > 1);
+  const single = det.b.filter(b => gcount(b) === 1);
+  html += drawn.map(b => evBracket(b[0], b[1], b[2], nm, det)).join('');
+
+  const extra = single.map(([kind, root, rounds]) => {
+    const g = rounds[rounds.length - 1].find(Boolean);
+    return g ? [g, brLabel(kind).replace(/ bracket$/, '')] : null;
+  }).filter(Boolean).concat(det.o);
+  if (extra.length) {
+    html += `<h3 class="sect">Placement &amp; other games <span class="muted">` +
+      `\u2014 one-game deciders, crossovers, play-ins, and anything the ` +
+      `organiser's own label does not put in a bracket</span></h3>` +
+      `<table><thead><tr><th>Round</th><th>Result</th>` +
+      `<th class="n">Score</th></tr></thead><tbody>` +
+      extra.map(([g, stage]) => {
+        const hw = g[2] >= g[3];
+        return `<tr><td class="muted">${esc(stage || '\u2014')}</td><td>` +
+          `${evTeamCell(nm(g[hw ? 0 : 1]))} ` +
+          `<span class="muted">${g[2] === g[3] ? 'tied' : 'def.'}</span> ` +
+          `${evTeamCell(nm(g[hw ? 1 : 0]))}</td>` +
+          `<td class="n">${Math.max(g[2], g[3])}\u2013${Math.min(g[2], g[3])}</td></tr>`;
+      }).join('') + `</tbody></table>`;
+  }
+  if (!det.p.length && !det.b.length && !det.o.length)
+    html += `<p class="muted">No completed games on record for this event.</p>`;
+
+  // The series history. Shown whenever there is more than this instance —
+  // across seasons AND across divisions, since a Sectional's men's and
+  // women's halves are one tournament run twice on the same weekend.
+  if (sibs.length > 1) {
+    html += `<h3 class="sect">${esc(ser[0])} <span class="muted">\u2014 ` +
+      `${sibs.length} instances on record</span></h3>` +
+      `<table class="evtbl"><thead><tr><th class="n">Year</th><th>Division</th>` +
+      `<th>Event</th><th class="n">Teams</th><th>Champion</th></tr></thead><tbody>` +
+      sibs.slice().reverse().map(j => {
+        const s = EVS[j], sd = EDET[j];
+        const ch = s[10] >= 0 ? `<span class="crown">${esc(ETM[sd.t[s[10]]])}</span>`
+                              : '<span class="muted">\u2014</span>';
+        return `<tr class="ev" data-ev="${s[0]}"${j === i ? ' style="font-weight:600"' : ''}>` +
+          `<td class="n">${s[2]}</td><td><span class="tag">` +
+          `${esc(EDIVL[s[3]] || '')}</span></td><td>${esc(s[1])}</td>` +
+          `<td class="n">${s[7]}</td><td>${ch}</td></tr>`;
+      }).join('') + `</tbody></table>`;
+  }
+  $('#tvbody').innerHTML = html;
+  $('#tvnote').innerHTML =
+    `USAU publishes a flat fixture list per event and nothing about its shape, ` +
+    `so the shape here is <b>recovered</b>. A pool is a set of teams that have ` +
+    `all played each other, found as a clique in the co-play graph and chosen ` +
+    `to span the fewest calendar days — that is what separates an opening pool ` +
+    `of three from a placement pool of four reusing two of its teams. Bracket ` +
+    `ROUNDS come from the organiser's own stage label, never from the results: ` +
+    `a win-chain through mislabelled pool play looks exactly like a nine-round ` +
+    `bracket, and showing none beats inventing one. Only the feeders are ` +
+    `inferred, a slot reading back to the game that team won. Anything the ` +
+    `label does not place lands in Other games under whatever it was called. ` +
+    `Standings break ties on head-to-head inside the tied group, then point ` +
+    `differential. Team names in <span class="nmlink">this style</span> open ` +
+    `that club's rating history.`;
+  curEvent = i;
+}
+const POOLTAG = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+function evGameRow(g, nm) {
+  const hw = g[2] > g[3], tie = g[2] === g[3];
+  const side = (l, sc, win) =>
+    `<div class="t ${tie ? '' : win ? 'w' : 'l'} fact"><span>${esc(nm(l))}</span>` +
+    `<span class="p">${sc}</span></div>`;
+  return `<div class="g">${side(g[0], g[2], hw)}<span class="vs">v</span>` +
+         `${side(g[1], g[3], !hw)}</div>`;
+}
+
+/* One bracket as a CSS grid. Rounds arrive outermost first and each is exactly
+   twice the next, so a round of n games sits on a row step of ROWS/n and the
+   incoming connector spans one pitch of the round before it.
+
+   `root` is the rank the innermost column actually reached — 0 for a bracket
+   that played its final, 1 for a Regional that stopped at two semifinals. The
+   column headings count out from there, so a bracket with no final is headed
+   Quarterfinals/Semifinals rather than having its rounds shifted in to
+   manufacture one. */
+function evBracket(kind, root, rounds, nm, det) {
+  const MH = 50, RG = 8, PITCH = MH + RG;
+  const ROWS = rounds[0].length, cols = rounds.length;
+  const seed = evSeeds(det);
+  const at = (c, r, span) =>
+    `grid-column:${c};grid-row:${r}${span > 1 ? ' / span ' + span : ''}`;
+  const head = rounds.map((rd, r) => {
+    const rank = root + cols - 1 - r;
+    return `<div class="round" style="${at(r + 1, 1)}"><h4>` +
+      `${esc(TV.rounds[rank] || 'Round of ' + (2 << rank))}</h4></div>`;
+  }).join('');
+  const body = rounds.map((rd, r) => {
+    const step = ROWS / rd.length;
+    const span = r === 0 ? 0 : PITCH * (ROWS / rounds[r - 1].length);
+    return rd.map((g, i) => {
+      if (!g) return '';
+      const line = (l, sc, other, win) =>
+        `<div class="t ${sc === other ? '' : win ? 'w' : 'l'}">` +
+        `<span class="sd">${seed.get(l) || ''}</span>` +
+        `<span class="nm">${evTeamCell(nm(l))}</span><span class="p">${sc}</span></div>`;
+      return `<div class="m${r < cols - 1 ? ' out' : ''}" style="${at(r + 1, i * step + 2, step)}">` +
+        (span ? `<i class="cin" style="--span:${span}px"></i>` : '') +
+        line(g[0], g[2], g[3], g[2] > g[3]) + line(g[1], g[3], g[2], g[3] > g[2]) +
+        `</div>`;
+    }).join('');
+  }).join('');
+  return `<h3 class="sect">${esc(brLabel(kind))}</h3>` +
+    `<div class="tbr" style="grid-template-columns:repeat(${cols},minmax(150px,1fr));` +
+    `grid-template-rows:auto repeat(${ROWS},${MH}px)">${head}${body}</div>`;
+}
+
+/* A team's pool finish, for the chip on each bracket line: which slot walked
+   out of pool play into this game. */
+function evSeeds(det) {
+  const out = new Map();
+  det.p.forEach(([later, gs], pi) => {
+    if (later) return;
+    const teams = [...new Set(gs.flatMap(g => [g[0], g[1]]))];
+    standingsOf(gs, teams).forEach((r, j) => {
+      if (!out.has(r.t)) out.set(r.t, POOLTAG[pi] + (j + 1));
+    });
+  });
+  return out;
+}
+
+function openTournament(eid) {
+  const i = EVBYID.get(eid);
+  if (i === undefined) { closeTournament(); return; }
+  if (curEvent !== i) drawTournament(i);
+  $('#tlist').style.display = 'none';
+  $('#tview').style.display = '';
+  showTab('events');
+  window.scrollTo(0, 0);
+}
+function closeTournament() {
+  curEvent = null;
+  $('#tview').style.display = 'none';
+  $('#tlist').style.display = '';
+}
+$('#eback').onclick = () => { location.hash = '#'; };
+$('#tvbody').addEventListener('click', ev => {
+  const c = ev.target.closest('[data-club]');
+  if (c) { openDetail('c', c.dataset.club); return; }
+  const tr = ev.target.closest('[data-ev]');
+  if (tr) location.hash = '#t/' + tr.dataset.ev;
+});
+
 /* ---------- deep links ---------- */
 // Club keys carry spaces and punctuation ('rhino slam!', 'cookie mon$terz'),
 // so the key is percent-encoded rather than concatenated raw.
@@ -1549,12 +1975,25 @@ const known = (kind, key) => kind === 'p'
   ? (!!H.players[key] || PBY.has(String(key)))
   : !!H.teams[TK[key] || key];
 function routeHash() {
-  const m = /^#([pc])\/(.+)$/.exec(location.hash || '');
-  if (!m) { if (cur) closeDetail(); return; }
+  const m = /^#([pct])\/(.+)$/.exec(location.hash || '');
+  // A tournament is a VIEW, not the overlay panel: it owns the tab, and any
+  // club panel opened from inside it is layered on top and closed first.
+  if (m && m[1] === 't') {
+    if (cur) closeDetail(true);
+    openTournament(+m[2]);
+    return;
+  }
+  // Only a bare hash tears the tournament down. A club panel opened from
+  // inside one is layered ON it and must leave it standing.
+  if (!m) {
+    if (cur) closeDetail(true);
+    if (curEvent !== null) closeTournament();
+    return;
+  }
   let key;
   try { key = decodeURIComponent(m[2]); } catch (err) { key = m[2]; }
   if (cur && cur.kind === m[1] && cur.key === key) return;
-  if (!known(m[1], key)) { closeDetail(); return; }
+  if (!known(m[1], key)) { closeDetail(true); return; }
   openDetail(m[1], key);
 }
 window.addEventListener('hashchange', routeHash);
@@ -1876,7 +2315,17 @@ $('#tnote').textContent =
   `25 is recomputed inside whatever you have selected. All five divisions share ` +
   `one rating scale, bridged by the ${GENDER_NOTE}`;
 
-drawClubs(); drawPlayers(); drawUS(); routeHash();
+$('#enote').innerHTML =
+  `Every event in the corpus with a completed game, ${EVS.length.toLocaleString()} of ` +
+  `them across ${ESER.length.toLocaleString()} tournament series. Click a row for ` +
+  `that event's pools and bracket, and for the other years the same tournament ` +
+  `has run. <b>Editions</b> counts the instances on record — the same tournament ` +
+  `in another division counts, since a Sectional's men's and women's halves are ` +
+  `one weekend run twice. The champion is the winner of the championship ` +
+  `bracket's final where the schedule names one; events that finished on pool ` +
+  `play, or whose stage labels name no final, show a dash.`;
+
+drawClubs(); drawPlayers(); drawUS(); drawEvents(); routeHash();
 </script>
 </html>
 """

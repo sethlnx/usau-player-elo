@@ -78,10 +78,10 @@ no rule places keep `gender=''` and appear only under "all genders";
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
 searchable player table over all five divisions, a **Trends** tab drawing one line per
 season for every player or club that has ever closed a season in the top 25,
-and a U.S. Open tracker that re-runs a 40,000-sim Monte Carlo in the browser
-over whatever is left to play. It reads only the published artifacts and never
-replays the model, so the page cannot drift from `data/player_elo.csv` and
-`data/team_elo*.csv`.
+a **Tournaments** browser over all 2,870 events, and a U.S. Open tracker that
+re-runs a 40,000-sim Monte Carlo in the browser over whatever is left to play.
+It reads only the published artifacts and never replays the model, so the page
+cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
 
 Every tab filters by division, and what that means differs by tab — on
 purpose. **Clubs** shows one division at a time (club men's / mixed /
@@ -108,6 +108,48 @@ that season's last event in the division picked.
 group between events; it is disabled for clubs, which have no group. Neither
 filtered gender view contains the 3,124 unplaced identities, so the two never
 sum to the unfiltered count. The U.S. Open tracker remains club men's.
+
+### Tournaments
+
+USAU publishes a flat fixture list per event and nothing about its shape, so
+the shape is **recovered** rather than read. The `stage` column is free text
+typed by thousands of organisers and runs to 3,300 distinct values, including
+`Chumpionship 9`, `GAME TO GO TO THE GAME TO GO` and `Round Name`. Two
+different strategies, in `analysis/tournaments.py`:
+
+**Pools are found structurally**, as sets of teams that have all played each
+other — cliques in the co-play graph — because the labels carry no
+information: 2,103 of the 2,680 events with pool play file every fixture under
+one heading. Cliques consume EDGES rather than teams, so a placement round
+robin reusing teams from the opening pools is still found, and a rematch
+counts for the later pool instead of twice in the first pool's standings. The
+clique chosen through a fixture is the one spanning the fewest CALENDAR DAYS,
+size breaking the tie: structure alone cannot tell the U.S. Open's opening
+pool of three from the 9-12 pool of four that reuses two of its teams — both
+are cliques and the wrong one is bigger.
+
+**Brackets are not.** Round rank comes from the organiser's own label
+(`Pre-Quarters`, `Sweet 16`, `Gold Semi Finals`, `9th Place Quarters`), and
+only the feeders are inferred, a slot reading back to the game that team won.
+Deriving rounds from the results too — what this did first — turns a win-chain
+through mislabelled pool play into a nine-round bracket that never existed;
+showing no bracket is better than inventing one. Every rank-0 game is a root,
+so a college invite running two flights off one schedule yields two trees
+rather than one tree and a pile of orphans. Anything the label does not place
+lands under **Placement & other games** with the organiser's own wording.
+Across the corpus this puts 84.6% of the 90,505 completed games into a pool or
+a bracket and loses none: every game is displayed somewhere.
+
+A **series** is the printed name with everything that varies between instances
+taken out — the year, the edition number (`Cooler Classic 30`), the division
+wording, and whatever suffix that season used (`- ICC`, `(ICC)`). 2,870 events
+collapse to 670 series, so opening the 2025 U.S. Open also shows the other 23
+instances and who won each. Division wording goes because division is its own
+facet: a Sectional's men's and women's halves are one tournament run twice.
+"Open" is deliberately kept — it is load-bearing in "U.S. Open". Standings
+break ties on head-to-head inside the tied group, then point differential;
+unlike the U.S. Open tracker, which prices games that have not happened, every
+game here has a score, so rating never enters.
 
 Club identity is the normalized name, so "Rhino" and "Rhino Slam!" are one
 club and a college program's D-I and D-III sides are one program. Mixed and
@@ -271,6 +313,9 @@ the reason in the data notes below: display names are not unique.
   than a sequential updater. Needs a prior pull toward the base rating to
   converge at all (see its module docstring); +10.1 accuracy points over the
   team-level original, still behind player Elo.
+  `tournaments.py` recovers pools, brackets and tournament series from the
+  fixture list (see **Tournaments** above) and hands `site.py` the payload the
+  browser tab draws; it never touches ratings.
 
 ## Data notes
 
