@@ -88,8 +88,15 @@ purpose. **Clubs** shows one division at a time (club men's / mixed /
 women's), ranked within it and searchable by club name or the event it was
 rated off, because those teams never play each other and a
 merged 1..n would invite a comparison the games cannot settle. **Players**
-follows the "2026 rosters only" toggle: with it on you get players who played
-the division IN 2026, with it off anyone who ever has. That distinction is not
+follows the "2026 rosters only" toggle: with it on you get players in the
+division NOW, with it off anyone who ever played it. Nobody is listed in two
+CLUB divisions at once — men's, mixed and women's are alternatives, so the
+club bits collapse to whichever division the player turned out in most that
+season (ties to the most recent event) and someone on a mixed team shows only
+under mixed. College is deliberately NOT collapsed against club: it runs in
+the spring and club in the summer, so 1,789 players are genuinely in both in
+2026 against just 217 who touched two club divisions, and a college senior who
+also plays club belongs in both lists. That distinction is not
 cosmetic — a career-wide mask left 43% of the club men's list stale (Nathan
 Champoux last played men's in 2018 and has been on Hybrid since 2019, and
 every graduated player still sat under college). Either way the rating is the

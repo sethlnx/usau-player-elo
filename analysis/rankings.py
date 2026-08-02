@@ -13,7 +13,7 @@ import json
 import math
 import sqlite3
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -866,17 +866,45 @@ def main(cfg: EloConfig | None = None):
     # 43% of the club men's list was stale that way. `divisions_now` covers
     # only the player's LAST season, which is what "currently in this
     # division" means for a population already filtered to that season.
-    div_ever, div_now = defaultdict(int), defaultdict(int)
-    for pid, season_played, division in con.execute("""
-            SELECT DISTINCT rp.player_id, ev.season,
-                   COALESCE(ev.division, 'club-men')
+    # A player belongs to ONE club division at a time. Within club, men's /
+    # mixed / women's are alternatives — somebody on a mixed team is a mixed
+    # player, and listing them under club men's because they guested at a
+    # men's sectional is what makes the filter look broken. So the club bits
+    # of div_now collapse to the division they played MOST in that season,
+    # ties going to the most recent event.
+    #
+    # College is NOT collapsed against club, because that overlap is real and
+    # large: 1,940 players played both a college and a club division in 2026
+    # (college runs spring, club runs summer) against just 217 in two club
+    # divisions. A college senior who also plays club belongs in both lists.
+    # college and college-d3 likewise stay together — same program, two sides.
+    CLUB_DIVISIONS = {"club-men", "club-mixed", "club-women"}
+    div_ever = defaultdict(int)
+    now_counts = defaultdict(Counter)     # pid -> division -> events this season
+    now_latest = defaultdict(dict)        # pid -> division -> latest start_date
+    for pid, season_played, division, start in con.execute("""
+            SELECT rp.player_id, ev.season, COALESCE(ev.division, 'club-men'),
+                   COALESCE(ev.start_date, '')
             FROM roster_players rp
             JOIN event_teams et USING (event_team_id)
             JOIN events ev ON ev.event_id = et.event_id"""):
-        bit = 1 << DIVCODE.get(division, 0)
-        div_ever[pid] |= bit
+        div_ever[pid] |= 1 << DIVCODE.get(division, 0)
         if latest.get(pid) and season_played == latest[pid][2]:
-            div_now[pid] |= bit
+            now_counts[pid][division] += 1
+            prev = now_latest[pid].get(division, "")
+            if start > prev:
+                now_latest[pid][division] = start
+    div_now = {}
+    for pid, counts in now_counts.items():
+        club_side = {d: n for d, n in counts.items() if d in CLUB_DIVISIONS}
+        keep = set(counts) - CLUB_DIVISIONS
+        if club_side:
+            keep.add(max(club_side,
+                         key=lambda d: (club_side[d], now_latest[pid].get(d, ""))))
+        mask = 0
+        for d in keep:
+            mask |= 1 << DIVCODE.get(d, 0)
+        div_now[pid] = mask
     out = DB_PATH.parent / "player_elo.csv"
     with open(out, "w", newline="") as f:
         w = csv.writer(f)

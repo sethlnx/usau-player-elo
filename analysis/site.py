@@ -817,8 +817,13 @@ $('#pnote').textContent =
   `below ${D.minGames} games are omitted: under that the engine's provisional ` +
   `multiplier is still moving a rating faster than results justify. Ratings never ` +
   `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default. ` +
-  `The division follows that toggle: with it on you get players who played ` +
-  `the division in 2026, with it off anyone who ever has. Their rating is ` +
+  `The division follows that toggle: with it on you get players in the ` +
+  `division NOW, with it off anyone who ever played it. Nobody appears in two ` +
+  `club divisions at once — men's, mixed and women's are alternatives, so a ` +
+  `player is filed under whichever they played most this season and someone ` +
+  `on a mixed team shows only under mixed. College is different and is kept ` +
+  `alongside: it runs in the spring and club in the summer, so 1,789 people ` +
+  `are genuinely in both and appear in both. Their rating is ` +
   `still the one number they carry everywhere, not a per-division rating. ` +
   `All five divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
 
