@@ -85,11 +85,20 @@ re-runs a 40,000-sim Monte Carlo in the browser over whatever is left to play.
 It reads only the published artifacts and never replays the model, so the page
 cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
 
-Every tab filters by division, and what that means differs by tab — on
-purpose. **Clubs** shows one division at a time (club men's / mixed /
-women's), ranked within it and searchable by club name or the event it was
-rated off, because those teams never play each other and a
-merged 1..n would invite a comparison the games cannot settle. **Players**
+Every tab now spans the same five divisions, and every tab defaults to all of
+them. **Clubs** used to show one division at a time, ranked within it, on the
+grounds that a merged 1..n invites a comparison the games cannot settle. It
+now offers "All divisions" like the others: the five share one rating scale,
+bridged through mixed, so one list is arithmetically sound even where it is
+not a prediction — club men's and college teams never play, so #4 above #5
+across that line settles nothing. The number shown is the club's position in
+whatever is selected, with its rank inside its own division on the tooltip,
+exactly as the player table works. College's three roster bases carry less
+information than a club division's, because a college squad is registered for
+the season more often than for the event: in 2025, 57% of D-III clubs and 18%
+of college ones filed an identical roster at every event they entered, against
+1-4% across the club divisions. Less discriminating, not meaningless — the
+other 43% and 82% do vary. **Players**
 follows the "2026 rosters only" toggle: with it on you get players in the
 division NOW, with it off anyone who ever played it. Nobody is listed in two
 CLUB divisions at once — men's, mixed and women's are alternatives, so the
@@ -312,6 +321,16 @@ the model's probability, and cannot be clicked away; the odds are conditioned
 on it. What you can still enter is a call on a game not yet played, kept in
 `localStorage` under the fixture's USAU game number.
 
+The field's ratings prefer the **upcoming** roster table, which rates a club
+off what it registered for this event rather than off whatever it last played
+— worth about 180 Elo for a club that fielded a B-squad last time out. But
+that table empties the moment the event finishes, and a club with nothing
+registered leaves it: rebuilding the day after the 2026 U.S. Open rated all
+twelve entrants `None`, which quietly reduced the pool lettering to arbitrary
+and the simulation to noise. It now falls back to the completed roster and
+then the best one, so the preference is unchanged and the tracker no longer
+depends on WHEN the page was built.
+
 Two things it stops guessing once the tournament starts. **Pools** are the sets
 of teams that have all played each other, grown one fixture at a time — USAU
 labels every opening fixture "Pool D" and publishes no pool letters at all.
@@ -324,7 +343,16 @@ USAU's published slots, which fill in as the tournament runs, replacing the old
 assumed: quarters 1-2 into one semi, 3-4 into the other.
 
 Clicking any name opens a drill-down: the rating curve, the full event history,
-and — for a player — **which club he turned out for** at each event; for a club,
+and — for a player — **which club he turned out for** at each event. A club's
+event history also carries **what it did there**: its win-loss record for the
+weekend, a mark where it won the thing, and the field-strength grade of the
+tournament. Both ride in the resident core — the record folded into each
+trajectory point as `[elo, rosterSize, wins, losses]`, the grade and champion
+in an `eventMeta` map keyed by event — because counting wins from the games
+tier would fault a season of games for every row drawn, which is the entire
+thing the split exists to avoid. Self-fixtures are excluded from the record:
+USAU sometimes files a club's A and B squads under one name, 76 of them at a
+single event, and a club cannot beat itself. A club also gets
 **rosters by season** behind a disclosure, tabbed newest-first. One table per
 season, sorted strongest first, carrying each player's overall rank and Elo.
 Past seasons show the union of every played event's listed squad — a club

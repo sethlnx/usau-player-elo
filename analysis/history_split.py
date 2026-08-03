@@ -155,7 +155,54 @@ def _delta(xs):
     return out
 
 
-def split(history, player_names, genders):
+def club_records(history):
+    """(club index, event index as str) -> [wins, losses].
+
+    From the same scored games the drill-down expands, so a club's record on
+    an event row and the games behind it can never disagree.
+
+    Two fixtures contribute nothing. A DRAW is neither a win nor a loss; the
+    model has a handful. And a club against ITSELF is not a result at all —
+    USAU occasionally files a club's A and B squads under one name, and 76 of
+    them land on a single key at one event — so counting it would credit the
+    same club with a win and a loss for one game. decompose() drops these
+    fixtures for the same reason.
+    """
+    out = collections.defaultdict(lambda: [0, 0])
+    for ev, rows in history.get("games", {}).items():
+        for r in rows:
+            if r[0] == r[1] or r[2] == r[3]:
+                out[(r[0], ev)], out[(r[1], ev)] = out[(r[0], ev)], out[(r[1], ev)]
+                continue
+            win, lose = (r[0], r[1]) if r[2] > r[3] else (r[1], r[0])
+            out[(win, ev)][0] += 1
+            out[(lose, ev)][1] += 1
+    return out
+
+
+def with_records(history):
+    """Club trajectories with the event record folded into each point.
+
+    A point is [elo, rosterSize] and becomes [elo, rosterSize, wins, losses],
+    which the page reads positionally. Putting it here rather than in a
+    parallel map costs 37 KB gzipped and no extra lookup: the panel is already
+    walking these points to draw the table.
+    """
+    rec = club_records(history)
+    cix = {k: i for i, k in enumerate(history.get("gameClubs", []))}
+    out = {}
+    for key, entry in history["teams"].items():
+        ci, vals, i = cix.get(key), list(entry[1]), 0
+        for k, d in enumerate(entry[0]):
+            i += d
+            wl = rec.get((ci, str(i))) if ci is not None else None
+            if wl:
+                vals[k] = list(vals[k]) + wl
+        out[key] = [entry[0], vals] + entry[2:]
+    return out
+
+
+def split(history, player_names, genders, event_meta=None):
     """-> (core, players, rosters, games), each tier keyed by its bucket."""
     events = history["events"]
     seasons = sorted({e[2] for e in events})
@@ -220,10 +267,18 @@ def split(history, player_names, genders):
         sides[ev] = _delta({r[0] for r in rows} | {r[1] for r in rows})
 
     core = {k: history[k] for k in (
-        "events", "teams", "teamKey", "teamNames", "clubNames",
+        "events", "teamKey", "teamNames", "clubNames",
         "gameClubs", "gameStages", "bestSeason") if k in history}
+    # Club trajectories carry their event record; the drill-down prints it on
+    # every row, and faulting a season of games per row to count wins would
+    # undo the whole point of the split.
+    core["teams"] = with_records(history)
     core["gameSides"] = sides
     core["rostByClub"] = rost_by_club
     core["trends"] = _trends(history, player_names, genders, seasons, six)
+    # eventIdx -> [strength score, letter, champion club key or null]. Both
+    # facts are per EVENT, so they ride here rather than being repeated on
+    # every club that attended.
+    core["eventMeta"] = event_meta or {}
     return core, dict(players), rosters, dict(games)
 

@@ -545,11 +545,17 @@ PUBLISHED = dict(tau=500.0, involvement_credit=False,
 # into a bitmask, and the site's DIVLABEL mirrors them. APPEND, never reorder.
 DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "club-mixed": 3, "club-women": 4}
-# Divisions the team tables cover, in display order. College is excluded: a
-# college roster is a season-long squad rather than an event entry, so
-# "the roster it last played" does not mean the same thing there, and the
-# three roster bases the tables are built on would not be comparable.
-TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women"]
+# Divisions the team tables cover, in display order. College is included so
+# the club tables reach as far as the player table and Trends do, but its
+# three roster bases carry less information than a club division's: a college
+# squad is registered for the season more often than for the event, so "the
+# roster it last played" and "its best full-strength roster" collapse into one
+# answer. Measured on 2025, clubs filing an IDENTICAL roster at every event
+# they entered: D-III 57%, college 18%, against 1-4% across the club
+# divisions. Less discriminating, not meaningless -- 43% of D-III clubs and
+# 82% of college ones still vary their entry.
+TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
+                  "college", "college-d3"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and

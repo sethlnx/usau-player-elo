@@ -232,8 +232,16 @@ def build():
     # each club off the roster it registered for this event - not off whatever
     # it last played. That distinction is worth ~180 Elo for Truck Stop, who
     # fielded a B-squad at Pro Elite Challenge East.
-    upcoming = {r["club"]: float(r["elo"]) for r in clubs["upcoming"]}
-    ratings = {t: upcoming.get(t) for t in field}
+    #
+    # But "upcoming" empties out the moment the event finishes: a club with no
+    # forward registration leaves the table, and rebuilding the day after the
+    # U.S. Open left all twelve entrants rated None, which silently reduced the
+    # pool lettering to arbitrary and the simulation to noise. Fall back to the
+    # completed roster, then the best one. Preference order preserved, and the
+    # tracker no longer depends on WHEN the page was built.
+    bases = [{r["club"]: float(r["elo"]) for r in clubs[b]}
+             for b in ("upcoming", "completed", "best")]
+    ratings = {t: next((b[t] for b in bases if t in b), None) for t in field}
 
     # Pool letters are cosmetic — USAU publishes none — so label them by
     # strength: A holds the strongest team, and each pool sorts strongest
@@ -324,12 +332,29 @@ def build():
     # same in every division and a letter with a hidden threshold is a riddle.
     tourneys["strengthCuts"] = strength_cuts
 
+    # The same two facts, re-keyed by HISTORY event index so the drill-down can
+    # print them per row without touching the tournaments payload. The champion
+    # arrives as a display name and is stored as the model key the panel links
+    # on, since three divisions share printed names.
+    hev_by_key = {(e[0], e[1], e[2], e[3]): i
+                  for i, e in enumerate(history.get("events", []))}
+    alias = history.get("teamKey", {})
+    event_meta = {}
+    for row, verdict in zip(tourneys["events"], verdicts):
+        i = hev_by_key.get((row[4][:10], row[1][:46], row[2], row[3]))
+        if i is None:
+            continue
+        name = tourneys["teams"][row[10]] if row[10] >= 0 else None
+        event_meta[i] = [(verdict or [None, ""])[0], (verdict or [None, ""])[1],
+                         alias.get(name, name)]
+
     # The trajectory corpus, sliced into a resident core and three lazy tiers.
     # Player names come from the ranked table rather than history.json's own
     # name pool: the two key sets are identical (every rated trajectory is a
     # >= MIN_GAMES player), so the pool is only ever needed alongside a roster.
     hcore, hplay, hrost, hgame = split_history(
-        history, {r["player_id"]: r["player"] for r in players}, genders)
+        history, {r["player_id"]: r["player"] for r in players}, genders,
+        event_meta)
 
     payload = {
         "generated": date.today().isoformat(),
@@ -777,14 +802,17 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <option value="upcoming">Next event roster</option>
     </select>
     <select id="cdiv">
+      <option value="all">All divisions</option>
       <option value="0">Club Men's</option>
+      <option value="1">College</option>
+      <option value="2">College D-III</option>
       <option value="3">Club Mixed</option>
       <option value="4">Club Women's</option>
     </select>
     <span class="count" id="ccount"></span>
   </div>
   <table><thead><tr>
-    <th class="n">#</th><th>Club</th><th class="n">Elo</th>
+    <th class="n">#</th><th>Club</th><th>Division</th><th class="n">Elo</th>
     <th class="n">Roster</th><th>Rated off</th>
   </tr></thead><tbody id="ctb"></tbody></table>
   <p class="note" id="cnote"></p>
@@ -971,9 +999,9 @@ document.querySelectorAll('nav button').forEach(
 
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
-  `softmax-weighted mean of its event roster. Clubs cover the three club ` +
-  `divisions, Players and Trends add college and college D-III. Tournaments ` +
-  `covers every event in the corpus. The U.S. Open tracker is club men's. ` +
+  `softmax-weighted mean of its event roster. Clubs, Players, Trends and ` +
+  `Tournaments all span the same five divisions — club men's, mixed and ` +
+  `women's, college and college D-III. The U.S. Open tracker is club men's. ` +
   `Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
@@ -985,30 +1013,50 @@ const CNOTE = {
     "picks the smallest one, because a mean over an elite subset beats a mean over a full squad.",
   upcoming: 'Each club rated off the roster it has registered for its next event. ' +
     'Rosters post weeks ahead, so these are provisional until the games are played — ' +
-    'but for a club that fielded a B-squad last time out, this is the truer number.'
+    'but for a club that fielded a B-squad last time out, this is the truer number. ' +
+    'This table empties out between events: a club with nothing registered is not in it.'
 };
+/* College is in these tables so they reach as far as the player table and
+   Trends, but its roster bases say less. Measured on 2025. */
+const COLLEGE_NOTE =
+  'All five divisions share one rating scale, so they share one list — but ' +
+  'the three roster bases mean less in college, where a squad is often ' +
+  'registered for the season rather than the event: 57% of D-III clubs and ' +
+  '18% of college ones filed an identical roster at every event they entered ' +
+  'in 2025, against 1-4% across the club divisions.';
 function drawClubs() {
-  const basis = $('#basis').value, div = +$('#cdiv').value;
-  // One division at a time, and the rank shown is the one the CSV assigned
-  // WITHIN it: club men's and club women's teams never play each other, so a
-  // merged 1..n would invite a comparison the games cannot settle.
+  const basis = $('#basis').value, div = $('#cdiv').value;
   const q = $('#cq').value.trim().toLowerCase();
-  const pop = (D.clubs[basis] || []).filter(r => r[5] === div);
-  // Search is a lookup, not a re-ranking, the same as the player table: a club
-  // keeps the number it holds in its division, so hits come back sparse
-  // (#3, #17, #41). Matches the printed name and the event it was rated off.
+  // Same shape as the player table: the number is the club's position in
+  // WHATEVER is selected, assigned before the search runs, with its rank
+  // inside its own division on the tooltip. Searching is a lookup, not a
+  // re-ranking, so hits come back sparse (#3, #17, #41).
+  //
+  // All five divisions can share one list because they share one rating
+  // scale, bridged through mixed — the same reason the player table and
+  // Trends span them. What the merged order is NOT is a prediction: club
+  // men's and college teams never play, so #4 above #5 across that line is
+  // an arithmetic fact and not a result anyone can go and settle.
+  let pop = D.clubs[basis] || [];
+  if (div !== 'all') pop = pop.filter(r => r[5] === +div);
+  pop = pop.slice().sort((a, b) => b[2] - a[2]);
+  const rankOf = new Map();
+  pop.forEach((r, i) => rankOf.set(r, i + 1));
   const rows = q ? pop.filter(r => r[1].toLowerCase().includes(q) ||
                                    String(r[4]).toLowerCase().includes(q))
                  : pop;
   $('#ctb').innerHTML = rows.map(r =>
-    `<tr><td class="rk">${r[0]}</td>` +
+    `<tr><td class="rk" title="#${r[0]} of ${DIVLABEL[r[5]]} clubs">` +
+    `${rankOf.get(r)}</td>` +
     `<td><span class="nmlink" data-club="${esc(r[6])}">${esc(r[1])}</span></td>` +
+    `<td><span class="tag">${esc(EDIVL[r[5]] || '')}</span></td>` +
     `<td class="n">${r[2].toFixed(0)}</td><td class="n">${r[3]}</td>` +
     `<td class="muted" style="font-size:13px">${esc(r[4])}</td></tr>`).join('');
+  const what = div === 'all' ? 'clubs' : `${DIVLABEL[div]} clubs`;
   $('#ccount').textContent = q
-    ? `${rows.length} of ${pop.length} ${DIVLABEL[div]} clubs match`
-    : `${pop.length} ${DIVLABEL[div]} clubs`;
-  $('#cnote').textContent = CNOTE[basis];
+    ? `${rows.length} of ${pop.length} ${what} match`
+    : `${pop.length.toLocaleString()} ${what}`;
+  $('#cnote').textContent = CNOTE[basis] + ' ' + COLLEGE_NOTE;
 }
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
@@ -1406,6 +1454,9 @@ let HEV = [];     // [date, name, season, divisionCode]
 let GC = [], GST = [];
 let GCIX = new Map();
 let GSIDE = {};   // eventIdx -> Set(club index), from the core
+// eventIdx -> [field strength score, letter, champion club key]. Per event,
+// so a club's history row can print the grade and a crown without any fault.
+let EMETA = {};
 let RBC = {};     // clubKey -> {b: roster bucket, evs: [eventIdx], has: Set}
 let SEASONS = [], SIX = new Map(), DEFYEAR = 0;
 let HREADY = false, HFAILED = false;
@@ -1443,6 +1494,7 @@ function applyHistory(h) {
     for (const d of sides[ev]) { i += d; s.add(i); }
     GSIDE[ev] = s;
   }
+  EMETA = H.eventMeta || {};
   // A club's roster bucket rides on this entry rather than on a string hash
   // the emitter and the page both have to implement identically.
   RBC = {};
@@ -1580,7 +1632,11 @@ function decode(entry) {
     const v = vals[k];
     out.push({date: ev[0], event: ev[1], season: ev[2], div: ev[3], evIdx: i,
               elo: Array.isArray(v) ? v[0] : v,
-              n: Array.isArray(v) ? v[1] : null, club: club});
+              n: Array.isArray(v) ? v[1] : null,
+              // Clubs only: [elo, rosterSize, wins, losses]. A club that
+              // played no scored game at an event has a size and no record.
+              w: Array.isArray(v) ? v[2] : null,
+              l: Array.isArray(v) ? v[3] : null, club: club});
   }
   return out;
 }
@@ -1654,13 +1710,26 @@ function histTable(pts, isTeam, ckey) {
         `data-kind="${isTeam ? 'c' : 'p'}" data-d="${d === null ? '' : d}">` +
         `${esc(p.event)}</span>`
       : esc(p.event);
+    // A club's row says how the weekend actually went before it says what it
+    // did to the rating: the record, a crown where they won the thing, and
+    // how hard the field was. A player's row keeps the club column instead —
+    // the record there would be the club's, not theirs.
+    const meta = EMETA[p.evIdx] || [];
+    const won = isTeam && meta[2] && meta[2] === ckey;
+    const res = !isTeam ? ''
+      : `<td class="n">` + (p.w === null || p.w === undefined
+          ? `<span class="muted">\u2014</span>`
+          : `${won ? '<span class="crown">\u25b2</span> ' : ''}${p.w}\u2013${p.l}`) +
+        `</td>`;
+    const fs = !isTeam ? '' : `<td class="n">${strChip(p.div, meta[0], meta[1])}</td>`;
     return `<tr><td class="d">${p.date}</td>` +
            `<td>${ev}<span class="muted" style="font-size:11.5px">` +
-           ` ${DIVTAG[p.div] || DIVTAG[0]}</span></td>` + mid +
+           ` ${DIVTAG[p.div] || DIVTAG[0]}</span></td>` + res + fs + mid +
            `<td class="r">${p.elo}</td><td class="dl">${dl}</td></tr>`;
   }).join('');
   return `<table class="hist"><thead><tr><th>Date</th><th>Event</th>` +
-         (isTeam ? '<th class="n">Roster</th>' : '<th>Team</th>') +
+         (isTeam ? '<th class="n">Result</th><th class="n">Field</th>' +
+                   '<th class="n">Roster</th>' : '<th>Team</th>') +
          `<th class="n">Elo after</th><th class="n">Δ</th></tr></thead>` +
          `<tbody>${rows}</tbody></table>`;
 }
@@ -2062,22 +2131,24 @@ function daterange(a, b) {
 $('#eyear').innerHTML = '<option value="all">All years</option>' +
   EYEARS.map((y, i) => `<option value="${y}"${i ? '' : ' selected'}>${y}</option>`).join('');
 
-/* A field-strength cell: the letter, with the score and the bar it cleared
-   behind it on hover. An event the model never rated carries neither, and
+/* A field-strength chip: the letter, with the score and the bar it cleared
+   behind it on hover. Something the model never rated carries neither, and
    says so with a dash rather than a D — "no ranked clubs came" and "we have
-   no idea" are not the same claim. */
-function strCell(e) {
-  if (!e[12]) return `<span class="muted">\u2014</span>`;
-  const cut = (STRCUT[e[3]] || []).find(c => c[1] === e[12]);
-  return `<span class="fs fs${e[12]}" title="field strength ${e[11]} \u2014 ` +
-    `${esc(STRNOTE[e[12]] || '')}` +
-    (cut ? ` (${EDIVL[e[3]]} ${e[12]} starts at ${cut[0]})` : '') +
-    `">${e[12]}</span>`;
+   no idea" are not the same claim. Shared by the tournament list and the
+   club drill-down, which is why it takes the parts rather than a row. */
+function strChip(div, score, letter) {
+  if (!letter) return `<span class="muted">\u2014</span>`;
+  const cut = (STRCUT[div] || []).find(c => c[1] === letter);
+  return `<span class="fs fs${letter}" title="field strength ${score} \u2014 ` +
+    `${esc(STRNOTE[letter] || '')}` +
+    (cut ? ` (${EDIVL[div]} ${letter} starts at ${cut[0]})` : '') +
+    `">${letter}</span>`;
 }
+const strCell = e => strChip(e[3], e[11], e[12]);
 
 /* The division's own ladder, with the event's rung marked. A letter whose
    threshold is invisible is a riddle, and these thresholds MOVE: an S is
-   93% of what that division's own Nationals scores, which is a different
+   the weakest championship that division has held, which is a different
    number in college than in club men's. */
 function strBar(div, letter) {
   const cuts = STRCUT[div];

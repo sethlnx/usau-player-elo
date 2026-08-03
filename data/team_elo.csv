@@ -521,3 +521,507 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 91,Ultraviolet,ultraviolet (women's),club-women,1267.9,18,2026,2026 Select Flight Invite - West,2026-07-25
 92,Virginia Valkyrie,virginia valkyrie (women's),club-women,1252.5,16,2026,Scuffletown Throwdown 2026,2026-06-13
 93,Lakeshore Drive,lakeshore drive (women's),club-women,1222.4,22,2026,Heavyweights 2026,2026-07-11
+1,Oregon (Ego),oregon (ego),college,2130.9,26,2026,2026 D-I College Championships,2026-05-22
+2,Massachusetts (Zoodisc),massachusetts (zoodisc),college,2117.4,25,2026,2026 D-I College Championships,2026-05-22
+3,Carleton College (CUT),carleton college (cut),college,2110.3,31,2026,2026 D-I College Championships,2026-05-22
+4,Colorado (Mamabird),colorado (mamabird),college,2046.1,33,2026,2026 D-I College Championships,2026-05-22
+5,Middlebury (Pranksters),middlebury (pranksters),college,1983.2,24,2026,UMass Invite 2026,2026-02-28
+6,Cal Poly-SLO (SLOCORE),cal poly-slo (slocore),college,1971.2,25,2026,2026 D-I College Championships,2026-05-22
+7,North Carolina (Darkside),north carolina (darkside),college,1957.2,27,2026,2026 D-I College Championships,2026-05-22
+8,Oregon State (Beavers),oregon state (beavers),college,1954.7,28,2026,2026 D-I College Championships,2026-05-22
+9,Pittsburgh (En Sabah Nur),pittsburgh (en sabah nur),college,1944.5,27,2026,2026 D-I College Championships,2026-05-22
+10,California-Santa Cruz (Slugs),california-santa cruz (slugs),college,1873.9,25,2026,2026 D-I College Championships,2026-05-22
+11,Washington (Sundodgers),washington (sundodgers),college,1866.8,30,2026,2026 D-I College Championships,2026-05-22
+12,Davenport (Panthers),davenport (panthers),college,1861.0,20,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+13,Penn State (Spank),penn state (spank),college,1855.4,27,2026,2026 D-I College Championships,2026-05-22
+14,Brown (Brownian Motion),brown (brownian motion),college,1854.4,24,2026,2026 D-I College Championships,2026-05-22
+15,Western Washington (DIRT),western washington (dirt),college,1839.0,23,2026,2026 D-I College Championships,2026-05-22
+16,Carleton College-CHOP (Carleton House of Pancakes),carleton college-chop (carleton house of pancakes),college,1833.5,26,2026,Atlantic Coast Open 2026,2026-03-21
+17,Georgia Tech (Tribe),georgia tech (tribe),college,1831.1,25,2026,2026 D-I College Championships,2026-05-22
+18,Maryland (Maryland Ultimate),maryland (maryland ultimate),college,1825.3,32,2026,2026 D-I College Championships,2026-05-22
+19,Texas (TUFF),texas (tuff),college,1824.6,29,2026,2026 D-I College Championships,2026-05-22
+20,Michigan (MagnUM),michigan (magnum),college,1822.7,28,2026,2026 D-I College Championships,2026-05-22
+21,Utah (Zion Curtain),utah (zion curtain),college,1807.9,26,2026,2026 D-I College Championships,2026-05-22
+22,Minnesota (Minnesota A),minnesota (minnesota a),college,1801.5,25,2026,North Central D-I College Men's Regionals,2026-04-25
+23,Wisconsin (Hodags),wisconsin (hodags),college,1792.4,26,2026,North Central D-I College Men's Regionals,2026-04-25
+24,Vermont (Chill),vermont (chill),college,1783.9,28,2026,New England D-I College Men's Regionals,2026-05-02
+25,North Carolina-Wilmington (Seamen),north carolina-wilmington (seamen),college,1773.7,25,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+26,Victoria (Vikes),victoria (vikes),college,1772.9,26,2026,Northwest D-I College Men's Regionals,2026-05-02
+27,Ottawa (Gee-Gees),ottawa (gee-gees),college,1770.3,24,2026,Metro East D-I College Men's Regionals,2026-04-25
+28,British Columbia (Thunderbirds),british columbia (thunderbirds),college,1762.7,25,2026,Northwest D-I College Men's Regionals,2026-05-02
+29,Illinois (Rise),illinois (rise),college,1749.0,27,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+30,Lewis & Clark (Bacchus ),lewis & clark (bacchus ),college,1747.0,23,2026,Stanford Invite 2026,2026-03-14
+31,Chicago (Fission),chicago (fission),college,1737.2,31,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+32,Elon (Big Fat Bomb),elon (big fat bomb),college,1736.5,24,2026,Easterns Qualifier 2026,2026-02-21
+33,Oklahoma Christian (Eagles),oklahoma christian (eagles),college,1736.4,22,2026,Snow Melt 2026,2026-02-28
+34,Williams (WUFO),williams (wufo),college,1732.4,34,2026,The Grand Northeast Kickoff,2026-03-07
+35,Virginia (Night Train),virginia (night train),college,1726.1,26,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+36,McGill (MUT),mcgill (mut),college,1725.8,23,2026,2026 D-I College Championships,2026-05-22
+37,UCLA (Smaug),ucla (smaug),college,1725.5,24,2026,Southwest D-I College Men's Regionals,2026-04-25
+38,Tufts (Elephant Men),tufts (elephant men),college,1722.7,24,2026,New England D-I College Men's Regionals,2026-05-02
+39,Brigham Young (CHI),brigham young (chi),college,1710.4,24,2026,Northwest Challenge-Men,2026-03-06
+40,Claremont (Braineaters),claremont (braineaters),college,1697.1,27,2026,Southwest Showdown 2026,2026-03-07
+41,Emory (Emory Juice),emory (emory juice),college,1690.0,28,2026,Southeast D-I College Men's Regionals,2026-04-25
+42,Utah Valley (Utah Valley Ultimate),utah valley (utah valley ultimate),college,1689.1,25,2026,Northwest D-I College Men's Regionals,2026-05-02
+43,California (Ursa Major),california (ursa major),college,1685.3,20,2026,Southwest D-I College Men's Regionals,2026-04-25
+44,St Olaf (Berzerkers),st olaf (berzerkers),college,1681.4,29,2026,Huck Finn 2026,2026-03-27
+45,Virginia Tech (Burn),virginia tech (burn),college,1680.8,31,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+46,Ohio State (Leadbelly),ohio state (leadbelly),college,1678.2,27,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+47,Tennessee (Tennessee),tennessee (tennessee),college,1666.8,26,2026,Southeast D-I College Men's Regionals,2026-04-25
+48,Franciscan (Fatal),franciscan (fatal),college,1666.8,21,2026,Needle in a Ho-Stack 2026,2026-03-28
+49,Colorado Mines (Entropy),colorado mines (entropy),college,1664.7,24,2026,Snow Melt 2026,2026-02-28
+50,Colorado State (Hibida),colorado state (hibida),college,1660.8,25,2026,South Central D-I College Men's Regionals,2026-04-25
+51,California-San Diego (Air Squids),california-san diego (air squids),college,1657.3,25,2026,Southwest D-I College Men's Regionals,2026-04-25
+52,Northeastern (Huskies),northeastern (huskies),college,1654.1,26,2026,New England D-I College Men's Regionals,2026-05-02
+53,Georgetown (Justice),georgetown (justice),college,1653.2,35,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+54,Tulane (Tucks),tulane (tucks),college,1643.5,32,2026,Southeast D-I College Men's Regionals,2026-04-25
+55,Temple (Alert),temple (alert),college,1639.8,29,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+56,William & Mary (Merry Men),william & mary (merry men),college,1636.8,30,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+57,Stanford (Stanford Men's Ultimate Team),stanford (stanford men's ultimate team),college,1635.3,23,2026,Southwest D-I College Men's Regionals,2026-04-25
+58,Iowa State (ISUC),iowa state (isuc),college,1629.3,27,2026,North Central D-I College Men's Regionals,2026-04-25
+59,Purdue (Undue Ultimate),purdue (undue ultimate),college,1625.9,27,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+60,Cincinnati (Bearcats),cincinnati (bearcats),college,1619.8,22,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+61,SUNY-Binghamton (SUNY-Binghamton),suny-binghamton (suny-binghamton),college,1619.3,23,2026,Metro East D-I College Men's Regionals,2026-04-25
+62,Syracuse (Doom),syracuse (doom),college,1616.9,24,2026,Metro East D-I College Men's Regionals,2026-04-25
+63,Macalester (Flat Earth),macalester (flat earth),college,1614.7,23,2026,Old Capitol Open 2026,2026-03-28
+64,Kenyon (SERF),kenyon (serf),college,1611.3,23,2026,Corny Classic College 2026,2026-03-28
+65,California-Santa Barbara (Black Tide),california-santa barbara (black tide),college,1610.9,26,2026,Southwest D-I College Men's Regionals,2026-04-25
+66,Washington University (Contra),washington university (contra),college,1609.8,23,2026,South Central D-I College Men's Regionals,2026-04-25
+67,Yale (Süperfly),yale (süperfly),college,1606.7,27,2026,2026 D-I College Championships,2026-05-22
+68,Bowdoin (Clown),bowdoin (clown),college,1603.3,16,2026,UMass Invite 2026,2026-02-28
+69,Ithaca (Nawshus Ultimate),ithaca (nawshus ultimate),college,1598.2,22,2026,East Coast Invite 2026,2026-03-28
+70,North Carolina State (NC State Alpha),north carolina state (nc state alpha),college,1597.8,31,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+71,Notre Dame (Papal Rage),notre dame (papal rage),college,1597.6,26,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+72,Michigan State (ARC),michigan state (arc),college,1596.9,27,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+73,Alabama-Huntsville (Nightmares),alabama-huntsville (nightmares),college,1594.8,20,2026,Southeast D-I College Men's Regionals,2026-04-25
+74,Utah State (Scotsmen),utah state (scotsmen),college,1586.1,19,2026,Northwest D-I College Men's Regionals,2026-05-02
+75,Cornell (Buds),cornell (buds),college,1582.1,25,2026,Metro East D-I College Men's Regionals,2026-04-25
+76,Hillsdale (Chargers),hillsdale (chargers),college,1580.2,14,2026,Grand Rapids Invite 2026,2026-03-14
+77,Ave Maria (Gyrenes),ave maria (gyrenes),college,1576.6,24,2026,Tally Classic XX,2026-03-14
+78,Berry (Bucks),berry (bucks),college,1575.5,24,2026,Florida Warm Up 2026,2026-01-30
+79,Richmond (Spidermonkeys),richmond (spidermonkeys),college,1575.2,35,2026,Atlantic Coast Open 2026,2026-03-21
+80,Colorado College (Wasabi),colorado college (wasabi),college,1574.8,27,2026,Centex 2026,2026-03-13
+81,Kentucky (KULT),kentucky (kult),college,1572.0,22,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+82,Carnegie Mellon (Mr. Yuk),carnegie mellon (mr. yuk),college,1564.3,25,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+83,Simon Fraser (SFU Red Leafs),simon fraser (sfu red leafs),college,1563.1,26,2026,Cascadia D-I Men's Conferences,2026-04-11
+84,SUNY-Buffalo (Green Eggs and Ham),suny-buffalo (green eggs and ham),college,1556.5,25,2026,Metro East D-I College Men's Regionals,2026-04-25
+85,Whitman (Whitman Sweets),whitman (whitman sweets),college,1554.9,22,2026,Stanford Invite 2026,2026-03-14
+86,Boston College (Eagles),boston college (eagles),college,1553.5,23,2026,New England D-I College Men's Regionals,2026-05-02
+87,Florida (Florida),florida (florida),college,1553.3,28,2026,Southeast D-I College Men's Regionals,2026-04-25
+88,Marquette (Birdhouse),marquette (birdhouse),college,1550.0,24,2026,North Central D-I College Men's Regionals,2026-04-25
+89,West Chester (West Chester),west chester (west chester),college,1549.5,26,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+90,Alabama (Yellow Hammer),alabama (yellow hammer),college,1540.7,27,2026,Southeast D-I College Men's Regionals,2026-04-25
+91,Florida State (DUF),florida state (duf),college,1535.4,23,2026,Southeast D-I College Men's Regionals,2026-04-25
+92,SUNY-Cortland  (Team Rocket),suny-cortland (team rocket),college,1535.1,18,2026,Northeast Classic 2026,2026-03-28
+93,Rhode Island (RIUT),rhode island (riut),college,1531.4,19,2026,New England D-I College Men's Regionals,2026-05-02
+94,Colorado-B (CUCU),colorado-b (cucu),college,1531.0,25,2026,South Central D-I College Men's Regionals,2026-04-25
+95,Rochester (Piggies),rochester (piggies),college,1528.6,23,2026,East Coast Invite 2026,2026-03-28
+96,Truman State (JujiTSU),truman state (jujitsu),college,1527.2,17,2026,Rockford Meltdown 26,2026-03-21
+97,Wisconsin-Eau Claire (EauZone),wisconsin-eau claire (eauzone),college,1527.1,20,2026,Old Capitol Open 2026,2026-03-28
+98,Northwestern (Lake Effect),northwestern (lake effect),college,1523.4,26,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+99,Butler (Butler Big Dog),butler (butler big dog),college,1519.6,14,2026,Butler Spring Fling 2026,2026-03-21
+100,Washington-B (Washington B),washington-b (washington b),college,1518.7,20,2026,Cascadia D-I Men's Conferences,2026-04-11
+101,Southern Illinois-Edwardsville (SIEGE),southern illinois-edwardsville (siege),college,1518.5,17,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+102,Appalachian State (Nomads),appalachian state (nomads),college,1517.8,27,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+103,North Carolina-Charlotte (Charlotte Skyrise),north carolina-charlotte (charlotte skyrise),college,1516.8,23,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+104,Texas A&M (Dozen),texas a&m (dozen),college,1516.6,27,2026,South Central D-I College Men's Regionals,2026-04-25
+105,North Carolina-B (BatCH),north carolina-b (batch),college,1515.9,27,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+106,George Mason (Meteors),george mason (meteors),college,1514.6,23,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+107,Kansas (Horrorzontals),kansas (horrorzontals),college,1514.3,27,2026,South Central D-I College Men's Regionals,2026-04-25
+108,Georgia State (Underground),georgia state (underground),college,1513.1,29,2026,Southeast D-I College Men's Regionals,2026-04-25
+109,East Carolina (Irates),east carolina (irates),college,1510.6,20,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+110,Haverford (Big Donkey Ultimate),haverford (big donkey ultimate),college,1509.6,24,2026,East Coast Invite 2026,2026-03-28
+111,James Madison (Hellfish),james madison (hellfish),college,1509.4,25,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+112,North Carolina-Asheville (Mudpuppy),north carolina-asheville (mudpuppy),college,1508.1,15,2026,Carolina Kickoff 2026,2026-01-30
+113,Dartmouth (Pain Train),dartmouth (pain train),college,1503.6,25,2026,New England D-I College Men's Regionals,2026-05-02
+114,Iowa (IHUC),iowa (ihuc),college,1500.4,22,2026,North Central D-I College Men's Regionals,2026-04-25
+115,Johns Hopkins (Dangerzone),johns hopkins (dangerzone),college,1500.0,26,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+116,British Columbia -B (B-Birds),british columbia -b (b-birds),college,1496.3,30,2026,Northwest D-I College Men's Regionals,2026-05-02
+117,Delaware (Sideshow),delaware (sideshow),college,1495.2,24,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
+118,Portland (Uprise),portland (uprise),college,1488.7,17,2026,PLU Mens+BBQ 2026,2026-02-21
+119,Mississippi State (Dark Horse),mississippi state (dark horse),college,1487.8,36,2026,Southeast D-I College Men's Regionals,2026-04-25
+120,Missouri (Missouri),missouri (missouri),college,1485.3,28,2026,South Central D-I College Men's Regionals,2026-04-25
+121,Arizona State (Prime),arizona state (prime),college,1483.1,26,2026,Southwest D-I College Men's Regionals,2026-04-25
+122,Pennsylvania (Void),pennsylvania (void),college,1479.5,23,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+123,Parkland - PLU Alumni,parkland - plu alumni,college,1476.3,10,2026,PLU Mens+BBQ 2026,2026-02-21
+124,LSU (Purple Haze),lsu (purple haze),college,1476.2,23,2026,Gulf Coast D-I Men's Conferences,2026-04-11
+125,Princeton (Clockwork),princeton (clockwork),college,1476.1,29,2026,Metro East D-I College Men's Regionals,2026-04-25
+126,Vermont-B (Chill Dev),vermont-b (chill dev),college,1474.6,26,2026,New England D-I College Men's Regionals,2026-05-02
+127,Davidson (DUFF),davidson (duff),college,1466.2,33,2026,Atlantic Coast Open 2026,2026-03-21
+128,California-Irvine (Nightlife),california-irvine (nightlife),college,1465.3,22,2026,Southwest D-I College Men's Regionals,2026-04-25
+129,Cedarville (Swarm),cedarville (swarm),college,1463.7,24,2026,Grand Rapids Invite 2026,2026-03-14
+130,Georgia (Jojah),georgia (jojah),college,1462.5,24,2026,Southeast D-I College Men's Regionals,2026-04-25
+131,San Diego State (Federales ),san diego state (federales ),college,1460.7,23,2026,Southwest D-I College Men's Regionals,2026-04-25
+132,Oregon -B (Bucks),oregon -b (bucks),college,1460.0,20,2026,Cascadia D-I Men's Conferences,2026-04-11
+133,Montana State (Rum Runners),montana state (rum runners),college,1453.3,18,2026,Northwest D-I College Men's Regionals,2026-05-02
+134,Northern Iowa (AmmUNItion),northern iowa (ammunition),college,1453.0,19,2026,North Central D-I College Men's Regionals,2026-04-25
+135,Brandeis (TRON),brandeis (tron),college,1452.6,23,2026,The Grand Northeast Kickoff,2026-03-07
+136,Colby (CDC (Men's)),colby (cdc (men's)),college,1452.6,27,2026,New England Open (men),2026-03-21
+137,Grand Canyon (Lopes),grand canyon (lopes),college,1450.6,22,2026,Southwest D-I College Men's Regionals,2026-04-25
+138,Winona State (Experience),winona state (experience),college,1445.1,12,2026,Old Capitol Open 2026,2026-03-28
+139,Ohio (Trout),ohio (trout),college,1439.3,25,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+140,Massachusetts -B (Umass Amherst Developmental),massachusetts -b (umass amherst developmental),college,1434.8,30,2026,New England D-I College Men's Regionals,2026-05-02
+141,Boston University (Boston University),boston university (boston university),college,1432.7,27,2026,New England D-I College Men's Regionals,2026-05-02
+142,Amherst (Army of Darkness),amherst (army of darkness),college,1431.7,29,2026,Northeast Classic 2026,2026-03-28
+143,Oregon State-B (Oregon State B),oregon state-b (oregon state b),college,1428.7,22,2026,Cascadia D-I Men's Conferences,2026-04-11
+144,Brigham Young-B (CHI B),brigham young-b (chi b),college,1428.1,18,2026,Big Sky D-I Men's Conferences,2026-04-11
+145,Santa Clara-B (SCRATCH),santa clara-b (scratch),college,1427.4,26,2026,Stanford Open 2026,2026-02-07
+146,Baylor (Stonewall),baylor (stonewall),college,1426.4,18,2026,South Central D-I College Men's Regionals,2026-04-25
+147,Santa Clara (SCAB),santa clara (scab),college,1425.1,30,2026,Stanford Invite 2026,2026-03-14
+148,Wisconsin-Milwaukee (Black Cat),wisconsin-milwaukee (black cat),college,1424.9,21,2026,North Central D-I College Men's Regionals,2026-04-25
+149,Connecticut (UConn Huskies),connecticut (uconn huskies),college,1420.6,24,2026,Metro East D-I College Men's Regionals,2026-04-25
+150,Lehigh (Lehigh ),lehigh (lehigh ),college,1418.6,24,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+151,Denver (Sourdough),denver (sourdough),college,1418.1,29,2026,South Central D-I College Men's Regionals,2026-04-25
+152,Michigan Tech (DiscoTech),michigan tech (discotech),college,1417.4,24,2026,Old Capitol Open 2026,2026-03-28
+153,George Washington (George Washington Men’s Club Ultimate),george washington (george washington men’s club ultimate),college,1417.1,20,2026,Colonial D-I Men's Conferences,2026-04-18
+154,Rutgers (Machine),rutgers (machine),college,1415.8,30,2026,Metro East D-I College Men's Regionals,2026-04-25
+155,Union (Tennessee) (Union Jaxx),union (tennessee) (union jaxx),college,1412.8,21,2026,Huck Finn 2026,2026-03-27
+156,Central Connecticut State (Yetis),central connecticut state (yetis),college,1409.0,14,2026,Northeast Classic 2026,2026-03-28
+157,Pennsylvania Western (Haggis),pennsylvania western (haggis),college,1407.5,10,2026,Jersey Devil 2026,2026-03-21
+158,Liberty (Flames),liberty (flames),college,1407.2,22,2026,Virginia D-I Men's Conferences,2026-04-11
+159,Indiana (HoosierMama?s),indiana (hoosiermama?s),college,1407.1,28,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+160,Texas-San Antonio (Siesta),texas-san antonio (siesta),college,1407.1,22,2026,South Central D-I College Men's Regionals,2026-04-25
+161,Asbury (Asbury Ultimate),asbury (asbury ultimate),college,1403.7,14,2026,Needle in a Ho-Stack 2026,2026-03-28
+162,Case Western Reserve (Fighting Gobies[A]),case western reserve (fighting gobies[a]),college,1401.4,27,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+163,Maine (Snositi),maine (snositi),college,1399.8,16,2026,Greater New England D-I Men's Conferences,2026-04-11
+164,Grand Valley (Lakers),grand valley (lakers),college,1396.0,16,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+165,Michigan-B (Michigan-B),michigan-b (michigan-b),college,1395.2,31,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+166,Lewis & Clark-B (BBacchus),lewis & clark-b (bbacchus),college,1393.2,24,2026,PLU Mens+BBQ 2026,2026-02-21
+167,Chico State (Chico State),chico state (chico state),college,1392.7,18,2026,Southwest D-I College Men's Regionals,2026-04-25
+168,Skidmore (Wombats),skidmore (wombats),college,1389.8,23,2026,Northeast Classic 2026,2026-03-28
+169,Clemson (Joint Chiefs of Waft),clemson (joint chiefs of waft),college,1389.8,28,2026,Carolina D-I Men's Conferences,2026-04-11
+170,Minnesota-B (Minnesota B),minnesota-b (minnesota b),college,1387.2,22,2026,North Central D-I College Men's Regionals,2026-04-25
+171,Duke (Brimstone),duke (brimstone),college,1384.6,32,2026,Carolina D-I Men's Conferences,2026-04-11
+172,St John's (Minnesota) (BAM),st john's (minnesota) (bam),college,1384.0,15,2026,Old Capitol Open 2026,2026-03-28
+173,Cal Poly-SLO-B (SLOB),cal poly-slo-b (slob),college,1382.8,29,2026,Southwest D-I College Men's Regionals,2026-04-25
+174,Embry-Riddle (Dirty Birds),embry-riddle (dirty birds),college,1382.0,16,2026,Needle in a Ho-Stack 2026,2026-03-28
+175,Vassar (Swinging Monks),vassar (swinging monks),college,1379.6,22,2026,Northeast Classic 2026,2026-03-28
+176,Auburn (Aetos),auburn (aetos),college,1374.8,18,2026,Southeast D-I College Men's Regionals,2026-04-25
+177,Nebraska (Cornfed Ultimate),nebraska (cornfed ultimate),college,1372.3,21,2026,North Central D-I College Men's Regionals,2026-04-25
+178,Louisville (LUCKY),louisville (lucky),college,1369.5,11,2026,Corny Classic College 2026,2026-03-28
+179,RIT (RIT Spudheds),rit (rit spudheds),college,1368.1,33,2026,Metro East D-I College Men's Regionals,2026-04-25
+180,Illinois State (Gnomes),illinois state (gnomes),college,1365.8,24,2026,Illinois D-I Men's Conferences,2026-04-11
+181,Toronto (TULA),toronto (tula),college,1364.0,19,2026,Western NY D-I Men's Conferences,2026-04-11
+182,Southern California (USC Lockdown),southern california (usc lockdown),college,1363.3,16,2026,Southwest D-I College Men's Regionals,2026-04-25
+183,Harding (Harding Apocalypse),harding (harding apocalypse),college,1361.9,18,2026,Centex 2026,2026-03-13
+184,Puget Sound (Postmen),puget sound (postmen),college,1361.7,18,2026,Snow Melt 2026,2026-02-28
+185,Penn State-B (LoveTap),penn state-b (lovetap),college,1360.9,18,2026,Northeast Classic 2026,2026-03-28
+186,Arkansas (Ludicrous Speed ),arkansas (ludicrous speed ),college,1351.8,16,2026,South Central D-I College Men's Regionals,2026-04-25
+187,Tennessee-Chattanooga (Swamp Donkeys),tennessee-chattanooga (swamp donkeys),college,1349.9,29,2026,Southeast D-I College Men's Regionals,2026-04-25
+188,Illinois-B (Boomland),illinois-b (boomland),college,1348.4,23,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+189,Drexel (Spitfire),drexel (spitfire),college,1347.4,26,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+190,Villanova (Main Line Ultimate),villanova (main line ultimate),college,1346.7,22,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+191,Georgia Southern (Eagles),georgia southern (eagles),college,1346.7,22,2026,Southeast D-I College Men's Regionals,2026-04-25
+192,Grinnell (Grinnellephants),grinnell (grinnellephants),college,1346.0,19,2026,Old Capitol Open 2026,2026-03-28
+193,San Jose State (Spartans),san jose state (spartans),college,1345.9,21,2026,NorCal D-I Men's Conferences,2026-04-11
+194,UCLA-B (UCLA Smoke),ucla-b (ucla smoke),college,1343.0,27,2026,Southwest D-I College Men's Regionals,2026-04-25
+195,South Carolina (Gamecock Ultimate),south carolina (gamecock ultimate),college,1339.9,26,2026,Carolina D-I Men's Conferences,2026-04-11
+196,Georgia Tech-B (Tribe),georgia tech-b (tribe),college,1336.8,31,2026,Southeast D-I College Men's Regionals,2026-04-25
+197,North Texas (UNT),north texas (unt),college,1335.4,16,2026,South Central D-I College Men's Regionals,2026-04-25
+198,Gonzaga (GURU ),gonzaga (guru ),college,1332.8,30,2026,Swing By Spring,2026-03-28
+199,Minnesota-Duluth (Northern Lights),minnesota-duluth (northern lights),college,1332.0,27,2026,Old Capitol Open 2026,2026-03-28
+200,American (Stall 11),american (stall 11),college,1331.8,22,2026,Colonial D-I Men's Conferences,2026-04-18
+201,Akron (GoonSquad),akron (goonsquad),college,1330.9,25,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+202,Texas-Dallas (Woof),texas-dallas (woof),college,1329.9,26,2026,South Central D-I College Men's Regionals,2026-04-25
+203,Miami (Florida) (UMiami Vice),miami (florida) (umiami vice),college,1328.5,21,2026,Southeast D-I College Men's Regionals,2026-04-25
+204,Western Carolina (Western Carolina Catamounts),western carolina (western carolina catamounts),college,1325.1,14,2026,Atlantic Coast Open 2026,2026-03-21
+205,Stevens Tech (Stevens Tech),stevens tech (stevens tech),college,1322.4,21,2026,Northeast Classic 2026,2026-03-28
+206,NYU (New York University ),nyu (new york university ),college,1312.8,22,2026,Metro East D-I College Men's Regionals,2026-04-25
+207,West Virginia (WV Wild),west virginia (wv wild),college,1312.8,17,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+208,Occidental (Detox),occidental (detox),college,1310.4,19,2026,Snow Melt 2026,2026-02-28
+209,Washington-C (UW C),washington-c (uw c),college,1310.1,17,2026,Cascadia D-I Men's Conferences,2026-04-11
+210,Columbia (Uptown Local),columbia (uptown local),college,1307.8,24,2026,Metro East D-I College Men's Regionals,2026-04-25
+211,California-Santa Cruz-B (UCSC B (Ooze)),california-santa cruz-b (ucsc b (ooze)),college,1303.5,23,2026,Silicon Valley Rally 2026,2026-03-07
+212,Clark (Woo Town Killer Bees ),clark (woo town killer bees ),college,1303.2,14,2026,New England Open (men),2026-03-21
+213,Harvard (Red Line),harvard (red line),college,1298.9,19,2026,New England D-I College Men's Regionals,2026-05-02
+214,Central Michigan (Chippewas),central michigan (chippewas),college,1297.7,12,2026,Corny Classic College 2026,2026-03-28
+215,Vanderbilt (Armada),vanderbilt (armada),college,1295.1,26,2026,Gulf Coast D-I Men's Conferences,2026-04-11
+216,South Florida (Scallywags),south florida (scallywags),college,1291.3,23,2026,Florida D-I Men's Conferences,2026-04-11
+217,DePaul (DUC),depaul (duc),college,1290.8,20,2026,Illinois D-I Men's Conferences,2026-04-11
+218,Trinity (Turbulence),trinity (turbulence),college,1290.8,25,2026,Centex 2026,2026-03-13
+219,Miami (Ohio) (Miami Boogiemen),miami (ohio) (miami boogiemen),college,1288.6,28,2026,Ohio D-I Men's Conferences,2026-04-11
+220,MIT (Grim Beaver),mit (grim beaver),college,1288.3,20,2026,New England D-I College Men's Regionals,2026-05-02
+221,Tufts-B (Tufts B),tufts-b (tufts b),college,1284.5,27,2026,New England D-I College Men's Regionals,2026-05-02
+222,Boston University-B (Boston University B),boston university-b (boston university b),college,1282.1,11,2026,New England Open (men),2026-03-21
+223,Ave Maria-B (Ave Maria B Team),ave maria-b (ave maria b team),college,1279.1,22,2026,Florida Warm Up 2026-Weekend 2,2026-02-14
+224,Xavier (B.L.O.B.),xavier (b.l.o.b.),college,1278.6,17,2026,Corny Classic College 2026,2026-03-28
+225,North Carolina State-B (SixPack),north carolina state-b (sixpack),college,1277.4,21,2026,Needle in a Ho-Stack 2026,2026-03-28
+226,Rowan (Ruf Riders),rowan (ruf riders),college,1276.8,20,2026,Metro East D-I College Men's Regionals,2026-04-25
+227,Rensselaer Polytech (Trudge),rensselaer polytech (trudge),college,1274.4,22,2026,Northeast Classic 2026,2026-03-28
+228,Bates (Orange Whip),bates (orange whip),college,1271.2,22,2026,Ocean State Invite 26',2026-03-28
+229,Georgia College (Disconnected),georgia college (disconnected),college,1270.8,22,2026,Southerns 2026,2026-03-28
+230,Texas State (Texas State Buckets),texas state (texas state buckets),college,1270.5,22,2026,South Central D-I College Men's Regionals,2026-04-25
+231,Willamette (Asylum),willamette (asylum),college,1269.4,11,2026,PLU Mens+BBQ 2026,2026-02-21
+232,Alabama-Birmingham (Inferno),alabama-birmingham (inferno),college,1261.1,21,2026,Gulf Coast D-I Men's Conferences,2026-04-11
+233,Kennesaw State (Parliament),kennesaw state (parliament),college,1257.1,24,2026,Southern Appalachian D-I Men's Conferences,2026-04-11
+234,Mississippi State-B (Trenches ),mississippi state-b (trenches ),college,1256.5,14,2026,Golden Triangle Invitational 2026,2026-02-07
+235,SUNY-Geneseo (Snail),suny-geneseo (snail),college,1255.4,26,2026,Northeast Classic 2026,2026-03-28
+236,California-Santa Barbara-B (Black Out),california-santa barbara-b (black out),college,1254.5,18,2026,Southwest Showdown 2026,2026-03-07
+237,Central Florida (Dogs of War),central florida (dogs of war),college,1254.0,17,2026,Florida D-I Men's Conferences,2026-04-11
+238,Worcester Polytech (Whisper),worcester polytech (whisper),college,1250.9,19,2026,Ocean State Invite 26',2026-03-28
+239,Dayton (FLUD),dayton (flud),college,1249.2,36,2026,Ohio D-I Men's Conferences,2026-04-11
+240,Sam Houston (Prison Break),sam houston (prison break),college,1247.2,13,2026,Huckfest 2026,2026-03-28
+241,Swarthmore (Earthworms),swarthmore (earthworms),college,1247.1,25,2026,Jersey Devil 2026,2026-03-21
+242,Virginia Commonwealth (Biscuit Villains),virginia commonwealth (biscuit villains),college,1247.0,21,2026,Virginia D-I Men's Conferences,2026-04-11
+243,Montana (Smokejump),montana (smokejump),college,1246.6,11,2026,Northwest D-I College Men's Regionals,2026-05-02
+244,Stonehill (Stonehill College Men's Ultimate),stonehill (stonehill college men's ultimate),college,1246.4,17,2026,New England Open (men),2026-03-21
+245,Wisconsin-Platteville (Udderburn),wisconsin-platteville (udderburn),college,1243.7,16,2026,Old Capitol Open 2026,2026-03-28
+246,Minnesota-C (Minnesota C),minnesota-c (minnesota c),college,1239.9,18,2026,Old Capitol Open 2026,2026-03-28
+247,Pittsburgh-B (University of Pittsburgh- B),pittsburgh-b (university of pittsburgh- b),college,1238.6,33,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
+248,Charleston (Palmetto Bums),charleston (palmetto bums),college,1233.9,24,2026,Carolina D-I Men's Conferences,2026-04-11
+249,Valparaiso (Vult),valparaiso (vult),college,1229.9,12,2026,Corny Classic College 2026,2026-03-28
+250,Michigan State-B (Riot Control),michigan state-b (riot control),college,1229.4,20,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+251,Wright State (Airstrike),wright state (airstrike),college,1229.4,16,2026,The DUDE (Dayton Ultimate Disc Experience),2026-02-28
+252,Connecticut College (Deimos),connecticut college (deimos),college,1228.4,20,2026,Northeast Classic 2026,2026-03-28
+253,Cal Poly-Pomona (Cow Ultimate),cal poly-pomona (cow ultimate),college,1225.9,20,2026,SoCal D-I Men's Conferences,2026-04-18
+254,Wisconsin-La Crosse (BadLUC),wisconsin-la crosse (badluc),college,1225.3,23,2026,North Central D-I College Men's Regionals,2026-04-25
+255,Northeastern-B (Beastern),northeastern-b (beastern),college,1222.0,24,2026,New England D-I College Men's Regionals,2026-05-02
+256,Air Force (Afterburn),air force (afterburn),college,1218.9,21,2026,Centex 2026,2026-03-13
+257,California-B (Ursa Minor),california-b (ursa minor),college,1217.6,18,2026,Southwest D-I College Men's Regionals,2026-04-25
+258,Bradley (Angry Otters),bradley (angry otters),college,1215.6,10,2026,Corny Classic College 2026,2026-03-28
+259,Seattle (Throbots),seattle (throbots),college,1214.2,8,2026,PLU Mens+BBQ 2026,2026-02-21
+260,Grace (Lancer Ultimate),grace (lancer ultimate),college,1213.8,18,2026,Corny Classic College 2026,2026-03-28
+261,California-Davis (Davis Dogs),california-davis (davis dogs),college,1212.4,23,2026,NorCal D-I Men's Conferences,2026-04-11
+262,St Thomas (Purple Reign),st thomas (purple reign),college,1211.7,32,2026,Rockford Meltdown 26,2026-03-21
+263,Dickinson (Dumptrucks),dickinson (dumptrucks),college,1210.7,26,2026,Northeast Classic 2026,2026-03-28
+264,Florida-B (Florida B),florida-b (florida b),college,1208.7,26,2026,Florida D-I Men's Conferences,2026-04-11
+265,Purdue-B (CTRL-Z),purdue-b (ctrl-z),college,1208.6,28,2026,Great Lakes D-I College Men's Regionals,2026-04-25
+266,Colorado Mesa (Colorado Mesa Mavericks),colorado mesa (colorado mesa mavericks),college,1207.2,15,2026,Snow Melt 2026,2026-02-28
+267,Carleton University (Ravens),carleton university (ravens),college,1206.1,10,2026,Western NY D-I Men's Conferences,2026-04-11
+268,Missouri S&T (Miner Threat),missouri s&t (miner threat),college,1203.6,14,2026,Huck Finn 2026,2026-03-27
+269,Whitworth (Bangarang),whitworth (bangarang),college,1198.6,12,2026,Swing By Spring,2026-03-28
+270,Eastern Michigan (Fighting Hellfish),eastern michigan (fighting hellfish),college,1196.1,10,2026,Grand Rapids Invite 2026,2026-03-14
+271,William & Mary-B (Seahorse),william & mary-b (seahorse),college,1193.0,24,2026,FishBowl 2026,2026-02-28
+272,Northern Arizona (El Ponderoso),northern arizona (el ponderoso),college,1190.2,13,2026,Desert D-I Men's Conferences,2026-04-11
+273,Washington State (Air Raid),washington state (air raid),college,1189.9,15,2026,Swing By Spring,2026-03-28
+274,Wisconsin-B (Fauxdags),wisconsin-b (fauxdags),college,1189.2,28,2026,North Central D-I College Men's Regionals,2026-04-25
+275,Florida State-B (DUF Eyyy),florida state-b (duf eyyy),college,1188.5,12,2026,Florida Warm Up 2026-Weekend 2,2026-02-14
+276,Arizona (Sunburn),arizona (sunburn),college,1188.1,18,2026,Desert D-I Men's Conferences,2026-04-11
+277,Wisconsin-Stevens Point (Homegrown),wisconsin-stevens point (homegrown),college,1186.8,16,2026,Old Capitol Open 2026,2026-03-28
+278,Brown-B (Brown - B),brown-b (brown - b),college,1185.1,16,2026,Ocean State Invite 26',2026-03-28
+279,Kansas State (Wizards),kansas state (wizards),college,1183.8,11,2026,Ozarks D-I Men's Conferences,2026-04-11
+280,SUNY-Albany (SCAM),suny-albany (scam),college,1183.5,24,2026,Metro East D-I College Men's Regionals,2026-04-25
+281,South Carolina-B (South Carolina),south carolina-b (south carolina),college,1181.2,13,2026,Needle in a Ho-Stack 2026,2026-03-28
+282,Connecticut-B (Grind),connecticut-b (grind),college,1180.6,15,2026,Northeast Classic 2026,2026-03-28
+283,Loyola Marymount (Lions),loyola marymount (lions),college,1179.3,17,2026,SoCal D-I Men's Conferences,2026-04-18
+284,Kent State (Klockwork),kent state (klockwork),college,1178.4,17,2026,Ohio D-I Men's Conferences,2026-04-11
+285,Cal Poly-Humboldt (Humboldt Buds),cal poly-humboldt (humboldt buds),college,1176.7,19,2026,Silicon Valley Rally 2026,2026-03-07
+286,Grove City (Grove City Doomsday),grove city (grove city doomsday),college,1175.6,11,2026,Huckin' in the Hills XII,2026-02-21
+287,"Wake Forest (Well Oiled Machine, Baby)","wake forest (well oiled machine, baby)",college,1172.4,13,2026,Needle in a Ho-Stack 2026,2026-03-28
+288,Delaware-B (Sideshow),delaware-b (sideshow),college,1169.6,13,2026,First State Invite 2026,2026-03-07
+289,Reed (Hoot),reed (hoot),college,1169.0,16,2026,PLU Mens+BBQ 2026,2026-02-21
+290,Vermont-C (Chill B),vermont-c (chill b),college,1167.6,10,2026,Northeast Classic 2026,2026-03-28
+291,East Tennessee State (Dry Bones),east tennessee state (dry bones),college,1166.3,17,2026,Southern Appalachian D-I Men's Conferences,2026-04-11
+292,Colorado State-B (Bibida),colorado state-b (bibida),college,1165.6,20,2026,Rocky Mountain D-I Men's Conferences,2026-04-11
+293,Cincinnati -B (Bearcats B),cincinnati -b (bearcats b),college,1164.5,25,2026,Spring Spook 2026,2026-03-07
+294,Benedictine College (Flying Monks),benedictine college (flying monks),college,1163.6,12,2026,Old Capitol Open 2026,2026-03-28
+295,Wheaton (Illinois) (Mastodon),wheaton (illinois) (mastodon),college,1163.1,10,2026,Corny Classic College 2026,2026-03-28
+296,Virginia Tech-B (Virginia Tech B),virginia tech-b (virginia tech b),college,1162.3,25,2026,Atlantic Coast Open 2026,2026-03-21
+297,Carleton College-C (Karls),carleton college-c (karls),college,1157.8,25,2026,Midwest Throwdown 2026,2026-02-28
+298,James Madison-B (Smellfish),james madison-b (smellfish),college,1152.8,21,2026,FishBowl 2026,2026-02-28
+299,Towson (Pandamonium),towson (pandamonium),college,1151.5,19,2026,Colonial D-I Men's Conferences,2026-04-18
+300,Army (Army-West Point),army (army-west point),college,1149.6,16,2026,Jersey Devil 2026,2026-03-21
+301,Tarleton State (Texan Ultimate),tarleton state (texan ultimate),college,1144.9,15,2026,Huckfest 2026,2026-03-28
+302,Ball State (Wizardz),ball state (wizardz),college,1138.3,19,2026,Corny Classic College 2026,2026-03-28
+303,Western New England (Golden Bears),western new england (golden bears),college,1134.8,15,2026,Ocean State Invite 26',2026-03-28
+304,Case Western Reserve-B (Fighting Gobies),case western reserve-b (fighting gobies),college,1132.9,22,2026,The DUDE (Dayton Ultimate Disc Experience),2026-02-28
+305,Denver-B (Sourdough B Team),denver-b (sourdough b team),college,1129.9,14,2026,New Year Fest 2026,2026-01-24
+306,Tennessee Tech (Tech Talons),tennessee tech (tech talons),college,1128.7,11,2026,Southern Appalachian D-I Men's Conferences,2026-04-11
+307,Saint Louis (Archangel),saint louis (archangel),college,1128.7,19,2026,Ozarks D-I Men's Conferences,2026-04-11
+308,College of New Jersey (Revolution),college of new jersey (revolution),college,1127.4,19,2026,First State Invite 2026,2026-03-07
+309,Maryland-Baltimore County (Booya),maryland-baltimore county (booya),college,1122.9,21,2026,Colonial D-I Men's Conferences,2026-04-18
+310,Georgia-B (Chillydawgs),georgia-b (chillydawgs),college,1118.3,28,2026,Southern Appalachian D-I Men's Conferences,2026-04-11
+311,Illinois-Chicago (Juice ),illinois-chicago (juice ),college,1114.8,10,2026,Illinois D-I Men's Conferences,2026-04-11
+312,Minnesota State-Mankato (Blue Skunks ),minnesota state-mankato (blue skunks ),college,1112.6,14,2026,Western North Central D-I Men's Conferences,2026-04-11
+313,Texas Tech (Tumbleweed),texas tech (tumbleweed),college,1109.4,16,2026,Centex 2026,2026-03-13
+314,Pacific Lutheran (Reign Men),pacific lutheran (reign men),college,1107.5,14,2026,Swing By Spring,2026-03-28
+315,Oklahoma State (Ultimato),oklahoma state (ultimato),college,1106.2,10,2026,South Central D-I College Men's Regionals,2026-04-25
+316,Hofstra (Flying Dutchmen),hofstra (flying dutchmen),college,1100.7,26,2026,Metro East D-I College Men's Regionals,2026-04-25
+317,Toledo (Savage),toledo (savage),college,1098.7,10,2026,Ohio D-I Men's Conferences,2026-04-11
+318,John Brown (Ironfist),john brown (ironfist),college,1098.7,10,2026,Dust Bowl 2026,2026-02-21
+319,Rice (Cloud 9),rice (cloud 9),college,1097.0,12,2026,Centex 2026,2026-03-13
+320,Lehigh-B (Lehigh-B),lehigh-b (lehigh-b),college,1095.9,16,2026,Northeast Classic 2026,2026-03-28
+321,Salisbury (Buzz),salisbury (buzz),college,1095.7,12,2026,Jersey Devil 2026,2026-03-21
+322,California-San Diego-B (Air Squids LITE ),california-san diego-b (air squids lite ),college,1095.6,25,2026,Southwest Showdown 2026,2026-03-07
+323,Oklahoma (Apes of Wrath),oklahoma (apes of wrath),college,1091.5,13,2026,Huckfest 2026,2026-03-28
+324,West Chester-B (West Chester B),west chester-b (west chester b),college,1085.0,24,2026,Northeast Classic 2026,2026-03-28
+325,Illinois-C (Cornland),illinois-c (cornland),college,1083.5,15,2026,Corny Classic College 2026,2026-03-28
+326,Jacksonville State (Firebird ),jacksonville state (firebird ),college,1080.7,16,2026,Gulf Coast D-I Men's Conferences,2026-04-11
+327,Loyola-Chicago (Darkwing),loyola-chicago (darkwing),college,1076.9,24,2026,Illinois D-I Men's Conferences,2026-04-11
+328,Marquette-B (Birdfeeder),marquette-b (birdfeeder),college,1076.5,22,2026,Old Capitol Open 2026,2026-03-28
+329,Florida Polytechnic (Florida Poly Ultimate),florida polytechnic (florida poly ultimate),college,1072.9,13,2026,Florida Warm Up 2026-Weekend 2,2026-02-14
+330,Rose-Hulman (Elephantitis),rose-hulman (elephantitis),college,1072.7,19,2026,Corny Classic College 2026,2026-03-28
+331,New Hampshire (New Hampshire Ultimate Team),new hampshire (new hampshire ultimate team),college,1072.2,22,2026,Greater New England D-I Men's Conferences,2026-04-11
+332,Wisconsin-Whitewater (Sub*Par),wisconsin-whitewater (sub*par),college,1071.9,19,2026,Lake Superior D-I Men's Conferences,2026-04-11
+333,Dayton-B (UD FLUD B),dayton-b (ud flud b),college,1071.8,14,2026,Spring Spook 2026,2026-03-07
+334,George Washington-B (George Washington Men’s Club Ultimate B),george washington-b (george washington men’s club ultimate b),college,1069.8,13,2026,Needle in a Ho-Stack 2026,2026-03-28
+335,Portland State (Juicy),portland state (juicy),college,1066.3,14,2026,Cascadia D-I Men's Conferences,2026-04-11
+336,Dartmouth-B (Discomfort Trolley),dartmouth-b (discomfort trolley),college,1061.0,10,2026,Jersey Devil 2026,2026-03-21
+337,Cornell-B (Cornell-B (Shake)),cornell-b (cornell-b (shake)),college,1052.4,15,2026,Jersey Devil 2026,2026-03-21
+338,Utah-B (Shower Curtain Ultimate),utah-b (shower curtain ultimate),college,1051.8,15,2026,Big Sky D-I Men's Conferences,2026-04-11
+339,Colorado Mines-B (Orediggers),colorado mines-b (orediggers),college,1051.2,18,2026,Snow Melt 2026,2026-02-28
+340,North Florida (Category 5),north florida (category 5),college,1049.5,21,2026,Florida D-I Men's Conferences,2026-04-11
+341,Maryland-B (Astro Quakers),maryland-b (astro quakers),college,1047.9,19,2026,FishBowl 2026,2026-02-28
+342,SUNY-Stony Brook (Panic),suny-stony brook (panic),college,1038.8,19,2026,Metro NY D-I Men's Conferences,2026-04-11
+343,SUNY-Binghamton-B (SUNY-Binghamton B),suny-binghamton-b (suny-binghamton b),college,1037.7,33,2026,Jersey Devil 2026,2026-03-21
+344,Boise State (Mamu Zaldi),boise state (mamu zaldi),college,1035.5,13,2026,Swing By Spring,2026-03-28
+345,Siena (Siena Saints),siena (siena saints),college,1026.3,14,2026,Northeast Classic 2026,2026-03-28
+346,Knox (River Rats),knox (river rats),college,1025.7,15,2026,Corny Classic College 2026,2026-03-28
+347,Iowa State-B (BSUC),iowa state-b (bsuc),college,1017.3,19,2026,Old Capitol Open 2026,2026-03-28
+348,Cal Poly-SLO-C (SLOC),cal poly-slo-c (sloc),college,1012.0,18,2026,Presidents' Day Qualifiers (men),2026-01-31
+349,Colorado-C (Rooster Tussle),colorado-c (rooster tussle),college,1012.0,16,2026,Rocky Mountain D-I Men's Conferences,2026-04-11
+350,Nevada-Reno (Elevation Ultimate),nevada-reno (elevation ultimate),college,1011.4,19,2026,NorCal D-I Men's Conferences,2026-04-11
+351,Luther (LUFDA),luther (lufda),college,1011.4,20,2026,Atlantic Coast Open 2026,2026-03-21
+352,Northeastern-C (Salty C Dogs),northeastern-c (salty c dogs),college,1011.3,10,2026,Northeast Classic 2026,2026-03-28
+353,Harvard-B (BRed Line),harvard-b (bred line),college,1010.0,11,2026,New England Open (men),2026-03-21
+354,SUNY-Buffalo-B (Buffalo Grinch),suny-buffalo-b (buffalo grinch),college,994.9,23,2026,Metro East D-I College Men's Regionals,2026-04-25
+355,North Carolina-Charlotte-B (Underground),north carolina-charlotte-b (underground),college,992.2,8,2026,Needle in a Ho-Stack 2026,2026-03-28
+356,Wentworth (Concrete Jungle),wentworth (concrete jungle),college,989.7,18,2026,Ocean State Invite 26',2026-03-28
+357,New Mexico (Fusion),new mexico (fusion),college,988.7,12,2026,Desert D-I Men's Conferences,2026-04-11
+358,Idaho (Graffiti),idaho (graffiti),college,988.4,11,2026,Big Sky D-I Men's Conferences,2026-04-11
+359,Dallas (Vortex),dallas (vortex),college,983.8,19,2026,Huckfest 2026,2026-03-28
+360,California-Davis-B (Beagles),california-davis-b (beagles),college,982.8,16,2026,Stanford Open 2026,2026-02-07
+361,Florida Tech (F-IT),florida tech (f-it),college,981.6,13,2026,Florida Warm Up 2026-Weekend 2,2026-02-14
+362,High Point (High Point University Bagheera),high point (high point university bagheera),college,976.3,21,2026,Needle in a Ho-Stack 2026,2026-03-28
+363,Washington University-B (Contraband),washington university-b (contraband),college,976.2,22,2026,Ozarks D-I Men's Conferences,2026-04-11
+364,Purdue-C (CTRL X),purdue-c (ctrl x),college,972.3,16,2026,Corny Classic College 2026,2026-03-28
+365,Texas-B (Graze),texas-b (graze),college,970.9,14,2026,South Texas D-I Men's Conferences,2026-04-11
+366,South Florida-B (Scourge),south florida-b (scourge),college,964.1,10,2026,Florida D-I Men's Conferences,2026-04-11
+367,Carnegie Mellon-B (Poison Control),carnegie mellon-b (poison control),college,959.7,10,2026,Huckin' in the Hills XII,2026-02-21
+368,Notre Dame-B (Opus D's),notre dame-b (opus d's),college,959.6,10,2026,Corny Classic College 2026,2026-03-28
+369,Northwestern-B (Blizzard),northwestern-b (blizzard),college,959.4,9,2026,Grand Rapids Invite 2026,2026-03-14
+370,Middlebury-B (Branksters),middlebury-b (branksters),college,955.8,10,2026,UMass Invite 2026,2026-02-28
+371,Providence (PC Ulty),providence (pc ulty),college,928.4,20,2026,New England Open (men),2026-03-21
+372,Iowa-B (Iowa-B (HUCititis)),iowa-b (iowa-b (hucititis)),college,928.1,16,2026,Old Capitol Open 2026,2026-03-28
+373,Cal State-Long Beach (Pyramid Scheme),cal state-long beach (pyramid scheme),college,924.5,14,2026,SoCal D-I Men's Conferences,2026-04-18
+374,Grinnell-B (Gphants),grinnell-b (gphants),college,921.1,10,2026,Old Capitol Open 2026,2026-03-28
+375,Cleveland State (Cleveland State Vikings),cleveland state (cleveland state vikings),college,908.5,13,2026,Ohio D-I Men's Conferences,2026-04-11
+376,Coastal Carolina (Coastal Carolina Ultimate Frisbee),coastal carolina (coastal carolina ultimate frisbee),college,902.2,10,2026,Southerns 2026,2026-03-28
+377,Fairfield (Fairfield Stags),fairfield (fairfield stags),college,900.6,12,2026,Northeast Classic 2026,2026-03-28
+378,Central Washington (CWU Ultimate),central washington (cwu ultimate),college,898.1,10,2026,Swing By Spring,2026-03-28
+379,Massachusetts-Lowell (Riverhawks),massachusetts-lowell (riverhawks),college,887.2,15,2026,Metro Boston D-I Men's Conferences,2026-04-11
+380,New Jersey Tech (Highlanders),new jersey tech (highlanders),college,885.8,13,2026,Metro NY D-I Men's Conferences,2026-04-11
+381,San Diego State-B (Bomberos),san diego state-b (bomberos),college,883.8,11,2026,Southwest Showdown 2026,2026-03-07
+382,North Park (Vikings),north park (vikings),college,814.1,11,2026,Rockford Meltdown 26,2026-03-21
+383,Wisconsin-Milwaukee-B (BLACKOUT),wisconsin-milwaukee-b (blackout),college,812.8,10,2026,Grand Rapids Invite 2026,2026-03-14
+1,Middlebury (Pranksters),middlebury (pranksters),college-d3,1967.7,26,2026,2026 D-III College Championships,2026-05-16
+2,Davenport (Panthers),davenport (panthers),college-d3,1861.0,20,2026,Eastern Great Lakes D-III Men's Conferences,2026-04-11
+3,Carleton College-CHOP (Carleton House of Pancakes),carleton college-chop (carleton house of pancakes),college-d3,1836.3,25,2026,2026 D-III College Championships,2026-05-16
+4,Elon (Big Fat Bomb),elon (big fat bomb),college-d3,1749.5,22,2026,2026 D-III College Championships,2026-05-16
+5,Oklahoma Christian (Eagles),oklahoma christian (eagles),college-d3,1736.4,22,2026,2026 D-III College Championships,2026-05-16
+6,Williams (WUFO),williams (wufo),college-d3,1732.4,34,2026,2026 D-III College Championships,2026-05-16
+7,Lewis & Clark (Bacchus ),lewis & clark (bacchus ),college-d3,1717.9,28,2026,2026 D-III College Championships,2026-05-16
+8,Claremont (Braineaters),claremont (braineaters),college-d3,1700.3,26,2026,2026 D-III College Championships,2026-05-16
+9,St Olaf (Berzerkers),st olaf (berzerkers),college-d3,1681.4,29,2026,2026 D-III College Championships,2026-05-16
+10,Franciscan (Fatal),franciscan (fatal),college-d3,1661.0,22,2026,2026 D-III College Championships,2026-05-16
+11,Colorado Mines (Entropy),colorado mines (entropy),college-d3,1656.9,24,2026,2026 D-III College Championships,2026-05-16
+12,Macalester (Flat Earth),macalester (flat earth),college-d3,1617.8,21,2026,2026 D-III College Championships,2026-05-16
+13,Kenyon (SERF),kenyon (serf),college-d3,1611.3,23,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+14,Ave Maria (Gyrenes),ave maria (gyrenes),college-d3,1605.6,20,2026,Southeast D-III Men's Conferences,2026-04-25
+15,Ithaca (Nawshus Ultimate),ithaca (nawshus ultimate),college-d3,1597.3,22,2026,Metro East D-III College Men's Regionals,2026-04-25
+16,Berry (Bucks),berry (bucks),college-d3,1584.2,21,2026,2026 D-III College Championships,2026-05-16
+17,Bowdoin (Clown),bowdoin (clown),college-d3,1579.2,23,2026,2026 D-III College Championships,2026-05-16
+18,Richmond (Spidermonkeys),richmond (spidermonkeys),college-d3,1576.8,37,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+19,Whitman (Whitman Sweets),whitman (whitman sweets),college-d3,1569.9,20,2026,2026 D-III College Championships,2026-05-16
+20,Colorado College (Wasabi),colorado college (wasabi),college-d3,1566.2,31,2026,South Central D-III College Men's Regionals,2026-04-25
+21,Hillsdale (Chargers),hillsdale (chargers),college-d3,1557.4,18,2026,2026 D-III College Championships,2026-05-16
+22,Oberlin (Flying Horsecows),oberlin (flying horsecows),college-d3,1557.2,25,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+23,SUNY-Cortland  (Team Rocket),suny-cortland (team rocket),college-d3,1532.2,19,2026,Metro East D-III College Men's Regionals,2026-04-25
+24,Haverford (Big Donkey Ultimate),haverford (big donkey ultimate),college-d3,1531.5,28,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+25,Truman State (JujiTSU),truman state (jujitsu),college-d3,1527.2,17,2026,South Central D-III College Men's Regionals,2026-04-25
+26,Wisconsin-Eau Claire (EauZone),wisconsin-eau claire (eauzone),college-d3,1527.1,20,2026,North Central D-III College Men's Regionals,2026-04-25
+27,North Carolina-Asheville (Mudpuppy),north carolina-asheville (mudpuppy),college-d3,1513.3,17,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+28,Butler (Butler Big Dog),butler (butler big dog),college-d3,1496.2,22,2026,Great Lakes D-III College Men's Regionals,2026-05-02
+29,Wesleyan (Nietzsch Factor),wesleyan (nietzsch factor),college-d3,1491.1,33,2026,Metro East D-III College Men's Regionals,2026-04-25
+30,Roger Williams (RWU Mens Ultimate),roger williams (rwu mens ultimate),college-d3,1485.1,13,2026,New England D-III College Men's Regionals,2026-05-02
+31,Portland (Uprise),portland (uprise),college-d3,1479.7,18,2026,Northwest D-III Men's Conferences,2026-04-11
+32,Rochester (Piggies),rochester (piggies),college-d3,1478.6,24,2026,2026 D-III College Championships,2026-05-16
+33,Davidson (DUFF),davidson (duff),college-d3,1466.2,33,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+34,Cedarville (Swarm),cedarville (swarm),college-d3,1457.5,25,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+35,Colby (CDC (Men's)),colby (cdc (men's)),college-d3,1452.6,27,2026,New England D-III College Men's Regionals,2026-05-02
+36,Brandeis (TRON),brandeis (tron),college-d3,1448.9,26,2026,New England D-III College Men's Regionals,2026-05-02
+37,Winona State (Experience),winona state (experience),college-d3,1437.9,14,2026,North Central D-III College Men's Regionals,2026-04-25
+38,Santa Clara (SCAB),santa clara (scab),college-d3,1435.5,25,2026,Southwest D-III Men's Conferences,2026-04-11
+39,Amherst (Army of Darkness),amherst (army of darkness),college-d3,1428.6,30,2026,New England D-III College Men's Regionals,2026-05-02
+40,Michigan Tech (DiscoTech),michigan tech (discotech),college-d3,1413.5,35,2026,North Central D-III College Men's Regionals,2026-04-25
+41,Union (Tennessee) (Union Jaxx),union (tennessee) (union jaxx),college-d3,1412.8,21,2026,Southeast D-III Men's Conferences,2026-04-25
+42,Asbury (Asbury Ultimate),asbury (asbury ultimate),college-d3,1405.8,20,2026,Great Lakes D-III College Men's Regionals,2026-05-02
+43,Central Connecticut State (Yetis),central connecticut state (yetis),college-d3,1394.3,13,2026,Metro East D-III College Men's Regionals,2026-04-25
+44,St John's (Minnesota) (BAM),st john's (minnesota) (bam),college-d3,1384.0,15,2026,Western North Central D-III Men's Conferences,2026-04-11
+45,Embry-Riddle (Dirty Birds),embry-riddle (dirty birds),college-d3,1382.0,16,2026,Southeast D-III Men's Conferences,2026-04-25
+46,Vassar (Swinging Monks),vassar (swinging monks),college-d3,1379.6,22,2026,Metro East D-III College Men's Regionals,2026-04-25
+47,Skidmore (Wombats),skidmore (wombats),college-d3,1368.0,33,2026,Metro East D-III College Men's Regionals,2026-04-25
+48,Grinnell (Grinnellephants),grinnell (grinnellephants),college-d3,1367.4,20,2026,North Central D-III College Men's Regionals,2026-04-25
+49,Hamilton (Hot Saucers),hamilton (hot saucers),college-d3,1358.9,17,2026,Metro East D-III College Men's Regionals,2026-04-25
+50,Harding (Harding Apocalypse),harding (harding apocalypse),college-d3,1355.2,19,2026,South Central D-III College Men's Regionals,2026-04-25
+51,Puget Sound (Postmen),puget sound (postmen),college-d3,1352.5,24,2026,Northwest D-III Men's Conferences,2026-04-11
+52,Minnesota-Duluth (Northern Lights),minnesota-duluth (northern lights),college-d3,1348.4,30,2026,North Central D-III College Men's Regionals,2026-04-25
+53,Bryant (Bryant Craze),bryant (bryant craze),college-d3,1347.6,13,2026,New England D-III College Men's Regionals,2026-05-02
+54,Christopher Newport (Skymaul),christopher newport (skymaul),college-d3,1347.5,23,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+55,Scranton (Electric City Scranton Ultimate),scranton (electric city scranton ultimate),college-d3,1346.9,18,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+56,Gonzaga (GURU ),gonzaga (guru ),college-d3,1332.8,30,2026,Northwest D-III Men's Conferences,2026-04-11
+57,Occidental (Detox),occidental (detox),college-d3,1326.7,25,2026,Southwest D-III Men's Conferences,2026-04-11
+58,Stevens Tech (Stevens Tech),stevens tech (stevens tech),college-d3,1315.8,22,2026,Metro East D-III College Men's Regionals,2026-04-25
+59,Xavier (B.L.O.B.),xavier (b.l.o.b.),college-d3,1312.5,24,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+60,Messiah (Falcons),messiah (falcons),college-d3,1301.8,19,2026,West Penn D-III Men's Conferences,2026-04-11
+61,Grove City (Grove City Doomsday),grove city (grove city doomsday),college-d3,1291.5,17,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+62,Trinity (Turbulence),trinity (turbulence),college-d3,1290.8,25,2026,South Central D-III College Men's Regionals,2026-04-25
+63,Bates (Orange Whip),bates (orange whip),college-d3,1278.5,26,2026,New England D-III College Men's Regionals,2026-05-02
+64,Wisconsin-Platteville (Udderburn),wisconsin-platteville (udderburn),college-d3,1271.0,20,2026,North Central D-III College Men's Regionals,2026-04-25
+65,Georgia College (Disconnected),georgia college (disconnected),college-d3,1270.8,22,2026,Southeast D-III Men's Conferences,2026-04-25
+66,Worcester Polytech (Whisper),worcester polytech (whisper),college-d3,1262.0,26,2026,South New England D-III Men's Conferences,2026-04-11
+67,SUNY-Geneseo (Snail),suny-geneseo (snail),college-d3,1255.4,26,2026,Metro East D-III College Men's Regionals,2026-04-25
+68,Ave Maria-B (Ave Maria B Team),ave maria-b (ave maria b team),college-d3,1255.0,22,2026,Southeast D-III Men's Conferences,2026-04-25
+69,Rensselaer Polytech (Trudge),rensselaer polytech (trudge),college-d3,1251.2,30,2026,Metro East D-III College Men's Regionals,2026-04-25
+70,Swarthmore (Earthworms),swarthmore (earthworms),college-d3,1247.1,25,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+71,Colgate (Jabberwock),colgate (jabberwock),college-d3,1242.5,27,2026,Western NY D-III Men's Conferences,2026-04-11
+72,Bradley (Angry Otters),bradley (angry otters),college-d3,1233.0,11,2026,Illinois D-III Men's Conferences,2026-04-18
+73,Valparaiso (Vult),valparaiso (vult),college-d3,1230.0,14,2026,Great Lakes D-III College Men's Regionals,2026-05-02
+74,Connecticut College (Deimos),connecticut college (deimos),college-d3,1228.4,20,2026,Metro East D-III College Men's Regionals,2026-04-25
+75,Wright State (Airstrike),wright state (airstrike),college-d3,1227.3,17,2026,Ohio D-III Men's Conferences,2026-04-11
+76,Air Force (Afterburn),air force (afterburn),college-d3,1218.9,21,2026,South Central D-III College Men's Regionals,2026-04-25
+77,Missouri S&T (Miner Threat),missouri s&t (miner threat),college-d3,1218.4,16,2026,South Central D-III College Men's Regionals,2026-04-25
+78,Grace (Lancer Ultimate),grace (lancer ultimate),college-d3,1213.8,18,2026,Great Lakes D-III College Men's Regionals,2026-05-02
+79,Calvin (Calvin Knights),calvin (calvin knights),college-d3,1212.7,15,2026,Great Lakes D-III College Men's Regionals,2026-05-02
+80,St Thomas (Purple Reign),st thomas (purple reign),college-d3,1211.7,32,2026,Western North Central D-III Men's Conferences,2026-04-11
+81,Dickinson (Dumptrucks),dickinson (dumptrucks),college-d3,1210.7,26,2026,Ohio Valley D-III College Men's Regionals,2026-04-25
+82,Colorado Mesa (Colorado Mesa Mavericks),colorado mesa (colorado mesa mavericks),college-d3,1207.2,15,2026,South Central D-III College Men's Regionals,2026-04-25
+83,Whitworth (Bangarang),whitworth (bangarang),college-d3,1198.6,12,2026,Northwest D-III Men's Conferences,2026-04-11
+84,San Diego (Flat Tax Ballers),san diego (flat tax ballers),college-d3,1197.0,25,2026,Southwest D-III Men's Conferences,2026-04-11
+85,Bethel (Bethel Ultimate),bethel (bethel ultimate),college-d3,1195.6,21,2026,Western North Central D-III Men's Conferences,2026-04-11
+86,William & Mary-B (Seahorse),william & mary-b (seahorse),college-d3,1185.3,26,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+87,Wisconsin-Stevens Point (Homegrown),wisconsin-stevens point (homegrown),college-d3,1180.4,17,2026,Lake Superior D-III Men's Conferences,2026-04-11
+88,Reed (Hoot),reed (hoot),college-d3,1176.1,17,2026,Northwest D-III Men's Conferences,2026-04-11
+89,Navy (Poseidon),navy (poseidon),college-d3,1175.3,15,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+90,Benedictine College (Flying Monks),benedictine college (flying monks),college-d3,1163.6,12,2026,Ozarks D-III Men's Conferences,2026-04-11
+91,Army (Army-West Point),army (army-west point),college-d3,1149.6,16,2026,Metro East D-III College Men's Regionals,2026-04-25
+92,Penn State-Behrend (JustDisc League),penn state-behrend (justdisc league),college-d3,1147.7,10,2026,West Penn D-III Men's Conferences,2026-04-11
+93,Carleton College-C (Karls),carleton college-c (karls),college-d3,1145.4,33,2026,North Central D-III College Men's Regionals,2026-04-25
+94,Rice (Cloud 9),rice (cloud 9),college-d3,1143.1,16,2026,Texas D-III Men's Conferences,2026-04-11
+95,Bentley (Icehouse),bentley (icehouse),college-d3,1139.0,33,2026,New England D-III College Men's Regionals,2026-05-02
+96,Western New England (Golden Bears),western new england (golden bears),college-d3,1134.8,15,2026,New England D-III College Men's Regionals,2026-05-02
+97,John Brown (Ironfist),john brown (ironfist),college-d3,1101.6,11,2026,Ozarks D-III Men's Conferences,2026-04-11
+98,Salisbury (Buzz),salisbury (buzz),college-d3,1095.7,12,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+99,Rose-Hulman (Elephantitis),rose-hulman (elephantitis),college-d3,1072.7,19,2026,Eastern Great Lakes D-III Men's Conferences,2026-04-11
+100,Holy Cross (Purple Heys),holy cross (purple heys),college-d3,1071.0,23,2026,South New England D-III Men's Conferences,2026-04-11
+101,Slippery Rock (SRU Lions),slippery rock (sru lions),college-d3,1068.8,19,2026,West Penn D-III Men's Conferences,2026-04-11
+102,Dartmouth-B (Discomfort Trolley),dartmouth-b (discomfort trolley),college-d3,1061.0,10,2026,North New England D-III Men's Conferences,2026-04-11
+103,Mary Washington (Mother of George),mary washington (mother of george),college-d3,1045.1,21,2026,D-III River City Showdown,2026-02-20
+104,Pacific Lutheran (Reign Men),pacific lutheran (reign men),college-d3,1041.1,10,2026,Northwest D-III Men's Conferences,2026-04-11
+105,Wentworth (Concrete Jungle),wentworth (concrete jungle),college-d3,1039.7,29,2026,New England D-III College Men's Regionals,2026-05-02
+106,Union (New York) (Electric City Plastic),union (new york) (electric city plastic),college-d3,1027.0,13,2026,Hudson Valley D-III Men's Conferences,2026-04-18
+107,Knox (River Rats),knox (river rats),college-d3,1025.7,15,2026,Illinois D-III Men's Conferences,2026-04-18
+108,Luther (LUFDA),luther (lufda),college-d3,1011.4,20,2026,Western North Central D-III Men's Conferences,2026-04-11
+109,Northern Michigan (Riptide),northern michigan (riptide),college-d3,1006.0,14,2026,Lake Superior D-III Men's Conferences,2026-04-11
+110,Creighton (Colossus),creighton (colossus),college-d3,1002.5,11,2026,Western North Central D-III Men's Conferences,2026-04-11
+111,Middlebury-B (Branksters),middlebury-b (branksters),college-d3,997.2,14,2026,North New England D-III Men's Conferences,2026-04-11
+112,SUNY-Oneonta (SOFA (A)),suny-oneonta (sofa (a)),college-d3,991.2,20,2026,Western NY D-III Men's Conferences,2026-04-11
+113,Dallas (Vortex),dallas (vortex),college-d3,983.8,19,2026,Texas D-III Men's Conferences,2026-04-11
+114,Florida Tech (F-IT),florida tech (f-it),college-d3,981.6,13,2026,Southeast D-III Men's Conferences,2026-04-25
+115,Kalamazoo (Ultimate Buzz),kalamazoo (ultimate buzz),college-d3,977.8,10,2026,Eastern Great Lakes D-III Men's Conferences,2026-04-11
+116,High Point (High Point University Bagheera),high point (high point university bagheera),college-d3,976.3,21,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
+117,New Haven (Chargers),new haven (chargers),college-d3,961.8,16,2026,Metro East D-III College Men's Regionals,2026-04-25
+118,Providence (PC Ulty),providence (pc ulty),college-d3,941.6,25,2026,South New England D-III Men's Conferences,2026-04-11
+119,Fairfield (Fairfield Stags),fairfield (fairfield stags),college-d3,915.7,17,2026,Hudson Valley D-III Men's Conferences,2026-04-18
+120,Shippensburg (Scapegoats),shippensburg (scapegoats),college-d3,893.3,10,2026,West Penn D-III Men's Conferences,2026-04-11
+121,North Park (Vikings),north park (vikings),college-d3,822.8,12,2026,Illinois D-III Men's Conferences,2026-04-18
