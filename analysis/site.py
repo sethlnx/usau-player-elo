@@ -1,13 +1,16 @@
-"""Build a single self-contained HTML page for the published rankings.
+"""Build the published rankings page.
 
 Five tabs: club rankings, player rankings, per-season Trends, a Tournaments
 browser showing every event's recovered pools and bracket plus the history of
 the series it belongs to, and a U.S. Open tracker whose bracket you fill in as
 games finish, re-simulating the title odds live.
 
-Everything is embedded in one file so it opens over file:// with no server
-and no network. Inputs are the published artifacts only - this script never
-replays the model, so the page can never disagree with the CSVs:
+The page itself is one file and opens over file:// with no server. Two things
+ride beside it rather than inside it, both as classic <script> tags because a
+file:// page cannot fetch(): the rating trajectories, pulled in the background
+after first paint, and the tournament shapes, faulted in one season at a time
+when an event is opened. Inputs are the published artifacts only - this script
+never replays the model, so the page can never disagree with the CSVs:
 
     data/player_elo.csv          player table (>= MIN_GAMES shown)
     data/team_elo.csv            clubs, most recent COMPLETED event roster
@@ -16,9 +19,10 @@ replays the model, so the page can never disagree with the CSVs:
     data/usau.db                 every event's schedule - the U.S. Open
                                  tracker, and the Tournaments browser
 
-Usage: python -m analysis.site   ->   docs/index.html
+Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.js
 """
 
+import collections
 import csv
 import json
 import re
@@ -30,6 +34,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import DB_PATH
+from analysis.field_strength import TIER_NAMES as FIELD_TIER_NAMES
+from analysis.field_strength import TIERS as FIELD_TIERS
+from analysis.field_strength import classify as classify_strength
+from analysis.history_split import BUCKETS as HIST_BUCKETS
+from analysis.history_split import split as split_history
 from analysis.rankings import DIVCODE, PUBLISHED, TEAM_DIVISIONS
 from analysis.tournaments import build as build_tournaments
 
@@ -38,6 +47,47 @@ from analysis.tournaments import build as build_tournaments
 # URL itself the app. The accompanying .nojekyll stops Pages running the
 # output through Jekyll, which is pure overhead for a single static file.
 OUT = DB_PATH.parent.parent / "docs" / "index.html"
+
+# Everything that is not needed to draw the first screen is emitted BESIDE the
+# page as a classic <script>, never fetched: both work over https, but fetch()
+# on a file:// page is blocked by CORS while a script from the same directory
+# still loads, so this is the one mechanism that splits the file without
+# breaking the "opens over file:// with no server" promise above.
+#
+# `history.js` is the resident core: event list, club trajectories, the naming
+# tables, the precomputed Trends answers and the two indices that keep the
+# panel drawable without faulting anything (`rostByClub`, `gameSides`). It
+# arrives in the background right after first paint. Everything else waits to
+# be asked for, one bucket per fault:
+#
+#   t/<season>.js   a tournament's pools and bracket
+#   p/<pid % 32>.js one player's rating trajectory
+#   r/<bucket>.js   one club's rosters, every season of them, plus the names
+#   g/<season>.js   the games behind one expanded event row
+#
+# What this buys: the corpus was 16 MB raw / 5.0 MB gzipped and loaded in full
+# on every visit. The core is 0.5 MB gzipped, and a reader who never opens a
+# panel never pays for the rest. See analysis/history_split.py for why the
+# split is possible at all — Trends and the expandable-row test both used to
+# need the whole player corpus, and both are precomputed there now.
+HIST_OUT = OUT.parent / "history.js"
+HIST_GLOBAL = "__USAU_HISTORY__"
+
+# Bucketed by SEASON, not by event. Per-event files would be 2,870 of them at
+# ~170 bytes gzipped each, where request overhead costs more than the body and
+# every rebuild churns the whole directory; per-season is ten files of 12-65 KB
+# and a session that stays inside one year pays once.
+TDET_DIR = OUT.parent / "t"
+TDET_GLOBAL = "__USAU_TDET__"
+
+# The three history tiers. Each bucket file assigns its own key on the tier's
+# global, so nothing assumes load order and two buckets in flight cannot race.
+PLAY_DIR = OUT.parent / "p"
+PLAY_GLOBAL = "__USAU_PLAY__"
+ROST_DIR = OUT.parent / "r"
+ROST_GLOBAL = "__USAU_ROST__"
+GAME_DIR = OUT.parent / "g"
+GAME_GLOBAL = "__USAU_GAME__"
 
 # The player table's display floor, matching the ranking convention: below 30
 # games a rating still sits inside the engine's provisional window.
@@ -63,6 +113,27 @@ def load_csv(name):
     p = DB_PATH.parent / name
     with open(p, newline="") as f:
         return list(csv.DictReader(f))
+
+
+def bucket_urls(directory, buckets):
+    """Bucket key -> url, relative to the page."""
+    return {str(k): f"{directory.name}/{k}.js" for k in sorted(buckets)}
+
+
+def write_buckets(directory, global_name, buckets):
+    """One file per bucket. Each creates the tier's global itself and writes
+    only its own key, so nothing assumes load order and two buckets in flight
+    cannot clobber each other. Files for keys that no longer exist are swept:
+    a stale bucket the page never asks for is still a stale bucket in git."""
+    directory.mkdir(parents=True, exist_ok=True)
+    for key, part in sorted(buckets.items()):
+        (directory / f"{key}.js").write_text(
+            f"(window.{global_name}=window.{global_name}||{{}})[{key}]="
+            + json.dumps(part, separators=(",", ":")) + ";\n")
+    live = {str(k) for k in buckets}
+    for stale in directory.glob("*.js"):
+        if stale.stem not in live:
+            stale.unlink()
 
 
 def _slot_order(game):
@@ -232,19 +303,51 @@ def build():
             return -1
         return 0 if v <= -0.002 else 2 if v >= 0.003 else 1
 
+    # Tournament detail out of the payload and into per-season files. Keys are
+    # event indices into `tourneys.events`, which stays inline: the list, the
+    # filters, the series table and the champion column all read it, so the
+    # index never waits on a fault. Only `drawTournament` needs a bucket, and
+    # only for the one season it is drawing.
+    tdetail = tourneys.pop("detail")
+    tbuckets = collections.defaultdict(dict)
+    for ix, det in tdetail.items():
+        tbuckets[tourneys["events"][int(ix)][2]][ix] = det
+
+    # Field strength, appended to each event row rather than built into it:
+    # tournaments.py recovers an event's SHAPE from the schedule and never
+    # touches ratings, and that is worth keeping true. Rows gain [11] = score
+    # and [12] = tier letter, or nothing at all where there is no answer.
+    for row, verdict in zip(tourneys["events"],
+                            classify_strength(history, tourneys["events"])):
+        row.extend(verdict if verdict else [None, ""])
+    tourneys["strengthTiers"] = [t for _, t in FIELD_TIERS]
+    tourneys["strengthNotes"] = FIELD_TIER_NAMES
+
+    # The trajectory corpus, sliced into a resident core and three lazy tiers.
+    # Player names come from the ranked table rather than history.json's own
+    # name pool: the two key sets are identical (every rated trajectory is a
+    # >= MIN_GAMES player), so the pool is only ever needed alongside a roster.
+    hcore, hplay, hrost, hgame = split_history(
+        history, {r["player_id"]: r["player"] for r in players}, genders)
+
     payload = {
         "generated": date.today().isoformat(),
         "minGames": MIN_GAMES,
         "totalRated": total_rated,
         "scale": PUBLISHED["division_scale"]["club-men"],
+        # The player tier keys on `pid % buckets`, which the page reproduces
+        # directly. Clubs cannot — their bucket rides on rostByClub instead.
+        "buckets": HIST_BUCKETS,
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
                      int(r["divisions"]), int(r["divisions_now"]),
                      loo_code(r["player_id"])]
                     for r in players],
-        "genders": {pid: g for pid, g in genders.items()
-                    if pid in history.get("players", {})},
+        # `genders` used to ride here for Trends, which walked every
+        # trajectory to find its own top 25. Trends is precomputed now, and
+        # the table's own filter reads the code off each player row, so the
+        # 356 KB map has no reader left.
         # Club rows carry both names: `club` as USAU prints it and `club_key`,
         # the model identity the drill-down opens on. Ranks are per division,
         # so the table shows one division at a time.
@@ -252,7 +355,11 @@ def build():
                        int(r["roster_size"]), r["roster_event"],
                        DIVCODE.get(r["division"], 0), r["club_key"]]
                       for r in v] for k, v in clubs.items()},
-        "history": history,
+        # All four of these load after first paint; see HIST_OUT and the
+        # tier constants above. `history` is the inline escape hatch: set it
+        # and the page skips the sidecar entirely.
+        "history": None,
+        "historyJs": HIST_OUT.name,
         "usopen": {
             "name": ev[1] if ev else "",
             "start": ev[2] if ev else "",
@@ -264,13 +371,32 @@ def build():
             "bracket": bracket,
         },
         "tourneys": tourneys,
+        # bucket key -> url, emitted rather than built in JS so a renamed
+        # directory is one constant here and nothing in the page changes.
+        "tourneyJs": bucket_urls(TDET_DIR, tbuckets),
+        "playJs": bucket_urls(PLAY_DIR, hplay),
+        "rostJs": bucket_urls(ROST_DIR, hrost),
+        "gameJs": bucket_urls(GAME_DIR, hgame),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
+    HIST_OUT.write_text(
+        f"window.{HIST_GLOBAL}=" + json.dumps(hcore, separators=(",", ":")) + ";\n")
+    write_buckets(TDET_DIR, TDET_GLOBAL, tbuckets)
+    write_buckets(PLAY_DIR, PLAY_GLOBAL, hplay)
+    write_buckets(ROST_DIR, ROST_GLOBAL, hrost)
+    write_buckets(GAME_DIR, GAME_GLOBAL, hgame)
     OUT.write_text(TEMPLATE.replace("__DATA__", json.dumps(payload, separators=(",", ":"))))
     (OUT.parent / ".nojekyll").write_text("")
-    kb = OUT.stat().st_size / 1024
-    print(f"wrote {OUT} ({kb:,.0f} KB) + .nojekyll")
+    kb, hkb = OUT.stat().st_size / 1024, HIST_OUT.stat().st_size / 1024
+    print(f"wrote {OUT} ({kb:,.0f} KB) + {HIST_OUT.name} ({hkb:,.0f} KB) + .nojekyll")
+    print(f"  first paint needs {kb:,.0f} KB, then {hkb:,.0f} KB of core; "
+          f"the rest is faulted in per panel:")
+    for d in (TDET_DIR, PLAY_DIR, ROST_DIR, GAME_DIR):
+        files = sorted(d.glob("*.js"))
+        sizes = [p.stat().st_size / 1024 for p in files]
+        print(f"    {d.name}/  {len(files):>3} buckets, "
+              f"{sum(sizes):>6,.0f} KB total, {max(sizes):>4,.0f} KB worst fault")
     played = sum(g["done"] for g in sched)
     print(f"  {len(payload['players']):,} players (>={MIN_GAMES} games), "
           f"{len(clubs['completed'])} clubs, {len(field)} U.S. Open teams, "
@@ -280,7 +406,7 @@ def build():
 
 
 TEMPLATE = r"""<!doctype html>
-<html lang="en">
+<html lang="en" class="booting">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>USAU Player-Elo Rankings</title>
@@ -317,6 +443,23 @@ nav button:hover{color:var(--ink)}
 nav button.on{color:var(--ink);border-bottom-color:var(--accent);font-weight:550}
 main{max-width:1180px;margin:0 auto;padding:20px}
 section{display:none} section.on{display:block}
+/* Boot state. First paint lands in ~300ms but the inline payload is a couple
+   of megabytes behind it, so without this the page sits there showing empty
+   tables and reads as broken rather than as loading. The class is on <html>
+   from the markup and removed once the data is drawn, which covers exactly
+   the window where the document is still downloading. */
+#boot{display:none;padding:40px 0 60px;max-width:560px}
+html.booting #boot{display:block}
+html.booting main > section{display:none !important}
+html.booting nav button{pointer-events:none;opacity:.45}
+#boot h2{font-size:15px;margin:0 0 6px;font-weight:600}
+#boot p{margin:0;font-size:13px;color:var(--ink-3);line-height:1.6}
+#boot .track{height:3px;border-radius:2px;background:var(--line);
+  overflow:hidden;margin:16px 0 12px}
+#boot .track i{display:block;height:100%;width:38%;border-radius:2px;
+  background:var(--accent);animation:boot 1.15s ease-in-out infinite}
+@keyframes boot{0%{transform:translateX(-105%)}100%{transform:translateX(305%)}}
+@media (prefers-reduced-motion:reduce){#boot .track i{animation:none;width:100%}}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 input[type=search],select{font:inherit;font-size:14px;padding:6px 10px;border-radius:7px;
   border:1px solid var(--line-strong);background:var(--surface);color:var(--ink)}
@@ -538,6 +681,17 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   color:var(--ink-3);font-weight:600;white-space:nowrap}
 .tag.t4{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--ink)}
 .tag.t3{background:color-mix(in srgb,var(--accent) 11%,transparent)}
+/* Field strength reads as a LADDER, so unlike the series tag it is shaded by
+   rank rather than flagged at the top: S is solid, D is barely there. The
+   letter carries the meaning; the fill just makes a column of them scannable. */
+.fs{display:inline-block;min-width:15px;text-align:center;font-size:10.5px;
+  font-weight:700;padding:1px 5px;border-radius:4px;font-family:var(--mono);
+  border:1px solid transparent}
+.fsS{background:var(--accent);color:var(--bg)}
+.fsA{background:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--ink)}
+.fsB{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.fsC{background:var(--chip);color:var(--ink-3)}
+.fsD{color:var(--ink-3);border-color:var(--line)}
 .crown{color:var(--accent);font-weight:600}
 #tvhead{margin:0 0 14px}
 #tvhead h2{font-size:20px;margin:0 0 3px;letter-spacing:-.01em}
@@ -596,6 +750,14 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <button data-t="usopen">U.S. Open 2026</button>
 </nav>
 <main>
+<div id="boot">
+  <h2>Loading rankings&hellip;</h2>
+  <div class="track"><i></i></div>
+  <p>Every rating, roster and result is embedded in this page, so it works
+  offline once loaded. Season-by-season trajectories arrive separately, just
+  after the tables appear.</p>
+</div>
+
 
 <section id="clubs" class="on">
   <div class="bar">
@@ -673,11 +835,24 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="1">Conference</option>
         <option value="0">Regular season</option>
       </select>
+      <select id="estr">
+        <option value="all">Any field</option>
+        <option value="S">S — championship-grade</option>
+        <option value="A">A — elite</option>
+        <option value="B">B — strong</option>
+        <option value="C">C — some ranked clubs</option>
+        <option value="D">D — no ranked clubs</option>
+      </select>
+      <select id="esort">
+        <option value="date">Newest first</option>
+        <option value="str">Hardest field first</option>
+      </select>
       <span class="count" id="ecount"></span>
     </div>
     <table class="evtbl"><thead><tr>
       <th>Dates</th><th>Tournament</th><th>Division</th>
-      <th class="n">Teams</th><th>Champion</th><th class="n">Editions</th>
+      <th class="n">Teams</th><th class="n">Field</th><th>Champion</th>
+      <th class="n">Editions</th>
     </tr></thead><tbody id="etb"></tbody></table>
     <p class="note" id="enote"></p>
   </div>
@@ -1206,20 +1381,146 @@ $('#unote').innerHTML =
   `this browser only.`;
 
 /* ---------- drill-down: play history + rating curve ---------- */
-const H = D.history || {events:[], players:{}, teams:{}, teamKey:{}};
-const TK = H.teamKey || {};    // display name -> normalized club key
-const TN = H.teamNames || {};  // normalized club key -> current display spelling
-const CN = H.clubNames || [];  // affiliation index -> normalized club key
-const ROST = H.rosters || {};  // "<clubKey>|<eventIdx>" -> delta-encoded people
-const BR = H.bestRosters || {};   // clubKey -> [event, date, person deltas]
-const BSEASON = H.bestSeason;     // the season BR applies to (the current one)
-const PEOPLE = H.people || [], PPID = H.peoplePid || [];
-const HEV = H.events;   // [date, name, season, divisionCode]
+/* The core arrives in a second file once the page is already usable, and the
+   bulk — trajectories, rosters, games — waits to be asked for after that.
+   That makes every binding here LATE: declared empty, filled by
+   applyHistory() or by a bucket landing, and re-read by anything drawn in the
+   meantime. HREADY is the guard each entry point checks; HFAILED means the
+   core could not be loaded at all, which is worth saying out loud rather than
+   showing an empty panel. */
+let H = {events: [], teams: {}, teamKey: {}};
+let TK = {};      // display name -> normalized club key
+let TN = {};      // normalized club key -> current display spelling
+let CN = [];      // affiliation index -> normalized club key
+let BSEASON = null;   // the season BR applies to (the current one)
+let HEV = [];     // [date, name, season, divisionCode]
+let GC = [], GST = [];
+let GCIX = new Map();
+let GSIDE = {};   // eventIdx -> Set(club index), from the core
+let RBC = {};     // clubKey -> {b: roster bucket, evs: [eventIdx], has: Set}
+let SEASONS = [], SIX = new Map(), DEFYEAR = 0;
+let HREADY = false, HFAILED = false;
+
+/* Filled by faulted buckets rather than by the core, and never reset: a
+   bucket that has landed stays landed. PEOPLE/PPID GROW — each roster bucket
+   carries its own slice of the name pool and mergeRosters rebases the indices
+   as it appends, so a name in two buckets is simply stored twice. */
+let PLAY = {};    // pid -> encoded trajectory              (tier p)
+let ROST = {};    // "<clubKey>|<eventIdx>" -> people indices (tier r)
+let BR = {};      // clubKey -> [event, date, people indices] (tier r)
+let PEOPLE = [], PPID = [];
 // Games behind each event, grouped by event index and stored once per game:
 // [homeClubIx, awayClubIx, homeScore, awayScore, stageIx, homeDelta, awayDelta]
 // against GC/GST. The deltas are what the game did to each CLUB's rating.
-const GC = H.gameClubs || [], GST = H.gameStages || [], GMS = H.games || {};
-const GCIX = new Map(GC.map((k, i) => [k, i]));
+let GMS = {};     // eventIdx -> game rows                   (tier g)
+
+function applyHistory(h) {
+  H = h || H;
+  TK = H.teamKey || {};
+  TN = H.teamNames || {};
+  CN = H.clubNames || [];
+  BSEASON = H.bestSeason;
+  HEV = H.events || [];
+  GC = H.gameClubs || []; GST = H.gameStages || [];
+  GCIX = new Map(GC.map((k, i) => [k, i]));
+  // Who appears in an event's games. The event table marks a row expandable
+  // only where the model scored games, and asking GMS for that would fault
+  // every season of every panel just to draw the table.
+  GSIDE = {};
+  const sides = H.gameSides || {};
+  for (const ev in sides) {
+    const s = new Set();
+    let i = 0;
+    for (const d of sides[ev]) { i += d; s.add(i); }
+    GSIDE[ev] = s;
+  }
+  // A club's roster bucket rides on this entry rather than on a string hash
+  // the emitter and the page both have to implement identically.
+  RBC = {};
+  const rbc = H.rostByClub || {};
+  for (const ck in rbc) {
+    const a = rbc[ck], evs = [];
+    let i = 0;
+    for (let k = 1; k < a.length; k++) { i += a[k]; evs.push(i); }
+    RBC[ck] = {b: a[0], evs, has: new Set(evs)};
+  }
+  SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
+  SIX = new Map(SEASONS.map((s, i) => [s, i]));
+  DEFYEAR = SEASONS.length - 1;
+  for (const k in trendCache) delete trendCache[k];
+  HREADY = true;
+}
+
+/* ---------- lazy tiers ---------- */
+/* Four corpora sit beside the page and arrive only when something needs them:
+   tournament shapes (t), player trajectories (p), club rosters (r) and the
+   games behind an event row (g). All four load the same way — a classic
+   <script>, because a file:// page cannot fetch() its own directory but can
+   still load a script from it — and all four settle through faultTier.
+
+   Each bucket file assigns its own key on the tier's global, so nothing
+   assumes load order and two buckets in flight write different keys. */
+const TIER = {
+  t: {urls: 'tourneyJs', glob: '__USAU_TDET__', merge: p => Object.assign(EDET, p)},
+  p: {urls: 'playJs',    glob: '__USAU_PLAY__', merge: p => Object.assign(PLAY, p)},
+  r: {urls: 'rostJs',    glob: '__USAU_ROST__', merge: mergeRosters},
+  g: {urls: 'gameJs',    glob: '__USAU_GAME__', merge: p => Object.assign(GMS, p)},
+};
+const TSTATE = new Map();   // "<tier>/<key>" -> 'load' | 'ok' | 'fail'
+const TWAIT = new Map();    // same id -> [callback], drained on settle
+const tierState = (tier, key) => TSTATE.get(tier + '/' + key);
+
+/* Roster buckets index their own name pool from 0, so merging one means
+   appending its pool to the global arrays and rebasing every index against
+   where that slice landed. Deltas are decoded here, once, rather than on
+   every read. */
+function mergeRosters(part) {
+  const base = PEOPLE.length;
+  for (const n of part.p) PEOPLE.push(n);
+  for (const p of part.i) PPID.push(p);
+  const abs = enc => {
+    const out = [];
+    let i = base;
+    for (const d of enc) { i += d; out.push(i); }
+    return out;
+  };
+  for (const rk in part.r) ROST[rk] = abs(part.r[rk]);
+  for (const ck in part.b) {
+    const e = part.b[ck];
+    BR[ck] = [e[0], e[1], abs(e[2])];
+  }
+}
+
+/* `done(ok)` fires once the bucket has settled, immediately if it already
+   has. A settled-but-failed bucket is never re-requested: the callback would
+   run synchronously and any caller that redraws on it would recurse. */
+function faultTier(tier, key, done) {
+  const id = tier + '/' + key, st = TSTATE.get(id);
+  if (st === 'ok' || st === 'fail') { done(st === 'ok'); return; }
+  if (!TWAIT.has(id)) TWAIT.set(id, []);
+  TWAIT.get(id).push(done);
+  if (st === 'load') return;
+  const spec = TIER[tier], url = ((D[spec.urls] || {})[key]);
+  const finish = ok => {
+    TSTATE.set(id, ok ? 'ok' : 'fail');
+    (TWAIT.get(id) || []).splice(0).forEach(fn => fn(ok));
+  };
+  if (!url) { finish(false); return; }
+  TSTATE.set(id, 'load');
+  const s = document.createElement('script');
+  s.src = url;
+  s.async = true;
+  s.onload = () => {
+    const bag = window[spec.glob], part = bag && bag[key];
+    if (part) {
+      spec.merge(part);
+      delete bag[key];   // the live store owns it now
+    }
+    finish(!!part);
+  };
+  s.onerror = () => finish(false);
+  document.head.appendChild(s);
+}
 // Per-event division tag in the drill-down table, indexed by DIVCODE. It used
 // to be a 3-slot array with an `|| 'club'` fallback, which silently labelled
 // every mixed and women's event as club men's the moment those divisions
@@ -1240,11 +1541,15 @@ function gamesAt(ckey, evIdx) {
   }
   return out;
 }
+/* Whether an event row is worth expanding, answered from the core index so
+   that drawing a 60-row table costs no game buckets at all. */
+function hasGames(ckey, evIdx) {
+  const me = GCIX.get(ckey), s = GSIDE[evIdx];
+  return me !== undefined && s !== undefined && s.has(me);
+}
 // player_id -> its row in the ranked table, so a drill-down rebuilds its own
 // header instead of reading it off whichever element happened to be clicked.
 const PBY = new Map(D.players.map(p => [String(p[8]), p]));
-const SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
-const SIX = new Map(SEASONS.map((s, i) => [s, i]));
 // H.teams is keyed on the lowercased model identity; never render that raw.
 const clubLabel = k => TN[k] || k;
 
@@ -1320,7 +1625,7 @@ function histTable(pts, isTeam, ckey) {
     let mid;
     if (isTeam) {
       const rk = ckey + '|' + p.evIdx;
-      mid = ROST[rk]
+      mid = RBC[ckey] && RBC[ckey].has.has(p.evIdx)
         ? `<td class="n"><span class="nmlink" data-roster="${esc(rk)}">` +
           `${p.n ?? ''}</span></td>`
         : `<td class="n">${p.n ?? ''}</td>`;
@@ -1335,7 +1640,7 @@ function histTable(pts, isTeam, ckey) {
     // club identity has nothing to open, and neither does an event whose games
     // the model dropped.
     const gk = isTeam ? ckey : p.club;
-    const ev = gk && gamesAt(gk, p.evIdx).length
+    const ev = gk && hasGames(gk, p.evIdx)
       ? `<span class="disc" data-games="${esc(gk + '|' + p.evIdx)}" ` +
         `data-kind="${isTeam ? 'c' : 'p'}" data-d="${d === null ? '' : d}">` +
         `${esc(p.event)}</span>`
@@ -1397,6 +1702,10 @@ function gamesPane(ckey, evIdx, rowDelta, kind) {
          `<table class="gtbl"><tbody>${body}</tbody></table>`;
 }
 
+/* The games are the one thing an event row does NOT already have: the table
+   knew the row was expandable from the core index, but the scores behind it
+   live in that season's bucket. Open the row first, fill it when the bucket
+   lands — the click is answered either way. */
 function toggleGames(el) {
   const tr = el.closest('tr'), nx = tr.nextElementSibling;
   if (nx && nx.classList.contains('gms')) {
@@ -1404,50 +1713,45 @@ function toggleGames(el) {
   }
   // lastIndexOf, because a club key is free to contain the separator.
   const rk = el.dataset.games, c = rk.lastIndexOf('|');
+  const ckey = rk.slice(0, c), evIdx = +rk.slice(c + 1);
   const d = el.dataset.d === '' ? null : +el.dataset.d;
+  const kind = el.dataset.kind;
   const row = document.createElement('tr');
   row.className = 'gms';
-  row.innerHTML = `<td colspan="5">` +
-    `${gamesPane(rk.slice(0, c), +rk.slice(c + 1), d, el.dataset.kind)}</td>`;
+  row.innerHTML = `<td colspan="5"><p class="gsum muted">Loading games\u2026</p></td>`;
   tr.after(row);
   tr.classList.add('open');
+  faultTier('g', HEV[evIdx][2], ok => {
+    if (!row.isConnected) return;
+    row.innerHTML = `<td colspan="5">` + (ok
+      ? gamesPane(ckey, evIdx, d, kind)
+      : `<p class="gsum muted">The games behind this event could not be ` +
+        `loaded.</p>`) + `</td>`;
+  });
 }
 
-/* Roster indices are delta-encoded and ascending; `people` is name-sorted, so
-   ascending index is already ascending name. */
-function decDeltas(enc) {
-  const out = []; let i = 0;
-  for (let k = 0; k < enc.length; k++) { i += enc[k]; out.push(i); }
-  return out;
-}
-function rosterOf(rk) { return ROST[rk] ? decDeltas(ROST[rk]) : []; }
+/* Roster people indices arrive absolute: mergeRosters decodes the bucket's
+   deltas and rebases them as it appends the bucket's names to the pool. */
+function rosterOf(rk) { return ROST[rk] || []; }
 /* Names as links, or plain text for anyone below the trajectory floor: they
-   were on the roster and are not dropped, there is just nothing to open. */
+   were on the roster and are not dropped, there is just nothing to open. The
+   floor is the ranked table's own — every rated trajectory belongs to a
+   player with MIN_GAMES behind them, so PBY and the trajectory corpus hold
+   exactly the same people, and PBY is the copy already in the page. */
 function nameList(ids) {
-  return ids.map(i => H.players[PPID[i]]
+  return ids.map(i => PBY.has(PPID[i])
     ? `<span class="nmlink" data-pid="${esc(PPID[i])}">${esc(PEOPLE[i])}</span>`
     : `<span class="muted">${esc(PEOPLE[i])}</span>`).join(', ');
 }
 
-/* clubKey -> [eventIdx], built once off the roster keys. lastIndexOf, because
-   a club key is free to contain the separator. */
-let rostByClub = null;
-function rosterIndex() {
-  if (rostByClub) return rostByClub;
-  rostByClub = {};
-  for (const rk in ROST) {
-    const c = rk.lastIndexOf('|');
-    const key = rk.slice(0, c);
-    (rostByClub[key] || (rostByClub[key] = [])).push(+rk.slice(c + 1));
-  }
-  return rostByClub;
-}
-/* Most recent season first, and most recent event first inside it. */
+/* Most recent season first, and most recent event first inside it. Which
+   events a club has a roster for comes from the core index, so the tabs are
+   drawable before the club's roster bucket has landed. */
 function rosterSeasons(ckey) {
-  const evs = rosterIndex()[ckey];
-  if (!evs) return [];
+  const rb = RBC[ckey];
+  if (!rb) return [];
   const by = new Map();
-  for (const ei of evs) {
+  for (const ei of rb.evs) {
     const ev = HEV[ei];
     if (!ev) continue;
     if (!by.has(ev[2])) by.set(ev[2], []);
@@ -1470,7 +1774,7 @@ function rosterPane(ckey, season) {
   const seen = new Map();
   grp.eis.forEach(ei => rosterOf(ckey + '|' + ei).forEach(
     i => seen.set(i, (seen.get(i) || 0) + 1)));
-  const ids = br ? decDeltas(br[2]) : [...seen.keys()];
+  const ids = br ? br[2] : [...seen.keys()];
   if (!ids.length) return '';
   const rows = ids.map(i => {
     const pid = PPID[i], r = PBY.get(String(pid));
@@ -1486,7 +1790,7 @@ function rosterPane(ckey, season) {
   });
   const body = rows.map(r =>
     `<tr><td class="rk">${r.rank === null ? '—' : r.rank}</td><td>` +
-    (H.players[r.pid]
+    (r.rank !== null
       ? `<span class="nmlink" data-pid="${esc(r.pid)}">${esc(r.name)}</span>`
       : `<span class="muted">${esc(r.name)}</span>`) +
     `</td><td class="n">${r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
@@ -1537,9 +1841,55 @@ function toggleRoster(el) {
 let navStack = [], cur = null;
 
 /* Self-resolving: the caller supplies only the identity, because roster links
-   and history-table links have no name/elo/rank to read off. */
+   and history-table links have no name/elo/rank to read off.
+
+   Everything below the header comes out of a sidecar — the core, then the one
+   bucket holding this subject — so if either is still in flight the panel
+   opens on a waiting state and re-renders itself the moment it lands. Opening
+   regardless, rather than swallowing the click, is what keeps a deep link
+   honest while the corpus is on its way. */
+let pendingDetail = null;
+
+/* The bucket a panel cannot be drawn without: a player's trajectory, or a
+   club's rosters. A club with no roster on record anywhere — 14 of them —
+   has no entry in the core index and so needs nothing faulted. */
+function detailDep(kind, key) {
+  if (kind === 'p') return ['p', (+key % (D.buckets || 1))];
+  const rb = RBC[TK[key] || key];
+  return rb ? ['r', rb.b] : null;
+}
+
 function openDetail(kind, key, opts) {
   opts = opts || {};
+  const dep = HREADY ? detailDep(kind, key) : null;
+  const st = dep ? tierState(dep[0], dep[1]) : 'ok';
+  if (!HREADY || st !== 'ok') {
+    // A player row knows its own name from the ranked table. A club key is
+    // only spellable once the core has landed with the naming tables; before
+    // that the key itself is all there is.
+    const title = kind === 'p'
+      ? ((PBY.get(String(key)) || [key])[0])
+      : (HREADY ? clubLabel(TK[key] || key) : key);
+    const dead = HFAILED || st === 'fail';
+    pendingDetail = (HREADY || HFAILED) ? null : {kind, key, opts};
+    $('#dbody').innerHTML = `<h2>${esc(title)}</h2>` +
+      `<p class="note">` + (dead
+        ? `The history behind this panel could not be loaded. Rankings, ` +
+          `Tournaments and the U.S. Open tracker do not need it and are ` +
+          `unaffected.`
+        : `Loading rating histories\u2026 this panel will fill in by itself.`) +
+      `</p>`;
+    cur = {kind, key};
+    $('#detail').classList.add('on'); $('#scrim').classList.add('on');
+    const h0 = '#' + kind + '/' + encodeURIComponent(key);
+    if (location.hash !== h0) location.hash = h0;
+    // Re-open only if the panel is still the one that asked. Clicking through
+    // three names while a bucket is in flight redraws the last, not all three.
+    if (!dead && dep) faultTier(dep[0], dep[1], () => {
+      if (cur && cur.kind === kind && cur.key === key) openDetail(kind, key, opts);
+    });
+    return;
+  }
   let ckey = key, title, parts = [];
   if (kind === 'p') {
     const row = PBY.get(String(key));
@@ -1548,8 +1898,9 @@ function openDetail(kind, key, opts) {
       parts.push(`Elo <b>${row[1].toFixed(0)}</b>`, `${row[4]} games`,
                  `#${row[7]} of ${D.totalRated.toLocaleString()} rated`);
     } else {
-      const i = PPID.indexOf(String(key));
-      title = i >= 0 ? PEOPLE[i] : 'Player ' + key;
+      // Every rated trajectory belongs to a player in the ranked table, so
+      // this is a hand-typed pid rather than anything the page ever linked.
+      title = 'Player ' + key;
     }
   } else {
     ckey = TK[key] || key;
@@ -1566,7 +1917,7 @@ function openDetail(kind, key, opts) {
                  `#${row[0]} of ${n} ${DIVLABEL[row[5]]} clubs`);
     }
   }
-  const pts = decode(kind === 'p' ? H.players[key] : H.teams[ckey]);
+  const pts = decode(kind === 'p' ? PLAY[key] : H.teams[ckey]);
   const peak = pts.length ? Math.max(...pts.map(p => p.elo)) : null;
   const peakAt = pts.find(p => p.elo === peak);
   if (peak !== null) parts.push(
@@ -1658,13 +2009,21 @@ $('#dbody').addEventListener('click', e => {
    rounds from the stage label with the feeders wired from the results. This
    half only draws it. Games are encoded against the event's own field:
    [homeLocal, awayLocal, homeScore, awayScore, dateIndex]. */
-const TV = D.tourneys || {teams: [], series: [], events: [], detail: {},
-                          rounds: [], tiers: []};
-const EVS = TV.events, EDET = TV.detail, ESER = TV.series, ETM = TV.teams;
+const TV = D.tourneys || {teams: [], series: [], events: [], rounds: [],
+                          tiers: []};
+const EVS = TV.events, ESER = TV.series, ETM = TV.teams;
+/* Event index -> shape, faulted one SEASON at a time through faultTier.
+   Nothing in the list needs it: the champion column reads a global team index
+   off the event row precisely so that 400 rendered rows pull no games. */
+const EDET = {};
 const EVBYID = new Map(EVS.map((e, i) => [e[0], i]));
 const EDIVL = ["Club Men's", 'College', 'College D-III', 'Club Mixed',
                "Club Women's"];
 const EYEARS = [...new Set(EVS.map(e => e[2]))].sort((a, b) => b - a);
+// Field strength, appended to each event row by site.py: [11] score, [12]
+// tier letter. Scored in analysis/field_strength.py against the division's
+// OWN season, so an S in club women's means what an S means in college.
+const STRNOTE = TV.strengthNotes || {};
 // A bracket's key is the placing it decides; 'champ' is the title.
 const BRLABEL = {champ: 'Championship bracket', gtg: 'Game to go'};
 const brLabel = k => BRLABEL[k] ||
@@ -1691,44 +2050,62 @@ function daterange(a, b) {
 $('#eyear').innerHTML = '<option value="all">All years</option>' +
   EYEARS.map((y, i) => `<option value="${y}"${i ? '' : ' selected'}>${y}</option>`).join('');
 
+/* A field-strength cell: the letter, with the score behind it on hover. An
+   event the model never rated carries neither, and says so with a dash rather
+   than a D — "no ranked clubs came" and "we have no idea" are not the same
+   claim. */
+function strCell(e) {
+  return e[12]
+    ? `<span class="fs fs${e[12]}" title="field strength ${e[11]} \u2014 ` +
+      `${esc(STRNOTE[e[12]] || '')}">${e[12]}</span>`
+    : `<span class="muted">\u2014</span>`;
+}
+
 function drawEvents() {
   const q = $('#eq').value.trim().toLowerCase(), div = $('#ediv').value;
   const yr = $('#eyear').value, tier = $('#etier').value;
+  const str = $('#estr').value, sort = $('#esort').value;
   let rows = EVS;
   if (div !== 'all') rows = rows.filter(e => e[3] === +div);
   if (yr !== 'all') rows = rows.filter(e => e[2] === +yr);
   if (tier === 'series') rows = rows.filter(e => e[8] > 0);
   else if (tier !== 'all') rows = rows.filter(e => e[8] === +tier);
+  if (str !== 'all') rows = rows.filter(e => e[12] === str);
   if (q) rows = rows.filter(e => e[1].toLowerCase().includes(q) ||
                                  e[6].toLowerCase().includes(q) ||
                                  ESER[e[9]][0].toLowerCase().includes(q));
   const total = rows.length;
-  // Most recent first. The cap is a DOM budget, not a filter: the count says
-  // how many matched so a narrower search is an obvious next move.
-  rows = rows.slice().sort((a, b) => (b[4] || '').localeCompare(a[4] || ''));
+  // The cap is a DOM budget, not a filter: the count says how many matched so
+  // a narrower search is an obvious next move. An unrated event sorts last on
+  // strength rather than as a zero — it is unmeasured, not weak.
+  rows = sort === 'str'
+    ? rows.slice().sort((a, b) => (b[11] ?? -1) - (a[11] ?? -1) ||
+                                  (b[4] || '').localeCompare(a[4] || ''))
+    : rows.slice().sort((a, b) => (b[4] || '').localeCompare(a[4] || ''));
   const shown = rows.slice(0, 400);
   $('#etb').innerHTML = shown.map(e => {
-    const i = EVBYID.get(e[0]), det = EDET[i], n = ESER[e[9]][1].length;
-    const ch = e[10] >= 0 ? `<span class="crown">${esc(ETM[det.t[e[10]]])}</span>`
+    const n = ESER[e[9]][1].length;
+    const ch = e[10] >= 0 ? `<span class="crown">${esc(ETM[e[10]])}</span>`
                           : '<span class="muted">\u2014</span>';
-    // Division and championship tier are separate facts, so they get separate
-    // marks: colouring the division tag by tier read as if "Club Men's" itself
-    // meant something. Only Regionals and up carry a chip — Sectionals and
-    // Conference are most of the corpus, and the filter already finds them.
+    // Division, championship tier and field strength are three separate facts,
+    // so they get three separate marks: colouring the division tag by tier read
+    // as if "Club Men's" itself meant something. Only Regionals and up carry a
+    // series chip — Sectionals and Conference are most of the corpus, and the
+    // filter already finds them.
     const chip = e[8] >= 3
       ? `<span class="tag t${e[8]}">${esc(TV.tiers[e[8]])}</span> ` : '';
     return `<tr class="ev" data-ev="${e[0]}"><td class="dt">${daterange(e[4], e[5])}</td>` +
       `<td>${chip}${esc(e[1])}` +
       `${e[6] ? ` <span class="muted">\u00b7 ${esc(e[6])}</span>` : ''}</td>` +
       `<td><span class="tag">${esc(EDIVL[e[3]] || '')}</span></td>` +
-      `<td class="n">${e[7]}</td><td>${ch}</td>` +
+      `<td class="n">${e[7]}</td><td class="n">${strCell(e)}</td><td>${ch}</td>` +
       `<td class="n">${n > 1 ? n : '<span class="muted">1</span>'}</td></tr>`;
   }).join('');
   $('#ecount').textContent = `${total.toLocaleString()} tournament` +
     (total === 1 ? '' : 's') + (total > shown.length
-      ? ` \u00b7 showing the ${shown.length} most recent` : '');
+      ? ` \u00b7 showing ${shown.length}` : '');
 }
-['#eq', '#ediv', '#eyear', '#etier'].forEach(s => {
+['#eq', '#ediv', '#eyear', '#etier', '#estr', '#esort'].forEach(s => {
   const el = $(s);
   el.oninput = drawEvents; el.onchange = drawEvents;
 });
@@ -1784,18 +2161,38 @@ function evTeamCell(name) {
     ? `<span class="nmlink" data-club="${esc(k)}">${esc(name)}</span>` : esc(name);
 }
 
+/* The header is drawable from the event row alone — date, place, division,
+   tier, size and champion all live there — so it paints at once and only the
+   games wait on the season bucket. `curEvent` is claimed up front rather than
+   at the end: a bucket landing checks it before redrawing, so clicking through
+   three events while one season is in flight redraws the last, not all three. */
 function drawTournament(i) {
   const e = EVS[i], det = EDET[i];
-  if (!det) return;
-  const nm = l => ETM[det.t[l]];
+  curEvent = i;
   const ser = ESER[e[9]], sibs = ser[1];
   const facts = [daterange(e[4], e[5]), e[6], EDIVL[e[3]], TV.tiers[e[8]],
                  `${e[7]} teams`].filter(Boolean).map(esc);
-  facts.push(e[10] >= 0 ? `champion <b>${esc(nm(e[10]))}</b>`
+  if (e[12]) facts.push(`field <b>${e[12]}</b> (${e[11]})`);
+  facts.push(e[10] >= 0 ? `champion <b>${esc(ETM[e[10]])}</b>`
                         : 'no champion on record');
   $('#tvhead').innerHTML = `<h2>${esc(e[1])}</h2>` +
     `<div class="meta">${facts.join(' \u00b7 ')}</div>`;
-
+  if (!det) {
+    // Settled-but-absent means the bucket 404'd or is missing this event, and
+    // re-requesting would call back synchronously — straight into a loop.
+    const st = tierState('t', e[2]), settled = st === 'ok' || st === 'fail';
+    $('#tvbody').innerHTML = settled
+      ? `<p class="muted">This tournament's games come from <code>` +
+        `${esc((D.tourneyJs || {})[e[2]] || 't/' + e[2] + '.js')}</code>, which ` +
+        `could not be loaded. The tournament list does not need it and is ` +
+        `unaffected.</p>`
+      : `<p class="muted">Loading ${e[2]} games\u2026</p>`;
+    $('#tvnote').innerHTML = '';
+    if (!settled)
+      faultTier('t', e[2], () => { if (curEvent === i) drawTournament(i); });
+    return;
+  }
+  const nm = l => ETM[det.t[l]];
   let html = '';
   // Pools, lettered in playing order. A pool whose teams have already played
   // in an earlier one is a placement round robin, and says so.
@@ -1853,15 +2250,17 @@ function drawTournament(i) {
     html += `<h3 class="sect">${esc(ser[0])} <span class="muted">\u2014 ` +
       `${sibs.length} instances on record</span></h3>` +
       `<table class="evtbl"><thead><tr><th class="n">Year</th><th>Division</th>` +
-      `<th>Event</th><th class="n">Teams</th><th>Champion</th></tr></thead><tbody>` +
+      `<th>Event</th><th class="n">Teams</th><th class="n">Field</th>` +
+      `<th>Champion</th></tr></thead><tbody>` +
       sibs.slice().reverse().map(j => {
-        const s = EVS[j], sd = EDET[j];
-        const ch = s[10] >= 0 ? `<span class="crown">${esc(ETM[sd.t[s[10]]])}</span>`
+        const s = EVS[j];
+        const ch = s[10] >= 0 ? `<span class="crown">${esc(ETM[s[10]])}</span>`
                               : '<span class="muted">\u2014</span>';
         return `<tr class="ev" data-ev="${s[0]}"${j === i ? ' style="font-weight:600"' : ''}>` +
           `<td class="n">${s[2]}</td><td><span class="tag">` +
           `${esc(EDIVL[s[3]] || '')}</span></td><td>${esc(s[1])}</td>` +
-          `<td class="n">${s[7]}</td><td>${ch}</td></tr>`;
+          `<td class="n">${s[7]}</td><td class="n">${strCell(s)}</td>` +
+          `<td>${ch}</td></tr>`;
       }).join('') + `</tbody></table>`;
   }
   $('#tvbody').innerHTML = html;
@@ -1879,7 +2278,6 @@ function drawTournament(i) {
     `Standings break ties on head-to-head inside the tied group, then point ` +
     `differential. Team names in <span class="nmlink">this style</span> open ` +
     `that club's rating history.`;
-  curEvent = i;
 }
 const POOLTAG = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -1971,8 +2369,10 @@ $('#tvbody').addEventListener('click', ev => {
 /* ---------- deep links ---------- */
 // Club keys carry spaces and punctuation ('rhino slam!', 'cookie mon$terz'),
 // so the key is percent-encoded rather than concatenated raw.
-const known = (kind, key) => kind === 'p'
-  ? (!!H.players[key] || PBY.has(String(key)))
+// Until the trajectory file lands nothing can be validated, so a deep link is
+// taken at face value; openDetail shows the waiting state and re-resolves it.
+const known = (kind, key) => !HREADY ? true : kind === 'p'
+  ? PBY.has(String(key))
   : !!H.teams[TK[key] || key];
 function routeHash() {
   const m = /^#([pct])\/(.+)$/.exec(location.hash || '');
@@ -2004,89 +2404,39 @@ window.addEventListener('hashchange', routeHash);
 // combination repeats and the legend, not the stroke, is the identifier.
 const DASH = ['none', '5 3', '2 3', '8 3 2 3',
               '12 4', '1 3', '7 3 1 3', '3 3 9 3'];
-const TOPN = 25;   // the per-season cut a subject must have made, once, ever
 // Codes match the DIVCODE written into each event by analysis.rankings.
 const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: 'college',
                   2: 'college D-III', 3: 'club mixed', 4: "club women's"};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
-const GEN = D.genders || {};
 const trendCache = {};
 
+// Every rated trajectory belongs to a player in the ranked table, so this
+// never has to reach past it.
 function playerLabel(pid) {
   const row = PBY.get(String(pid));
-  if (row) return row[0];
-  const i = PPID.indexOf(String(pid));
-  return i >= 0 ? PEOPLE[i] : String(pid);
+  return row ? row[0] : String(pid);
 }
 
-/* One value per season: the rating after that season's LAST event. Points are
-   already chronological, so a plain overwrite lands on the last one. */
+/* One value per season: the rating after that season's LAST event, per
+   subject, plus the population median and the population count.
+
+   Precomputed in analysis/history_split.py rather than derived here. The
+   median and the top-25 cut are statistics over the WHOLE population, so no
+   subset computes them — which meant this function, and this function alone,
+   pinned all 39,325 trajectories in the page. There are only 24 answers it
+   can ever give, so all 24 ship in the core at 40 KB gzipped against the
+   1.9 MB corpus they replace. Clubs carry no gender-matching group, so that
+   side has one answer per division and the control is normalized away. */
 function seasonData(kind, div, gen) {
-  const ck = kind + '|' + div + '|' + gen;
+  const ck = kind + '|' + div + '|' + (kind === 'c' ? 'all' : gen);
   if (trendCache[ck]) return trendCache[ck];
-  const src = kind === 'p' ? H.players : H.teams;
-  const dv = div === 'all' ? null : +div;
-  // Gender selects whole SUBJECTS, unlike division, which selects points: a
-  // person does not change gender-matching group between events, and clubs
-  // have no group at all, so the filter is inert on the club side.
-  const gv = (gen === 'all' || kind !== 'p') ? null : +gen;
-  const all = [];
-  for (const key in src) {
-    if (gv !== null && GEN[key] !== gv) continue;
-    const pts = decode(src[key]);
-    if (!pts.length) continue;
-    const vals = SEASONS.map(() => null);
-    for (const p of pts) {
-      // A division selects POINTS, never whole subjects: 301 club keys play in
-      // more than one division, so any per-subject verdict misfiles all of
-      // them. Within a division the season value is the rating after that
-      // season's last event IN that division, and a subject with no event
-      // there drops out of the population entirely.
-      if (dv !== null && p.div !== dv) continue;
-      const si = SIX.get(p.season);
-      if (si !== undefined) vals[si] = p.elo;
-    }
-    let peak = -Infinity;
-    for (const v of vals) if (v !== null && v > peak) peak = v;
-    if (peak === -Infinity) continue;
-    all.push({key, vals, peak});
-  }
-  // Median over the WHOLE population, not the drawn 25: the mode answers "how
-  // far above a typical subject", and the top 25 are typical of nothing.
-  const med = SEASONS.map((_, i) => {
-    const v = all.map(a => a.vals[i]).filter(x => x !== null).sort((a, b) => a - b);
-    if (!v.length) return 0;
-    const h = v.length >> 1;
-    return v.length % 2 ? v[h] : (v[h - 1] + v[h]) / 2;
-  });
-  // Every subject that has ever CLOSED a season inside the top 25 of its
-  // population, which is 67-164 lines rather than 25: a club that owned 2019
-  // and has since folded is on the chart beside this year's best. The cut is
-  // the 25th value, compared with >=, so a tie is never broken arbitrarily —
-  // a season can contribute 26. A season with fewer than 25 active subjects
-  // qualifies all of them.
-  const cut = SEASONS.map((_, i) => {
-    const v = all.map(a => a.vals[i]).filter(x => x !== null).sort((x, y) => y - x);
-    return v.length ? v[Math.min(TOPN, v.length) - 1] : null;
-  });
-  const top = all.filter(a => SEASONS.some((_, i) =>
-    a.vals[i] !== null && cut[i] !== null && a.vals[i] >= cut[i]));
-  // Ordered on the CURRENT season, so the series index — and with it the
-  // colour and dash — matches the default legend order and the strongest few
-  // get the eight solid hues. Ordering by one season's raw value is identical
-  // to ordering by that season's median-adjusted value, the median being a
-  // constant per season, so this holds in both modes. All-time peak only
-  // breaks ties among subjects that did not play it.
-  const LAST = SEASONS.length - 1;
-  top.sort((a, b) => {
-    const x = a.vals[LAST], y = b.vals[LAST];
-    if ((x === null) !== (y === null)) return x === null ? 1 : -1;
-    if (x !== null && x !== y) return y - x;
-    return b.peak - a.peak;
-  });
-  top.forEach(s => s.label = kind === 'p' ? playerLabel(s.key) : clubLabel(s.key));
-  trendCache[ck] = {top, med, n: all.length};
+  const raw = (H.trends || {})[ck];
+  // Mapped to objects once and kept: drawTrends writes `best` onto each.
+  trendCache[ck] = raw
+    ? {top: raw.top.map(t => ({key: t[0], label: t[1], vals: t[2], peak: t[3]})),
+       med: raw.med, n: raw.n}
+    : {top: [], med: SEASONS.map(() => 0), n: 0};
   return trendCache[ck];
 }
 
@@ -2159,9 +2509,8 @@ function trendChart(series) {
 }
 
 let hotIdx = null, pinIdx = null, yearIdx = null;
-// The season the legend falls back to: the most recent one. Hovering moves it,
-// leaving the chart returns here rather than to an all-time ranking.
-const DEFYEAR = SEASONS.length - 1;
+// The season the legend falls back to is the most recent one, and it moves
+// with the history file: DEFYEAR is set in applyHistory alongside SEASONS.
 // The chart, its baseline and its mode, so the legend can be re-sorted against
 // a season without re-deriving anything.
 let curSeries = [], curMed = [], curMode = 'elo';
@@ -2169,6 +2518,17 @@ const seriesVal = (s, i) => s.vals[i] === null ? null
   : (curMode === 'med' ? s.vals[i] - curMed[i] : s.vals[i]);
 
 function drawTrends() {
+  // Trends is built entirely out of the trajectory file. Until that lands
+  // there is nothing to plot, so say which state we are in and come back.
+  if (!HREADY) {
+    $('#tchart').innerHTML = `<p class="muted" style="font-size:13px">` + (HFAILED
+      ? `Trends needs <code>${esc(D.historyJs || 'history.js')}</code>, which ` +
+        `could not be loaded.`
+      : `Loading season trajectories\u2026`) + `</p>`;
+    $('#tlegend').innerHTML = ''; $('#tlhead').textContent = '';
+    $('#tcount').textContent = '';
+    return;
+  }
   const kind = $('#tsub').value, mode = $('#tmode').value, div = $('#tdiv').value;
   const gen = $('#tgen').value;
   // Clubs carry no gender-matching group, so the control is disabled rather
@@ -2325,7 +2685,68 @@ $('#enote').innerHTML =
   `bracket's final where the schedule names one; events that finished on pool ` +
   `play, or whose stage labels name no final, show a dash.`;
 
-drawClubs(); drawPlayers(); drawUS(); drawEvents(); routeHash();
+$('#enote').innerHTML +=
+  ` <b>Field</b> grades how hard the tournament was to be at, from who turned ` +
+  `up rather than from what the event is called: a Regional can outrank a ` +
+  `Nationals feeder and Florida Warm Up outranks the championship it feeds. ` +
+  `Each attending club is worth points by where <b>the rating it walked in ` +
+  `with</b> ranked in <i>its own division and season</i> — nothing done at the ` +
+  `event, or after it, counts, so the grade is what was knowable beforehand. ` +
+  `The bands decay steeply, so four of the top five outweigh thirty ` +
+  `merely-ranked teams, and anything outside the top fifth is worth nothing, ` +
+  `which is what stops a 40-team Sectional tiering up on bulk. The total is ` +
+  `then read against what that division's 16 best clubs on the day would have ` +
+  `scored, ` +
+  `so <b>100</b> means "as hard as this division's Nationals ought to be" and ` +
+  `means the same thing in club women's as in college. ` +
+  `<span class="fs fsS">S</span> \u2265 90 \u00b7 ` +
+  `<span class="fs fsA">A</span> \u2265 60 \u00b7 ` +
+  `<span class="fs fsB">B</span> \u2265 30 \u00b7 ` +
+  `<span class="fs fsC">C</span> \u2265 10 \u00b7 ` +
+  `<span class="fs fsD">D</span> below. The cut is a label on a continuous ` +
+  `score — a high C is a low B — so the number is on the chip. A dash is not ` +
+  `a D: it means the model rated nothing here.`;
+
+/* ---------- boot ---------- */
+/* Everything above needs only the inline payload, so the page is fully usable
+   the moment this runs. The trajectory corpus is then pulled in behind it. */
+drawClubs(); drawPlayers(); drawUS(); drawEvents();
+document.documentElement.classList.remove('booting');
+routeHash();
+
+/* Anything already on screen that was drawn without the trajectory file gets
+   redrawn now: a tournament view gains its club links, an open panel fills in,
+   and Trends becomes drawable. */
+function onHistoryReady() {
+  if (curEvent !== null) drawTournament(curEvent);
+  const p = pendingDetail;
+  pendingDetail = null;
+  if (p && cur && cur.kind === p.kind && cur.key === p.key) {
+    openDetail(p.kind, p.key, Object.assign({}, p.opts, {push: false}));
+  } else if (cur) {
+    openDetail(cur.kind, cur.key, {push: false});
+  }
+  if ($('#trends').classList.contains('on')) drawTrends();
+}
+
+/* A <script> tag rather than fetch(): a classic script loads from a file://
+   page, XHR and fetch do not, and this page is meant to work from disk. */
+(function loadHistory() {
+  if (D.history) { applyHistory(D.history); onHistoryReady(); return; }
+  if (!D.historyJs) { HFAILED = true; return; }
+  const s = document.createElement('script');
+  s.src = D.historyJs;
+  s.async = true;
+  s.onload = () => {
+    const h = window.__USAU_HISTORY__;
+    if (!h) { HFAILED = true; onHistoryReady(); return; }
+    applyHistory(h);
+    delete window.__USAU_HISTORY__;   // the live bindings own it now
+    onHistoryReady();
+  };
+  s.onerror = () => { HFAILED = true; onHistoryReady(); };
+  document.head.appendChild(s);
+})();
 </script>
 </html>
 """

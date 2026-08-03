@@ -23,7 +23,7 @@ USAU_DB=data/usau_women.db scraper/backfill.sh club-women data/usau_women.db 201
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv, data/history.json
 .venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
-.venv/bin/python -m analysis.site         # docs/index.html — standalone, no server
+.venv/bin/python -m analysis.site         # docs/index.html + history.js + t,p,r,g/*.js — no server
 ```
 
 The scrape is slow, disk-cached and resumable; `data/usau.db` and the raw HTML
@@ -72,8 +72,10 @@ no rule places keep `gender=''` and appear only under "all genders";
 
 ## Front end
 
-**https://sethlnx.github.io/usau-player-elo/** — a single self-contained
-`docs/index.html`, no server and no network needed.
+**https://sethlnx.github.io/usau-player-elo/** — `docs/index.html` plus a
+deferred core and four on-demand tiers, no server and no network needed; see
+*What loads when* below. It runs off a local checkout over `file://` exactly
+as it does on Pages.
 
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
 searchable player table over all five divisions, a **Trends** tab drawing one line per
@@ -140,8 +142,6 @@ lands under **Placement & other games** with the organiser's own wording.
 Across the corpus this puts 87.3% of the 90,505 completed games into a pool or
 a bracket and loses none: every game is displayed somewhere.
 
-A **series** is the printed name with everything that varies between instances
-taken out — the year, the edition number (`Cooler Classic 30`), the division
 **Labels also fence the structural recovery.** Most events name no pool at all
 — 2,103 of the 2,680 with pool play file every fixture under one heading — so
 when nothing matches "pool" the cliques are sought across the whole schedule.
@@ -160,6 +160,8 @@ Bron-Kerbosch over sets of team-name strings, so an unbroken tie is resolved
 by string hash order and the recovered shape changes between runs of the same
 build. Five events used to flip their champion between builds.
 
+A **series** is the printed name with everything that varies between instances
+taken out — the year, the edition number (`Cooler Classic 30`), the division
 wording, and whatever suffix that season used (`- ICC`, `(ICC)`). 2,870 events
 collapse to 670 series, so opening the 2025 U.S. Open also shows the other 23
 instances and who won each. Division wording goes because division is its own
@@ -197,6 +199,86 @@ a division a season reads as the rating after that season's last event *in that
 division*, the population is only the subjects with an event there (968 club, 980
 college, 316 D-III of 1,953), and the "above season median" baseline is
 recomputed over that population.
+
+### Field strength
+
+The series tier above says what an event is FOR — Conference, Sectionals,
+Regionals, Nationals. It says nothing about who was in it, and the two come
+apart constantly: the Northeast men's Regional is a harder tournament than
+most Sectionals will ever be, and Florida Warm Up is harder than the D-I
+championship it feeds. So events carry a second, independent grade in
+`analysis/field_strength.py`: **S / A / B / C / D**, from the attendees.
+
+The model is Smash Bros' — the Tournament Tier System PGStats runs for the
+Panda Global Rankings, which sorts events into S/A/B/C from two inputs: how
+many entered, and how many highly ranked people entered. Three things carry
+over. **Rank bands with steep decay** (PGRU pays 224 for a top-5 attendee
+against 64 for a top-50 one) — what makes a tournament hard is its ceiling,
+not its crowd. **Region multipliers**, so a smaller scene is not locked out of
+the top tier for being small. And **the tier is a cutoff on a continuous
+score**, which PGStats says out loud; both numbers are published here for the
+same reason, because a high C is a low B.
+
+Two things deliberately do not carry over.
+
+**Attendance is not a second path to the top.** PGRU takes the HIGHER of an
+attendance score and a ranked-attendee score, because a 1,200-entrant open
+bracket in Smash genuinely is a supermajor. Ultimate fields run 5 to 45 teams
+and the biggest are college regular-season invites, not championships — a
+16-team Nationals is the hardest tournament of its year and among the smaller
+draws. Size counts only through the attendees it brings: a club outside its
+division-season's top fifth is worth zero, so a 40-team Sectional of unranked
+teams scores zero rather than tiering up on bulk.
+
+**The bands are percentiles, not fixed ranks.** PGRU's top-50 works because
+Smash is one pool. Five divisions here run 67–500 clubs in a season, so a
+fixed rank would make "top 50" the top tenth of college and the top third of
+D-III. Moving the band from a rank to a percentile IS the region multiplier.
+
+**Every rating is the one the club carried INTO the tournament** — its last
+rated result strictly before the start date. Nothing an attendee did at the
+event, or after it, can move the grade, so a tournament is never strong merely
+because someone had a breakout there, and the number is exactly what was
+knowable walking in. A club with no rated result yet is unranked and worth
+nothing; it has not shown anything.
+
+A club's standing is its rank on that point-in-time rating within its own
+division and season. The pool is the clubs that turn out in that division that
+season — the competitive field the event sits in — but every rating inside it
+moves with the calendar, so the same club is a different rank in May than it
+was in February and the standings are rebuilt per event. Ratings carry across
+divisions and seasons (one number per club, the model's own convention), so
+"current" means the club's last rated result anywhere, not its last one in
+this division.
+
+Each attendee scores by band, and the event's raw total is divided by what the
+**16 best clubs in that pool as of that date** would have scored, 16 being a
+USAU national championship field. So **100 means "as hard as this division's
+Nationals ought to be"**, and it means the same in club women's as in college.
+Above 100 is earned: Florida Warm Up 2026 draws 43 college teams and scores
+114.3, beating the D-I championship it feeds.
+
+| tier | score | what lands there |
+|---|---|---|
+| S | ≥ 90 | 41 events — every division's Nationals, every season, plus Florida Warm Up (2019, 2026) and Easterns (2018, 2023, 2024, 2026) |
+| A | ≥ 60 | 64 — the elite regular season: Pro-Elite Challenge tops out at 86, Pro Championships at 80, the U.S. Open at 74 |
+| B | ≥ 30 | 198 — the stronger Regionals (Northeast men's peaks at 44) and the better invites |
+| C | ≥ 10 | 596 — Sectionals top out at 18 |
+| D | < 10 | 1,944 — no ranked club attended |
+
+Ties are routine: ratings are integers and the pool holds hundreds of clubs,
+so equal ratings land on band edges. They break on the club key — arbitrary,
+but stated, and the same on every rebuild.
+
+Attendance is the set of clubs the model scored games for, so a team that
+registered and never played is not counted. **27 events carry no grade at all
+and show a dash rather than a D**, which is a different claim. Ten are novelty
+4v4 and goalty brackets the model never rated. The other seventeen are events
+where fewer than 32 clubs — twice the reference field — carried a rating on
+the day, which happens in exactly two places: the first weekends of 2017,
+where the corpus begins and nobody has played yet, and D-III's COVID-truncated
+2020, where 19 rated clubs put a single team in the top 2% band. Outside
+those, the thinnest pool any event faces is 48 clubs and the median is 244.
 
 **The tracker takes played games from USAU, not from you.** Every fixture with
 a final score arrives with it, renders the score where an unplayed game renders
@@ -256,13 +338,69 @@ their provisional window, so teammates do not move together: Tyler Monroe took
 the Δ on the row; recovering his per-game share would mean re-deriving the
 engine in JavaScript, which is exactly what this page refuses to do.
 
-Rosters, affiliations and all 58,007 scored games ride inside
-`data/history.json`, which keeps the page a single file that works from
-`file://` — `fetch()` does not. That costs weight: 12.1 MB raw, 4.2 MB gzipped,
-which is what Pages actually serves. The games are grouped by event and stored
-once each, not once per side, which is the difference between 1.5 MB and 3.
-Roster members are keyed on `(name, player_id)` pairs, never on name alone, for
-the reason in the data notes below: display names are not unique.
+**What loads when.** `fetch()` on a `file://` page is blocked by CORS; a
+classic `<script>` from the same directory is not. That one asymmetry decides
+the whole layout, because the page has to keep working off a thumb drive. So
+every split below is a script tag, and what decides the tier is not size but
+WHEN the thing is needed:
+
+| tier | file | gzipped | when |
+|---|---|---|---|
+| page | `docs/index.html` | 1.32 MB | blocks first paint |
+| core | `docs/history.js` | 0.48 MB | background, right after paint |
+| tournament shapes | `docs/t/<season>.js` | 12–65 KB × 10 | an event is opened |
+| trajectories | `docs/p/<pid % 32>.js` | 75–80 KB × 32 | a player panel is opened |
+| rosters | `docs/r/<bucket>.js` | 59–82 KB × 32 | a club panel is opened |
+| games | `docs/g/<season>.js` | 19–106 KB × 10 | an event row is expanded |
+
+A cold visit that reads the rankings and leaves costs **1.8 MB gzipped**. It
+used to cost 6.9 MB, because the whole 16 MB / 5.0 MB-gzipped trajectory
+corpus — every rating, every roster, all 58,007 scored games — came down on
+every visit whether or not anything was ever clicked. Nothing was wrong with
+the corpus; what was wrong is that two features held it hostage, and both are
+precomputed in `analysis/history_split.py` now:
+
+- **Trends** walked all 39,325 trajectories to find a per-season median and a
+  per-season top-25 cut. Both are statistics over the whole population, so no
+  subset computes them, and that one function pinned the entire corpus. It can
+  only ever be asked 24 questions (subject × division × gender-matching), so
+  all 24 answers ship in the core at 40 KB gzipped.
+- **The expandable-row test.** A panel's event table marks a row clickable
+  only where the model scored games, which asked `games[evIdx]` per row and so
+  wanted every season a subject ever played. `gameSides` answers it from the
+  core: one sorted club-index list per event, 50 KB gzipped.
+
+With those gone the panel needs exactly one bucket, and which bucket is
+decidable without loading anything. Players key on `pid % 32`, which the page
+reproduces directly. Clubs cannot — there is no string hash the emitter and
+the page get to agree on for free — so a club's bucket rides on its
+`rostByClub` entry, which the panel already looks up to know which seasons it
+has rosters for. Rosters bucket by CLUB rather than by season so that opening
+one club costs one fault for all ten of its season tabs.
+
+Names inside a roster bucket are local to it: the page appends each bucket's
+pool to the growing global one and rebases the indices as it merges, so a name
+in two buckets is simply stored twice. Across 32 buckets that costs 22%, which
+is cheaper than any scheme for sharing them. Roster members are still keyed on
+`(name, player_id)` pairs, never on name alone, for the reason in the data
+notes below: display names are not unique. Games stay grouped by event and
+stored once each rather than once per side — the difference between 1.5 MB
+and 3.
+
+Bucket granularity is chosen against request overhead, not against total
+bytes. Chunking costs 26% overall, because each file gzips in its own window;
+what it buys is that nobody downloads a bucket they never open. Per-event
+tournament files would have been 2,870 of them at ~170 bytes gzipped, where
+the request costs more than the body and every rebuild churns the whole
+directory. Ten seasons and 32 hash buckets put the worst single fault at
+106 KB.
+
+What deliberately stays inline is the index every view reads: `tourneys.events`
+at 88 KB gzipped drives the tournament list, its filters, its search and its
+champion column. That last one is why an event row carries its champion as a
+GLOBAL team index — resolving it through the event's own field, as it did
+first, made 400 rendered rows fault in 400 events' games to print 400 names,
+and there was no on-demand split to be had while that was true.
 
 ## Layout
 
@@ -334,6 +472,14 @@ the reason in the data notes below: display names are not unique.
   `tournaments.py` recovers pools, brackets and tournament series from the
   fixture list (see **Tournaments** above) and hands `site.py` the payload the
   browser tab draws; it never touches ratings.
+  `history_split.py` slices `data/history.json` into the resident core and the
+  three lazy tiers `site.py` writes (see **What loads when**), and precomputes
+  the two things that used to force the whole corpus into the browser: every
+  Trends answer, and which clubs appear in each event's games.
+  `field_strength.py` grades each event's field S/A/B/C/D from the standing of
+  the clubs that played it (see **Field strength** above). It reads ratings but
+  writes none, and `site.py` appends its verdict to the event rows rather than
+  `tournaments.py` building it in — shape recovery stays rating-free.
 
 ## Data notes
 

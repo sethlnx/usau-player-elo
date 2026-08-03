@@ -437,7 +437,7 @@ def build(con):
         teams    [display name, ...]
         series   [[label, [event index, ...]], ...]
         events   [[id, name, season, div, start, end, place, nTeams, tier,
-                   series index, champion local index or -1], ...]
+                   series index, champion GLOBAL team index or -1], ...]
         detail   {event index: {t, d, p, b, o}}
                    t  field, as global team indices
                    d  distinct dates
@@ -501,10 +501,16 @@ def build(con):
                   for kind, root_rank, rounds in brs],
             "o": [[enc(g), g["stage"]] for g in loose],
         }
+        # The champion is carried as a GLOBAL team index, not the local one it
+        # was found as: the list and the series table print a champion for
+        # every row, and resolving through `detail[i].t` would make both of
+        # them fault in an event's games just to read one name. That is the
+        # coupling that stops `detail` being loaded per season. Costs ~15 KB.
         place = ", ".join(x for x in (city, state) if x)
         events.append([eid, name, season, DIVCODE.get(division, 0),
                        start or "", end or "", place,
-                       counts.get(eid, len(field)), tier(name), 0, champ])
+                       counts.get(eid, len(field)), tier(name), 0,
+                       detail[ix]["t"][champ] if champ >= 0 else -1])
         series[series_key(name)].append(ix)
 
     # Series in a stable order, and each event told which one it is in. A
