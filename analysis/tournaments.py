@@ -221,11 +221,18 @@ def _maximal_cliques(seed, adj, budget=4000):
 
 
 def _pool_score(clique, pending):
-    """Fewest calendar days wins, size breaks the tie."""
+    """Fewest calendar days wins, size breaks the tie, team names settle it.
+
+    That last term buys nothing but REPRODUCIBILITY, and it is not optional:
+    the cliques arrive from a Bron-Kerbosch over sets of team names, so
+    without it a tie is broken by string hash order and the recovered shape
+    changes between runs of the same build. Five events used to flip their
+    champion that way.
+    """
     days = {pending[e][0]["date"][:10]
             for e in (frozenset(p) for p in itertools.combinations(sorted(clique), 2))
             if e in pending}
-    return (len(days) if days else 9, -len(clique))
+    return (len(days) if days else 9, -len(clique), sorted(clique))
 
 
 def pools_of(games):
@@ -381,7 +388,17 @@ def decompose(games):
         pools, left = pools_of(poolish)
         rest = rest + left
     else:
-        pools, rest = pools_of(rest)
+        # Nothing says "pool", so the pools have to be recovered structurally
+        # from the whole schedule — 2,103 of 2,680 events file every fixture
+        # under one heading. What that must NOT do is eat a game the organiser
+        # already placed: a clique through the Final's edge is indistinguishable
+        # from a round robin on structure alone, and swallowing it loses the
+        # bracket. Centex 2023 lost Colorado's universe-point title that way,
+        # and the Northwest mixed Regional lost BFG's. Labels decide brackets
+        # everywhere else in this module; they decide here too.
+        named = [g for g in rest if classify(g["stage"])]
+        pools, left = pools_of([g for g in rest if not classify(g["stage"])])
+        rest = left + named
     brackets, loose = brackets_of(sorted(rest, key=lambda g: g["ord"]))
     return pools, brackets, sorted(loose + odd, key=lambda g: g["ord"])
 

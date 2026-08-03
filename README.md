@@ -137,11 +137,29 @@ showing no bracket is better than inventing one. Every rank-0 game is a root,
 so a college invite running two flights off one schedule yields two trees
 rather than one tree and a pile of orphans. Anything the label does not place
 lands under **Placement & other games** with the organiser's own wording.
-Across the corpus this puts 84.6% of the 90,505 completed games into a pool or
+Across the corpus this puts 87.3% of the 90,505 completed games into a pool or
 a bracket and loses none: every game is displayed somewhere.
 
 A **series** is the printed name with everything that varies between instances
 taken out — the year, the edition number (`Cooler Classic 30`), the division
+**Labels also fence the structural recovery.** Most events name no pool at all
+— 2,103 of the 2,680 with pool play file every fixture under one heading — so
+when nothing matches "pool" the cliques are sought across the whole schedule.
+That fallback used to run over the labelled games too, and on structure alone
+a clique through the Final's edge is indistinguishable from a round robin, so
+it sometimes ate one and the bracket lost its final. Centex 2023 lost
+Colorado's universe-point title that way and the Northwest mixed Regional lost
+BFG's. Excluding anything the label already places recovered 11 finals that
+were never found, moved 355 games out of phantom pools into the brackets they
+belonged to (84.6% -> 87.3% placed), changed no champion that was already
+right, and lost none.
+
+Cliques that tie on days and size then settle on their team names. That buys
+nothing but reproducibility, and it is not optional: cliques come out of a
+Bron-Kerbosch over sets of team-name strings, so an unbroken tie is resolved
+by string hash order and the recovered shape changes between runs of the same
+build. Five events used to flip their champion between builds.
+
 wording, and whatever suffix that season used (`- ICC`, `(ICC)`). 2,870 events
 collapse to 670 series, so opening the 2025 U.S. Open also shows the other 23
 instances and who won each. Division wording goes because division is its own
