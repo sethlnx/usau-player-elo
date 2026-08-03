@@ -35,7 +35,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import DB_PATH
 from analysis.field_strength import TIER_NAMES as FIELD_TIER_NAMES
-from analysis.field_strength import TIERS as FIELD_TIERS
 from analysis.field_strength import classify as classify_strength
 from analysis.history_split import BUCKETS as HIST_BUCKETS
 from analysis.history_split import split as split_history
@@ -317,11 +316,13 @@ def build():
     # tournaments.py recovers an event's SHAPE from the schedule and never
     # touches ratings, and that is worth keeping true. Rows gain [11] = score
     # and [12] = tier letter, or nothing at all where there is no answer.
-    for row, verdict in zip(tourneys["events"],
-                            classify_strength(history, tourneys["events"])):
+    verdicts, strength_cuts = classify_strength(history, tourneys["events"])
+    for row, verdict in zip(tourneys["events"], verdicts):
         row.extend(verdict if verdict else [None, ""])
-    tourneys["strengthTiers"] = [t for _, t in FIELD_TIERS]
     tourneys["strengthNotes"] = FIELD_TIER_NAMES
+    # division -> [[score, letter], ...]. Published because the bar is not the
+    # same in every division and a letter with a hidden threshold is a riddle.
+    tourneys["strengthCuts"] = strength_cuts
 
     # The trajectory corpus, sliced into a resident core and three lazy tiers.
     # Player names come from the ranked table rather than history.json's own
@@ -692,6 +693,14 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 .fsB{background:color-mix(in srgb,var(--accent) 22%,transparent)}
 .fsC{background:var(--chip);color:var(--ink-3)}
 .fsD{color:var(--ink-3);border-color:var(--line)}
+/* The division's ladder under the header. Rungs the event did not reach are
+   dimmed, so the eye lands on the one it did without hunting. */
+.fsline{margin-top:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fsbar{display:inline-flex;align-items:center;gap:3px;opacity:.5}
+.fsbar .fs{min-width:13px;padding:0 4px;font-size:9.5px}
+.fsbar .fs.now{outline:2px solid var(--accent);outline-offset:1px}
+.fsbar i{font-style:normal;font-family:var(--mono);font-size:10px;
+  color:var(--ink-3);margin-right:5px}
 .crown{color:var(--accent);font-weight:600}
 #tvhead{margin:0 0 14px}
 #tvhead h2{font-size:20px;margin:0 0 3px;letter-spacing:-.01em}
@@ -2024,6 +2033,9 @@ const EYEARS = [...new Set(EVS.map(e => e[2]))].sort((a, b) => b - a);
 // tier letter. Scored in analysis/field_strength.py against the division's
 // OWN season, so an S in club women's means what an S means in college.
 const STRNOTE = TV.strengthNotes || {};
+// division -> [[score, letter], ...], high to low. Not the same ladder in
+// every division: see analysis/field_strength.py.
+const STRCUT = TV.strengthCuts || {};
 // A bracket's key is the placing it decides; 'champ' is the title.
 const BRLABEL = {champ: 'Championship bracket', gtg: 'Game to go'};
 const brLabel = k => BRLABEL[k] ||
@@ -2050,15 +2062,30 @@ function daterange(a, b) {
 $('#eyear').innerHTML = '<option value="all">All years</option>' +
   EYEARS.map((y, i) => `<option value="${y}"${i ? '' : ' selected'}>${y}</option>`).join('');
 
-/* A field-strength cell: the letter, with the score behind it on hover. An
-   event the model never rated carries neither, and says so with a dash rather
-   than a D — "no ranked clubs came" and "we have no idea" are not the same
-   claim. */
+/* A field-strength cell: the letter, with the score and the bar it cleared
+   behind it on hover. An event the model never rated carries neither, and
+   says so with a dash rather than a D — "no ranked clubs came" and "we have
+   no idea" are not the same claim. */
 function strCell(e) {
-  return e[12]
-    ? `<span class="fs fs${e[12]}" title="field strength ${e[11]} \u2014 ` +
-      `${esc(STRNOTE[e[12]] || '')}">${e[12]}</span>`
-    : `<span class="muted">\u2014</span>`;
+  if (!e[12]) return `<span class="muted">\u2014</span>`;
+  const cut = (STRCUT[e[3]] || []).find(c => c[1] === e[12]);
+  return `<span class="fs fs${e[12]}" title="field strength ${e[11]} \u2014 ` +
+    `${esc(STRNOTE[e[12]] || '')}` +
+    (cut ? ` (${EDIVL[e[3]]} ${e[12]} starts at ${cut[0]})` : '') +
+    `">${e[12]}</span>`;
+}
+
+/* The division's own ladder, with the event's rung marked. A letter whose
+   threshold is invisible is a riddle, and these thresholds MOVE: an S is
+   93% of what that division's own Nationals scores, which is a different
+   number in college than in club men's. */
+function strBar(div, letter) {
+  const cuts = STRCUT[div];
+  if (!cuts) return '';
+  return ` <span class="fsbar">` + cuts.map(([at, t]) =>
+    `<span class="fs fs${t}${t === letter ? ' now' : ''}" ` +
+    `title="${esc(EDIVL[div])} ${t}: ${at} and up">${t}</span>` +
+    `<i>${at}</i>`).join('') + `</span>`;
 }
 
 function drawEvents() {
@@ -2172,11 +2199,17 @@ function drawTournament(i) {
   const ser = ESER[e[9]], sibs = ser[1];
   const facts = [daterange(e[4], e[5]), e[6], EDIVL[e[3]], TV.tiers[e[8]],
                  `${e[7]} teams`].filter(Boolean).map(esc);
-  if (e[12]) facts.push(`field <b>${e[12]}</b> (${e[11]})`);
+  // The grade gets the same chip it has in the list, and says out loud that
+  // the bar it cleared is this DIVISION's, since that bar moves.
+  const grade = e[12]
+    ? `<span class="fs fs${e[12]}">${e[12]}</span> ${e[11]} ` +
+      `<span class="muted">of ${EDIVL[e[3]]} championship strength</span>`
+    : `<span class="muted">field ungraded</span>`;
   facts.push(e[10] >= 0 ? `champion <b>${esc(ETM[e[10]])}</b>`
                         : 'no champion on record');
   $('#tvhead').innerHTML = `<h2>${esc(e[1])}</h2>` +
-    `<div class="meta">${facts.join(' \u00b7 ')}</div>`;
+    `<div class="meta">${facts.join(' \u00b7 ')}</div>` +
+    `<div class="meta fsline">${grade}${strBar(e[3], e[12])}</div>`;
   if (!det) {
     // Settled-but-absent means the bucket 404'd or is missing this event, and
     // re-requesting would call back synchronously — straight into a loop.
@@ -2695,17 +2728,24 @@ $('#enote').innerHTML +=
   `The bands decay steeply, so four of the top five outweigh thirty ` +
   `merely-ranked teams, and anything outside the top fifth is worth nothing, ` +
   `which is what stops a 40-team Sectional tiering up on bulk. The total is ` +
-  `then read against what that division's 16 best clubs on the day would have ` +
-  `scored, ` +
-  `so <b>100</b> means "as hard as this division's Nationals ought to be" and ` +
-  `means the same thing in club women's as in college. ` +
-  `<span class="fs fsS">S</span> \u2265 90 \u00b7 ` +
-  `<span class="fs fsA">A</span> \u2265 60 \u00b7 ` +
-  `<span class="fs fsB">B</span> \u2265 30 \u00b7 ` +
-  `<span class="fs fsC">C</span> \u2265 10 \u00b7 ` +
-  `<span class="fs fsD">D</span> below. The cut is a label on a continuous ` +
-  `score — a high C is a low B — so the number is on the chip. A dash is not ` +
-  `a D: it means the model rated nothing here.`;
+  `read against what a full championship field of that division would have ` +
+  `scored on the day — 20 clubs in D-I college, 16 everywhere else — so ` +
+  `<b>100</b> is championship strength.<br>` +
+  `<b>The letters are cut per division.</b> <span class="fs fsS">S</span> ` +
+  `starts at the <i>weakest national championship that division has held</i>, ` +
+  `so every Nationals is S and stays one — a thinner championship later ` +
+  `becomes the new floor rather than dropping out. A/B/C follow as fractions ` +
+  `of it. The bar differs because a championship does not capture its pool ` +
+  `equally everywhere — club men's Nationals runs 95-99, D-III's 78-97 — so ` +
+  `an S is the same claim in both at a different number. ` +
+  Object.keys(STRCUT).sort().map(d =>
+    `<span style="white-space:nowrap">${esc(EDIVL[d])} ` +
+    STRCUT[d].slice(0, 4).map(([at, t]) =>
+      `<span class="fs fs${t}">${t}</span>\u2009${at}`).join(' ') +
+    `</span>`).join(' \u00b7 ') +
+  `. The cut is a label on a continuous score — a high C is a low B — so the ` +
+  `number rides on the chip. A dash is not a D: it means the model rated ` +
+  `nothing here.`;
 
 /* ---------- boot ---------- */
 /* Everything above needs only the inline payload, so the page is fully usable

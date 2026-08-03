@@ -251,20 +251,46 @@ divisions and seasons (one number per club, the model's own convention), so
 "current" means the club's last rated result anywhere, not its last one in
 this division.
 
-Each attendee scores by band, and the event's raw total is divided by what the
-**16 best clubs in that pool as of that date** would have scored, 16 being a
-USAU national championship field. So **100 means "as hard as this division's
-Nationals ought to be"**, and it means the same in club women's as in college.
-Above 100 is earned: Florida Warm Up 2026 draws 43 college teams and scores
-114.3, beating the D-I championship it feeds.
+Each attendee scores by band, and the event's raw total is divided by what a
+**full championship field of that division** would have scored against the
+same pool on the same day — 20 clubs in D-I college, 16 everywhere else. The
+per-division size matters: scored against a flat 16, college's championships
+read 106.5 where every other division's read 97-99, which is a bigger field
+being mistaken for a harder one. So **100 is championship strength**, and
+above 100 is earned: Florida Warm Up 2026 draws 43 college teams and scores
+100.0, level with the D-I championship it feeds.
 
-| tier | score | what lands there |
+**The letters are cut per division, and S starts at the weakest national
+championship that division has held.** Every Nationals is therefore an S, and
+stays one — the anchor is recomputed from the data, so a thinner championship
+in some future season becomes the new floor rather than dropping out of the
+tier. A/B/C follow as fractions of it (0.65, 0.33, 0.11).
+
+The bar has to move because a championship does not capture its pool equally
+everywhere: club men's Nationals runs 95-99 against D-III's 78-97. On a fixed
+bar that difference reads as quality when it is structure, and it cost club
+women's 2021 and D-III's 2023 championships their S for having drawn a thin
+field — a true statement about the field, and a confusing badge next to the
+word "Nationals".
+
+| division | S | A | B | C |
+|---|---|---|---|---|
+| club men's | ≥ 94.6 | ≥ 61.5 | ≥ 31.2 | ≥ 10.4 |
+| college | ≥ 83.6 | ≥ 54.3 | ≥ 27.6 | ≥ 9.2 |
+| college D-III | ≥ 77.9 | ≥ 50.6 | ≥ 25.7 | ≥ 8.6 |
+| club mixed | ≥ 92.6 | ≥ 60.2 | ≥ 30.6 | ≥ 10.2 |
+| club women's | ≥ 89.6 | ≥ 58.2 | ≥ 29.6 | ≥ 9.9 |
+
+An S is the same claim in every division at a different number. What lands
+where:
+
+| tier | n | what lands there |
 |---|---|---|
-| S | ≥ 90 | 41 events — every division's Nationals, every season, plus Florida Warm Up (2019, 2026) and Easterns (2018, 2023, 2024, 2026) |
-| A | ≥ 60 | 64 — the elite regular season: Pro-Elite Challenge tops out at 86, Pro Championships at 80, the U.S. Open at 74 |
-| B | ≥ 30 | 198 — the stronger Regionals (Northeast men's peaks at 44) and the better invites |
-| C | ≥ 10 | 596 — Sectionals top out at 18 |
-| D | < 10 | 1,944 — no ranked club attended |
+| S | 44 | all 40 national championships, every division and season, plus college's four supermajors — Florida Warm Up 2019/2026 and Easterns 2024/2026 |
+| A | 61 | the elite regular season: Pro-Elite Challenge tops out at 86, Pro Championships at 80, the U.S. Open at 74 |
+| B | 187 | the stronger Regionals (Northeast men's peaks at 44) and the better invites |
+| C | 592 | Sectionals top out at 18 |
+| D | 1,959 | no ranked club attended |
 
 Ties are routine: ratings are integers and the pool holds hundreds of clubs,
 so equal ratings land on band edges. They break on the club key — arbitrary,

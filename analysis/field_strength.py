@@ -70,27 +70,54 @@ team that registered and never played is not counted.
 
 import bisect
 import collections
+import re
 
 # PGRU's own weights, unchanged, re-aimed at percentile bands. The ratio is
 # what matters: a band-1 attendee is worth 3.5 band-5 attendees.
 BANDS = [(0.02, 224), (0.04, 128), (0.08, 96), (0.12, 80), (0.20, 64)]
 
-# The notional full-strength field the score is a percentage of.
-REFERENCE_FIELD = 16
+# The notional full-strength field the score is a percentage of: THIS
+# division's own national championship, which is 20 teams in D-I college and
+# 16 everywhere else. Scoring college against a 16-team reference was worth
+# about eight points of pure inflation — its championships read 106.5 where
+# every other division's read 97-99 — because a bigger championship is a
+# bigger field, not a harder one.
+CHAMPIONSHIP_FIELD = {0: 16, 1: 20, 2: 16, 3: 16, 4: 16}
+DEFAULT_FIELD = 16
 
 # How many clubs must already carry a rating on the day for a percentile to
 # mean anything. It bites in exactly two places: the first weekends of 2017,
 # where the corpus starts and nobody has played yet, and D-III's
 # COVID-truncated 2020, where 19 rated clubs put a single team in the top 2%
 # band and a 19-team warm-up would score a perfect 100.
-MIN_POPULATION = 2 * REFERENCE_FIELD
+MIN_POPULATION = 32
 
-# Cutoffs on the continuous score. S is every division's Nationals plus the
-# handful of college invites that out-draw one; D is the long tail that no
-# ranked club attended.
-TIERS = [(90, "S"), (60, "A"), (30, "B"), (10, "C"), (0, "D")]
+# A division's own USAU national championship, used to calibrate its letters.
+# The U.S. Open sits in the same series tier and is not one: it is a 12-team
+# invitational, and treating it as the benchmark would drag the bar down.
+CHAMPIONSHIP_RE = re.compile(
+    r"national championship|club championships|club nationals"
+    r"|college championships?", re.I)
+NOT_CHAMPIONSHIP_RE = re.compile(r"u\.?s\.? open", re.I)
+
+# Letters are cut as a FRACTION of what the division's own championships
+# actually score, not at fixed marks on the scale. Even with the reference
+# corrected, divisions differ in how completely their championship captures
+# the pool beneath it — club men's Nationals lands at 98.7, D-III's at 90.9 —
+# and a fixed bar would grade that difference as quality rather than as
+# structure. So an S is "championship-grade for THIS division", which is a
+# different number in college than in club men's, and the same claim in both.
+#
+# The anchor is the WEAKEST championship the division has held, not a typical
+# one, so every national championship is S by construction. That is not a
+# thumb on the scale: it is self-correcting, because a future championship
+# weaker than any on record redefines the minimum and is therefore still S.
+# On a median anchor, club women's 2021 and D-III's 2023 championships fell to
+# A for having drawn a thin field, which is a true statement about the field
+# and a confusing one on a badge that says "Nationals" beside it.
+TIER_FRACTIONS = [(1.0, "S"), (0.65, "A"), (0.33, "B"), (0.11, "C"), (0.0, "D")]
 TIER_NAMES = {
-    "S": "as hard as a national championship",
+    "S": "championship-grade for this division",
     "A": "an elite field short of a championship one",
     "B": "a strong field — the better Regionals and invites",
     "C": "some ranked clubs present",
@@ -151,12 +178,14 @@ def _points(rank, population):
     return 0
 
 
-def _reference(population):
-    return sum(_points(r, population) for r in range(1, REFERENCE_FIELD + 1))
+def _reference(population, div):
+    """What this division's own championship field would score in this pool."""
+    n = CHAMPIONSHIP_FIELD.get(div, DEFAULT_FIELD)
+    return sum(_points(r, population) for r in range(1, n + 1))
 
 
-def score_events(history):
-    """History event index -> (score, tier), for every event the model rated.
+def raw_scores(history):
+    """History event index -> score, for every event the model rated.
 
     The standings are rebuilt per event, because the whole point is that they
     move: the same club is a different rank in May than it was in February.
@@ -192,9 +221,40 @@ def score_events(history):
         rank = {key: r for r, (_elo, key) in enumerate(live, 1)}
         field = {r[0] for r in rows} | {r[1] for r in rows}
         raw = sum(_points(rank[clubs[c]], n) for c in field if clubs[c] in rank)
-        pct = round(100 * raw / _reference(n), 1)
-        out[i] = (pct, next(t for cut, t in TIERS if pct >= cut))
+        out[i] = round(100 * raw / _reference(n, div), 1)
     return out
+
+
+def cutoffs(history, scores):
+    """division -> [(score, letter)], calibrated on its own championships.
+
+    The anchor is the WEAKEST national championship that division has on
+    record, which is what makes every championship an S and keeps it one: add
+    a thinner championship later and it becomes the new anchor rather than
+    dropping out. A division with no championship on record borrows the
+    weakest in the corpus rather than inventing a scale for itself.
+    """
+    events = history["events"]
+    by_div = collections.defaultdict(list)
+    for i, pct in scores.items():
+        name = events[i][1]
+        if CHAMPIONSHIP_RE.search(name) and not NOT_CHAMPIONSHIP_RE.search(name):
+            by_div[events[i][3]].append(pct)
+    overall = min([p for ps in by_div.values() for p in ps] or [100.0])
+    out = {}
+    for div in {e[3] for e in events}:
+        anchor = min(by_div[div]) if by_div.get(div) else overall
+        out[div] = [(round(f * anchor, 1), t) for f, t in TIER_FRACTIONS]
+    return out
+
+
+def score_events(history):
+    """History event index -> (score, letter)."""
+    scores = raw_scores(history)
+    cuts = cutoffs(history, scores)
+    events = history["events"]
+    return {i: (pct, next(t for c, t in cuts[events[i][3]] if pct >= c))
+            for i, pct in scores.items()}
 
 
 # analysis/rankings.py truncates the event name to 46 characters on its way
@@ -206,14 +266,19 @@ def _key(date, name, season, div):
 
 
 def classify(history, events):
-    """Per tournament row, [score, tier] — or None where there is no answer.
+    """(verdicts, cuts) — verdicts parallel to `events`, cuts per division.
 
-    Returned parallel to `events`, which is `tourneys["events"]`: [id, name,
-    season, div, start, ...]. Events the model never rated (novelty 4v4 and
-    goalty brackets, ten of them) and events in a too-thin division-season
-    come back None and carry no chip.
+    A verdict is [score, letter], or None where there is no answer: `events`
+    is `tourneys["events"]`, and the ten novelty 4v4 and goalty brackets the
+    model never rated, plus anything in a too-thin division-season, carry no
+    chip. `cuts` is what the page prints so the bar is never a mystery — it
+    differs per division by construction.
     """
-    scored = score_events(history)
+    scores = raw_scores(history)
+    cuts = cutoffs(history, scores)
+    hev = history["events"]
     # A history event row IS (date, name, season, div) — the key, in order.
-    by_key = {_key(*history["events"][i]): v for i, v in scored.items()}
-    return [by_key.get(_key(e[4], e[1], e[2], e[3])) for e in events]
+    by_key = {_key(*hev[i]): (pct, next(t for c, t in cuts[hev[i][3]] if pct >= c))
+              for i, pct in scores.items()}
+    return ([by_key.get(_key(e[4], e[1], e[2], e[3])) for e in events],
+            {str(d): c for d, c in cuts.items()})
