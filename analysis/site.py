@@ -2139,24 +2139,26 @@ $('#eyear').innerHTML = '<option value="all">All years</option>' +
 function strChip(div, score, letter) {
   if (!letter) return `<span class="muted">\u2014</span>`;
   const cut = (STRCUT[div] || []).find(c => c[1] === letter);
-  return `<span class="fs fs${letter}" title="field strength ${score} \u2014 ` +
+  return `<span class="fs fs${letter}" title="field ${score} average Elo \u2014 ` +
     `${esc(STRNOTE[letter] || '')}` +
-    (cut ? ` (${EDIVL[div]} ${letter} starts at ${cut[0]})` : '') +
+    (cut && cut[0] !== null ? ` (${EDIVL[div]} ${letter} starts at ${cut[0]})`
+                            : '') +
     `">${letter}</span>`;
 }
 const strCell = e => strChip(e[3], e[11], e[12]);
 
 /* The division's own ladder, with the event's rung marked. A letter whose
-   threshold is invisible is a riddle, and these thresholds MOVE: an S is
-   the weakest championship that division has held, which is a different
-   number in college than in club men's. */
+   threshold is invisible is a riddle, and these thresholds MOVE: an S is the
+   weakest championship that division has held, a different average Elo in
+   college than in club men's. D has no threshold — it is "below C". */
 function strBar(div, letter) {
   const cuts = STRCUT[div];
   if (!cuts) return '';
   return ` <span class="fsbar">` + cuts.map(([at, t]) =>
     `<span class="fs fs${t}${t === letter ? ' now' : ''}" ` +
-    `title="${esc(EDIVL[div])} ${t}: ${at} and up">${t}</span>` +
-    `<i>${at}</i>`).join('') + `</span>`;
+    `title="${esc(EDIVL[div])} ${t}${at === null ? ': below C'
+                                    : ': ' + at + ' and up'}">${t}</span>` +
+    (at === null ? '' : `<i>${at}</i>`)).join('') + `</span>`;
 }
 
 function drawEvents() {
@@ -2274,7 +2276,7 @@ function drawTournament(i) {
   // the bar it cleared is this DIVISION's, since that bar moves.
   const grade = e[12]
     ? `<span class="fs fs${e[12]}">${e[12]}</span> ${e[11]} ` +
-      `<span class="muted">of ${EDIVL[e[3]]} championship strength</span>`
+      `<span class="muted">average Elo \u00b7 ${EDIVL[e[3]]} field</span>`
     : `<span class="muted">field ungraded</span>`;
   facts.push(e[10] >= 0 ? `champion <b>${esc(ETM[e[10]])}</b>`
                         : 'no champion on record');
@@ -2790,33 +2792,33 @@ $('#enote').innerHTML =
   `play, or whose stage labels name no final, show a dash.`;
 
 $('#enote').innerHTML +=
-  ` <b>Field</b> grades how hard the tournament was to be at, from who turned ` +
-  `up rather than from what the event is called: a Regional can outrank a ` +
-  `Nationals feeder and Florida Warm Up outranks the championship it feeds. ` +
-  `Each attending club is worth points by where <b>the rating it walked in ` +
-  `with</b> ranked in <i>its own division and season</i> — nothing done at the ` +
-  `event, or after it, counts, so the grade is what was knowable beforehand. ` +
-  `The bands decay steeply, so four of the top five outweigh thirty ` +
-  `merely-ranked teams, and anything outside the top fifth is worth nothing, ` +
-  `which is what stops a 40-team Sectional tiering up on bulk. The total is ` +
-  `read against what a full championship field of that division would have ` +
-  `scored on the day — 20 clubs in D-I college, 16 everywhere else — so ` +
-  `<b>100</b> is championship strength.<br>` +
-  `<b>The letters are cut per division.</b> <span class="fs fsS">S</span> ` +
-  `starts at the <i>weakest national championship that division has held</i>, ` +
-  `so every Nationals is S and stays one — a thinner championship later ` +
-  `becomes the new floor rather than dropping out. A/B/C follow as fractions ` +
-  `of it. The bar differs because a championship does not capture its pool ` +
-  `equally everywhere — club men's Nationals runs 95-99, D-III's 78-97 — so ` +
-  `an S is the same claim in both at a different number. ` +
+  ` <b>Field</b> is the average Elo in the room: how hard the tournament was ` +
+  `to be at, from who turned up rather than from what the event is called. A ` +
+  `Regional can outrank a Nationals feeder, and Florida Warm Up outranks the ` +
+  `championship it feeds. Each club is counted at <b>the rating it walked in ` +
+  `with</b> — its last result before the event started — so nothing done at ` +
+  `the event, or after it, moves the number, and a club with no rating yet is ` +
+  `left out rather than guessed at. The average is taken against half a ` +
+  `Nationals field of merely typical clubs, which barely touches a 16-team ` +
+  `draw and drags a two-team showcase most of the way back to ordinary: two ` +
+  `results are not evidence of a tournament.<br>` +
+  `<b>The bars are per division</b>, pinned at both ends to that division's ` +
+  `own record. <span class="fs fsS">S</span> is the <i>weakest national ` +
+  `championship it has ever held</i>, so every Nationals is S and stays one — ` +
+  `a thinner championship later becomes the new floor rather than dropping ` +
+  `out. <span class="fs fsC">C</span> is its <i>median event</i>, and A and B ` +
+  `split the gap. So an S says "the average team here was as strong as the ` +
+  `average team at this division's Nationals" and a D says "a below-average ` +
+  `field for this division" — the same claims everywhere, at different ` +
+  `numbers. ` +
   Object.keys(STRCUT).sort().map(d =>
     `<span style="white-space:nowrap">${esc(EDIVL[d])} ` +
     STRCUT[d].slice(0, 4).map(([at, t]) =>
       `<span class="fs fs${t}">${t}</span>\u2009${at}`).join(' ') +
     `</span>`).join(' \u00b7 ') +
-  `. The cut is a label on a continuous score — a high C is a low B — so the ` +
-  `number rides on the chip. A dash is not a D: it means the model rated ` +
-  `nothing here.`;
+  `. The cut is a label on a continuous number — a high C is a low B — so the ` +
+  `rating rides on the chip. A dash is not a D: it means not one club in the ` +
+  `field had a rating yet.`;
 
 /* ---------- boot ---------- */
 /* Everything above needs only the inline payload, so the page is fully usable

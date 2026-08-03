@@ -218,102 +218,77 @@ most Sectionals will ever be, and Florida Warm Up is harder than the D-I
 championship it feeds. So events carry a second, independent grade in
 `analysis/field_strength.py`: **S / A / B / C / D**, from the attendees.
 
-The model is Smash Bros' — the Tournament Tier System PGStats runs for the
-Panda Global Rankings, which sorts events into S/A/B/C from two inputs: how
-many entered, and how many highly ranked people entered. Three things carry
-over. **Rank bands with steep decay** (PGRU pays 224 for a top-5 attendee
-against 64 for a top-50 one) — what makes a tournament hard is its ceiling,
-not its crowd. **Region multipliers**, so a smaller scene is not locked out of
-the top tier for being small. And **the tier is a cutoff on a continuous
-score**, which PGStats says out loud; both numbers are published here for the
-same reason, because a high C is a low B.
+**The score is the average Elo in the room.** Each club is counted at the
+rating it carried INTO the event — its last rated result strictly before the
+start date — so nothing an attendee did there, or after it, can move the
+grade, and the number is exactly what was knowable walking in. A club with no
+rated result yet has shown nothing and is left out of the average rather than
+guessed at. Ratings carry across divisions and seasons, one number per club,
+so "current" means its last result anywhere.
 
-Two things deliberately do not carry over.
+This replaced a port of Smash Bros' Tournament Tier System, which scored an
+event by how many of the division's top-ranked clubs attended, in steeply
+decaying rank bands after PGRU's 224-for-a-top-5, 64-for-a-top-50 shape. It
+read well at the top and lied everywhere else, because a band scheme has to
+end somewhere: everything outside the division's top fifth scored **zero**, so
+a club ranked 43rd counted exactly as much as one ranked 211th. Select Flight
+Invite West 2026 drew Dark Star (20th), SOUF (32nd) and Wavestorms (40th) and
+then nine clubs between 43rd and 111th, and came out **D** — a tier whose own
+label read "no ranked clubs present". Corpus-wide, 1,088 of 1,959 D events had
+ranked clubs in them. A mean has no cliff in it, every attendee moves the
+number by what they are worth, and the number is a rating, which is a thing
+people already know how to read.
 
-**Attendance is not a second path to the top.** PGRU takes the HIGHER of an
-attendance score and a ranked-attendee score, because a 1,200-entrant open
-bracket in Smash genuinely is a supermajor. Ultimate fields run 5 to 45 teams
-and the biggest are college regular-season invites, not championships — a
-16-team Nationals is the hardest tournament of its year and among the smaller
-draws. Size counts only through the attendees it brings: a club outside its
-division-season's top fifth is worth zero, so a 40-team Sectional of unranked
-teams scores zero rather than tiering up on bulk.
+What a mean does have is a blind spot for SIZE: two elite clubs playing a
+showcase average higher than a sixteen-team Nationals, and a raw mean duly
+made a 2-team exhibition championship-grade. So the average is taken against a
+**prior of half a Nationals field** of merely typical clubs. A 16-team event
+moves by a few Elo; a 2-team one is dragged most of the way back to ordinary,
+because two results are not evidence of a tournament. At `PRIOR = 6` that
+removes every small-field S while leaving all 40 national championships in S.
+It is the only correction applied, and it is one line.
 
-**The bands are percentiles, not fixed ranks.** PGRU's top-50 works because
-Smash is one pool. Five divisions here run 67–500 clubs in a season, so a
-fixed rank would make "top 50" the top tenth of college and the top third of
-D-III. Moving the band from a rank to a percentile IS the region multiplier.
-
-**Every rating is the one the club carried INTO the tournament** — its last
-rated result strictly before the start date. Nothing an attendee did at the
-event, or after it, can move the grade, so a tournament is never strong merely
-because someone had a breakout there, and the number is exactly what was
-knowable walking in. A club with no rated result yet is unranked and worth
-nothing; it has not shown anything.
-
-A club's standing is its rank on that point-in-time rating within its own
-division and season. The pool is the clubs that turn out in that division that
-season — the competitive field the event sits in — but every rating inside it
-moves with the calendar, so the same club is a different rank in May than it
-was in February and the standings are rebuilt per event. Ratings carry across
-divisions and seasons (one number per club, the model's own convention), so
-"current" means the club's last rated result anywhere, not its last one in
-this division.
-
-Each attendee scores by band, and the event's raw total is divided by what a
-**full championship field of that division** would have scored against the
-same pool on the same day — 20 clubs in D-I college, 16 everywhere else. The
-per-division size matters: scored against a flat 16, college's championships
-read 106.5 where every other division's read 97-99, which is a bigger field
-being mistaken for a harder one. So **100 is championship strength**, and
-above 100 is earned: Florida Warm Up 2026 draws 43 college teams and scores
-100.0, level with the D-I championship it feeds.
-
-**The letters are cut per division, and S starts at the weakest national
-championship that division has held.** Every Nationals is therefore an S, and
-stays one — the anchor is recomputed from the data, so a thinner championship
-in some future season becomes the new floor rather than dropping out of the
-tier. A/B/C follow as fractions of it (0.65, 0.33, 0.11).
-
-The bar has to move because a championship does not capture its pool equally
-everywhere: club men's Nationals runs 95-99 against D-III's 78-97. On a fixed
-bar that difference reads as quality when it is structure, and it cost club
-women's 2021 and D-III's 2023 championships their S for having drawn a thin
-field — a true statement about the field, and a confusing badge next to the
-word "Nationals".
+**The bars are per division, pinned at both ends to that division's own
+record.** Ratings are one scale across all five, so the averages are directly
+comparable — but the divisions are not equally deep, and a bar that is right
+for club men's is wrong for D-III. S is the weakest national championship the
+division has ever held, C is its median event, and A and B split the gap
+evenly.
 
 | division | S | A | B | C |
 |---|---|---|---|---|
-| club men's | ≥ 94.6 | ≥ 61.5 | ≥ 31.2 | ≥ 10.4 |
-| college | ≥ 83.6 | ≥ 54.3 | ≥ 27.6 | ≥ 9.2 |
-| college D-III | ≥ 77.9 | ≥ 50.6 | ≥ 25.7 | ≥ 8.6 |
-| club mixed | ≥ 92.6 | ≥ 60.2 | ≥ 30.6 | ≥ 10.2 |
-| club women's | ≥ 89.6 | ≥ 58.2 | ≥ 29.6 | ≥ 9.9 |
+| club men's | ≥ 1808 | ≥ 1728 | ≥ 1649 | ≥ 1569 |
+| college | ≥ 1655 | ≥ 1556 | ≥ 1457 | ≥ 1358 |
+| college D-III | ≥ 1527 | ≥ 1467 | ≥ 1407 | ≥ 1347 |
+| club mixed | ≥ 1825 | ≥ 1744 | ≥ 1664 | ≥ 1583 |
+| club women's | ≥ 1874 | ≥ 1797 | ≥ 1721 | ≥ 1644 |
 
-An S is the same claim in every division at a different number. What lands
-where:
+So an S says "the average team here was as strong as the average team at this
+division's Nationals" and a D says "a below-average field for this division" —
+the same claims everywhere, at different numbers. Every national championship
+is an S by construction and stays one: the anchor is recomputed from the data,
+so a thinner championship in some future season becomes the new floor rather
+than dropping out of the tier.
 
 | tier | n | what lands there |
 |---|---|---|
-| S | 44 | all 40 national championships, every division and season, plus college's four supermajors — Florida Warm Up 2019/2026 and Easterns 2024/2026 |
-| A | 61 | the elite regular season: Pro-Elite Challenge tops out at 86, Pro Championships at 80, the U.S. Open at 74 |
-| B | 187 | the stronger Regionals (Northeast men's peaks at 44) and the better invites |
-| C | 592 | Sectionals top out at 18 |
-| D | 1,959 | no ranked club attended |
+| S | 101 | all 40 national championships, plus the elite regular season — U.S. Opens, Pro Championships, Pro-Elite Challenge East, Florida Warm Up, Easterns |
+| A | 123 | the rest of the Triple Crown Tour and the better invites |
+| B | 327 | strong Regionals and the deeper Select Flight fields |
+| C | 875 | an ordinary field for the division |
+| D | 1,396 | below the division's median event |
 
-Ties are routine: ratings are integers and the pool holds hundreds of clubs,
-so equal ratings land on band edges. They break on the club key — arbitrary,
-but stated, and the same on every rebuild.
+For club men's, the ranges: Pro-Elite Challenge 1644-1918, U.S. Open
+1673-1978, Select Flight 1602-1743, Northeast Regionals 1479-1791, Sectionals
+1475-1668. 48 events carry no grade at all and show a dash rather than a D:
+not one club in the field had a rating yet, which is the first weekends of the
+corpus and the novelty 4v4 and goalty brackets the model never rated.
+
+There are no ranks left to tie: the mean does not care about ordering, so the
+per-event standings and their tie-break rule are gone with the bands.
 
 Attendance is the set of clubs the model scored games for, so a team that
-registered and never played is not counted. **27 events carry no grade at all
-and show a dash rather than a D**, which is a different claim. Ten are novelty
-4v4 and goalty brackets the model never rated. The other seventeen are events
-where fewer than 32 clubs — twice the reference field — carried a rating on
-the day, which happens in exactly two places: the first weekends of 2017,
-where the corpus begins and nobody has played yet, and D-III's COVID-truncated
-2020, where 19 rated clubs put a single team in the top 2% band. Outside
-those, the thinnest pool any event faces is 48 clubs and the median is 244.
+registered and never played is not counted.
 
 **The tracker takes played games from USAU, not from you.** Every fixture with
 a final score arrives with it, renders the score where an unplayed game renders
