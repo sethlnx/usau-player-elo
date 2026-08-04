@@ -4,14 +4,14 @@ the series each instance belongs to.
 USAU publishes a flat list of fixtures per event. It does NOT publish the
 structure over them — which games formed a pool, which bracket a game sat in,
 or that this year's Sectional is the same tournament as last year's. The
-`stage` column is free text typed by ~3,000 different organisers and runs to
-3,300 distinct values, including "Chumpionship 9", "GAME TO GO TO THE GAME TO
-GO" and "Round Name". So the structure is recovered rather than read:
+`stage` column is free text typed by thousands of different organisers and runs
+to 4,139 distinct values, including "Chumpionship 9", "GAME TO GO TO THE GAME
+TO GO" and "Round Name". So the structure is recovered rather than read:
 
-    pools     cliques in the co-play graph      (labels unusable: 2,103 of the
-                                                 2,680 events with pool play
-                                                 file every fixture under one
-                                                 heading)
+    pools     cliques in the co-play graph      (labels unusable: of the 2,546
+                                                 events where two or more pools
+                                                 were recovered, 1,447 file
+                                                 them under one heading)
     brackets  round RANK from the label, feeder wiring from the results
     series    the printed name with everything that varies between instances
               taken out
@@ -389,13 +389,14 @@ def decompose(games):
         rest = rest + left
     else:
         # Nothing says "pool", so the pools have to be recovered structurally
-        # from the whole schedule — 2,103 of 2,680 events file every fixture
-        # under one heading. What that must NOT do is eat a game the organiser
-        # already placed: a clique through the Final's edge is indistinguishable
-        # from a round robin on structure alone, and swallowing it loses the
-        # bracket. Centex 2023 lost Colorado's universe-point title that way,
-        # and the Northwest mixed Regional lost BFG's. Labels decide brackets
-        # everywhere else in this module; they decide here too.
+        # from the whole schedule — 1,447 of the 2,546 multi-pool events file
+        # every fixture under one heading. What that must NOT do is eat a game
+        # the organiser already placed: a clique through the Final's edge is
+        # indistinguishable from a round robin on structure alone, and
+        # swallowing it loses the bracket. Centex 2023 lost Colorado's
+        # universe-point title that way, and the Northwest mixed Regional lost
+        # BFG's. Labels decide brackets everywhere else in this module; they
+        # decide here too.
         named = [g for g in rest if classify(g["stage"])]
         pools, left = pools_of([g for g in rest if not classify(g["stage"])])
         rest = left + named

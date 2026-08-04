@@ -73,7 +73,7 @@ OUT = DB_PATH.parent.parent / "docs" / "index.html"
 HIST_OUT = OUT.parent / "history.js"
 HIST_GLOBAL = "__USAU_HISTORY__"
 
-# Bucketed by SEASON, not by event. Per-event files would be 2,870 of them at
+# Bucketed by SEASON, not by event. Per-event files would be 3,810 of them at
 # ~170 bytes gzipped each, where request overhead costs more than the body and
 # every rebuild churns the whole directory; per-season is ten files of 12-65 KB
 # and a session that stays inside one year pays once.

@@ -66,7 +66,9 @@ import statistics
 # Half a Nationals field. The mean is taken against this many notional clubs
 # rated at the division's own median event, which is what stops a two-team
 # showcase claiming the top on two data points. At 6 it removes every
-# small-field S while leaving all 40 national championships in S; a 16-team
+# small-field S while leaving every national championship in S — 73 of the 81
+# Nationals-or-major events grade S, the exceptions being the U.S. Open, which
+# is an invitational, and one name that merely contains "Nationals"; a 16-team
 # event moves by a few Elo, a 2-team one by hundreds.
 PRIOR = 6
 
@@ -203,7 +205,7 @@ def score_events(history):
 # analysis/rankings.py truncates the event name to 46 characters on its way
 # into history.json and keeps no event id, so this is the join back to the
 # tournament rows. Date, season and division make it unique on both sides:
-# 2,861 history events, 2,861 distinct keys.
+# 3,800 history events, 3,800 distinct keys.
 def _key(date, name, season, div):
     return ((date or "")[:10], (name or "")[:46], season, div)
 

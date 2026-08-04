@@ -174,14 +174,15 @@ sum to the unfiltered count. The U.S. Open tracker remains club men's.
 
 USAU publishes a flat fixture list per event and nothing about its shape, so
 the shape is **recovered** rather than read. The `stage` column is free text
-typed by thousands of organisers and runs to 3,300 distinct values, including
+typed by thousands of organisers and runs to 4,139 distinct values, including
 `Chumpionship 9`, `GAME TO GO TO THE GAME TO GO` and `Round Name`. Two
 different strategies, in `analysis/tournaments.py`:
 
 **Pools are found structurally**, as sets of teams that have all played each
 other — cliques in the co-play graph — because the labels carry no
-information: 2,103 of the 2,680 events with pool play file every fixture under
-one heading. Cliques consume EDGES rather than teams, so a placement round
+information: of the 2,546 events where two or more pools were recovered, 1,447
+file them under a single pool heading, so the label cannot tell one from
+another. Cliques consume EDGES rather than teams, so a placement round
 robin reusing teams from the opening pools is still found, and a rematch
 counts for the later pool instead of twice in the first pool's standings. The
 clique chosen through a fixture is the one spanning the fewest CALENDAR DAYS,
@@ -198,11 +199,11 @@ showing no bracket is better than inventing one. Every rank-0 game is a root,
 so a college invite running two flights off one schedule yields two trees
 rather than one tree and a pile of orphans. Anything the label does not place
 lands under **Placement & other games** with the organiser's own wording.
-Across the corpus this puts 87.3% of the 90,505 completed games into a pool or
+Across the corpus this puts 87.4% of the 115,057 completed games into a pool or
 a bracket and loses none: every game is displayed somewhere.
 
-**Labels also fence the structural recovery.** Most events name no pool at all
-— 2,103 of the 2,680 with pool play file every fixture under one heading — so
+**Labels also fence the structural recovery.** Most events name no pool that
+distinguishes anything — 1,447 of the 2,546 multi-pool events, above — so
 when nothing matches "pool" the cliques are sought across the whole schedule.
 That fallback used to run over the labelled games too, and on structure alone
 a clique through the Final's edge is indistinguishable from a round robin, so
@@ -210,8 +211,9 @@ it sometimes ate one and the bracket lost its final. Centex 2023 lost
 Colorado's universe-point title that way and the Northwest mixed Regional lost
 BFG's. Excluding anything the label already places recovered 11 finals that
 were never found, moved 355 games out of phantom pools into the brackets they
-belonged to (84.6% -> 87.3% placed), changed no champion that was already
-right, and lost none.
+belonged to (84.6% -> 87.3% placed, measured on the five-division corpus that
+change was made against), changed no champion that was already right, and lost
+none.
 
 Cliques that tie on days and size then settle on their team names. That buys
 nothing but reproducibility, and it is not optional: cliques come out of a
@@ -221,8 +223,8 @@ build. Five events used to flip their champion between builds.
 
 A **series** is the printed name with everything that varies between instances
 taken out — the year, the edition number (`Cooler Classic 30`), the division
-wording, and whatever suffix that season used (`- ICC`, `(ICC)`). 2,870 events
-collapse to 670 series, so opening the 2025 U.S. Open also shows the other 23
+wording, and whatever suffix that season used (`- ICC`, `(ICC)`). 3,810 events
+collapse to 776 series, so opening the 2025 U.S. Open also shows the other 23
 instances and who won each. Division wording goes because division is its own
 facet: a Sectional's men's and women's halves are one tournament run twice.
 "Open" is deliberately kept — it is load-bearing in "U.S. Open". Standings
@@ -232,7 +234,7 @@ game here has a score, so rating never enters.
 
 Club identity is the normalized name, so "Rhino" and "Rhino Slam!" are one
 club and a college program's D-I and D-III sides are one program. Mixed and
-women's keys carry a suffix on top of that: 73 club names (5 active in 2026)
+women's keys carry a suffix on top of that: 337 club names (281 active in 2026)
 exist in more than one gender division, and men's Phoenix and women's Phoenix
 are two teams. The men's group keeps the bare key, so every pre-existing
 identity is byte-identical to before.
@@ -296,11 +298,14 @@ made a 2-team exhibition championship-grade. So the average is taken against a
 **prior of half a Nationals field** of merely typical clubs. A 16-team event
 moves by a few Elo; a 2-team one is dragged most of the way back to ordinary,
 because two results are not evidence of a tournament. At `PRIOR = 6` that
-removes every small-field S while leaving all 40 national championships in S.
+removes every small-field S while leaving every national championship in S: 73
+of the 81 events the series tier files as Nationals-or-major grade S, and the
+eight that do not are U.S. Opens — an invitational, graded on the field that
+actually turned up — plus one event whose name merely contains "Nationals".
 It is the only correction applied, and it is one line.
 
 **The bars are per division, pinned at both ends to that division's own
-record.** Ratings are one scale across all five, so the averages are directly
+record.** Ratings are one scale across all seven, so the averages are directly
 comparable — but the divisions are not equally deep, and a bar that is right
 for club men's is wrong for D-III. S is the weakest national championship the
 division has ever held, C is its median event, and A and B split the gap
@@ -308,11 +313,13 @@ evenly.
 
 | division | S | A | B | C |
 |---|---|---|---|---|
-| club men's | ≥ 1808 | ≥ 1728 | ≥ 1649 | ≥ 1569 |
-| college | ≥ 1655 | ≥ 1556 | ≥ 1457 | ≥ 1358 |
-| college D-III | ≥ 1527 | ≥ 1467 | ≥ 1407 | ≥ 1347 |
-| club mixed | ≥ 1825 | ≥ 1744 | ≥ 1664 | ≥ 1583 |
-| club women's | ≥ 1874 | ≥ 1797 | ≥ 1721 | ≥ 1644 |
+| club men's | ≥ 1808 | ≥ 1729 | ≥ 1649 | ≥ 1570 |
+| college men's | ≥ 1664 | ≥ 1562 | ≥ 1460 | ≥ 1358 |
+| college men's D-III | ≥ 1527 | ≥ 1468 | ≥ 1408 | ≥ 1349 |
+| club mixed | ≥ 1821 | ≥ 1742 | ≥ 1662 | ≥ 1583 |
+| club women's | ≥ 1869 | ≥ 1792 | ≥ 1715 | ≥ 1638 |
+| college women's | ≥ 1712 | ≥ 1614 | ≥ 1517 | ≥ 1419 |
+| college women's D-III | ≥ 1528 | ≥ 1486 | ≥ 1444 | ≥ 1402 |
 
 So an S says "the average team here was as strong as the average team at this
 division's Nationals" and a D says "a below-average field for this division" —
@@ -323,11 +330,11 @@ than dropping out of the tier.
 
 | tier | n | what lands there |
 |---|---|---|
-| S | 101 | all 40 national championships, plus the elite regular season — U.S. Opens, Pro Championships, Pro-Elite Challenge East, Florida Warm Up, Easterns |
-| A | 123 | the rest of the Triple Crown Tour and the better invites |
-| B | 327 | strong Regionals and the deeper Select Flight fields |
-| C | 875 | an ordinary field for the division |
-| D | 1,396 | below the division's median event |
+| S | 117 | every national championship, plus the elite regular season — U.S. Opens, Pro Championships, Pro-Elite Challenge East, Florida Warm Up, Easterns |
+| A | 143 | the rest of the Triple Crown Tour and the better invites |
+| B | 421 | strong Regionals and the deeper Select Flight fields |
+| C | 1,208 | an ordinary field for the division |
+| D | 1,866 | below the division's median event |
 
 For club men's, the ranges: Pro-Elite Challenge 1644-1918, U.S. Open
 1673-1978, Select Flight 1602-1743, Northeast Regionals 1479-1791, Sectionals
@@ -470,7 +477,7 @@ and 3.
 Bucket granularity is chosen against request overhead, not against total
 bytes. Chunking costs 26% overall, because each file gzips in its own window;
 what it buys is that nobody downloads a bucket they never open. Per-event
-tournament files would have been 2,870 of them at ~170 bytes gzipped, where
+tournament files would have been 3,810 of them at ~170 bytes gzipped, where
 the request costs more than the body and every rebuild churns the whole
 directory. Ten seasons and 32 hash buckets put the worst single fault at
 106 KB.
