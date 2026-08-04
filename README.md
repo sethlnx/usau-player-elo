@@ -149,7 +149,7 @@ as it does on Pages.
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
 searchable player table over all seven divisions, a **Trends** tab drawing one line per
 season for every player or club that has ever closed a season in the top 25,
-and a **Tournaments** browser over all 3,809 events.
+and a **Tournaments** browser over all 3,863 events.
 It reads only the published artifacts and never replays the model, so the page
 cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
 
@@ -216,7 +216,7 @@ reading exactly that and the label path crowned Clutch, who won the NINTH-place
 bracket, over Alamode, who won the event. `scraper/structure.py` attaches that
 structure to games already in the DB — joined on the unordered team pair and
 score, since `games.slot` postdates most of the corpus — and
-`analysis/tournaments.py` prefers it. 3,024 of the 3,809 events with completed
+`analysis/tournaments.py` prefers it. 3,041 of the 3,863 events with completed
 games (79%) now have it.
 
 Two things are still inferred, because the mirror gets them wrong. A published
@@ -279,13 +279,26 @@ build. Five events used to flip their champion between builds.
 
 A **series** is the printed name with everything that varies between instances
 taken out — the year, the edition number (`Cooler Classic 30`), the division
-wording, and whatever suffix that season used (`- ICC`, `(ICC)`). 3,810 events
-collapse to 776 series, so opening the 2025 U.S. Open also shows the other 23
-instances and who won each. Division wording goes because division is its own
-facet: a Sectional's men's and women's halves are one tournament run twice.
-"Open" is deliberately kept — it is load-bearing in "U.S. Open". Standings
-break ties on head-to-head inside the tied group, then point differential; every
-game here has a score, so rating never enters.
+wording, the tour brand (`USAU`, `TCT`), and whatever suffix that season used
+(`- ICC`, `(ICC)`). 3,863 events collapse to 771 series, so opening the 2025
+U.S. Open also shows the other 23 instances and who won each. Division wording
+goes because division is its own facet: a Sectional's men's and women's halves
+are one tournament run twice. "Open" is deliberately kept — it is load-bearing
+in "U.S. Open".
+
+`TCT` goes for the same reason `USAU` does, and it earns its place: USAU dropped
+the prefix in 2025, which split the Pro-Elite Challenge East and West into
+`tct pro elite challenge west` for 2023-24 and `pro elite challenge west` for
+2025-26, so a 2026 page showed nothing before 2025. Stripping it merges exactly
+six series and over-merges none — the other five are the Select Flight Invite,
+its East, the Elite-Select Challenge and the Pro Championships. The single
+pre-2023 Pro-Elite Challenge stays its own series, correctly: one tournament
+that later became two regional ones is not either of them.
+
+A series spanning divisions gets a **picker** in the tournament view, opening on
+the division being looked at, because three divisions on one weekend are three
+separate histories. Standings break ties on head-to-head inside the tied group,
+then point differential; every game here has a score, so rating never enters.
 
 Club identity is the normalized name, so "Rhino" and "Rhino Slam!" are one
 club and a college program's D-I and D-III sides are one program. Mixed and

@@ -99,7 +99,7 @@ NOISE_RE = [re.compile(p, re.I) for p in [
     r"\b(19|20)\d{2}\b",
     r"\b(men'?s?|women'?s?|mixed|coed|co-ed)\b",
     r"\b(d-?\s?i{1,3}|d-?\s?1|d-?\s?3|division\s+\d+|di{1,3})\b",
-    r"\bcollege\b", r"\bclub\b", r"\bultimate\b", r"\busau?\b",
+    r"\bcollege\b", r"\bclub\b", r"\bultimate\b", r"\busau?\b", r"\btct\b",
     r"\b(part|pt\.?)\s*\d+\b", r"#\s*\d+\b",
     r"\s[-\u2013\u2014]\s.*$",          # trailing " - ICC", " - Day 2"
     r"\((?:[^)]*)\)",                   # "(ICC)", "(B Teams)"
