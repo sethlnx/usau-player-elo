@@ -299,6 +299,10 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 #tvhead .meta{color:var(--ink-3);font-size:13px}
 .sect{font-size:13px;margin:24px 0 9px;color:var(--ink-2)}
 .sect .muted{font-weight:400}
+/* The series-history division picker sits inside its own heading, so it takes
+   the heading's scale rather than the filter bars' 14px. */
+.sect select{font:inherit;font-size:12px;padding:2px 6px;margin-left:9px;
+  vertical-align:baseline;border-radius:6px}
 /* Bracket geometry, parameterised. A recovered bracket runs from one round to
    seven, so columns, rows and the connector pitch are all set inline per
    tournament. */
@@ -1619,13 +1623,17 @@ function drawTournament(i) {
   // The series history. Shown whenever there is more than this instance —
   // across seasons AND across divisions, since a Sectional's men's and
   // women's halves are one tournament run twice on the same weekend.
+  //
+  // A series that spans divisions gets a picker, defaulting to the one being
+  // viewed. Pro Elite Challenge West runs men's, mixed and women's on one
+  // weekend, so an undivided list interleaved three tournaments and asked the
+  // reader to filter twenty rows by eye to answer "who won this before?".
+  let seriesRows = null;
   if (sibs.length > 1) {
-    html += `<h3 class="sect">${esc(ser[0])} <span class="muted">\u2014 ` +
-      `${sibs.length} instances on record</span></h3>` +
-      `<table class="evtbl"><thead><tr><th class="n">Year</th><th>Division</th>` +
-      `<th>Event</th><th class="n">Teams</th><th class="n">Field</th>` +
-      `<th>Champion</th></tr></thead><tbody>` +
-      sibs.slice().reverse().map(j => {
+    const divs = [...new Set(sibs.map(j => EVS[j][3]))].sort((a, b) => a - b);
+    seriesRows = d => sibs.slice().reverse()
+      .filter(j => d === 'all' || EVS[j][3] === d)
+      .map(j => {
         const s = EVS[j];
         const ch = s[10] >= 0 ? `<span class="crown">${esc(ETM[s[10]])}</span>`
                               : '<span class="muted">\u2014</span>';
@@ -1634,9 +1642,34 @@ function drawTournament(i) {
           `${esc(EDIVL[s[3]] || '')}</span></td><td>${esc(s[1])}</td>` +
           `<td class="n">${s[7]}</td><td class="n">${strCell(s)}</td>` +
           `<td>${ch}</td></tr>`;
-      }).join('') + `</tbody></table>`;
+      }).join('');
+    // One division in the series means nothing to pick between, and the column
+    // already says which it is.
+    const start = divs.length > 1 ? e[3] : 'all';
+    const pick = divs.length > 1
+      ? ` <select id="sdiv">` +
+        divs.map(d => `<option value="${d}"${d === e[3] ? ' selected' : ''}>` +
+                      `${esc(EDIVL[d] || '')}</option>`).join('') +
+        `<option value="all">All divisions</option></select>`
+      : '';
+    html += `<h3 class="sect">${esc(ser[0])} <span class="muted">\u2014 ` +
+      `<span id="scount">${sibs.length}</span> instances on record</span>` +
+      `${pick}</h3>` +
+      `<table class="evtbl"><thead><tr><th class="n">Year</th><th>Division</th>` +
+      `<th>Event</th><th class="n">Teams</th><th class="n">Field</th>` +
+      `<th>Champion</th></tr></thead><tbody id="sbody">${seriesRows(start)}</tbody></table>`;
   }
   $('#tvbody').innerHTML = html;
+  // Re-rendered rather than re-drawn: drawTournament rebuilds the whole view
+  // and would reset the picker to the viewed division on every change. Row
+  // clicks survive because #tvbody delegates them.
+  const sd = $('#sdiv');
+  if (sd) sd.onchange = () => {
+    const d = sd.value === 'all' ? 'all' : +sd.value;
+    $('#sbody').innerHTML = seriesRows(d);
+    $('#scount').textContent = $('#sbody').children.length;
+  };
+  if (sd) $('#scount').textContent = $('#sbody').children.length;
   $('#tvnote').innerHTML =
     `USAU publishes a flat fixture list per event and nothing about its shape, ` +
     `so the shape here is <b>recovered</b>. A pool is a set of teams that have ` +
@@ -1649,8 +1682,11 @@ function drawTournament(i) {
     `inferred, a slot reading back to the game that team won. Anything the ` +
     `label does not place lands in Other games under whatever it was called. ` +
     `Standings break ties on head-to-head inside the tied group, then point ` +
-    `differential. Team names in <span class="nmlink">this style</span> open ` +
-    `that club's rating history.`;
+    `differential. The series history opens on the division you are looking at ` +
+    `and the picker beside it switches to the others, since a tournament ` +
+    `running three divisions on one weekend is three separate histories. Team ` +
+    `names in <span class="nmlink">this style</span> open that club's rating ` +
+    `history.`;
 }
 const POOLTAG = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
