@@ -8,14 +8,17 @@ from bs4 import BeautifulSoup
 
 from . import fetch
 
-# URL path segment per division. College's slug has no hyphen (verified: the
-# hyphenated form 404s, /schedule/Men/CollegeMen/ serves the page). The club
-# gender slugs do carry it — /schedule/Mixed/Club-Mixed/ and
+# URL path segment per division. The college slugs have no hyphen (verified
+# against a live event both ways: /schedule/Men/CollegeMen/ and
+# /schedule/Women/CollegeWomen/ serve, and both hyphenated forms 404). The
+# club gender slugs do carry it — /schedule/Mixed/Club-Mixed/ and
 # /schedule/Women/Club-Women/ both serve, their unhyphenated forms 404. D-III
-# is not a separate path — USAU files it under the same College Men schedule,
-# so the split is by event NAME, done in build_db.
+# is not a separate path on either level — USAU files it under the same
+# College schedule, so the split is by event NAME, done in build_db.
 DIVISION_PATHS = {"club-men": "Men/Club-Men", "college": "Men/CollegeMen",
                   "college-d3": "Men/CollegeMen",
+                  "college-women": "Women/CollegeWomen",
+                  "college-women-d3": "Women/CollegeWomen",
                   "club-women": "Women/Club-Women",
                   "club-mixed": "Mixed/Club-Mixed"}
 

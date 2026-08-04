@@ -38,7 +38,7 @@ only correction applied, and it costs one line.
 
 ## The bars are per division, and anchored at both ends
 
-Ratings are one scale across all five divisions, so the averages are directly
+Ratings are one scale across all seven divisions, so the averages are directly
 comparable — but the divisions are not equally deep, and a bar that is right
 for club men's is wrong for D-III. Each division's ladder is pinned to two
 facts about itself:

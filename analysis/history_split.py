@@ -15,9 +15,10 @@ rather than derived in the browser:
 **Trends.** `seasonData` in the page used to walk all 39,325 trajectories to
 get a per-season median and a per-season top-25 cut. Both are population
 statistics, so no subset computes them, and that single function pinned the
-whole player corpus in memory. There are only 24 distinct answers (subject x
-division x gender-matching), so they are computed once here — 40 KB gzipped
-for every combination, against 1.9 MB for the corpus they replace.
+whole player corpus in memory. The distinct answers (subject x division x
+gender-matching) number 32 across seven divisions, so they are computed once
+here — 40 KB gzipped for every combination, against 1.9 MB for the corpus
+they replace.
 
 **Which (club, event) pairs have games.** The event table marks a row
 expandable only where the model scored games, which asked `games[evIdx]` for
@@ -80,8 +81,9 @@ def _combo(items, events, seasons, six, labels, gender, div, gen):
             continue
         vals = [None] * len(seasons)
         for season, pdiv, elo in _decode(entry, events):
-            # A division selects POINTS, never whole subjects: 301 club keys
-            # play in more than one, so any per-subject verdict misfiles them.
+            # A division selects POINTS, never whole subjects: 461 club keys
+            # play in more than one (multi_division_clubs counts them), so any
+            # per-subject verdict misfiles them.
             if div is not None and pdiv != div:
                 continue
             si = six.get(season)
@@ -122,7 +124,15 @@ def _trends(history, player_names, genders, seasons, six):
     """Every Trends answer the four controls can ask for.
 
     Clubs carry no gender-matching group, so the page normalizes gen to 'all'
-    on that side and only six club combinations exist rather than eighteen.
+    on that side and only eight club combinations exist rather than twenty-four.
+
+    The division codes are read off the EVENT table rather than listed here.
+    They used to be a literal ("all", "0".."4"), which silently stopped one
+    short when college women's and college women's D-III became codes 5 and 6:
+    `seasonData` finds no key for a division nobody generated, falls through to
+    its empty default, and Trends draws a blank chart with no error anywhere.
+    Deriving them means a division appears on Trends as soon as it has a rated
+    event, and an eighth needs no edit here.
 
     Players are walked in ASCENDING pid, which is what the browser did when
     this ran there: `for (const key in obj)` visits integer-like keys in
@@ -133,18 +143,44 @@ def _trends(history, player_names, genders, seasons, six):
     events = history["events"]
     tn = history.get("teamNames", {})
     players = history["players"]
+    codes = sorted({ev[3] for ev in events
+                    if len(ev) > 3 and isinstance(ev[3], int)})
     out = {}
     for kind, items, labels in (
             ("p", [(k, players[k]) for k in sorted(players, key=int)],
              lambda k: player_names.get(k, "Player " + k)),
             ("c", list(history["teams"].items()), lambda k: tn.get(k) or k)):
-        for div in ("all", "0", "1", "2", "3", "4"):
+        for div in ("all", *(str(c) for c in codes)):
             for gen in (("all", "1", "2") if kind == "p" else ("all",)):
                 out[f"{kind}|{div}|{gen}"] = _combo(
                     items, events, seasons, six, labels, genders,
                     None if div == "all" else int(div),
                     None if (gen == "all" or kind != "p") else int(gen))
     return out
+
+
+def trend_series_range(core):
+    """(min, max) drawn lines over the Trends views that have any.
+
+    Empty views are excluded deliberately. Six subject x gender combinations
+    are impossible by construction — a men's division has no female-matching
+    players — so including them would report a floor of 0 describing views no
+    reader can reach.
+    """
+    counts = [len(v["top"]) for v in core.get("trends", {}).values() if v["top"]]
+    return (min(counts), max(counts)) if counts else (0, 0)
+
+
+def multi_division_clubs(core):
+    """Club identities whose rated events span more than one division.
+
+    Lives here because it has to read the same delta encoding `_decode` owns;
+    the Trends note quotes it to explain why narrowing the division re-ranks a
+    club rather than removing it.
+    """
+    events = core["events"]
+    return sum(1 for entry in core.get("teams", {}).values()
+               if len({d for _, d, _ in _decode(entry, events)}) > 1)
 
 
 def _delta(xs):

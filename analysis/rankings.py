@@ -534,17 +534,31 @@ PUBLISHED = dict(tau=500.0, involvement_credit=False,
                  low_info_anchor=0.0, roster_shrink=0.015,
                  division_scale={"club-men": 260.0, "college": 260.0,
                                  "college-d3": 260.0, "club-mixed": 220.0,
-                                 "club-women": 200.0},
+                                 "club-women": 200.0,
+                                 # UNTUNED priors, by analogy: the college
+                                 # men's scale matches club men's exactly, so
+                                 # the college women's ones take club women's.
+                                 # In descent.py's grid for the next sweep.
+                                 "college-women": 200.0,
+                                 "college-women-d3": 200.0},
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
-                                 "club-mixed": 1500.0, "club-women": 1600.0})
+                                 "club-mixed": 1500.0, "club-women": 1600.0,
+                                 # UNTUNED priors: college men's sits 250
+                                 # below club men's, so college women's takes
+                                 # club women's less the same 250. Only sets
+                                 # where a debut enters, and context_init
+                                 # overrides it wherever a teammate is rated.
+                                 "college-women": 1350.0,
+                                 "college-women-d3": 1350.0})
 # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
-# both "c", which silently labelled every club event as college. Five codes
-# now — a binary flag sent every D-III event back to "club". Codes are
-# positional: history.json stores them per event, player_elo.csv packs them
-# into a bitmask, and the site's DIVLABEL mirrors them. APPEND, never reorder.
+# both "c", which silently labelled every club event as college. Seven codes
+# now. Codes are positional: history.json stores them per event,
+# player_elo.csv packs them into a bitmask, and the site's DIVLABEL mirrors
+# them. APPEND, never reorder.
 DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
-           "club-mixed": 3, "club-women": 4}
+           "club-mixed": 3, "club-women": 4,
+           "college-women": 5, "college-women-d3": 6}
 # Divisions the team tables cover, in display order. College is included so
 # the club tables reach as far as the player table and Trends do, but its
 # three roster bases carry less information than a club division's: a college
@@ -555,7 +569,8 @@ DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
 # divisions. Less discriminating, not meaningless -- 43% of D-III clubs and
 # 82% of college ones still vary their entry.
 TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
-                  "college", "college-d3"]
+                  "college", "college-d3",
+                  "college-women", "college-women-d3"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and

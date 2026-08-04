@@ -45,13 +45,13 @@ from pathlib import Path
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "usau.db"
 AMBIGUITY_REPORT = DB_PATH.parent / "ambiguities.csv"
 
-# Gender-matching groups. The club/college/college-d3 divisions are all
-# Club-Men / College-Men competition levels (see scraper.build_db.DIVISIONS),
-# so "has played men's" is a division fact, not an inference. Mixed belongs to
-# neither: it is the bridge, and a mixed player's group is read off the
-# Pronouns column USAU publishes on the roster page.
+# Gender-matching groups. Every division here sits on a Men's or a Women's
+# competition level (see scraper.build_db.DIVISIONS), so "has played women's"
+# is a division fact, not an inference. Mixed belongs to neither: it is the
+# bridge, and a mixed player's group is read off the Pronouns column USAU
+# publishes on the roster page.
 MENS_DIVISIONS = {"club-men", "college", "college-d3"}
-WOMENS_DIVISIONS = {"club-women"}
+WOMENS_DIVISIONS = {"club-women", "college-women", "college-women-d3"}
 MIXED_DIVISIONS = {"club-mixed"}
 
 

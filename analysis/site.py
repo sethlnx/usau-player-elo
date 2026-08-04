@@ -37,6 +37,7 @@ from analysis.backtest import DB_PATH
 from analysis.field_strength import TIER_NAMES as FIELD_TIER_NAMES
 from analysis.field_strength import classify as classify_strength
 from analysis.history_split import BUCKETS as HIST_BUCKETS
+from analysis.history_split import multi_division_clubs, trend_series_range
 from analysis.history_split import split as split_history
 from analysis.rankings import DIVCODE, PUBLISHED, TEAM_DIVISIONS
 from analysis.tournaments import build as build_tournaments
@@ -412,7 +413,16 @@ def build():
     write_buckets(PLAY_DIR, PLAY_GLOBAL, hplay)
     write_buckets(ROST_DIR, ROST_GLOBAL, hrost)
     write_buckets(GAME_DIR, GAME_GLOBAL, hgame)
-    OUT.write_text(TEMPLATE.replace("__DATA__", json.dumps(payload, separators=(",", ":"))))
+    # Two figures in the Trends note describe the payload, so they are measured
+    # off it rather than typed into the prose. Both had gone stale by the time
+    # college women's arrived — the drawn-line range read "67 to 164" while a
+    # view now reaches 192, and the multi-division club count said 301 against
+    # an actual 461. history_split owns the encoding, so it does the counting.
+    lo, hi = trend_series_range(hcore)
+    OUT.write_text(TEMPLATE
+                   .replace("__DATA__", json.dumps(payload, separators=(",", ":")))
+                   .replace("__TRENDN__", f"{lo} to {hi}")
+                   .replace("__MULTIDIV__", f"{multi_division_clubs(hcore):,}"))
     (OUT.parent / ".nojekyll").write_text("")
     kb, hkb = OUT.stat().st_size / 1024, HIST_OUT.stat().st_size / 1024
     print(f"wrote {OUT} ({kb:,.0f} KB) + {HIST_OUT.name} ({hkb:,.0f} KB) + .nojekyll")
@@ -801,14 +811,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <option value="best">Best full-strength roster of 2026</option>
       <option value="upcoming">Next event roster</option>
     </select>
-    <select id="cdiv">
-      <option value="all">All divisions</option>
-      <option value="0">Club Men's</option>
-      <option value="1">College</option>
-      <option value="2">College D-III</option>
-      <option value="3">Club Mixed</option>
-      <option value="4">Club Women's</option>
-    </select>
+    <select id="cdiv"></select>
     <span class="count" id="ccount"></span>
   </div>
   <table><thead><tr>
@@ -828,14 +831,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <option value="120">120+ games</option>
       <option value="200">200+ games</option>
     </select>
-    <select id="pdiv">
-      <option value="all">All divisions</option>
-      <option value="0">Club Men's</option>
-      <option value="1">College</option>
-      <option value="2">College D-III</option>
-      <option value="3">Club Mixed</option>
-      <option value="4">Club Women's</option>
-    </select>
+    <select id="pdiv"></select>
     <select id="pgen">
       <option value="all">All genders</option>
       <option value="1">Male-matching</option>
@@ -854,14 +850,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div id="tlist">
     <div class="bar">
       <input type="search" id="eq" placeholder="Search tournament, city…" autocomplete="off">
-      <select id="ediv">
-        <option value="all">All divisions</option>
-        <option value="0">Club Men's</option>
-        <option value="1">College</option>
-        <option value="2">College D-III</option>
-        <option value="3">Club Mixed</option>
-        <option value="4">Club Women's</option>
-      </select>
+      <select id="ediv"></select>
       <select id="eyear"></select>
       <select id="etier">
         <option value="all">All tournaments</option>
@@ -907,14 +896,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <option value="p">Players</option>
       <option value="c">Clubs</option>
     </select>
-    <select id="tdiv">
-      <option value="all">All divisions</option>
-      <option value="0">Club Men's</option>
-      <option value="1">College</option>
-      <option value="2">College D-III</option>
-      <option value="3">Club Mixed</option>
-      <option value="4">Club Women's</option>
-    </select>
+    <select id="tdiv"></select>
     <select id="tgen">
       <option value="all">All genders</option>
       <option value="1">Male-matching</option>
@@ -967,6 +949,15 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct = v => (v*100).toFixed(1) + '%';
+// Division wording lives HERE, once. It used to be spelled out at six call
+// sites and every one of them said "five" after college women's and college
+// women's D-III made it seven, so the published page asserted a corpus it did
+// not have. EDIVL is the real list but is declared far below this point, and
+// these strings are assigned at load, so it cannot be counted here without a
+// TDZ error — keep NDIV in step with rankings.TEAM_DIVISIONS instead.
+const NDIV = 'seven';
+const NDIV_LIST = "club men's, mixed and women's, college men's and women's, " +
+  'and D-III in both college divisions';
 
 /* The caveat that has to travel with any cross-gender comparison on this page.
    Men's and women's players never meet, so their ratings are commensurable
@@ -1000,8 +991,8 @@ document.querySelectorAll('nav button').forEach(
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
   `softmax-weighted mean of its event roster. Clubs, Players, Trends and ` +
-  `Tournaments all span the same five divisions — club men's, mixed and ` +
-  `women's, college and college D-III. The U.S. Open tracker is club men's. ` +
+  `Tournaments all span the same ${NDIV} divisions — ${NDIV_LIST}. ` +
+  `The U.S. Open tracker is club men's. ` +
   `Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
@@ -1019,7 +1010,7 @@ const CNOTE = {
 /* College is in these tables so they reach as far as the player table and
    Trends, but its roster bases say less. Measured on 2025. */
 const COLLEGE_NOTE =
-  'All five divisions share one rating scale, so they share one list — but ' +
+  `All ${NDIV} divisions share one rating scale, so they share one list — but ` +
   'the three roster bases mean less in college, where a squad is often ' +
   'registered for the season rather than the event: 57% of D-III clubs and ' +
   '18% of college ones filed an identical roster at every event they entered ' +
@@ -1032,7 +1023,7 @@ function drawClubs() {
   // inside its own division on the tooltip. Searching is a lookup, not a
   // re-ranking, so hits come back sparse (#3, #17, #41).
   //
-  // All five divisions can share one list because they share one rating
+  // All divisions can share one list because they share one rating
   // scale, bridged through mixed — the same reason the player table and
   // Trends span them. What the merged order is NOT is a prediction: club
   // men's and college teams never play, so #4 above #5 across that line is
@@ -1161,7 +1152,7 @@ $('#pnote').textContent =
   `alongside: it runs in the spring and club in the summer, so 1,789 people ` +
   `are genuinely in both and appear in both. Their rating is ` +
   `still the one number they carry everywhere, not a per-division rating. ` +
-  `All five divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
+  `All ${NDIV} divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
 
 /* ---------- U.S. Open ---------- */
 const U = D.usopen, R = U.ratings, SCALE = D.scale;
@@ -1586,7 +1577,8 @@ function faultTier(tier, key, done) {
 // to be a 3-slot array with an `|| 'club'` fallback, which silently labelled
 // every mixed and women's event as club men's the moment those divisions
 // existed. Keep this the same length as DIVCODE.
-const DIVTAG = ["men's", 'college', 'D-III', 'mixed', "women's"];
+const DIVTAG = ["men's", "college men's", "college men's D-III", 'mixed',
+                "women's", "college women's", "college women's D-III"];
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -2095,8 +2087,17 @@ const EVS = TV.events, ESER = TV.series, ETM = TV.teams;
    off the event row precisely so that 400 rendered rows pull no games. */
 const EDET = {};
 const EVBYID = new Map(EVS.map((e, i) => [e[0], i]));
-const EDIVL = ["Club Men's", 'College', 'College D-III', 'Club Mixed',
-               "Club Women's"];
+const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
+               'Club Mixed', "Club Women's",
+               "College Women's", "College Women's D-III"];
+/* Clubs, Players, Tournaments and Trends all offer the same divisions, so
+   they are filled from EDIVL rather than written out four times — adding an
+   eighth division should be one edit in analysis/rankings.py DIVCODE and one
+   here, not five HTML blocks that drift apart. */
+['#cdiv', '#pdiv', '#ediv', '#tdiv'].forEach(sel => {
+  $(sel).innerHTML = '<option value="all">All divisions</option>' +
+    EDIVL.map((label, i) => `<option value="${i}">${esc(label)}</option>`).join('');
+});
 const EYEARS = [...new Set(EVS.map(e => e[2]))].sort((a, b) => b - a);
 // Field strength, appended to each event row by site.py: [11] score, [12]
 // tier letter. Scored in analysis/field_strength.py against the division's
@@ -2511,8 +2512,10 @@ window.addEventListener('hashchange', routeHash);
 const DASH = ['none', '5 3', '2 3', '8 3 2 3',
               '12 4', '1 3', '7 3 1 3', '3 3 9 3'];
 // Codes match the DIVCODE written into each event by analysis.rankings.
-const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: 'college',
-                  2: 'college D-III', 3: 'club mixed', 4: "club women's"};
+const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
+                  2: "college men's D-III", 3: 'club mixed',
+                  4: "club women's", 5: "college women's",
+                  6: "college women's D-III"};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};
@@ -2762,7 +2765,7 @@ $('#tgen').onchange = drawTrends;
 $('#tmode').onchange = drawTrends;
 $('#tnote').textContent =
   `One point per season: the rating after that season's last event. Every subject ` +
-  `that has ever closed a season inside the top 25 gets a line — 67 to 164 of them ` +
+  `that has ever closed a season inside the top 25 gets a line — __TRENDN__ of them ` +
   `depending on the view, which is why the field thins out and hovering is how you ` +
   `read an individual. The legend is ranked on the most recent season, not on an ` +
   `all-time peak, so it opens as the current table; hover any other season in the ` +
@@ -2774,11 +2777,11 @@ $('#tnote').textContent =
   `rather than being interpolated across. "Above season median" subtracts the ` +
   `median of every rated subject active that season. Narrowing the division keeps ` +
   `only events in it, so a season reads as the rating after that season's last ` +
-  `event in that division — 301 club identities play in more than one, and each ` +
+  `event in that division — __MULTIDIV__ club identities play in more than one, and each ` +
   `is ranked on its own record in whichever division you are looking at. Gender ` +
   `works the other way and selects whole people, since nobody changes group ` +
   `between events; it is inert for clubs. Both narrow the population, so the top ` +
-  `25 is recomputed inside whatever you have selected. All five divisions share ` +
+  `25 is recomputed inside whatever you have selected. All ${NDIV} divisions share ` +
   `one rating scale, bridged by the ${GENDER_NOTE}`;
 
 $('#enote').innerHTML =

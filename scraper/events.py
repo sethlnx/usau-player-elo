@@ -9,9 +9,11 @@ from . import fetch
 
 SEARCH_URL = fetch.BASE_URL + "/events/tournament/?ViewAll=false&IsLeagueType=false&IsClinic=false&FilterByCategory=AE"
 
+# Read off the live drpCompetitionLevelId dropdown, never inferred — the ids
+# are not sequential by any rule ("Club-Mixed" is 7, "College-Mixed" is 4).
 COMPETITION_LEVELS = {
     "Club-Men": "21", "Club-Women": "22", "Club-Mixed": "7",
-    "College-Men": "27",
+    "College-Men": "27", "College-Women": "28",
 }
 # Site dropdown value per season, read off CT_HP_Mid_1$drpSeasonId — NOT derivable.
 # It looks like `year - 2005` from 2019 up, but the sequence breaks below that:
@@ -19,13 +21,24 @@ COMPETITION_LEVELS = {
 # the pattern silently scrapes decade-old events stamped with a recent season and
 # raises nothing. Verify any new entry against the live dropdown before adding it.
 SEASON_IDS = {
+    2014: "4", 2015: "5", 2016: "6",
     2017: "7", 2018: "8", 2019: "14", 2020: "15",
     2021: "16", 2022: "17", 2023: "18", 2024: "19",
     2025: "20", 2026: "21", 2027: "22",
 }
-# Also present in the dropdown, parsers untested on them (verified values only):
-# 2016 "6", 2015 "5", 2014 "4", 2013 "3", 2012 "2", 2011 "1",
-# 2010 "9", 2009 "10", 2008 "11", 2007 "12", 2006 "13".
+# 2014-2016 verified against the live dropdown AND enumerated: 68, 64 and 75
+# Club-Men events, the same order as 2017+, so they scrape like any other year.
+#
+# The dropdown ALSO offers 2013 "3", 2012 "2", 2011 "1", 2010 "9", 2009 "10",
+# 2008 "11", 2007 "12" and 2006 "13". Do not bother: those seasons are EMPTY.
+# Enumerated every one of them — Club-Men holds a single "World Ultimate Club
+# Championships" record in 2006 and another in 2010, zero events in 2007-2009
+# and 2011-2013, and both WUCC records serve a schedule page with 0 games and
+# 0 teams. College-Men, Club-Women and Club-Mixed are the same or emptier.
+# USAU's event/roster system begins in 2014; the earlier seasons are dropdown
+# scaffolding for a few international competitions it logged without results.
+# 2014 is therefore a floor imposed by the SOURCE, not by any scraper — the
+# GraphQL mirror independently starts there too (66 of these same 68 events).
 
 
 def _form_data(page_html: str, season: int, competition_level: str,

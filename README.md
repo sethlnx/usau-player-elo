@@ -31,8 +31,10 @@ cache are gitignored and rebuilt by the commands above. There is no club
 2020 — COVID cancelled the series — but college 2020 exists and is kept: the
 series was cancelled in March, the January-March regular season was not.
 
-**Five divisions, 90,284 games.** club men's (19,682), club mixed (23,851),
-club women's (8,426), college (33,375) and college D-III (4,950), 2017-2026.
+**Seven divisions, 114,934 scored games.** club men's (19,745), club mixed
+(23,874), club women's (8,452), college men's (33,375) and its D-III (4,950),
+college women's (22,133) and its D-III (2,405), 2017-2026. The two college
+women's divisions came from the GraphQL mirror below, not the HTML scrape.
 Mixed and women's are scraped into their own DBs and merged in afterwards.
 They have to be: `events.url` is UNIQUE per division because a tournament
 cross-listed across divisions is one url (260 club/mixed urls collide), and
@@ -45,6 +47,54 @@ D-I and D-III share the College-Men competition level and the same schedule
 URL, so `--division college` takes every event whose name is not D-III and
 `--division college-d3` takes exactly those that are. The two sets are
 disjoint by name, which is what keeps them one row each.
+
+### Alternate source: the GraphQL mirror
+
+`scraper/graphql.py` pulls the same events, games, teams and rosters from the
+third-party mirror at `usau-rankings.fly.dev`, which serves USAU's own data
+without the WAF. It is a different shape of cost: one request per event
+returns teams, rosters and games together, so a division-decade lands in about
+30 seconds against the HTML path's hours of 1.5s-spaced requests and
+VPN-switch stalls.
+
+```
+USAU_GQL_DB=data/usau_gql_d3w.db .venv/bin/python -m scraper.graphql \
+    2014 … 2026 --division college-women-d3
+.venv/bin/python -m scraper.graphql --validate \
+    data/usau_college_women_d3.db data/usau_gql_d3w.db --division college-women-d3
+```
+
+It writes the SAME schema but NOT interchangeable keys: the mirror's team id is
+season-scoped where `event_teams.event_team_id` is per event, and its game id
+is a content hash rather than USAU's number. So team keys are synthesized in a
+`gq:` namespace and an event is sourced from exactly one provider — the ingest
+replaces an event's rows wholesale rather than overlaying them. Hence the
+separate `$USAU_GQL_DB` file.
+
+Validated against the HTML scrape on all six divisions it covers: across 3,162
+shared events only 27 differ on played games, and most of those are the mirror
+being FRESHER on the live 2026 club season. The mirror's one loss mode is a
+played game it can score but attribute to only one team — 110 games, 0.12% of
+the shared corpus, dropped rather than half-attributed. 44 of those sit at one
+event (2017 Mid-Atlantic Men's Regionals) whose division roll it files with 2
+teams instead of 16.
+
+Against that it fixes pool labels the HTML parse gets wrong (30 pool games
+spread over Pools A-E, not lumped into two), it reaches back to 2014, and it
+recovers `Denver-Round-Robin-2019` — the event that resets the connection on
+every request from every exit, so the HTML path can never fetch it, and which
+the mirror serves complete (10 games, 92 roster lines). Roster names differ on
+0.2-1.2% of lines because the mirror serves a player's current USAU name where
+the HTML froze it at scrape time.
+
+Two bugs the full run exposed, both fixed and both worth not reintroducing: a
+division must be matched on LEVEL AND DIVISION, since one event files the same
+division name at several levels (the U.S. Open carries Mixed/Club beside
+Mixed/Youth Club U-20) and matching the name alone will rate youth or masters
+squads on the open scale; and team rows must be seeded from the DIVISION's
+membership rather than the event-level team connection, which is sometimes
+empty even when the division roll is full — that dropped all 34 played games
+at the 2017 Carolina D-I CC.
 
 ## Gender-matching
 
@@ -78,17 +128,17 @@ deferred core and four on-demand tiers, no server and no network needed; see
 as it does on Pages.
 
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
-searchable player table over all five divisions, a **Trends** tab drawing one line per
+searchable player table over all seven divisions, a **Trends** tab drawing one line per
 season for every player or club that has ever closed a season in the top 25,
-a **Tournaments** browser over all 2,870 events, and a U.S. Open tracker that
+a **Tournaments** browser over all 3,809 events, and a U.S. Open tracker that
 re-runs a 40,000-sim Monte Carlo in the browser over whatever is left to play.
 It reads only the published artifacts and never replays the model, so the page
 cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
 
-Every tab now spans the same five divisions, and every tab defaults to all of
+Every tab now spans the same seven divisions, and every tab defaults to all of
 them. **Clubs** used to show one division at a time, ranked within it, on the
 grounds that a merged 1..n invites a comparison the games cannot settle. It
-now offers "All divisions" like the others: the five share one rating scale,
+now offers "All divisions" like the others: the seven share one rating scale,
 bridged through mixed, so one list is arithmetically sound even where it is
 not a prediction — club men's and college teams never play, so #4 above #5
 across that line settles nothing. The number shown is the club's position in
@@ -187,7 +237,7 @@ exist in more than one gender division, and men's Phoenix and women's Phoenix
 are two teams. The men's group keeps the bare key, so every pre-existing
 identity is byte-identical to before.
 
-That selection is a union across seasons, so it is 67–164 lines depending on the
+That selection is a union across seasons, so it is 61–192 lines depending on the
 view rather than a fixed 25 — the point being that a club that owned 2019 and has
 since folded sits on the chart beside this year's best. At that density no
 stroke can identify a line on its own (8 hues x 8 dash patterns gives 64
@@ -200,14 +250,15 @@ that did not play the ranked season shows an em dash and sinks to the bottom
 rather than sorting as zero, which would rank a club that skipped the year above
 one that played badly.
 
-The division filter selects **events, not teams**. 301 club identities play in
+The division filter selects **events, not teams**. 461 club identities play in
 more than one division, so classifying a whole identity would misfile every one
 of them — Colorado College (Wasabi) has both club and college events in 2024, and
 its 2024 value is 1449 in the club view against 1512 in the college view. Within
 a division a season reads as the rating after that season's last event *in that
-division*, the population is only the subjects with an event there (968 club, 980
-college, 316 D-III of 1,953), and the "above season median" baseline is
-recomputed over that population.
+division*, the population is only the subjects with an event there (970 club
+men's, 980 college men's, 316 its D-III, 938 mixed, 325 club women's, 579
+college women's, 170 its D-III, of 3,779), and the "above season median"
+baseline is recomputed over that population.
 
 ### Field strength
 
@@ -436,7 +487,8 @@ and there was no on-demand split to be had while that was true.
 - `scraper/` — cached, rate-limited fetch (`fetch.py`), event enumeration via
   the WebForms search postback (`events.py`), schedule/bracket parsing
   (`event_detail.py`), roster parsing (`rosters.py`), orchestration
-  (`build_db.py`).
+  (`build_db.py`), and the WAF-free GraphQL mirror ingest plus its
+  HTML-comparison harness (`graphql.py` — see Alternate source above).
 - `ufa/` — UFA (watchufa.com) integration: cached JSON API client (`api.py`),
   season scraper into `ufa_*` tables (`scrape.py` — teams, players, per-season
   stats incl. true points played, games), and name→identity linker with
@@ -515,6 +567,18 @@ and there was no on-demand split to be had while that was true.
 - Source: play.usaultimate.org. Raw HTML is cached under `data/raw/cache/`
   (404s too, as `.404` sentinels); DB rows are UPSERTed and finished events
   get `events.complete=1`, so any run can be interrupted and resumed cheaply.
+- Second source: `usau-rankings.fly.dev/api/graphql`, an unauthenticated
+  third-party mirror of the same USAU data, no WAF and no rate limiting
+  observed at 32-way concurrency. Introspection is enabled, so the schema is
+  self-documenting. It carries no ToS, no robots.txt, no versioning and no
+  named operator, so it is treated as a fast path rather than the source of
+  record — `scraper/graphql.py --validate` is what keeps that judgement
+  evidence-based, and the HTML scraper stays the fallback.
+- The mirror also answers questions the HTML never did: `franchiseId` gives a
+  stable cross-season program key (though it fragments across a gap in
+  seasons, 24% of college-women names), and per-team `currentRating` /
+  `ratingHistory` resolve for College. Its `rankings` and `ratingMeta` list
+  queries are Club-only — empty for College across every season and variant.
 - The site WAF blocks per-IP after a request budget, largely independent of
   pace. `fetch.py` paces via USAU_RATE_LIMIT/USAU_JITTER, or via a file named
   by USAU_RATE_FILE that it re-reads before every request so a long backfill

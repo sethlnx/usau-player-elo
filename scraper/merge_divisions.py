@@ -36,6 +36,8 @@ MAIN = DATA / "usau.db"
 SOURCES = [
     (DATA / "usau_mixed.db", "club-mixed", 1_000_000),
     (DATA / "usau_women.db", "club-women", 2_000_000),
+    (DATA / "usau_college_women.db", "college-women", 3_000_000),
+    (DATA / "usau_college_women_d3.db", "college-women-d3", 4_000_000),
 ]
 
 # Schema and migration live in build_db, which owns them: every DB it writes

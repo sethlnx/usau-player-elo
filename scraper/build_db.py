@@ -36,6 +36,8 @@ DIVISIONS = {
     "club-mixed": {"level": "Club-Mixed", "group": "Club - Mixed"},
     "college": {"level": "College-Men", "group": "College - Men"},
     "college-d3": {"level": "College-Men", "group": "College - Men"},
+    "college-women": {"level": "College-Women", "group": "College - Women"},
+    "college-women-d3": {"level": "College-Women", "group": "College - Women"},
 }
 # club-women / club-mixed are scraped into their own DBs (data/usau_mixed.db,
 # data/usau_women.db) and folded in afterwards by scraper/merge_divisions.py,
@@ -340,11 +342,15 @@ def main(seasons: list[int], division: str = "club-men"):
         events = [e for e in season_events
                   if any(group_name in g for g in e["groups"])
                   and "cancel" not in e["name"].lower()]
-        if division == "college":
+        # D-I and D-III share a competition level and a schedule URL on BOTH
+        # college levels, so the event name is the only thing separating them.
+        # The two sets are disjoint by construction, which is what keeps a
+        # cross-listed url from having one division overwrite the other.
+        if division in ("college", "college-women"):
             events = [e for e in events
                       if not _COLLEGE_EXCLUDE.search(e["name"])
                       and not _D3_MATCH.search(e["name"])]
-        elif division == "college-d3":
+        elif division in ("college-d3", "college-women-d3"):
             events = [e for e in events
                       if not _COLLEGE_EXCLUDE.search(e["name"])
                       and _D3_MATCH.search(e["name"])]

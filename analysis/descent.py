@@ -72,6 +72,12 @@ AXES = [
     ("division_bases.college-d3", [1100.0, 1250.0, 1350.0, 1450.0]),
     ("division_bases.club-mixed", [1400.0, 1450.0, 1500.0, 1550.0, 1600.0]),
     ("division_bases.club-women", [1450.0, 1500.0, 1550.0, 1600.0, 1700.0]),
+    # Untuned in PUBLISHED, set by analogy with the men's college offset and
+    # the club women's scale. First sweep that runs should settle them.
+    ("division_scale.college-women",    [160.0, 180.0, 200.0, 220.0, 260.0]),
+    ("division_scale.college-women-d3", [180.0, 220.0, 260.0, 300.0]),
+    ("division_bases.college-women",    [1250.0, 1350.0, 1450.0, 1550.0]),
+    ("division_bases.college-women-d3", [1200.0, 1350.0, 1500.0]),
 ]
 # division_bases["club-men"] is the gauge: every other base is a rating
 # DIFFERENCE against it, and moving both is the same model twice.
