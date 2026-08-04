@@ -2,8 +2,7 @@
 
 Five tabs: club rankings, player rankings, per-season Trends, a Tournaments
 browser showing every event's recovered pools and bracket plus the history of
-the series it belongs to, and a U.S. Open tracker whose bracket you fill in as
-games finish, re-simulating the title odds live.
+the series it belongs to.
 
 The page itself is one file and opens over file:// with no server. Two things
 ride beside it rather than inside it, both as classic <script> tags because a
@@ -15,9 +14,8 @@ never replays the model, so the page can never disagree with the CSVs:
     data/player_elo.csv          player table (>= MIN_GAMES shown)
     data/team_elo.csv            clubs, most recent COMPLETED event roster
     data/team_elo_best.csv       clubs, best full-strength roster of 2026
-    data/team_elo_upcoming.csv   clubs, next event roster - the U.S. Open field
-    data/usau.db                 every event's schedule - the U.S. Open
-                                 tracker, and the Tournaments browser
+    data/usau.db                 every event's schedule, for the Tournaments
+                                 browser
 
 Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.js
 """
@@ -93,21 +91,6 @@ GAME_GLOBAL = "__USAU_GAME__"
 # games a rating still sits inside the engine's provisional window.
 MIN_GAMES = 30
 
-# The U.S. Open field is 12 teams in 4 pools of 3, then a bracket. USAU does
-# not label the pools anywhere in the data — every opening-round fixture sits
-# in one table headed "Pool D" — so they are recovered from the fixtures
-# themselves: a pool is a set of teams that have all played each other. The two
-# same-stage games that cross two of those sets are the winners' crossover,
-# which seeds the quarters and must stay out of the pool standings. Deriving
-# pools from the co-play graph instead (what this did before day one) collapses
-# the field into two components of six the moment the crossovers are seeded.
-USOPEN_EVENT = "%U.S. Open%"
-
-# Bracket columns in playing order. The placement columns USAU also publishes
-# (Third Place, Fifth Semifinals, Fifth Place, Seventh Place) are dropped:
-# nothing in them can reach the title, which is what the tracker prices.
-BRACKET_ROUNDS = ["Prequarterfinals", "Quarterfinals", "Semifinals", "Final"]
-
 
 def load_csv(name):
     p = DB_PATH.parent / name
@@ -136,84 +119,9 @@ def write_buckets(directory, global_name, buckets):
             stale.unlink()
 
 
-def _slot_order(game):
-    """Sort key: USAU's own fixture numbering, which runs in playing order —
-    pool rows, then the bracket column by column."""
-    digits = re.sub(r"\D", "", game["slot"] or "")
-    return int(digits) if digits else 0
-
-
-def usopen(con):
-    """(event row, [team names], [game dicts]) for the men's ICC.
-
-    Teamless fixtures are kept (LEFT JOIN): a semifinal nobody has qualified
-    for is still a slot the bracket has to draw. `slot` distinguishes a pool
-    row (the page's numeric row id) from a bracket game ("game411460").
-    """
-    ev = con.execute(
-        """SELECT event_id, name, start_date, end_date FROM events
-           WHERE name LIKE ? AND season=2026 AND COALESCE(division,'club-men')='club-men'""",
-        (USOPEN_EVENT,)).fetchone()
-    if not ev:
-        return None, [], []
-    rows = con.execute(
-        """SELECT g.slot, g.stage, g.date, g.time, h.display_name, a.display_name,
-                  g.home_score, g.away_score, g.status
-           FROM games g
-           LEFT JOIN event_teams h ON h.event_team_id=g.home_id
-           LEFT JOIN event_teams a ON a.event_team_id=g.away_id
-           WHERE g.event_id=?""", (ev[0],)).fetchall()
-    games = [{"slot": slot, "stage": stage, "date": d, "time": t,
-              "home": home, "away": away, "hs": hs, "as": as_,
-              "done": status == "Final" and (hs or 0) + (as_ or 0) > 0}
-             for slot, stage, d, t, home, away, hs, as_, status in rows]
-    games.sort(key=_slot_order)
-    teams = [r[0] for r in con.execute(
-        """SELECT COALESCE(full_name, display_name) FROM event_teams
-           WHERE event_id=? ORDER BY 1""", (ev[0],))]
-    return ev, teams, games
-
-
-def pool_round(games):
-    """(pools, crossovers) for the opening round robin.
-
-    A pool is a maximal set of teams that have all played each other, grown one
-    fixture at a time in slot order — so the round robin has built the pools by
-    the time the crossovers arrive, and a game joining two finished pools is a
-    crossover rather than evidence that they are one pool. Each intra-pool game
-    gets a `pool` index for the standings.
-
-    A later placement round robin (USAU files the 9-12 pool as "Pool E") fails
-    the same test, so crossovers are held to the stage that built the pools.
-    """
-    rows = [g for g in games
-            if (g["slot"] or "").isdigit() and g["home"] and g["away"]]
-    pairs = {frozenset((g["home"], g["away"])) for g in rows}
-    pools, where, cross = [], {}, []
-    for g in rows:
-        h, a = g["home"], g["away"]
-        ph, pa = where.get(h), where.get(a)
-        if ph is not None and ph == pa:
-            g["pool"] = ph                      # intra-pool: counts to standings
-        elif ph is None and pa is None:
-            where[h] = where[a] = g["pool"] = len(pools)
-            pools.append([h, a])
-        elif ph is None or pa is None:
-            joiner, idx = (h, pa) if ph is None else (a, ph)
-            if all(frozenset((joiner, t)) in pairs for t in pools[idx]):
-                where[joiner] = g["pool"] = idx
-                pools[idx].append(joiner)
-            else:
-                cross.append(g)
-        else:
-            cross.append(g)
-    stage = rows[0]["stage"] if rows else None
-    return pools, [g for g in cross if g["stage"] == stage]
-
 
 def build():
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    ev, field, sched = usopen(con)
     # Every event's recovered shape, for the Tournaments tab. Derived here
     # rather than replayed: analysis.tournaments reads the same schedule the
     # tracker does and infers pools and brackets from the results.
@@ -229,49 +137,6 @@ def build():
         "upcoming": load_csv("team_elo_upcoming.csv"),
     }
 
-    # Ratings for the U.S. Open field come from the UPCOMING table, which rates
-    # each club off the roster it registered for this event - not off whatever
-    # it last played. That distinction is worth ~180 Elo for Truck Stop, who
-    # fielded a B-squad at Pro Elite Challenge East.
-    #
-    # But "upcoming" empties out the moment the event finishes: a club with no
-    # forward registration leaves the table, and rebuilding the day after the
-    # U.S. Open left all twelve entrants rated None, which silently reduced the
-    # pool lettering to arbitrary and the simulation to noise. Fall back to the
-    # completed roster, then the best one. Preference order preserved, and the
-    # tracker no longer depends on WHEN the page was built.
-    bases = [{r["club"]: float(r["elo"]) for r in clubs[b]}
-             for b in ("upcoming", "completed", "best")]
-    ratings = {t: next((b[t] for b in bases if t in b), None) for t in field}
-
-    # Pool letters are cosmetic — USAU publishes none — so label them by
-    # strength: A holds the strongest team, and each pool sorts strongest
-    # first. They no longer decide anything. The bracket used to be guessed
-    # from these letters ("2nd of one pool plays 3rd of another"); it is now
-    # read from USAU's published slots, which day one has filled in.
-    raw_pools, crossovers = pool_round(sched)
-    rank_of = sorted(range(len(raw_pools)),
-                     key=lambda i: -max((ratings.get(t) or 0) for t in raw_pools[i]))
-    letter = {idx: chr(65 + n) for n, idx in enumerate(rank_of)}
-    pools = {letter[i]: sorted(ts, key=lambda t: -(ratings.get(t) or 0))
-             for i, ts in enumerate(raw_pools)}
-
-    def game(g, pool=None):
-        out = {"slot": g["slot"], "date": g["date"], "time": g["time"],
-               "home": g["home"], "away": g["away"], "done": g["done"]}
-        if g["done"]:
-            out["hs"], out["as"] = g["hs"], g["as"]
-        if pool is not None:
-            out["pool"] = pool
-        return out
-
-    pool_games = [game(g, letter[g["pool"]]) for g in sched if "pool" in g]
-    by_stage = {}
-    for g in sched:
-        if not (g["slot"] or "").isdigit():
-            by_stage.setdefault(g["stage"], []).append(g)
-    bracket = [{"name": r, "games": [game(g) for g in by_stage.get(r, [])]}
-               for r in BRACKET_ROUNDS]
 
     # Trajectories for the drill-down, written by analysis.rankings from the
     # same replay that produced the CSVs. Optional: if it is missing the page
@@ -387,16 +252,6 @@ def build():
         # and the page skips the sidecar entirely.
         "history": None,
         "historyJs": HIST_OUT.name,
-        "usopen": {
-            "name": ev[1] if ev else "",
-            "start": ev[2] if ev else "",
-            "end": ev[3] if ev else "",
-            "pools": pools,
-            "ratings": ratings,
-            "poolGames": pool_games,
-            "crossovers": [game(g) for g in crossovers],
-            "bracket": bracket,
-        },
         "tourneys": tourneys,
         # bucket key -> url, emitted rather than built in JS so a renamed
         # directory is one constant here and nothing in the page changes.
@@ -433,10 +288,8 @@ def build():
         sizes = [p.stat().st_size / 1024 for p in files]
         print(f"    {d.name}/  {len(files):>3} buckets, "
               f"{sum(sizes):>6,.0f} KB total, {max(sizes):>4,.0f} KB worst fault")
-    played = sum(g["done"] for g in sched)
     print(f"  {len(payload['players']):,} players (>={MIN_GAMES} games), "
-          f"{len(clubs['completed'])} clubs, {len(field)} U.S. Open teams, "
-          f"{len(pools)} pools, {played}/{len(sched)} fixtures played")
+          f"{len(clubs['completed'])} clubs")
     print(f"  {len(tourneys['events']):,} tournaments in "
           f"{len(tourneys['series']):,} series")
 
@@ -530,7 +383,7 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   border-style:dashed !important;border-color:var(--ink-3) !important}
 .t.w.simd .nm::after,.g .t.w.simd > span:first-child::after{content:' ~';color:var(--ink-3)}
 .count{font-size:12.5px;color:var(--ink-3)}
-/* US Open */
+/* Pool cards and bracket lines, shared by every recovered tournament shape */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:12px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
 .card h3{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
@@ -742,9 +595,9 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 #tvhead .meta{color:var(--ink-3);font-size:13px}
 .sect{font-size:13px;margin:24px 0 9px;color:var(--ink-2)}
 .sect .muted{font-weight:400}
-/* Bracket geometry, parameterised. The U.S. Open tracker's grid is fixed at
-   four rounds; a recovered bracket runs from one round to seven, so columns,
-   rows and the connector pitch are all set inline per tournament. */
+/* Bracket geometry, parameterised. A recovered bracket runs from one round to
+   seven, so columns, rows and the connector pitch are all set inline per
+   tournament. */
 .tbr{--mh:50px; --rg:8px; --cg:26px; display:grid; column-gap:var(--cg);
   row-gap:var(--rg); align-items:center; margin-top:4px; overflow-x:auto}
 .tbr .m{background:var(--surface);border:1px solid var(--line);border-radius:8px;
@@ -791,7 +644,6 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <button data-t="players">Players</button>
   <button data-t="events">Tournaments</button>
   <button data-t="trends">Trends</button>
-  <button data-t="usopen">U.S. Open 2026</button>
 </nav>
 <main>
 <div id="boot">
@@ -918,29 +770,6 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <p class="note" id="tnote"></p>
 </section>
 
-<section id="usopen">
-  <div class="bar">
-    <button class="act prim" id="simGame">Simulate next game</button>
-    <button class="act prim" id="simRound">Simulate next round</button>
-    <button class="act" id="reset">Clear entered results</button>
-    <span class="count" id="ucount"></span>
-  </div>
-  <h3 style="font-size:13px;margin:14px 0 9px;color:var(--ink-2)">
-    Pool play <span class="muted" style="font-weight:400">— played results are
-    fixed; click a team to call an unplayed game</span></h3>
-  <div class="grid" id="pools"></div>
-  <h3 style="font-size:13px;margin:22px 0 9px;color:var(--ink-2)">Bracket</h3>
-  <div class="bracket" id="bracket"></div>
-  <div class="champline" id="champline"></div>
-  <h3 style="font-size:13px;margin:22px 0 9px;color:var(--ink-2)">
-    Title odds — re-simulated from the games already played</h3>
-  <table class="odds"><thead><tr>
-    <th class="n">#</th><th>Team</th><th class="n">Elo</th>
-    <th class="n">Reach SF</th><th class="n">Reach final</th><th class="n">Title</th>
-    <th class="bar-c"></th>
-  </tr></thead><tbody id="otb"></tbody></table>
-  <p class="note" id="unote"></p>
-</section>
 
 </main>
 <script>
@@ -992,7 +821,6 @@ $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
   `softmax-weighted mean of its event roster. Clubs, Players, Trends and ` +
   `Tournaments all span the same ${NDIV} divisions — ${NDIV_LIST}. ` +
-  `The U.S. Open tracker is club men's. ` +
   `Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
@@ -1153,280 +981,6 @@ $('#pnote').textContent =
   `are genuinely in both and appear in both. Their rating is ` +
   `still the one number they carry everywhere, not a per-division rating. ` +
   `All ${NDIV} divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
-
-/* ---------- U.S. Open ---------- */
-const U = D.usopen, R = U.ratings, SCALE = D.scale;
-const POOLS = U.pools, PK = Object.keys(POOLS).sort();
-const PGAMES = U.poolGames, XGAMES = U.crossovers, RNDS = U.bracket;
-const SFI = RNDS.findIndex(rd => rd.name === 'Semifinals'), FI = RNDS.length - 1;
-const ABBR = {Prequarterfinals:'PQ', Quarterfinals:'QF', Semifinals:'SF', Final:'F'};
-
-/* Played games are FACTS. They live in the page, come from USAU's own
-   schedule, and no click can move them; what is stored in your browser is only
-   the calls you make on games not yet played. State is keyed on the fixture's
-   SLOT id, which is USAU's game number and never moves. v3: it used to be
-   keyed on positions in a schedule array, and day one renumbered those the
-   moment TBD slots were seeded with real game ids. */
-const KEY = 'usopen2026.v3';
-let S = load();
-function load() {
-  let v;
-  try { v = JSON.parse(localStorage.getItem(KEY)); } catch (e) { v = null; }
-  v = v || {};
-  return {w: v.w || {}, sim: v.sim || {}};
-}
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
-
-const P = (a,b) => 1 / (1 + Math.pow(10, ((R[b]||1500) - (R[a]||1500)) / SCALE));
-const winner = g => g.done ? (g.hs > g.as ? g.home : g.away) : null;
-// A call only stands while it names one of the two teams actually in the slot:
-// an upstream result can change who is standing there.
-const called = (g,h,a) => (S.w[g.slot] === h || S.w[g.slot] === a) ? S.w[g.slot] : null;
-const settled = (g,h,a) => winner(g) || called(g,h,a);
-
-/* Resolve every bracket slot. USAU publishes participants as soon as it knows
-   them - day one filled the prequarters AND the quarters - so a slot reads its
-   teams off the fixture and only falls back to a feed while it is still TBD.
-   That feed is the one structural assumption left in the bracket: a round half
-   the size of the one before it takes the winners of games 2i and 2i+1, which
-   is how USAU's own columns line up. The old code had to guess the whole
-   pairing from pool finishes; none of that survives contact with the real
-   bracket. */
-function resolve(pick) {
-  const out = [];
-  RNDS.forEach((rd, r) => {
-    const prev = out[r-1], feed = prev && prev.length === 2 * rd.games.length;
-    out.push(rd.games.map((g, i) => {
-      const home = g.home || (feed ? prev[2*i].w : null);
-      const away = g.away || (feed ? prev[2*i+1].w : null);
-      return {g, home, away, w: (home && away) ? pick(g, home, away) : null};
-    }));
-  });
-  return out;
-}
-
-/* Pool standings. Ties break on rating - point differential is not modelled. */
-function standings(k) {
-  const ts = POOLS[k], w = {};
-  ts.forEach(t => w[t] = 0);
-  PGAMES.forEach(g => {
-    if (g.pool !== k) return;
-    const x = settled(g, g.home, g.away);
-    if (x) w[x]++;
-  });
-  return {w, order: ts.slice().sort((x,y) => (w[y]-w[x]) || (R[y]-R[x]))};
-}
-let SEED = {};   // team -> "A1", its pool finish; rebuilt whenever a result moves
-
-/* Monte Carlo over what is left, conditioned on every result already in.
-   With the quarters published, pool play no longer feeds anything, so the
-   remaining uncertainty is the bracket itself. */
-function simulate(n) {
-  const sf = {}, fin = {}, ti = {};
-  Object.keys(R).forEach(t => { sf[t] = 0; fin[t] = 0; ti[t] = 0; });
-  const pick = (g,h,a) => settled(g,h,a) || (Math.random() < P(h,a) ? h : a);
-  const bump = (tally, t) => { if (t) tally[t] = (tally[t] || 0) + 1; };
-  for (let s = 0; s < n; s++) {
-    const B = resolve(pick);
-    if (SFI >= 0) B[SFI].forEach(m => { bump(sf, m.home); bump(sf, m.away); });
-    const f = B[FI][0];
-    if (f) { bump(fin, f.home); bump(fin, f.away); bump(ti, f.w); }
-  }
-  return {sf, fin, ti, n};
-}
-
-/* One fixture line. A played game shows its score where an unplayed one shows
-   the model's probability, so the two read in the same shape; the pre-game
-   number survives as the row's tooltip, which is where an upset shows up. */
-function gameRow(g) {
-  const w = settled(g, g.home, g.away), ph = P(g.home, g.away);
-  const sd = S.sim[g.slot] ? ' simd' : '', fact = g.done ? ' fact' : '';
-  const side = (t, own, p) => {
-    const cls = (w ? (w === t ? 't w' + sd : 't l') : 't') + fact;
-    const hook = g.done ? '' : ` data-g="${g.slot}" data-w="${esc(t)}"`;
-    return `<div class="${cls}"${hook}><span>${esc(t)}</span>` +
-           `<span class="p">${g.done ? own : pct(p)}</span></div>`;
-  };
-  const tip = g.done ? ` title="model gave ${esc(g.home)} ${pct(ph)} before the game"` : '';
-  return `<div class="g"${tip}>${side(g.home, g.hs, ph)}` +
-         `<span class="vs">v</span>${side(g.away, g.as, 1-ph)}</div>`;
-}
-
-function drawPools() {
-  const cards = PK.map(k => {
-    const st = standings(k), gs = PGAMES.filter(g => g.pool === k);
-    const done = gs.filter(g => settled(g, g.home, g.away)).length;
-    return `<div class="card"><h3>Pool ${k} — ${done}/${gs.length} played</h3>` +
-      gs.map(gameRow).join('') +
-      `<table class="stand">` + st.order.map((t,j) =>
-        `<tr><td><span class="seed">${j+1}</span>${esc(t)}` +
-        `<span class="muted" style="font-size:11.5px"> ${R[t] ? R[t].toFixed(0) : '—'}</span></td>` +
-        `<td class="w">${st.w[t]}W</td></tr>`).join('') + `</table></div>`;
-  });
-  if (XGAMES.length)
-    cards.push(`<div class="card"><h3>Crossover — seeds the quarters</h3>` +
-               XGAMES.map(gameRow).join('') + `</div>`);
-  $('#pools').innerHTML = cards.join('');
-}
-
-/* One match box. The seed chip carries the team's pool finish once it is
-   known, and the feed that will fill the slot ("W QF1") while it is not.
-   `place` is the grid position, `span` the height of the incoming vertical
-   connector - 0 for a one-to-one feed, one row pitch for a semi, two for the
-   final. */
-function slot(m, r, i, place, span, opts) {
-  opts = opts || {};
-  const g = m.g, w = m.w, sm = S.sim[g.slot] ? ' simd' : '';
-  const prev = RNDS[r-1], feed = prev && prev.games.length === 2 * RNDS[r].games.length;
-  const lbl = j => feed ? 'W ' + ABBR[prev.name] + (2*i + j + 1) : 'TBD';
-  const line = (x, other, j) => {
-    const chip = `<span class="sd">${x ? (SEED[x] || '') : lbl(j)}</span>`;
-    if (!x) return `<div class="t tbd">${chip}<span class="nm">TBD</span></div>`;
-    const cls = (w ? (w === x ? 't w' + sm : 't l') : 't') + (g.done ? ' fact' : '');
-    const hook = g.done ? '' : ` data-b="${g.slot}" data-w="${esc(x)}"`;
-    const val = g.done ? (x === g.home ? g.hs : g.as) : (other ? pct(P(x, other)) : '');
-    return `<div class="${cls}"${hook}>${chip}<span class="nm">${esc(x)}</span>` +
-           `<span class="p">${val}</span></div>`;
-  };
-  const cin = span === null ? '' : `<i class="cin" style="--span:${span}px"></i>`;
-  return `<div class="m${opts.champ ? ' champ' : ''}${opts.out ? ' out' : ''}" ` +
-         `style="${place}">${cin}${line(m.home, m.away, 0)}${line(m.away, m.home, 1)}</div>`;
-}
-
-function drawBracket() {
-  const B = resolve(settled);
-  // Row pitch must match the CSS custom properties --mh and --rg; the grid is
-  // four rows deep, so a round of n games gets a 4/n row step.
-  const PITCH = 66 + 10, ROWS = 4;
-  const at = (col, row, span) =>
-    `grid-column:${col};grid-row:${row}${span > 1 ? ' / span ' + span : ''}`;
-  const head = RNDS.map((rd, r) =>
-    `<div class="round" style="${at(r+1, 1)}"><h4>${esc(rd.name)}</h4></div>`).join('');
-  const cols = RNDS.map((rd, r) => {
-    const step = ROWS / rd.games.length, nPrev = r ? RNDS[r-1].games.length : 0;
-    const span = r === 0 ? null : (nPrev === 2 * rd.games.length ? PITCH * (ROWS / nPrev) : 0);
-    return B[r].map((m, i) =>
-      slot(m, r, i, at(r+1, i*step + 2, step), span,
-           {out: r < FI, champ: r === FI && !!m.w})).join('');
-  }).join('');
-  $('#bracket').innerHTML = head + cols;
-  const champ = B[FI][0] && B[FI][0].w;
-  $('#champline').innerHTML = champ
-    ? `Champion: <b>${esc(champ)}</b>`
-    : `<span class="muted">Click through the bracket, or simulate it. Each slot ` +
-      `shows the pool finish or the game that feeds it until the teams are known.</span>`;
-}
-
-function drawOdds() {
-  const N = 40000, r = simulate(N);
-  const rows = Object.keys(R).sort((a,b) => r.ti[b]-r.ti[a] || r.sf[b]-r.sf[a] || R[b]-R[a]);
-  const top = r.ti[rows[0]] / N || 1;
-  const cell = v => v ? pct(v) : '<span class="muted">—</span>';
-  $('#otb').innerHTML = rows.map((t,i) =>
-    `<tr><td class="rk">${i+1}</td><td>${esc(t)}</td>` +
-    `<td class="n">${R[t] ? R[t].toFixed(0) : '—'}</td>` +
-    `<td class="n">${cell(r.sf[t]/N)}</td><td class="n">${cell(r.fin[t]/N)}</td>` +
-    `<td class="n"><b>${cell(r.ti[t]/N)}</b></td>` +
-    `<td class="bar-c"><div class="oddsbar" style="width:${100*(r.ti[t]/N)/top}%"></div></td>` +
-    `</tr>`).join('');
-  const all = PGAMES.concat(XGAMES, ...RNDS.map(rd => rd.games));
-  const done = all.filter(g => g.done).length;
-  const mine = all.filter(g => !g.done && S.w[g.slot]).length;
-  $('#ucount').textContent =
-    `${N.toLocaleString()} simulations · ${done}/${all.length} games played` +
-    (mine ? ` · ${mine} called by hand` : '');
-}
-
-function drawUS() {
-  SEED = {};
-  PK.forEach(k => standings(k).order.forEach((t,i) => SEED[t] = k + (i+1)));
-  drawPools(); drawBracket(); drawOdds(); updateSimButtons();
-}
-
-/* ---- simulation controls ----
-   "Next" means the earliest game still open in playing order: pool play and
-   crossovers first, then the bracket round by round. A bracket slot is only
-   playable once both its participants are known. */
-function pending() {
-  const pool = PGAMES.concat(XGAMES)
-                     .filter(g => !settled(g, g.home, g.away))
-                     .map(g => ({g, home: g.home, away: g.away}));
-  if (pool.length) return {name: 'Pool play', items: pool};
-  const B = resolve(settled);
-  for (let r = 0; r < RNDS.length; r++) {
-    const items = B[r].filter(m => m.home && m.away && !m.w);
-    if (items.length) return {name: RNDS[r].name, items};
-  }
-  return null;
-}
-
-/* Draw one result from the model's own probability, not the favourite. */
-function playOne(m) {
-  S.w[m.g.slot] = Math.random() < P(m.home, m.away) ? m.home : m.away;
-  S.sim[m.g.slot] = 1;
-}
-
-function updateSimButtons() {
-  const p = pending(), g = $('#simGame'), r = $('#simRound');
-  if (!p) {
-    g.disabled = r.disabled = true;
-    g.textContent = 'Simulate next game';
-    r.textContent = 'Tournament complete';
-    return;
-  }
-  g.disabled = r.disabled = false;
-  const it = p.items[0];
-  g.textContent = `Simulate next game — ${it.home} v ${it.away}`;
-  r.textContent = `Simulate ${p.name} — ${p.items.length} game` +
-                  (p.items.length === 1 ? '' : 's');
-}
-
-$('#simGame').onclick = () => {
-  const p = pending(); if (!p) return;
-  playOne(p.items[0]); save(); drawUS();
-};
-$('#simRound').onclick = () => {
-  const p = pending(); if (!p) return;
-  p.items.forEach(playOne);       // same round, so participants cannot shift
-  save(); drawUS();
-};
-
-function call(sl, team) {
-  if (S.w[sl] === team) delete S.w[sl]; else S.w[sl] = team;
-  delete S.sim[sl];               // typed by hand, so no longer simulated
-  save(); drawUS();
-}
-$('#pools').addEventListener('click', e => {
-  const el = e.target.closest('[data-g]');
-  if (el) call(el.dataset.g, el.dataset.w);
-});
-$('#bracket').addEventListener('click', e => {
-  const el = e.target.closest('[data-b]');
-  if (el) call(el.dataset.b, el.dataset.w);
-});
-$('#reset').onclick = () => { S = {w:{}, sim:{}}; save(); drawUS(); };
-
-$('#unote').innerHTML =
-  `Probabilities come from the published player-Elo model at club scale ${SCALE}, with ` +
-  `each club rated off <b>the roster it registered for this event</b> — not off its last ` +
-  `completed tournament. Neutral throughout: <code>home_advantage</code> is 0, so no ` +
-  `seeding information enters.<br><br>` +
-  `<b>Played games are read from USAU's schedule</b>, scores and all, and cannot be ` +
-  `clicked away; the odds are conditioned on them. Pools are recovered from the ` +
-  `results — USAU labels every opening fixture "Pool D" — as the sets of teams that ` +
-  `have all played each other, which also separates out the two crossover games that ` +
-  `seed the quarters. The bracket itself is no longer guessed: prequarter and quarter ` +
-  `matchups are USAU's own. Only the semifinal feed is assumed, quarters 1-2 into one ` +
-  `semi and 3-4 into the other.<br><br>` +
-  `<b>Simulated results are dashed and marked ~.</b> The two simulate buttons draw ` +
-  `each result from the model's own probability, not from the favourite — so a 55% ` +
-  `game goes the other way about 45% of the time, and running the same round twice ` +
-  `will not always agree. Clicking a team yourself overrides the simulated pick and ` +
-  `clears the mark.<br><br>` +
-  `Three-way pool ties break on rating, because point differential is not modelled. ` +
-  `Warao and EVOLUTION are international entrants with no USAU history, so their ratings ` +
-  `encode absence of evidence rather than measured weakness. Calls you enter are kept in ` +
-  `this browser only.`;
 
 /* ---------- drill-down: play history + rating curve ---------- */
 /* The core arrives in a second file once the page is already usable, and the
@@ -1945,8 +1499,7 @@ function openDetail(kind, key, opts) {
     $('#dbody').innerHTML = `<h2>${esc(title)}</h2>` +
       `<p class="note">` + (dead
         ? `The history behind this panel could not be loaded. Rankings, ` +
-          `Tournaments and the U.S. Open tracker do not need it and are ` +
-          `unaffected.`
+          `Tournaments do not need it and are unaffected.`
         : `Loading rating histories\u2026 this panel will fill in by itself.`) +
       `</p>`;
     cur = {kind, key};
@@ -2217,9 +1770,8 @@ $('#etb').addEventListener('click', e => {
 
 /* ---------- standings ---------- */
 /* Wins first, then the head-to-head record INSIDE the tied group, then point
-   differential. Unlike the U.S. Open tracker — which prices games that have
-   not happened and so cannot use a margin — every game here has a score, so
-   the real tiebreakers are available and rating never enters. */
+   differential. Every game here has a score, so the real tiebreakers are
+   available and rating never enters. */
 function standingsOf(games, teams) {
   const st = new Map(teams.map(t => [t, {t, w: 0, l: 0, pf: 0, pa: 0}]));
   games.forEach(g => {
@@ -2837,7 +2389,7 @@ $('#enote').innerHTML +=
 /* ---------- boot ---------- */
 /* Everything above needs only the inline payload, so the page is fully usable
    the moment this runs. The trajectory corpus is then pulled in behind it. */
-drawClubs(); drawPlayers(); drawUS(); drawEvents();
+drawClubs(); drawPlayers(); drawEvents();
 document.documentElement.classList.remove('booting');
 routeHash();
 

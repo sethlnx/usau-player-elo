@@ -1,6 +1,6 @@
 # USAU Player-Level Elo
 
-### → **[Live rankings and U.S. Open tracker](https://sethlnx.github.io/usau-player-elo/)**
+### → **[Live rankings](https://sethlnx.github.io/usau-player-elo/)**
 
 Every player carries a personal Elo across seasons; a team's rating at an
 event is the softmax-weighted mean of its event roster's player Elos (better
@@ -18,7 +18,9 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m scraper.build_db --division college-d3 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
 USAU_DB=data/usau_mixed.db scraper/backfill.sh club-mixed data/usau_mixed.db 2017 … 2026
 USAU_DB=data/usau_women.db scraper/backfill.sh club-women data/usau_women.db 2017 … 2026
-.venv/bin/python -m scraper.merge_divisions  # fold the two into data/usau.db
+.venv/bin/python -m scraper.refresh       # top up events that ended mid-scrape, from the mirror
+.venv/bin/python -m scraper.merge_divisions  # fold the per-division files into data/usau.db
+.venv/bin/python -m scraper.structure     # attach published bracket structure
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv, data/history.json
@@ -30,6 +32,23 @@ The scrape is slow, disk-cached and resumable; `data/usau.db` and the raw HTML
 cache are gitignored and rebuilt by the commands above. There is no club
 2020 — COVID cancelled the series — but college 2020 exists and is kept: the
 series was cancelled in March, the January-March regular season was not.
+
+**An event scraped mid-tournament stays that way.** Nothing ever went back for
+the rest, so the 2026 U.S. Open sat at 26 of 36 games for two days after it
+finished and the 2026 Lehigh Valley Invite at 42 of 93. `scraper/refresh.py`
+is the fix: it finds events that have ENDED but still hold an unplayed fixture,
+asks the mirror whether it knows more, and replaces only those that are
+genuinely behind — 306 club men's events looked stale on the cheap DB filter
+and exactly 2 were. Run over the whole corpus it topped up 7 events and 125
+played games; the college divisions were already complete.
+
+It writes to whichever file OWNS the division, which is not always
+`data/usau.db`: `merge_divisions` drops and re-imports four divisions from
+their own sources, so a club-mixed refresh written into the main DB survives
+precisely until the next merge. Replacement is wholesale through
+`scraper/graphql.py`, because for a game we hold no result for there is no
+score to match on and the team pair alone cannot separate a pool meeting from a
+bracket rematch.
 
 **Seven divisions, 114,934 scored games.** club men's (19,745), club mixed
 (23,874), club women's (8,452), college men's (33,375) and its D-III (4,950),
@@ -130,8 +149,7 @@ as it does on Pages.
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
 searchable player table over all seven divisions, a **Trends** tab drawing one line per
 season for every player or club that has ever closed a season in the top 25,
-a **Tournaments** browser over all 3,809 events, and a U.S. Open tracker that
-re-runs a 40,000-sim Monte Carlo in the browser over whatever is left to play.
+and a **Tournaments** browser over all 3,809 events.
 It reads only the published artifacts and never replays the model, so the page
 cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
 
@@ -168,7 +186,7 @@ that season's last event in the division picked.
 **Gender-matching** selects whole subjects everywhere, since nobody changes
 group between events; it is disabled for clubs, which have no group. Neither
 filtered gender view contains the 3,124 unplaced identities, so the two never
-sum to the unfiltered count. The U.S. Open tracker remains club men's.
+sum to the unfiltered count.
 
 ### Tournaments
 
@@ -266,8 +284,7 @@ collapse to 776 series, so opening the 2025 U.S. Open also shows the other 23
 instances and who won each. Division wording goes because division is its own
 facet: a Sectional's men's and women's halves are one tournament run twice.
 "Open" is deliberately kept — it is load-bearing in "U.S. Open". Standings
-break ties on head-to-head inside the tied group, then point differential;
-unlike the U.S. Open tracker, which prices games that have not happened, every
+break ties on head-to-head inside the tied group, then point differential; every
 game here has a score, so rating never enters.
 
 Club identity is the normalized name, so "Rhino" and "Rhino Slam!" are one
@@ -534,7 +551,8 @@ and there was no on-demand split to be had while that was true.
   (`event_detail.py`), roster parsing (`rosters.py`), orchestration
   (`build_db.py`), and the WAF-free GraphQL mirror ingest plus its
   HTML-comparison harness (`graphql.py` — see Alternate source above), and the
-  published-bracket backfill plus its champion audit (`structure.py`).
+  published-bracket backfill plus its champion audit (`structure.py`), and the
+  top-up for events that ended mid-scrape (`refresh.py`).
 - `ufa/` — UFA (watchufa.com) integration: cached JSON API client (`api.py`),
   season scraper into `ufa_*` tables (`scrape.py` — teams, players, per-season
   stats incl. true points played, games), and name→identity linker with
