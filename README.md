@@ -190,17 +190,47 @@ size breaking the tie: structure alone cannot tell the U.S. Open's opening
 pool of three from the 9-12 pool of four that reuses two of its teams — both
 are cliques and the wrong one is bigger.
 
-**Brackets are not.** Round rank comes from the organiser's own label
-(`Pre-Quarters`, `Sweet 16`, `Gold Semi Finals`, `9th Place Quarters`), and
-only the feeders are inferred, a slot reading back to the game that team won.
+**Brackets are READ where they are published, and recovered where they are
+not.** The GraphQL mirror serves each bracket's own name, its `placeStart` and a
+`nextGameId` chain, which is the one thing no label can carry: organisers name
+every bracket's decider "Finals", so Texas 2 Finger 2024 holds six games
+reading exactly that and the label path crowned Clutch, who won the NINTH-place
+bracket, over Alamode, who won the event. `scraper/structure.py` attaches that
+structure to games already in the DB — joined on the unordered team pair and
+score, since `games.slot` postdates most of the corpus — and
+`analysis/tournaments.py` prefers it. 3,024 of the 3,809 events with completed
+games (79%) now have it.
+
+Two things are still inferred, because the mirror gets them wrong. A published
+heading can hold several independent knockouts under ONE `placeStart`: the 2026
+Lehigh Valley Invite files 24 men's games as "Championship" at place 1, and
+they are four separate trees — the title bracket, a 9-16 "Ninals", a 17-24
+"Seventeenals", and a four-team flight. They are split by following
+`nextGameId` to its root, and each tree's real position is read off its own root
+label. And a heading with NO wiring at all is ignored rather than trusted:
+splitting one of those by tree makes every game its own final, which at Flat
+Tail 2017 turned one bracket into six championships and lost Oregon, who won
+the game the schedule calls "Champ".
+
+Where nothing is published, round rank still comes from the organiser's label
+(`Pre-Quarters`, `Sweet 16`, `Gold Semi Finals`, `9th Place Quarters`) and only
+the feeders are inferred, a slot reading back to the game that team won.
 Deriving rounds from the results too — what this did first — turns a win-chain
 through mislabelled pool play into a nine-round bracket that never existed;
 showing no bracket is better than inventing one. Every rank-0 game is a root,
 so a college invite running two flights off one schedule yields two trees
-rather than one tree and a pile of orphans. Anything the label does not place
-lands under **Placement & other games** with the organiser's own wording.
-Across the corpus this puts 87.4% of the 115,057 completed games into a pool or
-a bracket and loses none: every game is displayed somewhere.
+rather than one tree and a pile of orphans, and the page numbers them
+`flight 1`/`flight 2` rather than repeating a heading. Anything no bracket
+claims lands under **Placement & other games** with the organiser's own
+wording. Across the corpus this puts 88.6% of the 115,173 completed games into
+a pool or a bracket and loses none: every game is displayed somewhere.
+
+Reading the published shape moved 1,513 games out of the loose pile, gave 85
+events a champion they did not have, and corrected 84 that were wrong —
+including Truck Stop at the 2022 Mid-Atlantic Regional and Revolver at the
+2022 Southwest, both of which the labels had misfiled. Two events lost a
+champion and both deserved to: Eastern's Qualifier 2017 was crowning Kansas,
+who won its 17th-place bracket.
 
 **Labels also fence the structural recovery.** Most events name no pool that
 distinguishes anything — 1,447 of the 2,546 multi-pool events, above — so
@@ -495,7 +525,8 @@ and there was no on-demand split to be had while that was true.
   the WebForms search postback (`events.py`), schedule/bracket parsing
   (`event_detail.py`), roster parsing (`rosters.py`), orchestration
   (`build_db.py`), and the WAF-free GraphQL mirror ingest plus its
-  HTML-comparison harness (`graphql.py` — see Alternate source above).
+  HTML-comparison harness (`graphql.py` — see Alternate source above), and the
+  published-bracket backfill plus its champion audit (`structure.py`).
 - `ufa/` — UFA (watchufa.com) integration: cached JSON API client (`api.py`),
   season scraper into `ufa_*` tables (`scrape.py` — teams, players, per-season
   stats incl. true points played, games), and name→identity linker with

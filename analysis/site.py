@@ -2319,23 +2319,33 @@ function drawTournament(i) {
           `</table></div>`;
       }).join('') + `</div>`;
   }
-  // A bracket of one game is a placement decider, not a bracket. Drawing it
-  // as a four-row grid headed "Final" wastes a section on "3rd place: DiG
-  // beat Mooncatchers", so the singletons collapse into one table alongside
-  // whatever the label placed nowhere at all.
-  const gcount = b => b[2].reduce((n, rd) => n + rd.filter(Boolean).length, 0);
-  const drawn = det.b.filter(b => gcount(b) > 1);
-  const single = det.b.filter(b => gcount(b) === 1);
-  html += drawn.map(b => evBracket(b[0], b[1], b[2], nm, det)).join('');
+  // EVERY bracket is drawn, including the one-game ones. They used to collapse
+  // into the table below on the grounds that a four-row grid headed "Final" is
+  // a waste of a section for "3rd place: DiG beat Mooncatchers" — but that hid
+  // most of what an event actually decided. The 2026 Lehigh Valley Invite
+  // publishes TEN men's brackets and six of them are single games, so the old
+  // rule drew four and buried the rest in a flat list that never said they
+  // were brackets at all. A one-game bracket renders as a 1x1 grid under its
+  // own heading, which is short and says what it is.
+  // One kind can legitimately appear twice: an event running two flights off
+  // one schedule yields two trees deciding the same placement, and collapsing
+  // them would throw a flight away. So repeats are NUMBERED rather than
+  // merged — the 2026 Lehigh men's draw shows "Championship bracket" and
+  // "Championship bracket · flight 2" instead of the same heading twice.
+  const seen = {};
+  html += det.b.map(b => {
+    const n = (seen[b[0]] = (seen[b[0]] || 0) + 1);
+    const total = det.b.filter(x => x[0] === b[0]).length;
+    return evBracket(b[0], b[1], b[2], nm, det, total > 1 ? n : 0);
+  }).join('');
 
-  const extra = single.map(([kind, root, rounds]) => {
-    const g = rounds[rounds.length - 1].find(Boolean);
-    return g ? [g, brLabel(kind).replace(/ bracket$/, '')] : null;
-  }).filter(Boolean).concat(det.o);
+  // What is left is only what no bracket claimed: crossovers, play-ins, and
+  // anything the label placed nowhere.
+  const extra = det.o;
   if (extra.length) {
     html += `<h3 class="sect">Placement &amp; other games <span class="muted">` +
-      `\u2014 one-game deciders, crossovers, play-ins, and anything the ` +
-      `organiser's own label does not put in a bracket</span></h3>` +
+      `\u2014 crossovers, play-ins, and anything the organiser's own label ` +
+      `does not put in a bracket</span></h3>` +
       `<table><thead><tr><th>Round</th><th>Result</th>` +
       `<th class="n">Score</th></tr></thead><tbody>` +
       extra.map(([g, stage]) => {
@@ -2406,7 +2416,7 @@ function evGameRow(g, nm) {
    column headings count out from there, so a bracket with no final is headed
    Quarterfinals/Semifinals rather than having its rounds shifted in to
    manufacture one. */
-function evBracket(kind, root, rounds, nm, det) {
+function evBracket(kind, root, rounds, nm, det, flight) {
   const MH = 50, RG = 8, PITCH = MH + RG;
   const ROWS = rounds[0].length, cols = rounds.length;
   const seed = evSeeds(det);
@@ -2432,7 +2442,8 @@ function evBracket(kind, root, rounds, nm, det) {
         `</div>`;
     }).join('');
   }).join('');
-  return `<h3 class="sect">${esc(brLabel(kind))}</h3>` +
+  return `<h3 class="sect">${esc(brLabel(kind))}` +
+    (flight ? ` <span class="muted">\u00b7 flight ${flight}</span>` : '') + `</h3>` +
     `<div class="tbr" style="grid-template-columns:repeat(${cols},minmax(150px,1fr));` +
     `grid-template-rows:auto repeat(${ROWS},${MH}px)">${head}${body}</div>`;
 }

@@ -302,6 +302,23 @@ def pools_of(games):
     return out, sorted(left, key=lambda g: g["ord"])
 
 
+def bracket_order(e):
+    """Display order for a (kind, root_rank, rounds) bracket.
+
+    Title first, then placement brackets by the position they decide, then
+    anything whose key is not an ordinal. Bigger brackets first within a tie,
+    so a full eight-team tree outranks a one-game playoff for the same place.
+
+    Module level because `decompose` now merges two sources — the published
+    brackets and the label-recovered ones — and both have to land in one order.
+    """
+    size = sum(1 for rd in e[2] for m in rd if m)
+    if e[0] == "champ":
+        return (0, 0, -size)
+    m = re.fullmatch(r"(\d+)(?:st|nd|rd|th)", e[0])
+    return (1, int(m.group(1)), -size) if m else (2, 0, -size)
+
+
 def brackets_of(games):
     """Group labelled knockout games into brackets and wire each into a padded
     binary tree.
@@ -362,16 +379,60 @@ def brackets_of(games):
             out.append((kind, root_rank, list(reversed(rounds))))
         loose += [g for gs in ranks.values() for g in gs if id(g) not in used]
 
-    size = lambda e: sum(1 for rd in e[2] for m in rd if m)
-
-    def order(e):
-        m = re.fullmatch(r"(\d+)(?:st|nd|rd|th)", e[0])
-        if e[0] == "champ":
-            return (0, 0, -size(e))
-        return (1, int(m.group(1)), -size(e)) if m else (2, 0, -size(e))
-
-    out.sort(key=order)
+    out.sort(key=bracket_order)
     return out, sorted(loose, key=lambda g: g["ord"])
+
+
+def published_brackets(games):
+    """(brackets, leftover) from the shape the organiser actually published.
+
+    Same tuple shape `brackets_of` returns — (kind, root_rank, rounds), final
+    last — so nothing downstream has to know which source it came from.
+
+    This exists because the label cannot carry what `bracket_place` does. At
+    Texas 2 Finger 2024 six games are labelled "Finals", one per bracket, and
+    label recovery crowned the ninth-place winner. `place` says outright which
+    bracket decides first place, so `kind` is read off it rather than guessed:
+    1 is the title, anything else is that placement.
+
+    Two conditions gate every bracket, and a bracket failing either is handed
+    back untouched so the label path sees it exactly as before:
+
+      * `place` must be known. Without it there is no way to say which
+        position the bracket decides, and 932 published brackets have none.
+      * exactly ONE game may sit at round 0. `bracket_round` is derived from
+        nextGameId, so when the mirror publishes a bracket with no wiring every
+        game in it reads as a root: Tally Classic XII's championship bracket
+        arrives as seven simultaneous "finals". Trusting that loses the
+        champion outright, where label recovery still infers feeders from who
+        won. One root is the test for wiring actually being present.
+    """
+    have = [g for g in games if g.get("br") and g.get("bround") is not None]
+    if not have:
+        return [], games
+    per_bracket = collections.defaultdict(list)
+    for g in have:
+        per_bracket[g["br"]].append(g)
+
+    out, used = [], set()
+    for name, gs in per_bracket.items():
+        place = next((g["place"] for g in gs if g["place"] is not None), None)
+        by_round = collections.defaultdict(list)
+        for g in gs:
+            by_round[g["bround"]].append(g)
+        if place is None or len(by_round.get(0, ())) != 1:
+            continue
+        # bround counts wins from the final, so descending order puts the
+        # earliest round first and the final last.
+        rounds = [sorted(by_round[r], key=lambda g: g["ord"])
+                  for r in sorted(by_round, reverse=True)]
+        # `place` is per TREE, not per published heading: scraper/structure.py
+        # splits a heading that holds several knockouts and reads each one's
+        # real position off its own root label, so this can be trusted as-is.
+        kind = "champ" if place == 1 else _ordinal(place)
+        out.append((kind, min(by_round), rounds))
+        used.update(id(g) for g in gs)
+    return out, [g for g in games if id(g) not in used]
 
 
 def decompose(games):
@@ -382,6 +443,11 @@ def decompose(games):
     # reasoned about; it goes straight to the loose pile.
     odd = [g for g in playable if g["home"] == g["away"]]
     playable = [g for g in playable if g["home"] != g["away"]]
+    # The PUBLISHED bracket comes first and is never second-guessed. Whatever
+    # it does not cover carries on through the label path below, so an event
+    # with structure for its championship and nothing else still gets its pools
+    # recovered the old way.
+    pub, playable = published_brackets(playable)
     poolish = [g for g in playable if POOLISH.search(g["stage"])]
     rest = [g for g in playable if not POOLISH.search(g["stage"])]
     if poolish:
@@ -401,25 +467,45 @@ def decompose(games):
         pools, left = pools_of([g for g in rest if not classify(g["stage"])])
         rest = left + named
     brackets, loose = brackets_of(sorted(rest, key=lambda g: g["ord"]))
-    return pools, brackets, sorted(loose + odd, key=lambda g: g["ord"])
+    # A kind the published shape already claimed cannot be claimed again. The
+    # label path only ever sees leftovers, but a stray game reading like a
+    # final earns its own 'champ' bracket and the page then shows two sections
+    # both headed "Championship bracket" — the 2025 Lehigh men's draw does
+    # exactly that. The published one wins and the leftover goes loose, where
+    # it is still displayed, just not as a second title bracket.
+    claimed = {kind for kind, _, _ in pub}
+    keep = [b for b in brackets if b[0] not in claimed]
+    loose = loose + [m for b in brackets if b[0] in claimed
+                     for rd in b[2] for m in rd if m]
+    return (pools, sorted(pub + keep, key=bracket_order),
+            sorted(loose + odd, key=lambda g: g["ord"]))
 
 
 def load(con):
-    """Every event's fixtures, in playing order, keyed by event id."""
+    """Every event's fixtures, in playing order, keyed by event id.
+
+    `bracket`/`bracket_place`/`bracket_round` ride along where
+    scraper/structure.py has attached them. They are the organiser's PUBLISHED
+    shape rather than a reading of the label, so `decompose` prefers them and
+    only falls back to recovery for the games that have none.
+    """
     rows = con.execute("""
         SELECT g.event_id, g.game_key, g.stage, g.date, g.time, g.slot,
                h.display_name, a.display_name, g.home_score, g.away_score,
-               g.status
+               g.status, g.bracket, g.bracket_place, g.bracket_type,
+               g.bracket_round
         FROM games g
         LEFT JOIN event_teams h ON h.event_team_id = g.home_id
         LEFT JOIN event_teams a ON a.event_team_id = g.away_id""").fetchall()
     by_event = collections.defaultdict(list)
-    for eid, key, stage, d, t, slot, home, away, hs, as_, status in rows:
+    for (eid, key, stage, d, t, slot, home, away, hs, as_, status,
+         br, place, btype, bround) in rows:
         by_event[eid].append({
             "stage": (stage or "").strip(), "date": d or "",
             "home": home, "away": away, "hs": hs, "as": as_,
             "done": status == "Final" and hs is not None and as_ is not None
                     and (hs or 0) + (as_ or 0) > 0,
+            "br": br, "place": place, "btype": btype, "bround": bround,
             "ord": (d or "\uffff", _minutes(t), _slotnum(slot), key),
         })
     for gs in by_event.values():
@@ -484,12 +570,15 @@ def build(con):
 
         # Only a bracket that actually reached a single final crowns anybody.
         # A Regional that stopped at two semifinals has no champion, and says
-        # so rather than promoting one of the semifinal winners.
+        # so rather than promoting one of the semifinal winners. A DRAWN final
+        # crowns nobody either — `winner` returns None on a tie, and the
+        # published brackets surface ties the label path never reached.
         champ = -1
         for kind, root_rank, rounds in brs:
             if kind == "champ" and root_rank == 0 and len(rounds[-1]) == 1 \
                     and rounds[-1][0]:
-                champ = local[winner(rounds[-1][0])]
+                w = winner(rounds[-1][0])
+                champ = local[w] if w is not None else -1
                 break
 
         ix = len(events)

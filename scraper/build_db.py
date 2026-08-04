@@ -107,6 +107,16 @@ CREATE TABLE IF NOT EXISTS games (
     home_id TEXT, away_id TEXT,
     home_score INTEGER, away_score INTEGER,
     status TEXT,
+    -- Published bracket structure, backfilled by scraper/structure.py from the
+    -- GraphQL mirror. USAU's own pages carry none of it: `stage` is the only
+    -- shape they publish and organisers routinely label every bracket's
+    -- decider "Finals", so eight brackets at one event are indistinguishable.
+    -- Where these are set they are AUTHORITATIVE and analysis/tournaments.py
+    -- reads them instead of recovering the shape from labels.
+    bracket TEXT,             -- the bracket's own name, as published
+    bracket_place INTEGER,    -- placeStart: 1 for the championship bracket
+    bracket_type TEXT,        -- 'championship' | 'placement'
+    bracket_round INTEGER,    -- wins from this bracket's final; 0 IS the final
     PRIMARY KEY (event_id, game_key)
 );
 CREATE TABLE IF NOT EXISTS roster_entries (
@@ -269,8 +279,13 @@ def _ensure_columns(con):
         con.execute("ALTER TABLE events ADD COLUMN division TEXT NOT NULL DEFAULT 'club-men'")
     if "complete" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN complete INTEGER NOT NULL DEFAULT 0")
-    if "slot" not in [r[1] for r in con.execute("PRAGMA table_info(games)")]:
+    gcols = [r[1] for r in con.execute("PRAGMA table_info(games)")]
+    if "slot" not in gcols:
         con.execute("ALTER TABLE games ADD COLUMN slot TEXT")
+    for col, typ in (("bracket", "TEXT"), ("bracket_place", "INTEGER"),
+                     ("bracket_type", "TEXT"), ("bracket_round", "INTEGER")):
+        if col not in gcols:
+            con.execute(f"ALTER TABLE games ADD COLUMN {col} {typ}")
     if migrate_url_key(con):
         print("migrated events: UNIQUE(url) -> UNIQUE(url, division)", flush=True)
 
