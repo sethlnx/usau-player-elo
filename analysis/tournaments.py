@@ -434,9 +434,18 @@ def published_brackets(games):
             # and reads each one's real position off its own root label.
             kind = "champ" if place == 1 else _ordinal(place)
         else:
-            m = (PLACEMENT_RE.search(name or "")
-                 or PLACEMENT_RE.search(by_round[0][0]["stage"] or ""))
-            kind = bracket_key(m.group(0).lower()) if m else "champ"
+            # The ROOT's label, never the bracket's name. A name says what KIND
+            # of bracket it is; the root says what POSITION it decided, and
+            # `classify` already reads that. Reading the name instead filed
+            # Riverside Classic 2026's title bracket -- published as "Knockout
+            # Bracket" with no placeStart -- under 'knockout', because
+            # PLACEMENT_RE carries \bknockout\b to catch "13th Place (Knockout
+            # 13-16)". Nothing then matched 'champ' and the event showed no
+            # winner at all, though its root reads "Finals: Texas BBQ 10-9
+            # Riverside". Its "Consolation Bracket" went the same way over a
+            # root saying "5th Place".
+            c = classify(by_round[0][0]["stage"] or "")
+            kind = bracket_key(c[0]) if c and c[0] != "champ" else "champ"
         out.append((kind, min(by_round), rounds))
         used.update(id(g) for g in gs)
     return out, [g for g in games if id(g) not in used]
