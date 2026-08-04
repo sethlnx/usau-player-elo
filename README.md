@@ -232,6 +232,14 @@ including Truck Stop at the 2022 Mid-Atlantic Regional and Revolver at the
 champion and both deserved to: Eastern's Qualifier 2017 was crowning Kansas,
 who won its 17th-place bracket.
 
+**A fixture in no pool and no bracket keeps its published name.** USAU's
+`stage` for one of those is routinely the pool heading it was played under: the
+2026 U.S. Open's two quarterfinal-seeding games both read "Pool D", which files
+a seeding round among the pool games and hides it in the catch-all table. The
+mirror calls them "Seeding Crossovers", and that name is stored as `stage_pub`
+and preferred wherever it exists — 6,361 games, most often `Crossover` (415),
+`Round Robin` (306), `Pool Play Completion` (250) and `Consolation` (178).
+
 **Labels also fence the structural recovery.** Most events name no pool that
 distinguishes anything — 1,447 of the 2,546 multi-pool events, above — so
 when nothing matches "pool" the cliques are sought across the whole schedule.

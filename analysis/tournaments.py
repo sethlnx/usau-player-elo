@@ -488,9 +488,16 @@ def load(con):
     scraper/structure.py has attached them. They are the organiser's PUBLISHED
     shape rather than a reading of the label, so `decompose` prefers them and
     only falls back to recovery for the games that have none.
+
+    `stage_pub` overrides `stage` for the same reason: where the mirror names a
+    fixture USAU filed under a pool heading it did not belong to, the published
+    name wins. The 2026 U.S. Open's two quarterfinal-seeding games read
+    "Pool D" in USAU's schedule and "Seeding Crossovers" here, and the first
+    spelling puts a seeding round into pool play.
     """
     rows = con.execute("""
-        SELECT g.event_id, g.game_key, g.stage, g.date, g.time, g.slot,
+        SELECT g.event_id, g.game_key, COALESCE(g.stage_pub, g.stage),
+               g.date, g.time, g.slot,
                h.display_name, a.display_name, g.home_score, g.away_score,
                g.status, g.bracket, g.bracket_place, g.bracket_type,
                g.bracket_round

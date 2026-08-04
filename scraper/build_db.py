@@ -117,6 +117,12 @@ CREATE TABLE IF NOT EXISTS games (
     bracket_place INTEGER,    -- placeStart: 1 for the championship bracket
     bracket_type TEXT,        -- 'championship' | 'placement'
     bracket_round INTEGER,    -- wins from this bracket's final; 0 IS the final
+    -- The published name for a fixture the mirror files under NO pool and no
+    -- bracket: seeding crossovers, play-ins. USAU's own `stage` for those is
+    -- routinely the pool heading they were played under -- the 2026 U.S. Open
+    -- seeding crossovers both read "Pool D" -- which buries a round that
+    -- decides the quarterfinal seeding among the pool games.
+    stage_pub TEXT,
     PRIMARY KEY (event_id, game_key)
 );
 CREATE TABLE IF NOT EXISTS roster_entries (
@@ -283,7 +289,8 @@ def _ensure_columns(con):
     if "slot" not in gcols:
         con.execute("ALTER TABLE games ADD COLUMN slot TEXT")
     for col, typ in (("bracket", "TEXT"), ("bracket_place", "INTEGER"),
-                     ("bracket_type", "TEXT"), ("bracket_round", "INTEGER")):
+                     ("bracket_type", "TEXT"), ("bracket_round", "INTEGER"),
+                     ("stage_pub", "TEXT")):
         if col not in gcols:
             con.execute(f"ALTER TABLE games ADD COLUMN {col} {typ}")
     if migrate_url_key(con):

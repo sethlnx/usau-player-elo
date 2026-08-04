@@ -70,6 +70,23 @@ query($id:ID!){
 }
 """
 
+# Fixtures the mirror files under no pool and no bracket. `description` is the
+# only place their real identity is written down: the 2026 U.S. Open's two
+# quarterfinal-seeding games are "Seeding Crossovers" here and "Pool D" in
+# USAU's own stage column, which files a seeding round among the pool games.
+EVENT_LOOSE = """
+query($id:ID!,$a:String){
+  event(id:$id){
+    games(first:100, after:$a){
+      pageInfo{ hasNextPage endCursor }
+      edges{ node{
+        description pool{ name } bracket{ name }
+        team1{ name } team1Score team2{ name } team2Score } }
+    }
+  }
+}
+"""
+
 
 def norm_team(name: str | None) -> str:
     """Alphanumerics only, trailing parenthetical dropped.
@@ -184,14 +201,37 @@ def fetch_structure(event_api_id: str, division: str) -> list[dict] | None:
                 "bracket_type": b.get("type"),
                 "bracket_round": hops,
             })
+
+    # Fixtures belonging to no pool and no bracket, carrying the only published
+    # record of what they were. Fetched from the event-level connection because
+    # by definition they hang off no bracket.
+    after = None
+    while True:
+        conn = post(EVENT_LOOSE, {"id": event_api_id, "a": after})["event"]["games"]
+        for e in conn["edges"]:
+            g = e["node"]
+            if g.get("pool") or g.get("bracket"):
+                continue
+            desc = re.sub(r"\s+Schedule\s*&\s*Scores$", "",
+                          (g.get("description") or "").strip(), flags=re.I)
+            if not desc:
+                continue
+            k = game_key((g.get("team1") or {}).get("name"),
+                         (g.get("team2") or {}).get("name"),
+                         g.get("team1Score"), g.get("team2Score"))
+            if k is not None:
+                out.append({"key": k, "stage_pub": desc})
+        if not conn["pageInfo"]["hasNextPage"]:
+            break
+        after = conn["pageInfo"]["endCursor"]
     return out
 
 
 def apply_structure(con, event_id: int, rows: list[dict]) -> tuple[int, int]:
     """Write bracket columns for one event. Returns (attached, skipped)."""
     con.execute("""UPDATE games SET bracket=NULL, bracket_place=NULL,
-                   bracket_type=NULL, bracket_round=NULL WHERE event_id=?""",
-                (event_id,))
+                   bracket_type=NULL, bracket_round=NULL, stage_pub=NULL
+                   WHERE event_id=?""", (event_id,))
     mine = collections.defaultdict(list)
     for gk, h, a, hs, as_ in con.execute("""
             SELECT g.game_key, h.display_name, a.display_name,
@@ -214,11 +254,17 @@ def apply_structure(con, event_id: int, rows: list[dict]) -> tuple[int, int]:
         if theirs[k] != 1 or len(mine.get(k, ())) != 1:
             skipped += 1
             continue
-        con.execute(
-            """UPDATE games SET bracket=?, bracket_place=?, bracket_type=?,
-                                bracket_round=? WHERE event_id=? AND game_key=?""",
-            (r["bracket"], r["bracket_place"], r["bracket_type"],
-             r["bracket_round"], event_id, mine[k][0]))
+        if "stage_pub" in r:
+            con.execute("UPDATE games SET stage_pub=? "
+                        "WHERE event_id=? AND game_key=?",
+                        (r["stage_pub"], event_id, mine[k][0]))
+        else:
+            con.execute(
+                """UPDATE games SET bracket=?, bracket_place=?, bracket_type=?,
+                                    bracket_round=?
+                   WHERE event_id=? AND game_key=?""",
+                (r["bracket"], r["bracket_place"], r["bracket_type"],
+                 r["bracket_round"], event_id, mine[k][0]))
         attached += 1
     return attached, skipped
 
@@ -264,7 +310,7 @@ def main(seasons: list[int] | None, division: str | None = None,
                 con.commit()
                 if a:
                     events += 1
-                    brackets += len({r["bracket"] for r in rows})
+                    brackets += len({r.get("bracket") for r in rows if r.get("bracket")})
                 attached += a
                 skipped += s
         print(f"{div}: {events} events, {attached} games attached, "
