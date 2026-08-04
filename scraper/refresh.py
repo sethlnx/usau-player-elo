@@ -57,14 +57,23 @@ def owner_db(division: str):
 
 
 def stale_events(con, division: str, seasons: list[int] | None, today: str):
-    """Ended events that look unfinished: url -> (event_id, name, played)."""
+    """Ended events that look unfinished: url -> (event_id, name, played).
+
+    The end is COALESCE(end_date, start_date), not end_date. A one-day event
+    prints one date, so `build_db.parse_dates` leaves end_date NULL, and 307
+    events in the corpus have no end at all -- requiring one skipped every one
+    of them. MOB Invite 2026 and Twin Cities Rollaround 2026 both sat at zero
+    played games with the mirror holding twelve because of exactly that.
+    """
     q = """SELECT e.event_id, e.url, e.name, e.season,
                   COUNT(g.rowid),
                   COALESCE(SUM(g.status = 'Final' AND g.home_score IS NOT NULL
                                AND g.away_score IS NOT NULL
                                AND g.home_score + g.away_score > 0), 0)
            FROM events e LEFT JOIN games g ON g.event_id = e.event_id
-           WHERE e.division = ? AND e.end_date IS NOT NULL AND e.end_date < ?
+           WHERE e.division = ?
+             AND COALESCE(e.end_date, e.start_date) IS NOT NULL
+             AND COALESCE(e.end_date, e.start_date) < ?
            GROUP BY e.event_id"""
     out = {}
     for eid, url, name, season, total, played in con.execute(q, (division, today)):
@@ -91,22 +100,37 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
 
     today = date.today().isoformat()
     want = stale_events(con, division, seasons, today)
-    if not want:
-        print(f"{division}: nothing stale in {path.name}", flush=True)
-        con.close()
-        return 0, 0, 0
+    have = {(u or "").rstrip("/") for (u,) in con.execute(
+        "SELECT url FROM events WHERE division=?", (division,))}
 
     # Only the mirror's view of the seasons actually in play is needed, and its
     # event list is the thing that maps a url onto an id we can query.
-    years = seasons or sorted({s for _, _, s, _ in want.values()})
+    years = seasons or sorted(
+        {s for _, _, s, _ in want.values()} or
+        {s for (s,) in con.execute(
+            "SELECT DISTINCT season FROM events WHERE division=?", (division,))})
     todo = []
     for season in years:
         for ev in list_events(division, season):
             key = (ev.get("url") or "").rstrip("/")
             if key in want:
                 todo.append((want[key], ev))
+            elif key not in have:
+                # An event we never enumerated at all. USAU's own search
+                # postback drops some -- the 2026 Western NY D-III Women's
+                # Conferences is in the mirror and in no scrape of ours -- so a
+                # PAST one with no row here is a gap, not a fixture list we are
+                # early for. Future events are left to the ordinary scrape.
+                ends = ev.get("endDate") or ev.get("startDate")
+                if ends and ends < today and "cancel" not in (ev["name"] or "").lower():
+                    todo.append(((None, ev["name"], season, 0), ev))
 
-    replaced = gained = 0
+    if not todo:
+        print(f"{division}: nothing stale or missing in {path.name}", flush=True)
+        con.close()
+        return 0, 0, 0
+
+    replaced = added = gained = 0
     with ThreadPoolExecutor(workers) as ex:
         futs = {ex.submit(fetch_event, ev["id"], division): (meta, ev)
                 for meta, ev in todo}
@@ -126,21 +150,25 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
                          and g["home_score"] + g["away_score"] > 0)
             if theirs <= played:
                 continue          # the mirror knows no more than we do
+            verb = "add" if eid is None else "refresh"
             if dry_run:
-                print(f"  would refresh {ev['startDate']} {name[:42]:44} "
+                print(f"  would {verb} {ev['startDate']} {name[:40]:42} "
                       f"{played} -> {theirs} played", flush=True)
             else:
                 event_id = upsert_event(con, season, ev, division)
                 ingest_event(con, event_id, data)
                 con.commit()
-                print(f"  {ev['startDate']} {name[:42]:44} "
+                print(f"  {verb:7} {ev['startDate']} {name[:40]:42} "
                       f"{played} -> {theirs} played", flush=True)
-            replaced += 1
+            if eid is None:
+                added += 1
+            else:
+                replaced += 1
             gained += theirs - played
     con.close()
-    print(f"{division}: {len(want)} stale, {replaced} refreshed, "
+    print(f"{division}: {len(want)} stale, {replaced} refreshed, {added} added, "
           f"+{gained} played games ({path.name})", flush=True)
-    return len(want), replaced, gained
+    return len(want), replaced + added, gained
 
 
 def main(seasons: list[int] | None, division: str | None = None,

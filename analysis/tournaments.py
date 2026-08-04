@@ -395,17 +395,19 @@ def published_brackets(games):
     bracket decides first place, so `kind` is read off it rather than guessed:
     1 is the title, anything else is that placement.
 
-    Two conditions gate every bracket, and a bracket failing either is handed
-    back untouched so the label path sees it exactly as before:
+    WIRING is the gate, not `place`. Exactly one game may sit at round 0:
+    `bracket_round` comes off nextGameId, so a bracket the mirror publishes with
+    no wiring has every game reading as a root — Tally Classic XII's
+    championship arrives as seven simultaneous "finals" — and trusting that
+    loses the champion outright where label recovery still infers feeders from
+    who won. One root is the test for wiring being real. A bracket failing it is
+    handed back untouched and takes the label path exactly as before.
 
-      * `place` must be known. Without it there is no way to say which
-        position the bracket decides, and 932 published brackets have none.
-      * exactly ONE game may sit at round 0. `bracket_round` is derived from
-        nextGameId, so when the mirror publishes a bracket with no wiring every
-        game in it reads as a root: Tally Classic XII's championship bracket
-        arrives as seven simultaneous "finals". Trusting that loses the
-        champion outright, where label recovery still infers feeders from who
-        won. One root is the test for wiring actually being present.
+    A MISSING place is not disqualifying. PLU Mens+BBQ 2026 publishes its
+    championship as "Sunday Bracket" with no placeStart at all, and requiring
+    one threw the whole thing out: 37 of its 44 played games went loose. Where
+    the place is absent the placement is read off the bracket's own name or its
+    root label, and a bracket that names no position is the title bracket.
     """
     have = [g for g in games if g.get("br") and g.get("bround") is not None]
     if not have:
@@ -420,16 +422,21 @@ def published_brackets(games):
         by_round = collections.defaultdict(list)
         for g in gs:
             by_round[g["bround"]].append(g)
-        if place is None or len(by_round.get(0, ())) != 1:
+        if len(by_round.get(0, ())) != 1:
             continue
         # bround counts wins from the final, so descending order puts the
         # earliest round first and the final last.
         rounds = [sorted(by_round[r], key=lambda g: g["ord"])
                   for r in sorted(by_round, reverse=True)]
-        # `place` is per TREE, not per published heading: scraper/structure.py
-        # splits a heading that holds several knockouts and reads each one's
-        # real position off its own root label, so this can be trusted as-is.
-        kind = "champ" if place == 1 else _ordinal(place)
+        if place:
+            # `place` is per TREE, not per published heading:
+            # scraper/structure.py splits a heading holding several knockouts
+            # and reads each one's real position off its own root label.
+            kind = "champ" if place == 1 else _ordinal(place)
+        else:
+            m = (PLACEMENT_RE.search(name or "")
+                 or PLACEMENT_RE.search(by_round[0][0]["stage"] or ""))
+            kind = bracket_key(m.group(0).lower()) if m else "champ"
         out.append((kind, min(by_round), rounds))
         used.update(id(g) for g in gs)
     return out, [g for g in games if id(g) not in used]
