@@ -527,34 +527,49 @@ def latest_rosters(con, season: int, basis: str = "completed",
 # produce and what this one did not. Travis Dunn, the case that started this,
 # goes 3322 -> 2493 and his leave-one-out flips -0.0036 -> +0.0053.
 #
-# STALE AS OF THE 2014 + MASTERS EXPANSION. Every value above was selected by
-# descent.py against the OLD corpus: 7 divisions, 2017-2026, 114,934 games.
-# The corpus is now 16 divisions, 2014-2026, 162,098 games, and it changed in
-# three ways at once — three more seasons of history feeding every rating, a
-# switch to the GraphQL mirror as the source (which carries 231 club-men
-# events the HTML scrape never had), and masters results now flowing into the
-# 9,305 people who play both masters and open.
+# RETUNED for the 2014 + masters corpus (15 contested divisions, 2014-2026,
+# 162,098 games) by descent.py on FIT 2014-2021 / VAL 2022-23 / TEST 2024-25,
+# scoring the n-weighted VAL across ALL contested divisions rather than the
+# five the split used to name. Seven moves survived the prune:
 #
-# Measured cost, club men's TEST 2024-25: logloss 0.45193 -> 0.4589. That is
-# NOT a like-for-like regression — the eval games themselves changed with the
-# source — but it is the right sign to expect from re-using hyperparameters
-# fitted elsewhere, and it should not be left standing. Re-run descent.py over
-# the new corpus before quoting these numbers as tuned; the masters
-# division_scale/division_bases below are untuned priors by analogy and belong
-# in that same sweep.
-PUBLISHED = dict(tau=500.0, involvement_credit=False,
-                 involvement_shrink=1.0, stat_transfer_beta=8.0,
+#   roster_shrink        0.015 -> 0.025     involvement_credit  False -> True
+#   stat_transfer_beta     8.0 -> 12.0      stat_transfer_clamp    60 -> 90
+#   scale  club-women     200 -> 160        bases college-women  1350 -> 1250
+#                                           bases cw-D-III       1350 -> 1200
+#
+# stat_transfer_clamp is spelled out because EloConfig defaults it to 60: it
+# was never in this dict, so leaving it implicit would silently discard the
+# move. Weighted VAL 0.44808 -> 0.44637, weighted TEST 0.44706 -> 0.44578, and
+# all seven established divisions improve on TEST.
+#
+# What did NOT survive, and is worth not re-litigating: an earlier sweep run
+# against the OLD five-division constant picked k=56 and provisional_games=6,
+# both sizeable structural moves. On the full corpus k never improved at all
+# and provisional_games pruned out at +0.00029, just under the 0.0003 bar.
+# Tuning a GLOBAL knob on 77% of the corpus — college women's was absent, and
+# it is the fourth-largest VAL block — is what produced them.
+#
+# club men's TEST is 0.45910 against 0.45193 published for the old corpus.
+# Retuning moved it 0.00005, which settles what that gap was: not a stale
+# hyperparameter, but a different eval. The mirror carries 231 club-men events
+# the HTML scrape never had, so the 2024-25 games being scored are not the
+# same games. Compare the weighted figures above, not that pair.
+PUBLISHED = dict(tau=500.0, involvement_credit=True,
+                 involvement_shrink=1.0, stat_transfer_beta=12.0,
+                 stat_transfer_clamp=90.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=10,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
-                 low_info_anchor=0.0, roster_shrink=0.015,
+                 low_info_anchor=0.0, roster_shrink=0.025,
                  division_scale={"club-men": 260.0, "college": 260.0,
                                  "college-d3": 260.0, "club-mixed": 220.0,
-                                 "club-women": 200.0,
-                                 # UNTUNED priors, by analogy: the college
-                                 # men's scale matches club men's exactly, so
-                                 # the college women's ones take club women's.
-                                 # In descent.py's grid for the next sweep.
+                                 "club-women": 160.0,
+                                 # Both college women's scales went through
+                                 # the 2014+masters sweep and came back out at
+                                 # their starting value: 260 scored +0.00200
+                                 # on college women's when found, then pruned
+                                 # at +0.00027 once the rest of the moves were
+                                 # in. Tested, not merely inherited.
                                  "college-women": 200.0,
                                  "college-women-d3": 200.0,
                                  # UNTUNED priors, by analogy: masters is the
@@ -572,17 +587,27 @@ PUBLISHED = dict(tau=500.0, involvement_credit=False,
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0,
-                                 # UNTUNED priors: college men's sits 250
-                                 # below club men's, so college women's takes
-                                 # club women's less the same 250. Only sets
-                                 # where a debut enters, and context_init
-                                 # overrides it wherever a teammate is rated.
-                                 "college-women": 1350.0,
-                                 "college-women-d3": 1350.0,
-                                 # UNTUNED priors, by analogy: same reasoning
-                                 # as the scale above — masters is open club's
-                                 # level, not college's, so each bracket takes
-                                 # its open-club gender's base outright.
+                                 # TUNED on the 2014+masters corpus: both came
+                                 # down 100-150 from the by-analogy guess,
+                                 # and college women's D-III was the single
+                                 # largest move the whole sweep found
+                                 # (+0.01946 on its own VAL).
+                                 "college-women": 1250.0,
+                                 "college-women-d3": 1200.0,
+                                 # STILL by analogy, and now deliberately so.
+                                 # descent.py carries scale and base axes for
+                                 # the four brackets with enough VAL games to
+                                 # search (masters men's/mixed, grand masters
+                                 # men's, great grand masters men's). Every
+                                 # one of them found a large gain in isolation
+                                 # — great grand masters men's base +0.01104,
+                                 # grand masters men's +0.00907 — and every
+                                 # one PRUNED back out at 0.00001-0.00011 once
+                                 # the global moves were in. A gain that
+                                 # evaporates when the rest of the model
+                                 # catches up was measuring noise on 169-292
+                                 # VAL games, not a division constant, so the
+                                 # analogy stands as the honest answer.
                                  "masters-men": 1500.0, "grandmasters-men": 1500.0,
                                  "greatgrandmasters-men": 1500.0,
                                  "masters-women": 1600.0, "grandmasters-women": 1600.0,

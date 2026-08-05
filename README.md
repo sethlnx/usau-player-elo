@@ -177,14 +177,47 @@ membership rather than the event-level team connection, which is sometimes
 empty even when the division roll is full — that dropped all 34 played games
 at the 2017 Carolina D-I CC.
 
-**The published hyperparameters predate this corpus.** `PUBLISHED` in
-`analysis/rankings.py` was selected by `descent.py` against 7 divisions /
-2017-2026 / 114,934 games. On the current corpus club men's TEST 2024-25
-logloss measures 0.4589 where the tuned run reported 0.45193. That is not a
-like-for-like regression — the source change alters which games are even in
-the eval — but it is unearned to call the current numbers tuned. Re-run
-`descent.py` before quoting them as such; the masters priors are set by
-analogy to their open-club gender and belong in the same sweep.
+**Retuned for this corpus.** `descent.py` was re-run over the expanded corpus
+— FIT 2014-2021, VAL 2022-23, TEST 2024-25, scoring the n-weighted VAL across
+all fifteen contested divisions rather than the five the constant used to
+name. Seven moves survived the prune:
+
+| knob | was | now |
+|---|---:|---:|
+| `roster_shrink` | 0.015 | 0.025 |
+| `involvement_credit` | False | True |
+| `stat_transfer_beta` | 8.0 | 12.0 |
+| `stat_transfer_clamp` | 60 (implicit) | 90 |
+| `division_scale` club women's | 200 | 160 |
+| `division_bases` college women's | 1350 | 1250 |
+| `division_bases` college women's D-III | 1350 | 1200 |
+
+Weighted VAL 0.44808 -> 0.44637, weighted TEST 0.44706 -> 0.44578, and all
+seven established divisions improve on TEST. `stat_transfer_clamp` had never
+been in `PUBLISHED` at all, so it was silently taking EloConfig's 60; it is
+spelled out now.
+
+Two things the sweep settled rather than improved. **Club men's TEST is
+0.45910 against the 0.45193 published for the old corpus, and retuning moved
+it 0.00005** — so that gap was never a stale hyperparameter. It is a different
+eval: the mirror carries 231 club-men events the HTML scrape never had, so the
+2024-25 games being scored are not the same games. Compare the weighted
+figures, not that pair.
+
+**The masters priors stay by analogy, deliberately.** `descent.py` carries
+scale and base axes for the four brackets with enough VAL games to search
+(masters men's 235, masters mixed 292, grand masters men's 214, great grand
+masters men's 169). Every one found a large gain in isolation — great grand
+masters men's base +0.01104, grand masters men's +0.00907 — and every one
+pruned back out at 0.00001-0.00011 once the global moves were in. A gain that
+evaporates when the rest of the model catches up was measuring noise at that
+n, not a division constant. The other four brackets are not in the grid at
+all; two of them have zero FIT games, having first been contested in 2022.
+
+Masters TEST does degrade slightly under the retune (masters men's 0.39336 ->
+0.39596, grand masters women's 0.29481 -> 0.30704) because the global knobs
+are n-weighted and masters is 4.5% of VAL. That is the intended trade and it
+is worth naming rather than burying.
 
 ## Gender-matching
 

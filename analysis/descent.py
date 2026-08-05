@@ -42,10 +42,22 @@ from analysis.backtest import DB_PATH, load_games, load_maps, load_stat_events, 
 from analysis.rankings import PUBLISHED
 from elo.engine import EloConfig
 
-FIT = (2017, 2018, 2019, 2020, 2021)
+# FIT reaches back to 2014 with the corpus. It used to start at 2017 because
+# that was where the corpus started; leaving it there would accumulate ratings
+# from a cold start three seasons later than the data allows and hand VAL a
+# worse model than the engine can actually build.
+FIT = (2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021)
 VAL = (2022, 2023)
 TEST = (2024, 2025)
-DIVISIONS = ("club-men", "club-mixed", "club-women", "college", "college-d3")
+# Every CONTESTED division, n-weighted. This is what scores the global axes,
+# and it was five when there were five; leaving it there would tune k, tau and
+# the provisional window against a third of the corpus and call it global.
+# Great grand masters mixed is absent because it has never been played.
+DIVISIONS = ("club-men", "club-mixed", "club-women", "college", "college-d3",
+             "college-women", "college-women-d3",
+             "masters-men", "masters-women", "masters-mixed",
+             "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
+             "greatgrandmasters-men", "greatgrandmasters-women")
 PRUNE_EPS = 0.0003
 
 # Grids. Each axis is (name, values); dict-valued knobs address one key.
@@ -78,6 +90,34 @@ AXES = [
     ("division_scale.college-women-d3", [180.0, 220.0, 260.0, 300.0]),
     ("division_bases.college-women",    [1250.0, 1350.0, 1450.0, 1550.0]),
     ("division_bases.college-women-d3", [1200.0, 1350.0, 1500.0]),
+    # Masters, and only the four brackets that can carry a grid search. A
+    # scale or base here is scored on its OWN division's VAL games
+    # (axis_divisions below), so the question is how many that division has:
+    #
+    #   masters-mixed          292 VAL     grandmasters-women    78 VAL
+    #   masters-men            235         grandmasters-mixed    24  (0 FIT)
+    #   grandmasters-men       214         greatgrandmasters-w   17  (0 FIT)
+    #   greatgrandmasters-men  169         masters-women        111
+    #
+    # The right-hand four are left on their by-analogy priors deliberately.
+    # Two of them have NO fit games at all — they were first contested in
+    # 2022 — and selecting a scale off 17 or 24 games is fitting noise, which
+    # PRUNE_EPS cannot catch either: at that n the sampling error dwarfs
+    # 0.0003, so a spurious move looks like a real one. A wrong prior costs
+    # that division alone; a wrong "tuned" value costs it AND claims to be
+    # measured.
+    #
+    # Grids are tight and centred on the analogy prior for the same reason:
+    # even 200-300 games is thin, so the sweep is allowed to correct the
+    # analogy, not to search freely.
+    ("division_scale.masters-men",           [220.0, 240.0, 260.0, 290.0]),
+    ("division_scale.masters-mixed",         [180.0, 200.0, 220.0, 260.0]),
+    ("division_scale.grandmasters-men",      [220.0, 240.0, 260.0, 290.0]),
+    ("division_scale.greatgrandmasters-men", [220.0, 260.0, 300.0]),
+    ("division_bases.masters-men",           [1400.0, 1500.0, 1600.0]),
+    ("division_bases.masters-mixed",         [1400.0, 1500.0, 1600.0]),
+    ("division_bases.grandmasters-men",      [1400.0, 1500.0, 1600.0]),
+    ("division_bases.greatgrandmasters-men", [1350.0, 1450.0, 1550.0]),
 ]
 # division_bases["club-men"] is the gauge: every other base is a rating
 # DIFFERENCE against it, and moving both is the same model twice.
