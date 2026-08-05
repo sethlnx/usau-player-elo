@@ -14,6 +14,16 @@ SEARCH_URL = fetch.BASE_URL + "/events/tournament/?ViewAll=false&IsLeagueType=fa
 COMPETITION_LEVELS = {
     "Club-Men": "21", "Club-Women": "22", "Club-Mixed": "7",
     "College-Men": "27", "College-Women": "28",
+    # Age-restricted club series: each bracket is its OWN competition level,
+    # not a name-tagged subset of Club-Men/Women/Mixed (confirmed against the
+    # live drpCompetitionLevelId dropdown, 2026-08). Great Grand Masters -
+    # Mixed (102) exists on the dropdown but has drawn zero events in every
+    # season sampled (2014, 2016, 2019, 2022, 2025) — kept for completeness,
+    # expect it to enumerate empty.
+    "Masters-Men": "19", "Masters-Women": "20", "Masters-Mixed": "8",
+    "GrandMasters-Men": "17", "GrandMasters-Women": "18", "GrandMasters-Mixed": "50",
+    "GreatGrandMasters-Men": "70", "GreatGrandMasters-Women": "77",
+    "GreatGrandMasters-Mixed": "102",
 }
 # Site dropdown value per season, read off CT_HP_Mid_1$drpSeasonId — NOT derivable.
 # It looks like `year - 2005` from 2019 up, but the sequence breaks below that:

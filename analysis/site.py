@@ -854,9 +854,10 @@ const pct = v => (v*100).toFixed(1) + '%';
 // not have. EDIVL is the real list but is declared far below this point, and
 // these strings are assigned at load, so it cannot be counted here without a
 // TDZ error — keep NDIV in step with rankings.TEAM_DIVISIONS instead.
-const NDIV = 'seven';
-const NDIV_LIST = "club men's, mixed and women's, college men's and women's, " +
-  'and D-III in both college divisions';
+const NDIV = 'sixteen';
+const NDIV_LIST = "club men's, mixed and women's; college men's and women's " +
+  "and their D-III counterparts; and men's, women's and mixed at each of " +
+  "masters, grand masters and great grand masters";
 
 /* The caveat that has to travel with any cross-gender comparison on this page.
    Men's and women's players never meet, so their ratings are commensurable
@@ -1205,7 +1206,11 @@ function faultTier(tier, key, done) {
 // every mixed and women's event as club men's the moment those divisions
 // existed. Keep this the same length as DIVCODE.
 const DIVTAG = ["men's", "college men's", "college men's D-III", 'mixed',
-                "women's", "college women's", "college women's D-III"];
+                "women's", "college women's", "college women's D-III",
+                "masters men's", "masters women's", "masters mixed",
+                "grand masters men's", "grand masters women's", "grand masters mixed",
+                "great grand masters men's", "great grand masters women's",
+                "great grand masters mixed"];
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -1825,7 +1830,11 @@ const EDET = {};
 const EVBYID = new Map(EVS.map((e, i) => [e[0], i]));
 const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                'Club Mixed', "Club Women's",
-               "College Women's", "College Women's D-III"];
+               "College Women's", "College Women's D-III",
+               "Masters Men's", "Masters Women's", "Masters Mixed",
+               "Grand Masters Men's", "Grand Masters Women's", "Grand Masters Mixed",
+               "Great Grand Masters Men's", "Great Grand Masters Women's",
+               "Great Grand Masters Mixed"];
 /* Clubs, Players, Tournaments and Trends all offer the same divisions, so
    they are filled from EDIVL rather than written out four times — adding an
    eighth division should be one edit in analysis/rankings.py DIVCODE and one
@@ -2293,7 +2302,12 @@ const DASH = ['none', '5 3', '2 3', '8 3 2 3',
 const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
                   2: "college men's D-III", 3: 'club mixed',
                   4: "club women's", 5: "college women's",
-                  6: "college women's D-III"};
+                  6: "college women's D-III",
+                  7: "masters men's", 8: "masters women's", 9: 'masters mixed',
+                  10: "grand masters men's", 11: "grand masters women's",
+                  12: 'grand masters mixed',
+                  13: "great grand masters men's", 14: "great grand masters women's",
+                  15: 'great grand masters mixed'};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};

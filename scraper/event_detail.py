@@ -20,7 +20,25 @@ DIVISION_PATHS = {"club-men": "Men/Club-Men", "college": "Men/CollegeMen",
                   "college-women": "Women/CollegeWomen",
                   "college-women-d3": "Women/CollegeWomen",
                   "club-women": "Women/Club-Women",
-                  "club-mixed": "Mixed/Club-Mixed"}
+                  "club-mixed": "Mixed/Club-Mixed",
+                  # Fully hyphenated, unlike club's "Club-Men" — verified
+                  # against the 2025 USA Ultimate Masters Championships,
+                  # which hosts all three age brackets at once: /Men/
+                  # Masters-Men/, /Men/Grand-Masters-Men/ and /Men/Great-
+                  # Grand-Masters-Men/ all serve, "GrandMasters-Men" and
+                  # "Grand-Masters" (no trailing gender) both 404.
+                  "masters-men": "Men/Masters-Men",
+                  "masters-women": "Women/Masters-Women",
+                  "masters-mixed": "Mixed/Masters-Mixed",
+                  "grandmasters-men": "Men/Grand-Masters-Men",
+                  "grandmasters-women": "Women/Grand-Masters-Women",
+                  "grandmasters-mixed": "Mixed/Grand-Masters-Mixed",
+                  "greatgrandmasters-men": "Men/Great-Grand-Masters-Men",
+                  "greatgrandmasters-women": "Women/Great-Grand-Masters-Women",
+                  # Unverified: Great Grand Masters - Mixed has drawn zero
+                  # events in every season sampled (2014-2025), so this path
+                  # has never been exercised; best-effort by pattern.
+                  "greatgrandmasters-mixed": "Mixed/Great-Grand-Masters-Mixed"}
 
 
 def schedule_url(event_url: str, division: str = "club-men") -> str:

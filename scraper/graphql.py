@@ -112,6 +112,13 @@ PAGE = 100
 # competition level upstream and the mirror models no D-III flag either, so the
 # split stays on the event NAME via build_db._D3_MATCH, exactly as the HTML
 # path does it.
+#
+# The age-restricted brackets ARE modelled structurally here, each as its own
+# level (verified against the mirror: the 2025 Masters Championships reports
+# divisions [('Masters','Men'), ('Grand Masters','Men'), ('Great Grand
+# Masters','Men'), ...]). That makes the mirror a BETTER source than the HTML
+# path for masters, which can only address a bracket through a hand-maintained
+# competition-level id and a hyphenated URL slug.
 API_DIVISION = {
     "club-men": ("Club", "Men"),
     "club-women": ("Club", "Women"),
@@ -120,6 +127,17 @@ API_DIVISION = {
     "college-d3": ("College", "Men"),
     "college-women": ("College", "Women"),
     "college-women-d3": ("College", "Women"),
+    "masters-men": ("Masters", "Men"),
+    "masters-women": ("Masters", "Women"),
+    "masters-mixed": ("Masters", "Mixed"),
+    "grandmasters-men": ("Grand Masters", "Men"),
+    "grandmasters-women": ("Grand Masters", "Women"),
+    "grandmasters-mixed": ("Grand Masters", "Mixed"),
+    "greatgrandmasters-men": ("Great Grand Masters", "Men"),
+    "greatgrandmasters-women": ("Great Grand Masters", "Women"),
+    # Offered by the source but never yet contested: zero events in every
+    # season 2014-2026 on both the mirror and USAU's own dropdown.
+    "greatgrandmasters-mixed": ("Great Grand Masters", "Mixed"),
 }
 
 
@@ -287,9 +305,17 @@ def _pages(query: str, event_id: str, field: str):
 def list_events(division: str, season: int) -> list[dict]:
     """The mirror's events for one division-season, after our own name filters.
 
-    The mirror has no D-III flag and files Masters under open club, so the
-    same name rules the HTML path applies are applied here — otherwise 279
-    D-III games leak into D-I and masters teams get rated on the open scale.
+    The mirror has no D-III flag, so the D-I/D-III split stays on the event
+    NAME exactly as the HTML path does it — otherwise 279 D-III games leak
+    into D-I.
+
+    The age brackets need no name rule: level is structural here ("Masters",
+    "Grand Masters", "Great Grand Masters" are their own levels upstream), and
+    applying _CLUB_EXCLUDE to them would strip every event they have, since
+    every one of them is named "... Masters ...". The club divisions DO still
+    need it: a genuinely cross-listed event is filed under both levels and
+    comes back in a Club query too — measured, 2019 Club/Men returns "2019 USA
+    Ultimate North Central Masters Men's Regionals" and 2025 returns none.
     """
     level, div = API_DIVISION[division]
     flt = {"level": level, "division": div,
@@ -311,7 +337,7 @@ def list_events(division: str, season: int) -> list[dict]:
             is_d3 = bool(_D3_MATCH.search(name))
             if is_d3 != division.endswith("-d3"):
                 continue
-        elif _CLUB_EXCLUDE.search(name):
+        elif division.startswith("club") and _CLUB_EXCLUDE.search(name):
             continue
         keep.append(ev)
     return keep
@@ -577,38 +603,60 @@ def validate(html_db: str, gql_db: str, division: str = "college-women-d3"):
 
 def main(seasons: list[int], division: str = "college-women-d3",
          workers: int = WORKERS):
-    if division not in API_DIVISION:
-        raise SystemExit(f"unknown division {division!r}; "
-                         f"choose from {', '.join(sorted(API_DIVISION))}")
+    """Pull one or more divisions into a single DB.
+
+    `division` may be one key, a comma-separated list, or "all". Every
+    division can share one file because `events` is keyed UNIQUE(url,
+    division) — a cross-listed tournament holds one row per division — and
+    event_id is a local autoincrement, so nothing collides the way it does
+    when two SEPARATE scrape files are folded together. That is what makes the
+    per-division split DBs and their merge offsets unnecessary on this path.
+    """
+    divisions = (list(API_DIVISION) if division == "all"
+                 else [d.strip() for d in division.split(",") if d.strip()])
+    unknown = [d for d in divisions if d not in API_DIVISION]
+    if unknown:
+        raise SystemExit(f"unknown division(s) {', '.join(unknown)}; "
+                         f"choose from {', '.join(sorted(API_DIVISION))} or 'all'")
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     con = connect(DB_PATH)
     con.executescript(SCHEMA)
     _ensure_columns(con)
     print(f"db {DB_PATH}", flush=True)
 
-    for season in seasons:
-        events = list_events(division, season)
-        print(f"\n{season} {division}: {len(events)} events", flush=True)
-        # Fetch in parallel (the network is the cost), write serially: SQLite
-        # takes one writer and the ingest is a delete-then-insert per event.
-        with ThreadPoolExecutor(workers) as ex:
-            jobs = {ex.submit(fetch_event, ev["id"], division): ev for ev in events}
-            done = 0
-            for fut in list(jobs):
-                ev = jobs[fut]
-                try:
-                    data = fut.result()
-                except Exception as e:
-                    print(f"  ! {ev['name'][:50]}: {type(e).__name__}: {e}", flush=True)
-                    continue
-                if data is None:
-                    continue
-                event_id = upsert_event(con, season, ev, division)
-                summary = ingest_event(con, event_id, data)
-                con.commit()
-                done += 1
-                print(f"  [{done}/{len(events)}] {ev['startDate']} "
-                      f"{ev['name'][:44]:46} {summary}", flush=True)
+    totals = {}
+    for division in divisions:
+        for season in seasons:
+            events = list_events(division, season)
+            print(f"\n{season} {division}: {len(events)} events", flush=True)
+            # Fetch in parallel (the network is the cost), write serially:
+            # SQLite takes one writer and the ingest is a delete-then-insert
+            # per event.
+            with ThreadPoolExecutor(workers) as ex:
+                jobs = {ex.submit(fetch_event, ev["id"], division): ev
+                        for ev in events}
+                done = 0
+                for fut in list(jobs):
+                    ev = jobs[fut]
+                    try:
+                        data = fut.result()
+                    except Exception as e:
+                        print(f"  ! {ev['name'][:50]}: {type(e).__name__}: {e}",
+                              flush=True)
+                        continue
+                    if data is None:
+                        continue
+                    event_id = upsert_event(con, season, ev, division)
+                    summary = ingest_event(con, event_id, data)
+                    con.commit()
+                    done += 1
+                    print(f"  [{done}/{len(events)}] {ev['startDate']} "
+                          f"{ev['name'][:44]:46} {summary}", flush=True)
+            totals[division] = totals.get(division, 0) + done
+    if len(divisions) > 1:
+        print("\n== ingested ==", flush=True)
+        for d in divisions:
+            print(f"  {d:26s} {totals.get(d, 0):5d} events", flush=True)
     con.close()
 
 
@@ -626,9 +674,9 @@ if __name__ == "__main__":
     if not argv:
         raise SystemExit(
             "usage: python -m scraper.graphql SEASON [SEASON ...] "
-            "[--division college-women-d3]\n"
+            "[--division all|D[,D...]]\n"
             "       python -m scraper.graphql --validate HTML_DB GQL_DB "
-            "[--division college-women-d3]\n"
-            f"divisions: {', '.join(sorted(API_DIVISION))}\n"
+            "[--division D]\n"
+            f"divisions: all, {', '.join(sorted(API_DIVISION))}\n"
             f"writes to $USAU_GQL_DB (default {DB_PATH})")
     main([int(a) for a in argv], div)

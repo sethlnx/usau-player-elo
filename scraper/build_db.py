@@ -38,6 +38,23 @@ DIVISIONS = {
     "college-d3": {"level": "College-Men", "group": "College - Men"},
     "college-women": {"level": "College-Women", "group": "College - Women"},
     "college-women-d3": {"level": "College-Women", "group": "College - Women"},
+    # Age-restricted club series, each its own competition level on the
+    # source (see scraper/events.py COMPETITION_LEVELS) rather than a
+    # name-tagged subset of Club-Men/Women/Mixed. Deliberately NOT prefixed
+    # "club-": that prefix is what routes a division through _CLUB_EXCLUDE
+    # below, which would strip every one of these by name.
+    "masters-men": {"level": "Masters-Men", "group": "Masters - Men"},
+    "masters-women": {"level": "Masters-Women", "group": "Masters - Women"},
+    "masters-mixed": {"level": "Masters-Mixed", "group": "Masters - Mixed"},
+    "grandmasters-men": {"level": "GrandMasters-Men", "group": "Grand Masters - Men"},
+    "grandmasters-women": {"level": "GrandMasters-Women", "group": "Grand Masters - Women"},
+    "grandmasters-mixed": {"level": "GrandMasters-Mixed", "group": "Grand Masters - Mixed"},
+    "greatgrandmasters-men": {"level": "GreatGrandMasters-Men",
+                               "group": "Great Grand Masters - Men"},
+    "greatgrandmasters-women": {"level": "GreatGrandMasters-Women",
+                                 "group": "Great Grand Masters - Women"},
+    "greatgrandmasters-mixed": {"level": "GreatGrandMasters-Mixed",
+                                 "group": "Great Grand Masters - Mixed"},
 }
 # club-women / club-mixed are scraped into their own DBs (data/usau_mixed.db,
 # data/usau_women.db) and folded in afterwards by scraper/merge_divisions.py,
@@ -60,14 +77,16 @@ DIVISIONS = {
 # strict r"D-III" let 279 D-III games leak into the D-I pool.
 _D3_MATCH = re.compile(r"D-?III\b|\bD-?3\b", re.I)
 _COLLEGE_EXCLUDE = re.compile(r"\bDev\b|Developmental", re.I)
-# Age-restricted club series. USAU files Masters (33+), Grandmasters (40+) and
-# Great Grand Masters (50+) under the Club-Men competition level, so the event
-# enumerator returns them alongside open club. They are a separate population
-# playing a separate series, and rating them on the open scale is a category
-# error — a masters roster's games only ever price it against other masters
-# teams, so it floats free of the open pool that anchors the scale. Seen in the
-# 2019 backfill ("2019 USA Ultimate North Central Masters Men's Regionals");
-# expect more in 2017-2018.
+# Age-restricted club series each have their OWN competition level on the
+# source (see DIVISIONS above and events.py COMPETITION_LEVELS) and are
+# scraped as their own divisions, on their own rating scale bridged to open
+# club only through players who ALSO play open club — a masters roster's
+# games only ever price it against other masters teams, so rating it on the
+# open scale directly would be a category error. This regex is now only a
+# cross-listing guard: an event can carry MULTIPLE group tags (the 2019 USA
+# Ultimate North Central Masters Men's Regionals listed under BOTH "Club -
+# Men" and "Masters - Men"), and open club must not pick those up by name
+# even though the group filter already scopes the correct case.
 _CLUB_EXCLUDE = re.compile(r"\bMasters\b|\bGrandmasters?\b|Great Grand", re.I)
 
 

@@ -1,5 +1,11 @@
 """Fold the per-division scrape DBs into the main analysis DB.
 
+LEGACY: only the HTML path (scraper/build_db.py) needs this. The default
+build is `scraper.graphql --division all`, which writes every division into
+one file and so has nothing to merge — event_id collisions are an artifact of
+scraping into SEPARATE files, not of holding many divisions. Kept working for
+anyone rebuilding a division through the HTML scrape.
+
 club-women and club-mixed are scraped into their own SQLite files because
 events.url is UNIQUE and events.division is a single column: a tournament
 cross-listed across divisions ("Cooler Classic 37 (Men & Women)") is ONE url,

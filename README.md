@@ -13,13 +13,7 @@ Full plan: `USAU_by_player_elo.md`.
 ## Pipeline
 
 ```
-.venv/bin/python -m scraper.build_db --division club       2017 2018 2019 2021 2022 2023 2024 2025 2026
-.venv/bin/python -m scraper.build_db --division college    2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
-.venv/bin/python -m scraper.build_db --division college-d3 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
-USAU_DB=data/usau_mixed.db scraper/backfill.sh club-mixed data/usau_mixed.db 2017 … 2026
-USAU_DB=data/usau_women.db scraper/backfill.sh club-women data/usau_women.db 2017 … 2026
-.venv/bin/python -m scraper.refresh       # top up events that ended mid-scrape, from the mirror
-.venv/bin/python -m scraper.merge_divisions  # fold the per-division files into data/usau.db
+.venv/bin/python -m scraper.graphql 2014 … 2026 --division all   # the whole corpus, ~13 min
 .venv/bin/python -m scraper.structure     # attach published bracket structure
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
@@ -28,10 +22,34 @@ USAU_DB=data/usau_women.db scraper/backfill.sh club-women data/usau_women.db 201
 .venv/bin/python -m analysis.site         # docs/index.html + history.js + t,p,r,g/*.js — no server
 ```
 
-The scrape is slow, disk-cached and resumable; `data/usau.db` and the raw HTML
-cache are gitignored and rebuilt by the commands above. There is no club
-2020 — COVID cancelled the series — but college 2020 exists and is kept: the
-series was cancelled in March, the January-March regular season was not.
+**The GraphQL mirror is the default source.** One command pulls all sixteen
+divisions for all thirteen seasons into `data/usau.db` in about thirteen
+minutes. The HTML scrape it replaces needed a request per event page plus one
+per team roster, spaced 1.5s apart, and took hours per division punctuated by
+WAF blocks that each need a VPN switch. `--division all` writes every division
+into ONE file, which is what retires the per-division split DBs and
+`merge_divisions` entirely: `events` is keyed UNIQUE(url, division) so a
+cross-listed tournament holds one row per division, and `event_id` is a local
+autoincrement, so there is nothing left for the merge offsets to fix.
+
+`scraper/build_db.py` (HTML) is kept and still works — it is the independent
+source `--validate` checks the mirror against, and it recovers the handful of
+games the mirror can score but attribute to only one side. Use it to audit,
+not to build:
+
+```
+.venv/bin/python -m scraper.build_db --division club-men 2014 … 2026   # HTML, slow
+.venv/bin/python -m scraper.graphql --validate data/usau_html_reference.db data/usau.db \
+    --division club-men
+```
+
+`data/usau.db` is gitignored and rebuilt by the commands above. There is no
+club 2020 — COVID cancelled the series — but college 2020 exists and is kept:
+the series was cancelled in March, the January-March regular season was not.
+The masters brackets carry 2020 rows too, and all 51 hold zero played games:
+USAU opened registration before cancelling, so they are shells. They cost
+nothing — the model only reads games with scores — and are left in rather than
+special-cased, exactly as the 463 other empty events already were.
 
 **An event scraped mid-tournament stays that way.** Nothing ever went back for
 the rest, so the 2026 U.S. Open sat at 26 of 36 games for two days after it
@@ -50,24 +68,68 @@ precisely until the next merge. Replacement is wholesale through
 score to match on and the team pair alone cannot separate a pool meeting from a
 bracket rematch.
 
-**Seven divisions, 114,934 scored games.** club men's (19,745), club mixed
-(23,874), club women's (8,452), college men's (33,375) and its D-III (4,950),
-college women's (22,133) and its D-III (2,405), 2017-2026. The two college
-women's divisions came from the GraphQL mirror below, not the HTML scrape.
-Mixed and women's are scraped into their own DBs and merged in afterwards.
-They have to be: `events.url` is UNIQUE per division because a tournament
-cross-listed across divisions is one url (260 club/mixed urls collide), and
-`event_id` is a local autoincrement, so the three files number unrelated
-events identically. `scraper/merge_divisions.py` re-keys with a per-source
-offset and is idempotent. Running the two scrapes into `data/usau.db`
-directly would have each division overwrite the other's tag.
+**Sixteen divisions, 162,098 scored games, 2014-2026.** college men's
+(46,028) and its D-III (7,623), college women's (31,041) and its D-III
+(3,390), club mixed (30,966), club men's (25,905), club women's (11,083);
+then the age-restricted brackets — masters men's (1,446), masters mixed
+(1,305), grand masters men's (1,207), masters women's (829), great grand
+masters men's (702), grand masters women's (291), grand masters mixed (203),
+great grand masters women's (79). Great grand masters mixed exists on the
+source but has never been contested: zero events in all thirteen seasons.
+
+2014 is a floor imposed by the SOURCE, not the scraper. USAU's event and
+roster system begins there; every earlier season the dropdown offers is empty
+scaffolding, and the mirror independently starts in 2014 too.
+
+All sixteen now come from the mirror in one pass into one file, so the
+per-division split DBs (`usau_mixed.db`, `usau_women.db`,
+`usau_college_women*.db`) and their merge offsets are retired. What made them
+necessary was the HTML path: `events.url` is UNIQUE per division because a
+cross-listed tournament is one url (260 club/mixed urls collide), and
+`event_id` is a local autoincrement, so separate scrape FILES numbered
+unrelated events identically. One file has no such problem.
 
 D-I and D-III share the College-Men competition level and the same schedule
 URL, so `--division college` takes every event whose name is not D-III and
 `--division college-d3` takes exactly those that are. The two sets are
 disjoint by name, which is what keeps them one row each.
 
-### Alternate source: the GraphQL mirror
+### Masters, and what puts it on the same scale
+
+The age brackets are a separate series: a masters roster's games only ever
+price it against other masters teams, so rating one on the open scale by
+assertion would be a category error. They are nonetheless on the same scale
+here, for the same reason college and club are — **shared players**. 9,305
+people appear in both a masters bracket and an open division, which is what
+anchors the two pools to each other: masters mixed <-> club mixed (3,626),
+masters men's <-> club men's (2,678), grand masters men's <-> club men's
+(1,308), and even great grand masters men's <-> club men's (558).
+
+The bridge is dense enough to work, and the evidence it worked is a gradient
+nobody encoded. All three men's brackets were given an IDENTICAL prior (base
+1500, scale 260 — see `PUBLISHED` in `analysis/rankings.py`), and the ratings
+still separate by age in the right order and settle below open club's ceiling:
+
+| division | teams | median | max |
+|---|---:|---:|---:|
+| masters men's | 40 | 1650 | 2135 |
+| grand masters men's | 27 | 1613 | 2100 |
+| great grand masters men's | 27 | 1532 | 2069 |
+| club men's | 218 | 1606 | 2359 |
+
+Masters medians sit at or slightly above club's because the brackets are
+shallower — self-selected, experienced squads, with fewer weak teams dragging
+the middle down — while the CEILING stays below club's, which is the check
+that matters. Read a masters rating the way the gender note below asks you to
+read a women's one: a position in a pool linked to the open pool by shared
+players, not a prediction of a game USAU never schedules.
+
+These bridges go through `analysis/bridge_audit.py` like every other:
+47 of the 10,113 masters bridges show a hard height contradiction (0.46%,
+against 0.32% across the rest), and they land in `data/bridge_audit.csv` for
+review rather than being merged silently.
+
+### The GraphQL mirror
 
 `scraper/graphql.py` pulls the same events, games, teams and rosters from the
 third-party mirror at `usau-rankings.fly.dev`, which serves USAU's own data
@@ -114,6 +176,15 @@ squads on the open scale; and team rows must be seeded from the DIVISION's
 membership rather than the event-level team connection, which is sometimes
 empty even when the division roll is full — that dropped all 34 played games
 at the 2017 Carolina D-I CC.
+
+**The published hyperparameters predate this corpus.** `PUBLISHED` in
+`analysis/rankings.py` was selected by `descent.py` against 7 divisions /
+2017-2026 / 114,934 games. On the current corpus club men's TEST 2024-25
+logloss measures 0.4589 where the tuned run reported 0.45193. That is not a
+like-for-like regression — the source change alters which games are even in
+the eval — but it is unearned to call the current numbers tuned. Re-run
+`descent.py` before quoting them as such; the masters priors are set by
+analogy to their open-club gender and belong in the same sweep.
 
 ## Gender-matching
 
@@ -829,3 +900,4 @@ and there was no on-demand split to be had while that was true.
 - Rosters are public per event-team, names only (no stable player IDs).
   Nationals rosters include per-player stats (points/assists/Ds/turns) —
   unused by the model so far.
+

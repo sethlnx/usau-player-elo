@@ -526,6 +526,22 @@ def latest_rosters(con, season: int, basis: str = "completed",
 # the best player on the best club, which is what a sane rating system should
 # produce and what this one did not. Travis Dunn, the case that started this,
 # goes 3322 -> 2493 and his leave-one-out flips -0.0036 -> +0.0053.
+#
+# STALE AS OF THE 2014 + MASTERS EXPANSION. Every value above was selected by
+# descent.py against the OLD corpus: 7 divisions, 2017-2026, 114,934 games.
+# The corpus is now 16 divisions, 2014-2026, 162,098 games, and it changed in
+# three ways at once — three more seasons of history feeding every rating, a
+# switch to the GraphQL mirror as the source (which carries 231 club-men
+# events the HTML scrape never had), and masters results now flowing into the
+# 9,305 people who play both masters and open.
+#
+# Measured cost, club men's TEST 2024-25: logloss 0.45193 -> 0.4589. That is
+# NOT a like-for-like regression — the eval games themselves changed with the
+# source — but it is the right sign to expect from re-using hyperparameters
+# fitted elsewhere, and it should not be left standing. Re-run descent.py over
+# the new corpus before quoting these numbers as tuned; the masters
+# division_scale/division_bases below are untuned priors by analogy and belong
+# in that same sweep.
 PUBLISHED = dict(tau=500.0, involvement_credit=False,
                  involvement_shrink=1.0, stat_transfer_beta=8.0,
                  provisional_shape="hyperbolic",
@@ -540,7 +556,19 @@ PUBLISHED = dict(tau=500.0, involvement_credit=False,
                                  # the college women's ones take club women's.
                                  # In descent.py's grid for the next sweep.
                                  "college-women": 200.0,
-                                 "college-women-d3": 200.0},
+                                 "college-women-d3": 200.0,
+                                 # UNTUNED priors, by analogy: masters is the
+                                 # same level of play as open club (a separate
+                                 # series, not a weaker one), so each age
+                                 # bracket takes its open-club gender's scale
+                                 # rather than a fresh guess. Also awaiting
+                                 # descent.py once masters games exist to fit.
+                                 "masters-men": 260.0, "grandmasters-men": 260.0,
+                                 "greatgrandmasters-men": 260.0,
+                                 "masters-women": 200.0, "grandmasters-women": 200.0,
+                                 "greatgrandmasters-women": 200.0,
+                                 "masters-mixed": 220.0, "grandmasters-mixed": 220.0,
+                                 "greatgrandmasters-mixed": 220.0},
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0,
@@ -550,15 +578,29 @@ PUBLISHED = dict(tau=500.0, involvement_credit=False,
                                  # where a debut enters, and context_init
                                  # overrides it wherever a teammate is rated.
                                  "college-women": 1350.0,
-                                 "college-women-d3": 1350.0})
+                                 "college-women-d3": 1350.0,
+                                 # UNTUNED priors, by analogy: same reasoning
+                                 # as the scale above — masters is open club's
+                                 # level, not college's, so each bracket takes
+                                 # its open-club gender's base outright.
+                                 "masters-men": 1500.0, "grandmasters-men": 1500.0,
+                                 "greatgrandmasters-men": 1500.0,
+                                 "masters-women": 1600.0, "grandmasters-women": 1600.0,
+                                 "greatgrandmasters-women": 1600.0,
+                                 "masters-mixed": 1500.0, "grandmasters-mixed": 1500.0,
+                                 "greatgrandmasters-mixed": 1500.0})
 # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
-# both "c", which silently labelled every club event as college. Seven codes
-# now. Codes are positional: history.json stores them per event,
+# both "c", which silently labelled every club event as college. Sixteen
+# codes now. Codes are positional: history.json stores them per event,
 # player_elo.csv packs them into a bitmask, and the site's DIVLABEL mirrors
 # them. APPEND, never reorder.
 DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "club-mixed": 3, "club-women": 4,
-           "college-women": 5, "college-women-d3": 6}
+           "college-women": 5, "college-women-d3": 6,
+           "masters-men": 7, "masters-women": 8, "masters-mixed": 9,
+           "grandmasters-men": 10, "grandmasters-women": 11, "grandmasters-mixed": 12,
+           "greatgrandmasters-men": 13, "greatgrandmasters-women": 14,
+           "greatgrandmasters-mixed": 15}
 # Divisions the team tables cover, in display order. College is included so
 # the club tables reach as far as the player table and Trends do, but its
 # three roster bases carry less information than a club division's: a college
@@ -570,7 +612,11 @@ DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
 # 82% of college ones still vary their entry.
 TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
                   "college", "college-d3",
-                  "college-women", "college-women-d3"]
+                  "college-women", "college-women-d3",
+                  "masters-men", "masters-women", "masters-mixed",
+                  "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
+                  "greatgrandmasters-men", "greatgrandmasters-women",
+                  "greatgrandmasters-mixed"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
