@@ -230,6 +230,15 @@ def build():
         # The player tier keys on `pid % buckets`, which the page reproduces
         # directly. Clubs cannot — their bucket rides on rostByClub instead.
         "buckets": HIST_BUCKETS,
+        # Which divisions the pickers may OFFER. Derived, never listed: a
+        # division USAU registers but nobody has ever contested (great grand
+        # masters mixed, zero events in all thirteen seasons) would otherwise
+        # sit in all four dropdowns and answer every one of them with nothing
+        # — and on Trends "nothing" is a blank chart with no error, which is
+        # the exact failure history_split._trends documents. Deriving it also
+        # means the option appears by itself the season that bracket is first
+        # played, with no edit here.
+        "divs": sorted({ev[3] for ev in tourneys["events"]}),
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
@@ -854,10 +863,15 @@ const pct = v => (v*100).toFixed(1) + '%';
 // not have. EDIVL is the real list but is declared far below this point, and
 // these strings are assigned at load, so it cannot be counted here without a
 // TDZ error — keep NDIV in step with rankings.TEAM_DIVISIONS instead.
-const NDIV = 'sixteen';
+//
+// This is the count the page OFFERS, which is the contested one: DIVCODE and
+// TEAM_DIVISIONS carry sixteen, but great grand masters mixed has never been
+// played, so D.divs drops it from every picker and claiming sixteen here
+// would assert a division no reader can select.
+const NDIV = 'fifteen';
 const NDIV_LIST = "club men's, mixed and women's; college men's and women's " +
-  "and their D-III counterparts; and men's, women's and mixed at each of " +
-  "masters, grand masters and great grand masters";
+  "and their D-III counterparts; men's, women's and mixed at both masters " +
+  "and grand masters; and great grand masters men's and women's";
 
 /* The caveat that has to travel with any cross-gender comparison on this page.
    Men's and women's players never meet, so their ratings are commensurable
@@ -1838,10 +1852,18 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
 /* Clubs, Players, Tournaments and Trends all offer the same divisions, so
    they are filled from EDIVL rather than written out four times — adding an
    eighth division should be one edit in analysis/rankings.py DIVCODE and one
-   here, not five HTML blocks that drift apart. */
+   here, not five HTML blocks that drift apart.
+
+   Filtered to divisions that have actually been PLAYED (D.divs, derived from
+   the event table). A registered-but-never-contested bracket would otherwise
+   be offered by all four and answer with an empty table — or, on Trends, a
+   blank chart and no error at all. */
+const DIVS_PRESENT = new Set(D.divs || EDIVL.map((_, i) => i));
 ['#cdiv', '#pdiv', '#ediv', '#tdiv'].forEach(sel => {
   $(sel).innerHTML = '<option value="all">All divisions</option>' +
-    EDIVL.map((label, i) => `<option value="${i}">${esc(label)}</option>`).join('');
+    EDIVL.map((label, i) => [label, i])
+         .filter(([, i]) => DIVS_PRESENT.has(i))
+         .map(([label, i]) => `<option value="${i}">${esc(label)}</option>`).join('');
 });
 const EYEARS = [...new Set(EVS.map(e => e[2]))].sort((a, b) => b - a);
 // Field strength, appended to each event row by site.py: [11] score, [12]
