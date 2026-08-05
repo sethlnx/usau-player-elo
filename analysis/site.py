@@ -377,6 +377,45 @@ td.band.weaksup{color:var(--ink-2)}
 button.act.prim{border-color:var(--accent);color:var(--ink)}
 button.act:disabled{opacity:.42;cursor:default;border-color:var(--line)}
 button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
+/* Pinned players: a shortlist built from the players table, shown as a
+   sticky sidebar and carried in the URL so the exact list can be shared. */
+.pwrap{display:flex;gap:16px;align-items:flex-start}
+.ptblwrap{flex:1;min-width:0}
+th.pin,td.pin{width:24px;padding:7px 2px;text-align:center}
+button.pinbtn{background:none;border:0;cursor:pointer;font-size:14px;opacity:.32;
+  padding:0;line-height:1}
+button.pinbtn:hover{opacity:.75}
+button.pinbtn.on{opacity:1}
+#pinSidebar{width:270px;flex:none;background:var(--surface);border:1px solid var(--line);
+  border-radius:10px;padding:12px 13px;position:sticky;top:14px}
+#pinSidebar.collapsed{display:none}
+.pinhead{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin-bottom:8px}
+.pinhead h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--ink-3);font-weight:600}
+.pinactions{display:flex;gap:6px}
+.pinactions button.act{font-size:11.5px;padding:3px 8px}
+.pinrow{display:flex;align-items:center;gap:8px;padding:5px 0;
+  border-bottom:1px solid var(--line);font-size:13.5px}
+.pinrow:last-child{border-bottom:0}
+.pinrow .nmlink{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinrow .n{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+button.unpin{background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:15px;
+  line-height:1;padding:0 2px;flex:none}
+button.unpin:hover{color:var(--lose)}
+.pinaddwrap{position:relative;margin-top:10px}
+#pinadd{width:100%;box-sizing:border-box;font-size:13px;padding:5px 8px}
+#pinaddResults{display:none;position:absolute;left:0;right:0;top:100%;margin-top:2px;
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:7px;
+  max-height:220px;overflow-y:auto;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.16)}
+#pinaddResults.on{display:block}
+.pinhit{padding:6px 9px;cursor:pointer;font-size:13px}
+.pinhit:hover{background:var(--chip)}
+.pinhit .muted{font-size:11.5px}
+@media (max-width:860px){
+  .pwrap{flex-direction:column}
+  #pinSidebar{width:100%;position:static}
+}
 /* A simulated result is a coin flip, not a played game. Dashed and desaturated
    so it can never be mistaken for a real one you typed in. */
 .t.w.simd{background:color-mix(in srgb,var(--ink-3) 13%,transparent) !important;
@@ -460,6 +499,10 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
   box-shadow:-10px 0 40px rgba(0,0,0,.18)}
 #detail.on{display:block}
 #detail h2{font-size:18px;margin:0 0 2px;letter-spacing:-.01em}
+.dhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.dhead h2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+button.dpin{flex:none}
+button.dpin.on{border-color:var(--accent);color:var(--ink)}
 #detail .meta{color:var(--ink-3);font-size:13px;margin-bottom:14px}
 #detail .close{position:absolute;top:14px;right:18px;font-size:20px;line-height:1;
   background:none;border:0;color:var(--ink-3);cursor:pointer;padding:4px 8px}
@@ -694,12 +737,35 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <option value="2">Female-matching</option>
     </select>
     <span class="count" id="pcount"></span>
+    <button class="act" id="pinToggle" title="Show or hide your pinned players list">
+      &#128204; Pinned <span id="pinbadge">0</span></button>
   </div>
+  <div class="pwrap">
+  <div class="ptblwrap">
   <table><thead><tr>
+    <th class="pin"></th>
     <th class="n">#</th><th>Player</th><th class="n">Elo</th><th>90% band</th>
     <th class="n">G</th><th>Last club</th><th class="n">Yr</th>
   </tr></thead><tbody id="ptb"></tbody></table>
   <p class="note" id="pnote"></p>
+  </div>
+  <aside id="pinSidebar" class="collapsed">
+    <div class="pinhead">
+      <h3>Pinned players</h3>
+      <div class="pinactions">
+        <button class="act" id="pinlink">Copy link</button>
+        <button class="act" id="pinclear">Clear</button>
+      </div>
+    </div>
+    <div id="pinlist"></div>
+    <div class="pinaddwrap">
+      <input type="search" id="pinadd" placeholder="Add another player…" autocomplete="off">
+      <div id="pinaddResults"></div>
+    </div>
+    <p class="note" style="margin:8px 0 0">Pins are saved in this browser and baked into
+    the page URL, so copying the address bar shares this exact list.</p>
+  </aside>
+  </div>
 </section>
 
 <section id="events">
@@ -936,7 +1002,10 @@ function drawPlayers() {
                  : pop;
   const shown = rows.slice(0, 300);
   $('#ptb').innerHTML = shown.map(p =>
-    `<tr><td class="rk" title="#${p[7]} of all ${D.totalRated.toLocaleString()} rated players">` +
+    `<tr><td class="pin"><button class="pinbtn${PINNED.has(String(p[8])) ? ' on' : ''}" ` +
+    `data-pinid="${p[8]}" title="${PINNED.has(String(p[8])) ? 'Remove from pinned list' : 'Pin to sidebar list'}">` +
+    `&#128204;</button></td>` +
+    `<td class="rk" title="#${p[7]} of all ${D.totalRated.toLocaleString()} rated players">` +
     `${rankOf.get(p)}</td>` +
     `<td><span class="nmlink" data-pid="${p[8]}">${esc(p[0])}</span></td>` +
     `<td class="n">${p[1].toFixed(0)}</td>` +
@@ -1163,6 +1232,102 @@ function hasGames(ckey, evIdx) {
 const PBY = new Map(D.players.map(p => [String(p[8]), p]));
 // H.teams is keyed on the lowercased model identity; never render that raw.
 const clubLabel = k => TN[k] || k;
+
+/* ---------- pinned players: a shortlist that travels in the URL ---------- */
+// Pins live in `?p=id,id,id`, independent of the hash router (which owns
+// #p//#c//#t deep links) — so a shared link can carry a shortlist and,
+// separately, whatever hash the recipient's own click history lands on.
+// localStorage is the "come back tomorrow" copy; the query string is what a
+// shared link actually carries, and it wins over localStorage on first load.
+let PINNED = new Set();
+const PIN_CAP = 20;
+const pinsFromUrl = new URLSearchParams(location.search).get('p');
+(pinsFromUrl !== null ? pinsFromUrl : (localStorage.getItem('usau-pinned') || ''))
+  .split(',').map(s => s.trim()).filter(Boolean).forEach(id => {
+    if (PBY.has(id)) PINNED.add(id);
+  });
+function savePins() {
+  const ids = [...PINNED];
+  localStorage.setItem('usau-pinned', ids.join(','));
+  const u = new URL(location.href);
+  if (ids.length) u.searchParams.set('p', ids.join(',')); else u.searchParams.delete('p');
+  history.replaceState(null, '', u.pathname + u.search + location.hash);
+}
+function setPinSidebarOpen(open) {
+  $('#pinSidebar').classList.toggle('collapsed', !open);
+  $('#pinToggle').classList.toggle('on', open);
+  localStorage.setItem('usau-pinned-open', open ? '1' : '0');
+}
+function togglePin(id) {
+  id = String(id);
+  if (PINNED.has(id)) PINNED.delete(id);
+  else { if (PINNED.size >= PIN_CAP || !PBY.has(id)) return; PINNED.add(id); }
+  savePins();
+  drawPlayers();
+  renderPinSidebar();
+  if (PINNED.size) setPinSidebarOpen(true);
+}
+function renderPinSidebar() {
+  $('#pinbadge').textContent = PINNED.size;
+  $('#pinlist').innerHTML = PINNED.size ? [...PINNED].map(id => {
+    const p = PBY.get(id);
+    return p ? `<div class="pinrow"><span class="nmlink" data-pid="${id}">${esc(p[0])}</span>` +
+      `<span class="n">${p[1].toFixed(0)}</span>` +
+      `<button class="unpin" data-unpin="${id}" title="Remove from list">&times;</button></div>` : '';
+  }).join('') : `<p class="note" style="margin:2px 0 0">Nobody pinned yet. Click ` +
+    `&#128204; beside a name in the table, or search below.</p>`;
+}
+$('#pinToggle').onclick = () => setPinSidebarOpen($('#pinSidebar').classList.contains('collapsed'));
+$('#pinlist').addEventListener('click', e => {
+  const un = e.target.closest('[data-unpin]'); if (un) { togglePin(un.dataset.unpin); return; }
+  const nm = e.target.closest('[data-pid]'); if (nm) openDetail('p', nm.dataset.pid);
+});
+$('#pinclear').onclick = () => { PINNED.clear(); savePins(); drawPlayers(); renderPinSidebar(); };
+$('#pinlink').onclick = () => {
+  const b = $('#pinlink'), was = b.textContent;
+  const flash = t => { b.textContent = t; setTimeout(() => { b.textContent = was; }, 1300); };
+  navigator.clipboard.writeText(location.href).then(() => flash('Copied!'), () => {
+    // Clipboard permission denied (older browser, non-secure context, or a
+    // sandboxed embed) — select the address bar's worth of text instead of
+    // failing silently, so the link can still be copied by hand.
+    const r = document.createRange(); const sel = getSelection();
+    const tmp = document.createElement('span'); tmp.textContent = location.href;
+    tmp.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(tmp); r.selectNodeContents(tmp);
+    sel.removeAllRanges(); sel.addRange(r);
+    flash('Select & copy \u2318C');
+    setTimeout(() => tmp.remove(), 1400);
+  });
+};
+// Add-another-player: a small live search inside the sidebar itself, scoped
+// to name only, so a pin can be added without touching the main table's
+// filters — which may currently be hiding the very player being added.
+$('#pinadd').addEventListener('input', () => {
+  const q = $('#pinadd').value.trim().toLowerCase();
+  const out = $('#pinaddResults');
+  if (!q) { out.innerHTML = ''; out.classList.remove('on'); return; }
+  const hits = D.players.filter(p => !PINNED.has(String(p[8])) &&
+    p[0].toLowerCase().includes(q)).slice(0, 8);
+  out.innerHTML = hits.length ? hits.map(p =>
+    `<div class="pinhit" data-add="${p[8]}">${esc(p[0])} ` +
+    `<span class="muted">${esc(p[5])}</span></div>`).join('')
+    : `<div class="pinhit muted">No match</div>`;
+  out.classList.add('on');
+});
+$('#pinaddResults').addEventListener('click', e => {
+  const h = e.target.closest('[data-add]'); if (!h) return;
+  togglePin(h.dataset.add);
+  $('#pinadd').value = ''; $('#pinaddResults').innerHTML = ''; $('#pinaddResults').classList.remove('on');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.pinaddwrap')) $('#pinaddResults').classList.remove('on');
+});
+renderPinSidebar();
+// A pinned link should show its list on arrival without a click; a returning
+// visitor's own open/closed choice is remembered instead.
+setPinSidebarOpen(pinsFromUrl !== null ? PINNED.size > 0
+  : localStorage.getItem('usau-pinned-open') === '1');
+if (pinsFromUrl !== null && PINNED.size) showTab('players');
 
 /* Stored delta-encoded: rebuild absolute event indices. `runs` (players only)
    is the run-length club affiliation: [startIdx, clubIdx] pairs positioned
@@ -1549,8 +1714,13 @@ function openDetail(kind, key, opts) {
   const peakAt = pts.find(p => p.elo === peak);
   if (peak !== null) parts.push(
     `peak <b>${peak}</b> after ${esc(peakAt.event)} (${peakAt.date})`);
+  const pinHead = kind === 'p'
+    ? `<button class="act dpin${PINNED.has(String(key)) ? ' on' : ''}" data-pinid="${esc(String(key))}">` +
+      `${PINNED.has(String(key)) ? '\u{1F4CC} Pinned' : '\u{1F4CC} Pin'}</button>`
+    : '';
   $('#dbody').innerHTML =
-    `<h2>${esc(title)}</h2><div class="meta">${parts.join(' · ')}</div>` + chart(pts) +
+    `<div class="dhead"><h2>${esc(title)}</h2>${pinHead}</div>` +
+    `<div class="meta">${parts.join(' · ')}</div>` + chart(pts) +
     `<p class="note" style="margin:0 0 14px">Each point is the rating after that ` +
     `event — a weekend tournament is one step, not one point per game. ` +
     `${pts.length} event${pts.length === 1 ? '' : 's'} on record; click one in ` +
@@ -1594,6 +1764,14 @@ $('#dclose').onclick = () => closeDetail();
 $('#scrim').onclick = () => closeDetail();
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 
+$('#detail').addEventListener('click', e => {
+  const pin = e.target.closest('[data-pinid]');
+  if (!pin) return;
+  togglePin(pin.dataset.pinid);
+  const on = PINNED.has(pin.dataset.pinid);
+  pin.classList.toggle('on', on);
+  pin.textContent = on ? '\u{1F4CC} Pinned' : '\u{1F4CC} Pin';
+});
 $('#detail').addEventListener('mousemove', e => {
   const h = e.target.closest('[data-tip]'); const tip = $('#tip');
   if (!h) { tip.classList.remove('on'); return; }
@@ -1604,6 +1782,7 @@ $('#detail').addEventListener('mousemove', e => {
 });
 
 $('#ptb').addEventListener('click', e => {
+  const pin = e.target.closest('[data-pinid]'); if (pin) { togglePin(pin.dataset.pinid); return; }
   const el = e.target.closest('[data-pid]'); if (el) openDetail('p', el.dataset.pid);
 });
 $('#ctb').addEventListener('click', e => {
