@@ -27,12 +27,14 @@ report at data/ambiguities.csv, and cross-division links at
 data/cross_division_links.csv.
 
 Manual review verdicts live in data/link_overrides.csv (norm_name, action,
-note): action "block" splits that name's college and club identities (the
-name match was two different people); "merge" is its inverse — it forces one
-identity for a name the (division, season) rule called ambiguous, for when
-review shows the multi-club season was one person (a youth or fifth-year
-player on several summer rosters); "confirm" marks the bridge reviewed-OK so
-audits skip it. See analysis/bridge_audit.py for the review queue.
+note, scope, clubs): action "block" splits that name's college and club
+identities (the name match was two different people); an unscoped "merge" is
+its inverse and forces one identity for a name the (division, season) rule
+called ambiguous. A scoped "merge" joins only the listed divisions and/or
+canonical clubs for a name that the gender or collision split would otherwise
+separate. Use `|` between scope divisions or clubs. "confirm" marks the bridge
+reviewed-OK so audits skip it. See analysis/bridge_audit.py for the review
+queue.
 """
 
 import csv
@@ -195,6 +197,32 @@ def load_overrides(path: Path) -> dict[str, str]:
                 for r in csv.DictReader(f) if r.get("norm_name")}
 
 
+def load_merge_scopes(path: Path) -> dict[str, dict[str, dict[str, tuple]]]:
+    """Return scoped merge groups indexed by normalized division or club."""
+    if not path.exists():
+        return {}
+    out = defaultdict(lambda: {"divisions": {}, "clubs": {}})
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            if (row.get("action") or "").strip().lower() != "merge":
+                continue
+            nname = norm_name(row.get("norm_name", ""))
+            divisions = tuple(sorted({d.strip() for d in
+                                      (row.get("scope") or "").split("|")
+                                      if d.strip()}))
+            clubs = tuple(sorted({norm_club(c, c) for c in
+                                  (row.get("clubs") or "").split("|")
+                                  if c.strip()}))
+            if not nname or (len(divisions) < 2 and len(clubs) < 2):
+                continue
+            group = ("scoped-merge", divisions, clubs)
+            for division in divisions:
+                out[nname]["divisions"][division] = group
+            for club in clubs:
+                out[nname]["clubs"][club] = group
+    return dict(out)
+
+
 def has_date_conflict(windows: list[tuple[str, str, str, int]]) -> bool:
     """True if two DIFFERENT clubs at DIFFERENT events hold overlapping dates.
 
@@ -227,8 +255,11 @@ def has_date_conflict(windows: list[tuple[str, str, str, int]]) -> bool:
 def main():
     con = sqlite3.connect(DB_PATH)
     overrides = load_overrides(AMBIGUITY_REPORT.parent / "link_overrides.csv")
+    merge_scopes = load_merge_scopes(AMBIGUITY_REPORT.parent / "link_overrides.csv")
     blocked = {n for n, a in overrides.items() if a == "block"}
-    merged = {n for n, a in overrides.items() if a == "merge"}
+    scoped_names = set(merge_scopes)
+    merged = {n for n, a in overrides.items()
+              if a == "merge" and n not in scoped_names}
     rows = con.execute("""
         SELECT re.event_team_id, re.name, et.full_name, et.display_name,
                ev.season, ev.division, ev.start_date, ev.end_date, ev.event_id,
@@ -301,14 +332,24 @@ def main():
     display_of: dict[int, str] = {}     # player_id -> display name, for the name prior
 
     def player_for(nname: str, club: str, division: str, pg: str | None) -> int:
-        if nname in ambiguous_names:
+        scopes = merge_scopes.get(nname, {})
+        scoped_merge = scopes.get("clubs", {}).get(club)
+        if scoped_merge is None:
+            scoped_merge = scopes.get("divisions", {}).get(division)
+        if scoped_merge is not None:
+            key = (nname, "scoped-merge", scoped_merge)
+        elif nname in ambiguous_names:
             key = (nname, club)
         elif nname in blocked:          # reviewed: college/club are two people
             key = (nname, division)
+        elif nname in merged:
+            key = (nname,)
         elif nname in split_gender:
             key = (nname, division_gender(division) or pg or "?")
         else:
             key = (nname,)
+
+
         if key not in player_ids:
             cur = con.execute(
                 "INSERT INTO players (display_name, norm_name, ambiguous) VALUES (?,?,?)",

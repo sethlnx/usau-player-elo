@@ -686,12 +686,14 @@ and there was no on-demand split to be had while that was true.
   division is the one case that always splits: 279 of them, two people each.
   Every collision, split or merged, lands in `data/ambiguities.csv` with its
   verdict; the 31,166 cross-division bridges log to
-  `data/cross_division_links.csv`; review verdicts in
-  `data/link_overrides.csv` (`block` = two people, `merge` = one person,
-  `confirm` = bridge reviewed OK). A conflict proves two people, its absence
-  only fails to disprove them, so same-named players in different regions who
-  never coincide do merge wrongly — `block` is the correction. The same pass
-  writes `players.gender` / `players.gender_source`; see Gender-matching above.
+`data/cross_division_links.csv`; review verdicts in
+`data/link_overrides.csv` (`block` = two people, `merge` = one person,
+`confirm` = bridge reviewed OK). A `merge` row may include a fourth `scope`
+field containing `|`-separated divisions, or a fifth `clubs` field containing
+`|`-separated canonical clubs, when only those records should be joined.
+only fails to disprove them, so same-named players in different regions who
+never coincide do merge wrongly — `block` is the correction. The same pass
+writes `players.gender` / `players.gender_source`; see Gender-matching above.
 - `elo/` — the rating engine (`EloConfig` holds every knob). Debut players
   enter at their division's base rating (not teammate mean; the old
   context-init survives behind `EloConfig.context_init`), converging via an

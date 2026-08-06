@@ -126,7 +126,6 @@ def build():
     # rather than replayed: analysis.tournaments reads the same schedule the
     # tracker does and infers pools and brackets from the results.
     tourneys = build_tournaments(con)
-    con.close()
 
     all_players = load_csv("player_elo.csv")
     total_rated = len(all_players)
@@ -193,6 +192,18 @@ def build():
     verdicts, strength_cuts = classify_strength(history, tourneys["events"])
     for row, verdict in zip(tourneys["events"], verdicts):
         row.extend(verdict if verdict else [None, ""])
+    # [13] = 1 where the event has no PLAYED game yet, which is what the
+    # Tournaments filter means by "upcoming". Keyed on results rather than on
+    # the calendar deliberately: the mirror publishes scores for events dated
+    # ahead of today (Vacationland 2026 carries 40 of them three days out), so
+    # a date test would file a tournament you can already read results for
+    # under "nothing has happened yet". Results are also what the page can
+    # actually show, which is the question a reader is really asking.
+    played = {eid for (eid,) in con.execute(
+        """SELECT DISTINCT event_id FROM games
+           WHERE home_score IS NOT NULL AND away_score IS NOT NULL""")}
+    for row in tourneys["events"]:
+        row.append(0 if row[0] in played else 1)
     tourneys["strengthNotes"] = FIELD_TIER_NAMES
     # division -> [[score, letter], ...]. Published because the bar is not the
     # same in every division and a letter with a hidden threshold is a riddle.
@@ -301,6 +312,7 @@ def build():
           f"{len(clubs['completed'])} clubs")
     print(f"  {len(tourneys['events']):,} tournaments in "
           f"{len(tourneys['series']):,} series")
+    con.close()
 
 
 TEMPLATE = r"""<!doctype html>
@@ -804,6 +816,11 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="date">Newest first</option>
         <option value="str">Hardest field first</option>
       </select>
+      <span class="seg" id="estate" role="group" aria-label="Filter by completion">
+        <button data-state="all" class="on">All</button
+        ><button data-state="done">Completed</button
+        ><button data-state="up">Upcoming</button>
+      </span>
       <span class="count" id="ecount"></span>
     </div>
     <table class="evtbl"><thead><tr>

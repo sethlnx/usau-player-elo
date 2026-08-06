@@ -1,5 +1,8 @@
-norm_name,action,note
+norm_name,action,note,scope,clubs
 jared smith,block,auto: height medians >= 4in apart
 logan sadler,block,auto: height medians >= 4in apart
 samuel stewart,block,auto: height medians >= 4in apart
 john sullivan,block,auto: height medians >= 4in apart
+
+zoey hughes,merge,confirmed same player on Oregon Scorch Oregon Fugue and Oregon-B,club-mixed|college-women,oregon-b (bucks)
+emilie mohler,merge,confirmed all Emilie Mohler records,,

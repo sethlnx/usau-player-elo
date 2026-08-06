@@ -28,6 +28,7 @@ Entry point: build(con) -> the `tourneys` payload embedded by analysis.site.
 import collections
 import itertools
 import re
+from datetime import date
 
 from analysis.rankings import DIVCODE
 
@@ -573,12 +574,25 @@ def build(con):
         return tix[name]
 
     events, detail, series = [], {}, collections.defaultdict(list)
+    # An event the source has announced but published nothing for yet — no
+    # fixtures, often no team roll — used to be dropped here along with the
+    # dead ones. That silently cost the page every UPCOMING tournament: 29 of
+    # the 37 future-dated events in the corpus carry nothing but a name, a
+    # date and a place, which is exactly what someone asking "what is on next
+    # month" wants to see.
+    #
+    # So emptiness alone no longer disqualifies an event; emptiness in the
+    # PAST does. A game-less event whose start date has been and gone is
+    # cancelled, or one the source never filled in, and listing several
+    # hundred of those would bury the handful that are actually ahead.
+    today = date.today().isoformat()
     for eid, name, season, division, start, end, city, state in meta:
         games = by_event.get(eid)
-        if not games:
+        scheduled = not games and (start or "") >= today
+        if not games and not scheduled:
             continue
-        pools, brs, loose = decompose(games)
-        if not (pools or brs or loose):
+        pools, brs, loose = decompose(games) if games else ([], [], [])
+        if games and not (pools or brs or loose):
             continue
 
         field = sorted({g[k] for _, gs, _ in pools for g in gs for k in ("home", "away")}
@@ -586,7 +600,7 @@ def build(con):
                           if g for k in ("home", "away")}
                        | {g[k] for g in loose for k in ("home", "away") if g[k]})
         local = {t: i for i, t in enumerate(field)}
-        dates = sorted({g["date"] for g in games if g["date"]})
+        dates = sorted({g["date"] for g in (games or []) if g["date"]})
         dix = {d: i for i, d in enumerate(dates)}
         enc = lambda g: [local[g["home"]], local[g["away"]], g["hs"], g["as"],
                          dix.get(g["date"], 0)]
