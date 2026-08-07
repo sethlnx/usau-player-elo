@@ -96,7 +96,7 @@ def connect(path: Path) -> sqlite3.Connection:
     con.execute("PRAGMA busy_timeout=30000")   # wait, don't error, on lock
     return con
 
-SCHEMA = """
+NORMALIZED_SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
     event_id INTEGER PRIMARY KEY,
     season INTEGER NOT NULL,
@@ -116,7 +116,8 @@ CREATE TABLE IF NOT EXISTS event_teams (
     display_name TEXT,
     full_name TEXT,
     city TEXT,
-    roster_fetched INTEGER DEFAULT 0
+    roster_fetched INTEGER DEFAULT 0,
+    canonical_team_id TEXT
 );
 CREATE TABLE IF NOT EXISTS games (
     event_id INTEGER NOT NULL REFERENCES events(event_id),
@@ -152,6 +153,25 @@ CREATE TABLE IF NOT EXISTS roster_entries (
     PRIMARY KEY (event_team_id, name, number)
 );
 """
+
+SOURCE_ENTITIES_SCHEMA = """
+CREATE TABLE IF NOT EXISTS source_entities (
+    source TEXT NOT NULL,
+    entity_type TEXT NOT NULL CHECK (
+        entity_type IN ('event', 'team', 'game', 'person', 'standing', 'division')
+    ),
+    source_id TEXT NOT NULL,
+    local_key TEXT NOT NULL,
+    source_url TEXT NOT NULL,
+    observed_at TEXT NOT NULL,
+    payload_hash TEXT NOT NULL,
+    PRIMARY KEY (source, entity_type, source_id)
+);
+CREATE INDEX IF NOT EXISTS source_entities_local
+    ON source_entities(entity_type, local_key);
+"""
+
+SCHEMA = NORMALIZED_SCHEMA + SOURCE_ENTITIES_SCHEMA
 
 
 def parse_dates(dates_text: str) -> tuple[str | None, str | None]:
@@ -299,11 +319,15 @@ def migrate_url_key(con):
 
 def _ensure_columns(con):
     """Older DBs predate some columns; add them with backfill-safe defaults."""
+    con.executescript(SOURCE_ENTITIES_SCHEMA)
     cols = [r[1] for r in con.execute("PRAGMA table_info(events)")]
     if "division" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN division TEXT NOT NULL DEFAULT 'club-men'")
     if "complete" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN complete INTEGER NOT NULL DEFAULT 0")
+    tcols = [r[1] for r in con.execute("PRAGMA table_info(event_teams)")]
+    if "canonical_team_id" not in tcols:
+        con.execute("ALTER TABLE event_teams ADD COLUMN canonical_team_id TEXT")
     gcols = [r[1] for r in con.execute("PRAGMA table_info(games)")]
     if "slot" not in gcols:
         con.execute("ALTER TABLE games ADD COLUMN slot TEXT")

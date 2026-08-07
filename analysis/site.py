@@ -1,8 +1,8 @@
 """Build the published rankings page.
 
-Three tabs: combined club/player rankings, per-season Trends, and a Tournaments
-browser showing every event's recovered pools and bracket plus the history of
-the series it belongs to.
+Three tabs: combined USAU/EUF club and player rankings, per-season Trends, and
+a USAU Tournaments browser showing every event's recovered pools and bracket
+plus the history of the series it belongs to.
 
 The page itself is one file and opens over file:// with no server. Two things
 ride beside it rather than inside it, both as classic <script> tags because a
@@ -14,8 +14,8 @@ never replays the model, so the page can never disagree with the CSVs:
     data/player_elo.csv          player table (>= MIN_GAMES shown)
     data/team_elo.csv            clubs, most recent COMPLETED event roster
     data/team_elo_best.csv       clubs, best full-strength roster of 2026
-    data/usau.db                 every event's schedule, for the Tournaments
-                                 browser
+    data/usau.db                 USAU schedules for the Tournaments browser
+    data/euf.db                  European games and captured season rosters
 
 Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.js
 """
@@ -241,15 +241,15 @@ def build():
         # The player tier keys on `pid % buckets`, which the page reproduces
         # directly. Clubs cannot — their bucket rides on rostByClub instead.
         "buckets": HIST_BUCKETS,
-        # Which divisions the pickers may OFFER. Derived, never listed: a
-        # division USAU registers but nobody has ever contested (great grand
-        # masters mixed, zero events in all thirteen seasons) would otherwise
-        # sit in all four dropdowns and answer every one of them with nothing
-        # — and on Trends "nothing" is a blank chart with no error, which is
-        # the exact failure history_split._trends documents. Deriving it also
-        # means the option appears by itself the season that bracket is first
-        # played, with no edit here.
-        "divs": sorted({ev[3] for ev in tourneys["events"]}),
+        # Which divisions the Rankings and Trends pickers may offer. Team
+        # tables include the European divisions; the USAU tournament browser
+        # has its own narrower eventDivs list.
+        "divs": sorted(
+            {ev[3] for ev in tourneys["events"]}
+            | {DIVCODE.get(r["division"], 0)
+               for rows in clubs.values() for r in rows}
+        ),
+        "eventDivs": sorted({ev[3] for ev in tourneys["events"]}),
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
@@ -319,7 +319,7 @@ TEMPLATE = r"""<!doctype html>
 <html lang="en" class="booting">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>USAU Player-Elo Rankings</title>
+<title>USAU + EUF Player-Elo Rankings</title>
 <style>
 :root {
   --bg:#f4f5f4; --surface:#fcfcfb; --ink:#12140f; --ink-2:#52544c; --ink-3:#86887e;
@@ -704,7 +704,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div id="dbody"></div></div>
 <div id="tip"></div>
 <header>
-  <h1>USAU Player-Elo Rankings</h1>
+  <h1>USAU + EUF Player-Elo Rankings</h1>
   <div class="sub" id="sub"></div>
 </header>
 <nav>
@@ -884,21 +884,14 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct = v => (v*100).toFixed(1) + '%';
-// Division wording lives HERE, once. It used to be spelled out at six call
-// sites and every one of them said "five" after college women's and college
-// women's D-III made it seven, so the published page asserted a corpus it did
-// not have. EDIVL is the real list but is declared far below this point, and
-// these strings are assigned at load, so it cannot be counted here without a
-// TDZ error — keep NDIV in step with rankings.TEAM_DIVISIONS instead.
-//
-// This is the count the page OFFERS, which is the contested one: DIVCODE and
-// TEAM_DIVISIONS carry sixteen, but great grand masters mixed has never been
-// played, so D.divs drops it from every picker and claiming sixteen here
-// would assert a division no reader can select.
-const NDIV = 'fifteen';
-const NDIV_LIST = "club men's, mixed and women's; college men's and women's " +
-  "and their D-III counterparts; men's, women's and mixed at both masters " +
-  "and grand masters; and great grand masters men's and women's";
+// Division wording lives HERE, once. NDIV describes the divisions a reader
+// can actually select in Rankings and Trends, not registered-but-unplayed
+// divisions. The Tournaments tab remains USAU-only.
+const NDIV = 'eighteen';
+const NDIV_LIST = "USAU club men's, mixed and women's; college men's and " +
+  "women's and their D-III counterparts; men's, women's and mixed at both " +
+  "masters and grand masters; great grand masters men's and women's; plus " +
+  "European open, mixed and women's";
 
 /* The caveat that has to travel with any cross-gender comparison on this page.
    Men's and women's players never meet, so their ratings are commensurable
@@ -940,9 +933,9 @@ $('#ryear').onchange = drawRankings;
 
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
-  `softmax-weighted mean of its event roster. Rankings, Trends and ` +
-  `Tournaments all span the same ${NDIV} divisions — ${NDIV_LIST}. ` +
-  `Generated ${D.generated || ''}.`;
+  `softmax-weighted mean of its event roster. Rankings and Trends span ` +
+  `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. The Tournaments browser is ` +
+  `USAU-only. Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
 const CNOTE = {
@@ -956,14 +949,19 @@ const CNOTE = {
     'but for a club that fielded a B-squad last time out, this is the truer number. ' +
     'This table empties out between events: a club with nothing registered is not in it.'
 };
-/* College is in these tables so they reach as far as the player table and
-   Trends, but its roster bases say less. Measured on 2025. */
+/* EUCS does not distinguish these roster bases. */
+const EU_ROSTER_NOTE =
+  ' EUCS Ranking publishes season rosters rather than event-specific completed ' +
+  'and upcoming rosters. Its captured season roster is used in the completed ' +
+  'and best views; European teams are omitted from the next-event view.';
 const COLLEGE_NOTE =
-  `All ${NDIV} divisions share one rating scale, so they share one list — but ` +
-  'the three roster bases mean less in college, where a squad is often ' +
-  'registered for the season rather than the event: 57% of D-III clubs and ' +
-  '18% of college ones filed an identical roster at every event they entered ' +
-  'in 2025, against 1-4% across the club divisions.';
+  `All ${NDIV} divisions share one rating scale, so the unfiltered view is one ` +
+  'overall list. European teams enter through EUCS results and captured season ' +
+  'rosters; a European name reuses a USAU identity only when that exact name is ' +
+  'unique in both corpora and appears in both during the same season. Treat the ' +
+  'cross-continent order as provisional: EUF publishes no stable player IDs. ' +
+  'College roster bases also mean less because a squad is often registered for ' +
+  'the season rather than the event.';
 function drawClubs() {
   const basis = $('#basis').value;
   const year = $('#ryear').value;
@@ -1020,7 +1018,8 @@ function drawClubs() {
         `<td class="muted" style="font-size:13px">${esc(p.event)}</td></tr>`;
     }
     const p = r.row;
-    return `<tr><td class="rk" title="#${p[0]} of ${DIVLABEL[p[5]]} clubs">` +
+    const scope = div === 'all' ? 'the overall list' : `${DIVLABEL[p[5]]} clubs`;
+    return `<tr><td class="rk" title="#${rankOf.get(r)} of ${scope}">` +
       `${rankOf.get(r)}</td>` +
       `<td><span class="nmlink" data-club="${esc(p[6])}">${esc(p[1])}</span></td>` +
       `<td><span class="tag">${esc(EDIVL[p[5]] || '')}</span></td>` +
@@ -1031,10 +1030,10 @@ function drawClubs() {
   $('#ccount').textContent = q
     ? `${rows.length} of ${pop.length} ${what} match`
     : `${pop.length.toLocaleString()} ${what}`;
-  $('#cnote').textContent = historical
+  $('#cnote').textContent = (historical
     ? `Showing each club after its last ${year} event in ` +
       `${div === 'all' ? 'all divisions' : EDIVL[div]}.`
-    : CNOTE[basis] + ' ' + COLLEGE_NOTE;
+    : CNOTE[basis] + ' ' + COLLEGE_NOTE) + EU_ROSTER_NOTE;
 }
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
@@ -1319,6 +1318,10 @@ const TIER = {
   r: {urls: 'rostJs',    glob: '__USAU_ROST__', merge: mergeRosters},
   g: {urls: 'gameJs',    glob: '__USAU_GAME__', merge: p => Object.assign(GMS, p)},
 };
+function playerBucket(pid) {
+  const n = D.buckets || 1;
+  return ((+pid % n) + n) % n;
+}
 const TSTATE = new Map();   // "<tier>/<key>" -> 'load' | 'ok' | 'fail'
 const TWAIT = new Map();    // same id -> [callback], drained on settle
 const tierState = (tier, key) => TSTATE.get(tier + '/' + key);
@@ -1383,7 +1386,8 @@ const DIVTAG = ["men's", "college men's", "college men's D-III", 'mixed',
                 "masters men's", "masters women's", "masters mixed",
                 "grand masters men's", "grand masters women's", "grand masters mixed",
                 "great grand masters men's", "great grand masters women's",
-                "great grand masters mixed"];
+                "great grand masters mixed", "Europe open", "Europe mixed",
+                "Europe women's"];
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -1751,7 +1755,7 @@ function loadRosterRatings(ckey, season, ids) {
   for (const i of ids) {
     const pid = String(PPID[i]);
     if (!PBY.has(pid) || Object.prototype.hasOwnProperty.call(PLAY, pid)) continue;
-    const key = +pid % (D.buckets || 1);
+    const key = playerBucket(pid);
     const st = tierState('p', key);
     if (st !== 'ok' && st !== 'fail') keys.add(key);
   }
@@ -1773,7 +1777,7 @@ function rosterPlayerRating(pid, season, div) {
   pid = String(pid);
   if (!PBY.has(pid)) return {elo: null, loading: false};
   if (!Object.prototype.hasOwnProperty.call(PLAY, pid)) {
-    const st = tierState('p', +pid % (D.buckets || 1));
+    const st = tierState('p', playerBucket(pid));
     return {elo: null, loading: st !== 'ok' && st !== 'fail'};
   }
   const point = playerYearMap(pid).get(
@@ -1783,10 +1787,10 @@ function rosterPlayerRating(pid, season, div) {
 
 /* ONE roster per season. For past seasons that is the union of every played
    event's listed squad. For the CURRENT season it is the best full-strength
-   roster reported to USAU — the same squad team_elo_best.csv rates the club
-   off — which may be registered for an event not yet played; the Ev column
-   then says how many of the season's played events each person was actually
-   listed for, 0 meaning registered only. */
+   roster reported by the source — the same squad team_elo_best.csv rates the
+   club off — which may be registered for an event not yet played; the Ev
+   column then says how many of the season's played events each person was
+   actually listed for, 0 meaning registered only. */
 function rosterPane(ckey, season) {
   const grp = rosterSeasons(ckey).find(g => g.season === season) || {eis: []};
   const br = season === BSEASON ? BR[ckey] : null;
@@ -1819,11 +1823,12 @@ function rosterPane(ckey, season) {
     `${div === 'all' ? 'event' : EDIVL[div] + ' event'}">` +
     `${r.loading ? '…' : r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
     `<td class="n">${r.ev}</td></tr>`).join('');
+  const rosterSource = ckey.startsWith('euf:') ? 'EUCS Ranking' : 'USAU';
   const sum = br
-    ? `${rows.length} players — best full-strength roster reported to USAU, ` +
-      `registered for ${esc(br[0])} (${br[1]}). This is the squad the ` +
-      `"best" club table rates off; Ev counts the ${grp.eis.length} played ` +
-      `event${grp.eis.length === 1 ? '' : 's'} this season, 0 meaning ` +
+    ? `${rows.length} players — best full-strength roster reported by ` +
+      `${rosterSource}, registered for ${esc(br[0])} (${br[1]}). This is the ` +
+      `squad the "best" club table rates off; Ev counts the ${grp.eis.length} ` +
+      `played event${grp.eis.length === 1 ? '' : 's'} this season, 0 meaning ` +
       `registered but not yet played with.`
     : `${rows.length} players · ${grp.eis.length} event` +
       `${grp.eis.length === 1 ? '' : 's'}: ` +
@@ -1883,7 +1888,7 @@ let pendingDetail = null;
    club's rosters. A club with no roster on record anywhere — 14 of them —
    has no entry in the core index and so needs nothing faulted. */
 function detailDep(kind, key) {
-  if (kind === 'p') return ['p', (+key % (D.buckets || 1))];
+  if (kind === 'p') return ['p', playerBucket(key)];
   const rb = RBC[TK[key] || key];
   return rb ? ['r', rb.b] : null;
 }
@@ -2077,7 +2082,8 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                "Masters Men's", "Masters Women's", "Masters Mixed",
                "Grand Masters Men's", "Grand Masters Women's", "Grand Masters Mixed",
                "Great Grand Masters Men's", "Great Grand Masters Women's",
-               "Great Grand Masters Mixed"];
+               "Great Grand Masters Mixed", "Europe Open", "Europe Mixed",
+               "Europe Women's"];
 
 /* Event geography is only city/state in the upstream record. Translate the
    venue state through USA Ultimate's division-specific region boundaries;
@@ -2119,22 +2125,20 @@ function eventGeo(e) {
   return [regions[state] || 'Unknown region', state];
 }
 const EVENT_GEO = new Map(EVS.map(e => [e, eventGeo(e)]));
-/* Rankings, Tournaments and Trends all offer the same divisions, so they are
-   filled from EDIVL rather than written out three times — adding a division
-   should be one edit in analysis/rankings.py DIVCODE and one here, not HTML
-   blocks that drift apart.
-
-   Filtered to divisions that have actually been PLAYED (D.divs, derived from
-   the event table). A registered-but-never-contested bracket would otherwise
-   be offered by all three and answer with an empty table — or, on Trends, a
-   blank chart and no error at all. */
+/* Rankings and Trends include the European divisions. Tournaments are backed
+   by the USAU event corpus and therefore use the narrower eventDivs set. */
 const DIVS_PRESENT = new Set(D.divs || EDIVL.map((_, i) => i));
-['#rdiv', '#ediv', '#tdiv'].forEach(sel => {
-  $(sel).innerHTML = '<option value="all">All divisions</option>' +
+const EVENT_DIVS_PRESENT = new Set(D.eventDivs || D.divs || []);
+function divisionOptions(present) {
+  return '<option value="all">All divisions</option>' +
     EDIVL.map((label, i) => [label, i])
-         .filter(([, i]) => DIVS_PRESENT.has(i))
-         .map(([label, i]) => `<option value="${i}">${esc(label)}</option>`).join('');
+      .filter(([, i]) => present.has(i))
+      .map(([label, i]) => `<option value="${i}">${esc(label)}</option>`).join('');
+}
+['#rdiv', '#tdiv'].forEach(sel => {
+  $(sel).innerHTML = divisionOptions(DIVS_PRESENT);
 });
+$('#ediv').innerHTML = divisionOptions(EVENT_DIVS_PRESENT);
 const EYEARS = [...new Set(EVS.map(e => e[2]))].sort((a, b) => b - a);
 // Field strength, appended to each event row by site.py: [11] score, [12]
 // tier letter. Scored in analysis/field_strength.py against the division's
@@ -2620,7 +2624,8 @@ const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
                   10: "grand masters men's", 11: "grand masters women's",
                   12: 'grand masters mixed',
                   13: "great grand masters men's", 14: "great grand masters women's",
-                  15: 'great grand masters mixed'};
+                  15: 'great grand masters mixed',
+                  16: 'Europe open', 17: 'Europe mixed', 18: "Europe women's"};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};

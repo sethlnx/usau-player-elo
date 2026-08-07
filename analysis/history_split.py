@@ -25,10 +25,11 @@ expandable only where the model scored games, which asked `games[evIdx]` for
 every row and would fault every season just to draw the table. `gameSides`
 answers it from the core: one sorted club-index list per event.
 
-Bucketing. Players key on `pid % BUCKETS`, which JavaScript reproduces
-directly. Clubs cannot — there is no string hash both languages agree on for
-free — so a club's bucket rides on its `rostByClub` entry, which the panel
-already looks up. Names inside a roster bucket are LOCAL to it: the browser
+Bucketing. Players key on Python's non-negative `pid % BUCKETS`; JavaScript
+reproduces it with `((pid % n) + n) % n`, including source-scoped negative IDs.
+Clubs cannot use a free cross-language string hash, so a club's bucket rides
+on its `rostByClub` entry, which the panel already looks up. Names inside a
+roster bucket are LOCAL to it: the browser
 appends each bucket's pool to the growing global one and rewrites the indices
 as it merges, so a name shared by two buckets is simply stored twice. Across
 32 buckets that costs 22%, which is cheaper than any scheme for sharing them.
@@ -247,7 +248,8 @@ def split(history, player_names, genders, event_meta=None):
     people, pids = history.get("people", []), history.get("peoplePid", [])
     best = history.get("bestRosters", {})
 
-    # Players key on pid % BUCKETS; the page reproduces that with `+pid % n`.
+    # Player IDs may be source-scoped negatives; Python modulo stays
+    # non-negative and site.py deliberately reproduces that behavior.
     players = collections.defaultdict(dict)
     for pid, entry in history["players"].items():
         players[int(pid) % BUCKETS][pid] = entry

@@ -1,12 +1,13 @@
-# USAU Player-Level Elo
+# USAU + European Player-Level Elo
 
 ### → **[Live rankings](https://sethlnx.github.io/usau-player-elo/)**
 
-Every player carries a personal Elo across seasons; a team's rating at an
-event is the softmax-weighted mean of its event roster's player Elos (better
-players weigh more, assuming more playing time). Game deltas are applied to
-every rostered player equally. New seasons need no reset — a team's opening
-rating falls out of whoever is on its roster.
+Every player carries a personal Elo across seasons and, where the identity
+bridge is unambiguous, across USAU and European competition. A team's rating
+at an event is the softmax-weighted mean of its event roster's player Elos
+(better players weigh more, assuming more playing time). Game deltas are
+applied to every rostered player equally. New seasons need no reset — a team's
+opening rating falls out of whoever is on its roster.
 
 Full plan: `USAU_by_player_elo.md`.
 
@@ -16,6 +17,9 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m scraper.graphql 2014 … 2026 --division all   # the whole corpus, ~13 min
 .venv/bin/python -m scraper.structure     # attach published bracket structure
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
+.venv/bin/python -m scraper.euf_ranking data/raw/euf-ranking/rosters.json
+.venv/bin/python -m scraper.euf --audit       # must report publication_blocked: false
+.venv/bin/python -m analysis.euf_overlap      # review name candidates before replay
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv, data/history.json
 .venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
@@ -928,11 +932,138 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   median and teammate count, because both halves are reproducibly biased the
   same way; a static recompute off final ratings correlates +0.237 and gets
   the sign wrong on the worst cases. Hence one replay per player, top 1,000.
-- Join `player_elo.csv` on `player_id`, never on `player`. Names that survive
-  as separate identities are still split per club, so display names are not
-  unique. Four names also contain commas (`Gregory Plaia, Jr`), so parse the
-  file as CSV — splitting on commas corrupts those rows.
+- Join `player_elo.csv` on `player_id`, never on `player`. USAU names that
+  survive as separate identities are still split per club; European-only
+  identities use deterministic negative IDs. Display names are not unique.
+  Four USAU names also contain commas (`Gregory Plaia, Jr`), so parse the file
+  as CSV — splitting on commas corrupts those rows.
 - Rosters are public per event-team, names only (no stable player IDs).
   Nationals rosters include per-player stats (points/assists/Ds/turns) —
   unused by the model so far.
 
+
+## European data source reference
+
+European data is an independently ingested corpus in `data/euf.db`.
+`analysis.rankings` joins its games and season rosters to the USAU replay only
+through the conservative identity contract described below.
+
+| Surface | Contract used here | Coverage and boundary |
+|---|---|---|
+| [Ultimate Central API](https://help.ultimatecentral.com/support/solutions/articles/4000064797-api-access) | Public, paginated REST endpoints discovered from `/api/help`: events, teams, games, final standings, and public persons | Historical event metadata, scored games, teams, and final standings. Roster responses remain `incomplete` or `restricted` unless public rows are actually returned. |
+| [EUCS Schedule](https://eucs-schedule.ultimatefederation.eu/) | Server-rendered season schedule plus iCalendar cross-check | Schedule rows, scores, pools/stages, divisions, dates, times, fields, and placeholder/forfeit state. There is no roster contract. HTML is cached with URL, observation time, and SHA-256. |
+| [EUCS Ranking](https://ranking.ultimatefederation.eu/) | R/Shiny `dataobj/team_master_roster` responses captured through a browser session | Season/team roster names for 2024–2026. The `session/.../dataobj/...` URLs are transient and are retained only as observation evidence, not presented as a stable API. The source exposes names, not player IDs. |
+
+The observed `data/euf.db` audit covers Ultimate Central EUCF events from
+2015, 2016, 2019, 2021, and 2022 plus all discoverable completed EUCS
+schedules from 2023–2025. It contains 47 event/division records, 729
+source-scoped canonical teams, 2,001 scored games, and 267 standing rows. The
+normalized divisions are `euf-open`, `euf-women`, and `euf-mixed`. Six 2022
+carryover records advertise an outcome without scores and remain explicitly
+`incomplete`; 38 rows remain `scheduled` and three remain `teams_not_set`.
+The 14 discoverable 2026 schedules are excluded because they are upcoming.
+Years and event classes not listed above are coverage gaps, not zero-game
+seasons.
+
+The captured EUCS Ranking snapshot adds 384 season/team rosters, 11,274 roster
+memberships, and 6,804 distinct display names across 2024–2026. Eleven
+successful responses contained zero rows. These are season-level ranking
+rosters, not event rosters. Ultimate Central roster coverage remains nullable:
+its person collections report a larger source count than the public result
+set, so all 15 Ultimate Central event/divisions are `incomplete`; the 32
+schedule-only event/divisions are `unavailable`. No private identities are
+inferred.
+
+Every imported event, team, game, standing, public person, and ranking roster
+observation retains its provider namespace, provider key, request URL,
+observation time, and payload hash in `source_entities` or
+`source_observations`. Provider IDs remain text: EUCS season and synthetic slot
+IDs are not coerced to integers. Team-name similarity creates review
+candidates only; it never merges team identities.
+
+The rating replay uses 908 scored 2024–2025 EUCS games whose teams all map to a
+captured ranking roster. European-only roster names receive deterministic
+negative IDs within JavaScript's safe-integer range. A name reuses a positive
+USAU player ID only when its exact case/spacing-normalized key is unique and
+non-ambiguous in both corpora, appears in both during the same calendar season,
+and does not occur on two European teams in the same season/division. The
+current snapshot produces 190 such bridges; every one is written to
+`data/euf_bridge_audit.csv`. This is a conservative name bridge, not a stable-ID
+match: EUCS Ranking publishes no player IDs.
+
+The three European division bases and scales are explicit, untuned priors
+copied from their analogous USAU club divisions. Same-player bridges propagate
+observed ratings between corpora, but do not prove that the continent-wide
+scale is calibrated. Six scored games touch an unavailable roster and use the
+engine's existing ghost-team behavior. Current European team tables use the
+captured 2026 season roster in the completed and best views; European teams are
+omitted from the next-event view because EUCS does not expose event-specific
+upcoming rosters.
+
+`python -m scraper.euf --audit` blocks publication for duplicate source
+mappings, invalid played games, blocking source disagreements, or provenance
+gaps. `python -m analysis.euf_overlap` reproduces the identity-candidate counts
+without treating any name match as authoritative.
+
+## How to build and query the European corpus
+
+Install the declared runtime:
+
+```sh
+uv pip install --python .venv/bin/python -r requirements.txt
+```
+
+Probe the two live contracts without writing the database:
+
+```sh
+.venv/bin/python -m scraper.euf --probe ultimate-central --request-budget 10
+.venv/bin/python -m scraper.euf --probe eucs --season eucf24
+```
+
+Create the isolated database, ingest one schedule or one Ultimate Central
+event, and optionally load a captured ranking-roster snapshot:
+
+```sh
+.venv/bin/python -m scraper.euf --init-db
+.venv/bin/python -m scraper.euf 2024 --event eucf24
+.venv/bin/python -m scraper.euf --event uc:116389 --request-budget 40
+.venv/bin/python -m scraper.euf_ranking data/raw/euf-ranking/rosters.json
+.venv/bin/python -m scraper.euf --audit
+.venv/bin/python -m analysis.euf_overlap
+```
+
+Rerunning an event transactionally replaces that event; it does not append
+duplicates. A failed replacement rolls back. To refresh EUCS rather than use
+its content-addressed cache, add `--refresh`.
+
+Serve the read-only GraphQL facade:
+
+```sh
+EUF_DB=data/euf.db .venv/bin/uvicorn api.euf_graphql:app \
+  --host 127.0.0.1 --port 8766
+```
+
+Query `http://127.0.0.1:8766/graphql`:
+
+```sh
+curl -sS http://127.0.0.1:8766/graphql \
+  -H 'content-type: application/json' \
+  --data '{"query":"{ events(eventCode:\"eucf24\", first:3) { totalCount nodes { id divisions rosterState games(first:200, played:true) { totalCount } sources { source sourceId } } } }"}'
+```
+
+Top-level `events`, `teams`, and `games` accept source, event-code, season,
+division, team, and relevant played-state filters. Connections expose
+`nodes`, `totalCount`, and offset page information. `first` must be 1–200.
+Teams imported from `eucs-ranking` expose their observed roster names through
+`players`; a successful zero-row roster returns `[]`. Unknown IDs and roster
+fields with no observed roster source return `null`. The schema has no mutation
+root and opens SQLite with `mode=ro` plus `PRAGMA query_only=ON`.
+The service never calls an upstream endpoint from a resolver.
+
+The overlap command reports candidate counts under both exact case/spacing and
+diacritic-folded keys. The replay accepts only the 190 exact, unique,
+non-ambiguous, same-season matches recorded in `euf_bridge_audit.csv`;
+diacritic-only candidates are never auto-joined. Because EUCS Ranking
+publishes no stable player ID, the comparable stable-ID match count remains
+zero by construction. The audit file is the review boundary for every
+cross-source identity used by Elo.

@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (DB_PATH, load_games, load_maps,
                                load_stat_events, load_ufa_stat_events, replay)
+from analysis.euf_ratings import EUF_DB, EuropeanInputs, load_european_inputs
 from elo.engine import EloConfig
 
 
@@ -564,6 +565,11 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                  division_scale={"club-men": 260.0, "college": 260.0,
                                  "college-d3": 260.0, "club-mixed": 220.0,
                                  "club-women": 160.0,
+                                 # European divisions inherit the analogous
+                                 # USAU scale. The EU corpus is joined after
+                                 # tuning; these are explicit untuned priors.
+                                 "euf-open": 260.0, "euf-mixed": 220.0,
+                                 "euf-women": 160.0,
                                  # Both college women's scales went through
                                  # the 2014+masters sweep and came back out at
                                  # their starting value: 260 scored +0.00200
@@ -587,6 +593,12 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0,
+                                 # Explicit untuned priors matching the
+                                 # analogous USAU club divisions. Same-season
+                                 # name bridges then carry observed scale
+                                 # information between the two corpora.
+                                 "euf-open": 1500.0, "euf-mixed": 1500.0,
+                                 "euf-women": 1600.0,
                                  # TUNED on the 2014+masters corpus: both came
                                  # down 100-150 from the by-analogy guess,
                                  # and college women's D-III was the single
@@ -625,7 +637,8 @@ DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "masters-men": 7, "masters-women": 8, "masters-mixed": 9,
            "grandmasters-men": 10, "grandmasters-women": 11, "grandmasters-mixed": 12,
            "greatgrandmasters-men": 13, "greatgrandmasters-women": 14,
-           "greatgrandmasters-mixed": 15}
+           "greatgrandmasters-mixed": 15,
+           "euf-open": 16, "euf-mixed": 17, "euf-women": 18}
 # Divisions the team tables cover, in display order. College is included so
 # the club tables reach as far as the player table and Trends do, but its
 # three roster bases carry less information than a club division's: a college
@@ -641,7 +654,8 @@ TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
                   "masters-men", "masters-women", "masters-mixed",
                   "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
                   "greatgrandmasters-men", "greatgrandmasters-women",
-                  "greatgrandmasters-mixed"]
+                  "greatgrandmasters-mixed",
+                  "euf-open", "euf-mixed", "euf-women"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
@@ -651,6 +665,33 @@ TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
 # about how strong Skeleton Squad is. 30% of multi-roster clubs peak on a
 # below-average-size roster, so the floor is doing real work.
 FULL_SQUAD_FRACTION = 0.8
+
+def roster_rating(model, roster: list, division: str) -> float:
+    """Rate a roster after materializing debutants at its division base."""
+    return model.pregame_ratings(roster, [], division)[0]
+
+
+def published_rosters(
+    con,
+    season: int,
+    model,
+    division: str,
+    basis: str,
+    european: EuropeanInputs | None = None,
+):
+    primary = (
+        best_rosters(con, season, model, division)
+        if basis == "best"
+        else latest_rosters(con, season, basis, division)
+    )
+    rosters, source, display = (dict(part) for part in primary)
+    if european is not None and basis != "upcoming":
+        extra = european.team_rosters.get((season, division))
+        if extra:
+            rosters.update(extra[0])
+            source.update(extra[1])
+            display.update(extra[2])
+    return rosters, source, display
 
 
 def best_rosters(con, season: int, model, division: str = "club-men"):
@@ -681,7 +722,9 @@ def best_rosters(con, season: int, model, division: str = "club-men"):
     for key, entries in cand.items():
         floor = FULL_SQUAD_FRACTION * max(len(p) for p, _, _ in entries)
         full = [e for e in entries if len(e[0]) >= floor]
-        pids, evname, sd = max(full, key=lambda e: model.team_rating(e[0]))
+        pids, evname, sd = max(
+            full, key=lambda e: roster_rating(model, e[0], division)
+        )
         out[key], source[key] = pids, (evname, sd)
     return out, source, display
 
@@ -691,7 +734,10 @@ def best_rosters(con, season: int, model, division: str = "club-men"):
 HISTORY_MIN_GAMES = 30
 
 
-def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season):
+def write_history(
+    con, games, rosters, clubs, snaps, game_deltas, model, season,
+    european: EuropeanInputs | None = None,
+):
     """Emit data/history.json — per-event rating trajectories for the drill-down.
 
     Trajectories are keyed on (subject, event) rather than (subject, game): a
@@ -708,6 +754,8 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
     evinfo = {r[0]: r[1:] for r in con.execute(
         "SELECT event_id, name, start_date, season, COALESCE(division,'club-men') "
         "FROM events")}
+    if european is not None:
+        evinfo.update(european.event_info)
     keep = {p for p, st in model.players.items()
             if not str(p).startswith("ghost:") and st.games >= HISTORY_MIN_GAMES}
     used = sorted({e for subj, evs in snaps.items() for e in evs
@@ -787,6 +835,14 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
         person = (name, str(pid))
         seen.add(person)
         roster_rows.append((f"{key}|{i}", person))
+    if european is not None:
+        for eid, etid, pid, name in european.event_roster_rows:
+            i, key = ix.get(eid), clubs.get(etid)
+            if i is None or key not in teams:
+                continue
+            person = (name, str(pid))
+            seen.add(person)
+            roster_rows.append((f"{key}|{i}", person))
     # The most recent season's roster tab shows the club's BEST reported
     # full-strength squad — the same selection team_elo_best.csv rates off —
     # which may belong to an event not yet played and therefore absent from
@@ -794,9 +850,13 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
     # before it is built. best_rosters now keys on the model's club key
     # directly, so no name round-trip through `alias` is needed.
     pname = dict(con.execute("SELECT player_id, display_name FROM players"))
+    if european is not None:
+        pname.update(european.player_names)
     best_ref = {}
     for division in TEAM_DIVISIONS:
-        best, bsrc, _display = best_rosters(con, season, model, division)
+        best, bsrc, _display = published_rosters(
+            con, season, model, division, "best", european
+        )
         for key, pids in best.items():
             if key not in teams:
                 continue
@@ -880,6 +940,12 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
         sd = sd or ""
         if key not in latest or sd >= latest[key][0]:
             latest[key] = (sd, name)
+    if european is not None:
+        for key, value in european.team_names.items():
+            if (key in teams or key in club_num) and (
+                key not in latest or value[0] >= latest[key][0]
+            ):
+                latest[key] = value
     team_names = {k: v[1] for k, v in latest.items()}
 
     out = DB_PATH.parent / "history.json"
@@ -904,15 +970,27 @@ def write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
 def main(cfg: EloConfig | None = None):
     cfg = cfg or EloConfig(**PUBLISHED)
     con = sqlite3.connect(DB_PATH)
-    games = load_games(con)
+    european = load_european_inputs(con, EUF_DB)
+    games = sorted(
+        [*load_games(con), *european.games], key=lambda game: game["sort"]
+    )
     rosters, clubs = load_maps(con)
+    rosters.update(european.rosters)
+    clubs.update(european.clubs)
     stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con),
                          key=lambda e: e[0])
+    print(
+        f"loaded {len(european.games):,} European games, "
+        f"{len(european.player_names):,} roster-name identities and "
+        f"{len(european.bridge_rows):,} same-season USAU name bridges "
+        f"({european.ghost_scored_games} games touch an empty roster)"
+    )
 
     # Trajectories are captured from the ONE authoritative replay via the hook,
     # keyed (kind, subject) -> event_id -> payload. Last write per event wins,
     # so each point is the rating after that subject's final game of the event.
     etev = dict(con.execute("SELECT event_team_id, event_id FROM event_teams"))
+    etev.update(european.event_team_event)
     snaps = defaultdict(dict)
     # The same capture at game grain, club side only: (event, game) -> the two
     # club-rating changes across that game.
@@ -939,12 +1017,21 @@ def main(cfg: EloConfig | None = None):
                       on_game=capture)
 
     latest = last_appearance(con)
+    for pid, appearance in european.latest.items():
+        if pid not in latest or appearance[2] >= latest[pid][2]:
+            latest[pid] = appearance
     # Gender-matching group, decided in identity.resolve: 'm' if the identity
     # ever played a men's division, 'w' for the women's division, else the
     # pronoun majority off their mixed roster rows, else '' for unknown. It
     # rides on the player table rather than being re-derived here so the CSV,
     # the site and the DB can never disagree about who is in which bucket.
     gender = dict(con.execute("SELECT player_id, gender FROM players"))
+    european_divisions = defaultdict(set)
+    for pid, _season, division, _start in european.appearances:
+        european_divisions[pid].add(division)
+    for pid, divisions in european_divisions.items():
+        if "euf-women" in divisions and pid not in gender:
+            gender[pid] = "w"
     # Which divisions a player has appeared in, as bitmasks over DIVCODE, so
     # the site can filter the flat table by division. A rating is one number
     # across every division a player has played — a mask says where they
@@ -972,14 +1059,16 @@ def main(cfg: EloConfig | None = None):
     # college and college-d3 likewise stay together — same program, two sides.
     CLUB_DIVISIONS = {"club-men", "club-mixed", "club-women"}
     div_ever = defaultdict(int)
-    now_counts = defaultdict(Counter)     # pid -> division -> events this season
-    now_latest = defaultdict(dict)        # pid -> division -> latest start_date
-    for pid, season_played, division, start in con.execute("""
+    now_counts = defaultdict(Counter)     # pid -> division -> roster sightings
+    now_latest = defaultdict(dict)        # pid -> division -> latest source date
+    appearances = list(con.execute("""
             SELECT rp.player_id, ev.season, COALESCE(ev.division, 'club-men'),
                    COALESCE(ev.start_date, '')
             FROM roster_players rp
             JOIN event_teams et USING (event_team_id)
-            JOIN events ev ON ev.event_id = et.event_id"""):
+            JOIN events ev ON ev.event_id = et.event_id"""))
+    appearances.extend(european.appearances)
+    for pid, season_played, division, start in appearances:
         div_ever[pid] |= 1 << DIVCODE.get(division, 0)
         if latest.get(pid) and season_played == latest[pid][2]:
             now_counts[pid][division] += 1
@@ -1018,8 +1107,24 @@ def main(cfg: EloConfig | None = None):
                         ngames, club, season, gender.get(pid, ""),
                         div_ever.get(pid, 0), div_now.get(pid, 0)])
     print(f"wrote {out} ({len(ranked)} players with 5+ games)")
+    bridge_out = DB_PATH.parent / "euf_bridge_audit.csv"
+    with open(bridge_out, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["name_key", "eu_name", "usau_player_id", "usau_name",
+                    "shared_seasons"])
+        for row in european.bridge_rows:
+            w.writerow([
+                row["name_key"], row["eu_name"], row["usau_player_id"],
+                row["usau_name"], ";".join(map(str, row["shared_seasons"])),
+            ])
+    print(f"wrote {bridge_out} ({len(european.bridge_rows)} reviewable name bridges)")
 
-    season = con.execute("SELECT max(season) FROM events WHERE has_schedule=1").fetchone()[0]
+    season = max(
+        con.execute(
+            "SELECT max(season) FROM events WHERE has_schedule=1"
+        ).fetchone()[0],
+        max(key[0] for key in european.team_rosters),
+    )
     for basis, fname in (("completed", "team_elo.csv"),
                          ("upcoming", "team_elo_upcoming.csv"),
                          ("best", "team_elo_best.csv")):
@@ -1033,16 +1138,17 @@ def main(cfg: EloConfig | None = None):
                         "roster_size", "season", "roster_event",
                         "roster_event_date"])
             total = 0
-            # Ranked WITHIN a division: the divisions never play each other,
-            # so one merged 1..n would invite a comparison the games do not
-            # support. The site shows one division at a time for the same reason.
+            # CSV ranks remain division-local. The site recomputes an overall
+            # rank when "All divisions" is selected; same-season cross-source
+            # player bridges are what make that comparison possible.
             for division in TEAM_DIVISIONS:
-                by_club, source, display = (
-                    best_rosters(con, season, model, division)
-                    if basis == "best"
-                    else latest_rosters(con, season, basis, division))
-                rated = [(model.team_rating(pids), key, len(pids))
-                         for key, pids in by_club.items() if pids]
+                by_club, source, display = published_rosters(
+                    con, season, model, division, basis, european
+                )
+                rated = [
+                    (roster_rating(model, pids, division), key, len(pids))
+                    for key, pids in by_club.items() if pids
+                ]
                 for i, (rating, key, size) in enumerate(sorted(rated, reverse=True), 1):
                     evname, sd = source[key]
                     w.writerow([i, display[key], key, division, round(rating, 1),
@@ -1050,7 +1156,9 @@ def main(cfg: EloConfig | None = None):
                 total += len(rated)
         print(f"wrote {team_out} ({total} teams across {len(TEAM_DIVISIONS)} "
               f"divisions, season {season}, {basis} rosters)")
-    write_history(con, games, rosters, clubs, snaps, game_deltas, model, season)
+    write_history(
+        con, games, rosters, clubs, snaps, game_deltas, model, season, european
+    )
     con.close()
 
 

@@ -48,7 +48,7 @@ Initial acceptance criteria:
 
 ### Schema and migration
 
-- [ ] Extend `scraper/build_db.py:SCHEMA` with `source_entities` containing at least:
+- [x] Extend `scraper/build_db.py:SCHEMA` with `source_entities` containing at least:
   - `source` — provider and tenant namespace, for example `ultimate-central:euf` or `eucs-schedule`.
   - `entity_type` — `event`, `team`, `game`, `person`, `standing`, or `division`.
   - `source_id` — text, never coerced to an integer.
@@ -57,11 +57,11 @@ Initial acceptance criteria:
   - `observed_at`.
   - `payload_hash`.
   - Primary key on `(source, entity_type, source_id)` and uniqueness preventing one source entity from mapping to multiple local entities.
-- [ ] Update `scraper/build_db.py:_ensure_columns` so existing databases migrate idempotently.
-- [ ] Add an `EUF_DB` configuration path defaulting to `data/euf.db`; do not write European provider keys into `data/usau.db`.
-- [ ] Keep the existing normalized `events`, `event_teams`, `games`, and `roster_entries` contracts so downstream analysis can be reused.
-- [ ] Namespace Ultimate Central IDs by tenant. The same integer from another TopScore tenant is not the same entity.
-- [ ] Preserve EUCS season codes and game IDs as strings; do not infer a year from the code alone.
+- [x] Update `scraper/build_db.py:_ensure_columns` so existing databases migrate idempotently.
+- [x] Add an `EUF_DB` configuration path defaulting to `data/euf.db`; do not write European provider keys into `data/usau.db`.
+- [x] Keep the existing normalized `events`, `event_teams`, `games`, and `roster_entries` contracts so downstream analysis can be reused.
+- [x] Namespace Ultimate Central IDs by tenant. The same integer from another TopScore tenant is not the same entity.
+- [x] Preserve EUCS season codes and game IDs as strings; do not infer a year from the code alone.
 
 Verification:
 
@@ -87,9 +87,9 @@ Risks and edge cases:
 
 ### Files and symbols
 
-- [ ] Create `scraper/ultimate_central.py`.
-- [ ] Implement `UltimateCentralClient` with an injected `requests.Session`, base URL, timeout, and request budget.
-- [ ] Implement:
+- [x] Create `scraper/ultimate_central.py`.
+- [x] Implement `UltimateCentralClient` with an injected `requests.Session`, base URL, timeout, and request budget.
+- [x] Implement:
   - `get_help()`
   - `list_events()`
   - `list_games()`
@@ -97,16 +97,16 @@ Risks and edge cases:
   - `final_standings()`
   - `list_public_persons()`
   - bounded pagination and transport helpers
-- [ ] Enforce `per_page <= 100`.
-- [ ] Retry transport failures and 5xx responses with bounded backoff. Do not retry permanent 4xx responses except an explicitly handled rate response.
-- [ ] Validate the response envelope: `status`, `count`, `result`, and `errors`.
-- [ ] Distinguish these observed states:
+- [x] Enforce `per_page <= 100`.
+- [x] Retry transport failures and 5xx responses with bounded backoff. Do not retry permanent 4xx responses except an explicitly handled rate response.
+- [x] Validate the response envelope: `status`, `count`, `result`, and `errors`.
+- [x] Distinguish these observed states:
   - nonzero `count` with an empty `result`;
   - 401/403 restricted data;
   - zero records;
   - placeholder/unplayed game rows;
   - complete final standings with absent game history.
-- [ ] Preserve raw payload hashes and source URLs for auditability.
+- [x] Preserve raw payload hashes and source URLs for auditability.
 
 Probe:
 
@@ -132,16 +132,16 @@ Risks and edge cases:
 
 ### Files and symbols
 
-- [ ] Create `scraper/eucs_schedule.py`.
-- [ ] Implement:
+- [x] Create `scraper/eucs_schedule.py`.
+- [x] Implement:
   - `discover_seasons()`
   - `fetch_schedule()`
   - `parse_schedule()`
   - `fetch_ical()`
   - `EUCSFetchError`
   - `EUCSParseError`
-- [ ] Cache HTML before parsing and record the final URL and payload hash.
-- [ ] Parse:
+- [x] Cache HTML before parsing and record the final URL and payload hash.
+- [x] Parse:
   - season/event code;
   - division;
   - stage, pool, or bracket label;
@@ -151,10 +151,10 @@ Risks and edge cases:
   - home and away scores;
   - numeric/source game ID;
   - played, scheduled, placeholder, or forfeit state when the source supports it.
-- [ ] Keep score cells distinct from nearby spirit-score or standings fields.
-- [ ] Keep placeholder labels such as “Winner of …” unresolved until a real team is present.
-- [ ] Honor the source crawl policy. Use no concurrent HTML crawl and reuse cached responses.
-- [ ] Use iCalendar only to cross-check pairings, dates, times, and fields.
+- [x] Keep score cells distinct from nearby spirit-score or standings fields.
+- [x] Keep placeholder labels such as “Winner of …” unresolved until a real team is present.
+- [x] Honor the source crawl policy. Use no concurrent HTML crawl and reuse cached responses.
+- [x] Use iCalendar only to cross-check pairings, dates, times, and fields.
 
 Probe:
 
@@ -181,8 +181,8 @@ Risks and edge cases:
 
 ### Files and symbols
 
-- [ ] Create `scraper/euf.py`.
-- [ ] Implement:
+- [x] Create `scraper/euf.py`.
+- [x] Implement:
   - `main()`
   - `discover_events()`
   - `ingest_event()`
@@ -190,7 +190,7 @@ Risks and edge cases:
   - `replace_event()`
   - `link_sources()`
   - `validate_event()`
-- [ ] Support:
+- [x] Support:
   - `--db`
   - `--init-db`
   - `--probe`
@@ -198,12 +198,12 @@ Risks and edge cases:
   - `--backfill`
   - `--audit`
   - explicit season arguments
-- [ ] Follow the clean-replace invariant from `scraper/graphql.py`: refresh one provider-owned event transactionally so stale games and rosters cannot survive a successful replacement.
-- [ ] Roll back the whole event when parsing, mapping, or validation fails.
-- [ ] Link cross-provider entities by stable source mapping first.
-- [ ] Allow normalized name/date/division matching only to produce auditable candidates; require an explicit accepted mapping before authoritative merge.
-- [ ] Preserve hidden/missing roster states and never synthesize names.
-- [ ] Store score conflicts from two sources as audit findings.
+- [x] Follow the clean-replace invariant from `scraper/graphql.py`: refresh one provider-owned event transactionally so stale games and rosters cannot survive a successful replacement.
+- [x] Roll back the whole event when parsing, mapping, or validation fails.
+- [x] Link cross-provider entities by stable source mapping first.
+- [x] Allow normalized name/date/division matching only to produce auditable candidates; require an explicit accepted mapping before authoritative merge.
+- [x] Preserve hidden/missing roster states and never synthesize names.
+- [x] Store score conflicts from two sources as audit findings.
 
 Smoke scenario:
 
@@ -238,9 +238,9 @@ This phase is gated on the ingestion smoke corpus passing. The current repositor
 
 ### Files and symbols
 
-- [ ] Inventory current runtime imports, then add the smallest explicit dependency manifest required for the existing Python code plus a maintained GraphQL ASGI implementation.
-- [ ] Create `api/__init__.py`.
-- [ ] Create `api/euf_schema.py` with:
+- [x] Inventory current runtime imports, then add the smallest explicit dependency manifest required for the existing Python code plus a maintained GraphQL ASGI implementation.
+- [x] Create `api/__init__.py`.
+- [x] Create `api/euf_schema.py` with:
   - `Event`
   - `Team`
   - `Game`
@@ -252,11 +252,11 @@ This phase is gated on the ingestion smoke corpus passing. The current repositor
   - `Query.teams`
   - `Query.team`
   - `Query.games`
-- [ ] Create `api/euf_graphql.py` exposing `schema` and ASGI `app`.
-- [ ] Read from SQLite using bounded queries; prevent unbounded nested event/game expansion.
-- [ ] Support filters for source, event code, season, division, team, and played state where represented.
-- [ ] Return `null` for unavailable roster/person values. Do not turn missing source coverage into invented empty data.
-- [ ] Ensure resolvers perform no upstream HTTP requests.
+- [x] Create `api/euf_graphql.py` exposing `schema` and ASGI `app`.
+- [x] Read from SQLite using bounded queries; prevent unbounded nested event/game expansion.
+- [x] Support filters for source, event code, season, division, team, and played state where represented.
+- [x] Return `null` for unavailable roster/person values. Do not turn missing source coverage into invented empty data.
+- [x] Ensure resolvers perform no upstream HTTP requests.
 
 Smoke scenario:
 
@@ -306,11 +306,11 @@ Add tests only after the feature and its smoke path work. Tests must defend obse
 
 ### Test files
 
-- [ ] Create `tests/test_ultimate_central.py`.
-- [ ] Create `tests/test_eucs_schedule.py`.
-- [ ] Create `tests/test_euf_ingest.py`.
-- [ ] Create `tests/test_euf_graphql.py`.
-- [ ] Add sanitized, minimal fixtures under `tests/fixtures/euf/` only after capturing the working behavior.
+- [x] Create `tests/test_ultimate_central.py`.
+- [x] Create `tests/test_eucs_schedule.py`.
+- [x] Create `tests/test_euf_ingest.py`.
+- [x] Create `tests/test_euf_graphql.py`.
+- [x] Add sanitized, minimal fixtures under `tests/fixtures/euf/` only after capturing the working behavior.
 
 Required contracts:
 
@@ -341,10 +341,10 @@ Never alter a fixture or weaken an assertion merely to accommodate a parser regr
 
 ## Phase 7 — Backfill and audit the corpus
 
-- [ ] Backfill Ultimate Central events only across the date/event ranges its public API or HTML actually covers.
-- [ ] Backfill EUCS Schedule only for discovered, verified season codes.
-- [ ] Do not imply continuous European coverage from gaps between the two systems.
-- [ ] Add audit counts for:
+- [x] Backfill Ultimate Central events only across the date/event ranges its public API or HTML actually covers.
+- [x] Backfill EUCS Schedule only for discovered, verified season codes.
+- [x] Do not imply continuous European coverage from gaps between the two systems.
+- [x] Add audit counts for:
   - events by provider and year;
   - divisions;
   - teams;
@@ -355,7 +355,7 @@ Never alter a fixture or weaken an assertion merely to accommodate a parser regr
   - duplicate source mappings;
   - score/date/team disagreements;
   - played games missing either team or score.
-- [ ] Block publication when duplicate source mappings, half-attributed played games, or unexplained score conflicts remain.
+- [x] Block publication when duplicate source mappings, half-attributed played games, or unexplained score conflicts remain.
 
 Commands:
 
@@ -372,12 +372,12 @@ Expected:
 
 ## Phase 8 — Integrate only after verification
 
-- [ ] Update `README.md` after the smoke scenario, contract tests, and corpus audit pass.
-- [ ] Document the exact ingest, refresh, audit, and GraphQL launch commands.
-- [ ] State coverage boundaries and roster/privacy limitations next to the commands.
-- [ ] Keep EUF and USAU data/rating outputs separate.
-- [ ] If cross-continent ratings are later requested, first add a bridge audit that measures shared stable players, connected components, seasons, and divisions; do not calibrate from team-name similarity.
-- [ ] Re-run the implementation smoke scenario and full test discovery after the README command examples are finalized; the documented commands must be the commands that passed.
+- [x] Update `README.md` after the smoke scenario, contract tests, and corpus audit pass.
+- [x] Document the exact ingest, refresh, audit, and GraphQL launch commands.
+- [x] State coverage boundaries and roster/privacy limitations next to the commands.
+- [x] Keep EUF and USAU data/rating outputs separate.
+- [x] If cross-continent ratings are later requested, first add a bridge audit that measures shared stable players, connected components, seasons, and divisions; do not calibrate from team-name similarity.
+- [x] Re-run the implementation smoke scenario and full test discovery after the README command examples are finalized; the documented commands must be the commands that passed.
 
 ## Definition of done
 

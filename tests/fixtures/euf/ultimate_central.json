@@ -1,0 +1,7 @@
+{
+  "event": {"action":"api_events_list","status":200,"count":1,"result":[{"id":7,"name":"Fixture Championship","start_date":"2024-10-04","end_date":"2024-10-06","division_name":"Mixed"}],"errors":[]},
+  "teams": {"action":"api_teams_list","status":200,"count":2,"result":[{"id":11,"name":"Alpha","division_name":"Mixed"},{"id":12,"name":"Beta","division_name":"Mixed"}],"errors":[]},
+  "games_page_1": {"action":"api_games_list","status":200,"count":2,"result":[{"id":101,"event_id":7,"home_team_id":11,"away_team_id":12,"home_score":15,"away_score":10,"is_played":true}],"errors":[]},
+  "games_page_2": {"action":"api_games_list","status":200,"count":2,"result":[{"id":102,"event_id":7,"home_team_id":12,"away_team_id":11,"home_score":9,"away_score":15,"is_played":true}],"errors":[]},
+  "restricted": {"action":"api_persons_list","status":403,"count":0,"result":[],"errors":["private"]}
+}
