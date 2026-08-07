@@ -26,6 +26,7 @@ import csv
 import json
 import re
 import sqlite3
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -43,9 +44,13 @@ from analysis.tournaments import build as build_tournaments
 
 # docs/ rather than site/: GitHub Pages can serve a branch's root or its
 # /docs folder and nothing else, so putting the page here makes the project
-# URL itself the app. The accompanying .nojekyll stops Pages running the
-# output through Jekyll, which is pure overhead for a single static file.
-OUT = DB_PATH.parent.parent / "docs" / "index.html"
+# URL itself the app. Environment overrides build a sister site without
+# mutating the Elo publication.
+DATA_DIR = Path(os.environ.get("RANKINGS_DATA_DIR", DB_PATH.parent))
+OUT = Path(os.environ.get(
+    "RANKINGS_SITE_OUT", DB_PATH.parent.parent / "docs" / "index.html"
+))
+RATING_NAME = os.environ.get("RATING_NAME", "Elo")
 
 # Everything that is not needed to draw the first screen is emitted BESIDE the
 # page as a classic <script>, never fetched: both work over https, but fetch()
@@ -94,7 +99,7 @@ MIN_GAMES = 30
 
 
 def load_csv(name):
-    p = DB_PATH.parent / name
+    p = DATA_DIR / name
     with open(p, newline="") as f:
         return list(csv.DictReader(f))
 
@@ -155,7 +160,7 @@ def build():
     # Trajectories for the drill-down, written by analysis.rankings from the
     # same replay that produced the CSVs. Optional: if it is missing the page
     # still builds, it just has nothing to open when a name is clicked.
-    hist_path = DB_PATH.parent / "history.json"
+    hist_path = DATA_DIR / "history.json"
     history = (json.loads(hist_path.read_text()) if hist_path.exists()
                else {"events": [], "players": {}, "teams": {}})
     asset_version = content_version((DB_PATH, hist_path))
@@ -174,7 +179,7 @@ def build():
     # player's rating than without it. Optional and partial by design — one
     # replay per player, so it covers the top 1,000 rather than all 39,000 —
     # and the page shows the flag only where it was actually measured.
-    loo_path = DB_PATH.parent / "player_loo.csv"
+    loo_path = DATA_DIR / "player_loo.csv"
     loo = {}
     if loo_path.exists():
         with open(loo_path, newline="") as f:
@@ -248,9 +253,13 @@ def build():
     hcore, hplay, hrost, hgame = split_history(
         history, {r["player_id"]: r["player"] for r in players}, genders,
         event_meta)
+    metrics_path = DATA_DIR / "metrics.json"
+    model_metrics = json.loads(metrics_path.read_text()) if metrics_path.exists() else {}
 
     payload = {
         "generated": date.today().isoformat(),
+        "model": RATING_NAME,
+        "metrics": model_metrics,
         "minGames": MIN_GAMES,
         "totalRated": total_rated,
         "scale": PUBLISHED["division_scale"]["club-men"],
@@ -314,7 +323,8 @@ def build():
     OUT.write_text(TEMPLATE
                    .replace("__DATA__", json.dumps(payload, separators=(",", ":")))
                    .replace("__TRENDN__", f"{lo} to {hi}")
-                   .replace("__MULTIDIV__", f"{multi_division_clubs(hcore):,}"))
+                   .replace("__MULTIDIV__", f"{multi_division_clubs(hcore):,}")
+                   .replace("Elo", RATING_NAME))
     (OUT.parent / ".nojekyll").write_text("")
     kb, hkb = OUT.stat().st_size / 1024, HIST_OUT.stat().st_size / 1024
     print(f"wrote {OUT} ({kb:,.0f} KB) + {HIST_OUT.name} ({hkb:,.0f} KB) + .nojekyll")
@@ -897,6 +907,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 </main>
 <script>
 const D = __DATA__;
+const IS_GLICKO = D.model.startsWith('Glicko');
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -948,11 +959,16 @@ $('#rtype').onchange = drawRankings;
 $('#rdiv').onchange = drawRankings;
 $('#ryear').onchange = drawRankings;
 
+const heldOut = D.metrics.held_out_2024_2025;
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
   `softmax-weighted mean of its event roster. Rankings and Trends span ` +
   `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. The Tournaments browser is ` +
-  `USAU-only. Generated ${D.generated || ''}.`;
+  `USAU-only.` +
+  (heldOut?.n ? ` Held-out 2024–25: ${(heldOut.accuracy * 100).toFixed(1)}% ` +
+    `accuracy · ${heldOut.logloss.toFixed(3)} log loss over ` +
+    `${heldOut.n.toLocaleString()} games.` : '') +
+  ` Generated ${D.generated || ''}.`;
 
 /* ---------- clubs ---------- */
 const CNOTE = {
@@ -1208,34 +1224,29 @@ function drawPlayers() {
   $('#ming').addEventListener(e, drawPlayers);
   $('#pgen').addEventListener(e, drawPlayers);
 });
-$('#pnote').textContent =
-  `Searching does not renumber anything — a player keeps the rank they hold in the ` +
-  `current list, so results come back sparse. The toggles do change the rank, ` +
-  `because they change who is being ranked; hover a rank to see the player's ` +
-  `position across all ${D.totalRated.toLocaleString()} rated players. ` +
-  `Bands are 90% intervals on the rating as an estimate of current skill, and ` +
-  `they are ONE population figure for everyone, which the "?" marks call out: ` +
-  `for the top 1,000 each rating was re-tested by dropping the player from ` +
-  `every roster and replaying, and a "?" means the results are explained at ` +
-  `least as well without it. Read the whole top of this table with that in ` +
-  `mind — the game delta is applied to every rostered player equally, so what ` +
-  `separates teammates is thin, and a player's position reflects how far they ` +
-  `sit above their own teammates as much as how good they are. It is also not ` +
-  `the club scale: the best player here reads ${Math.round(Math.max(...D.players.map(p=>p[1])))} ` +
-  `against a best club of about 2,580, because a club's rating is a mean over ` +
-  `20-plus people and one star barely moves it. Players ` +
-  `below ${D.minGames} games are omitted: under that the engine's provisional ` +
-  `multiplier is still moving a rating faster than results justify. Ratings never ` +
-  `decay, so an unfiltered list mixes eras — "2026 rosters only" is on by default. ` +
-  `The division follows that toggle: with it on you get players in the ` +
-  `division NOW, with it off anyone who ever played it. Nobody appears in two ` +
-  `club divisions at once — men's, mixed and women's are alternatives, so a ` +
-  `player is filed under whichever they played most this season and someone ` +
-  `on a mixed team shows only under mixed. College is different and is kept ` +
-  `alongside: it runs in the spring and club in the summer, so 1,789 people ` +
-  `are genuinely in both and appear in both. Their rating is ` +
-  `still the one number they carry everywhere, not a per-division rating. ` +
-  `All ${NDIV} divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
+$('#pnote').textContent = IS_GLICKO
+  ? `Searching does not renumber anything — a player keeps the rank they hold in ` +
+    `the current list. The toggles do change the population and therefore the rank; ` +
+    `hover one to see its denominator. Bands are native 90% Glicko-2 intervals: ` +
+    `rating deviation shrinks as results accumulate and expands during inactivity. ` +
+    `Players below ${D.minGames} games are omitted because their estimates remain ` +
+    `too uncertain for a useful ordered list. Ratings themselves do not decay, so ` +
+    `\"2026 rosters only\" is on by default instead of mixing eras. A player carries ` +
+    `one rating across every division; the division filters describe where they ` +
+    `played, not separate ratings. All ${NDIV} divisions share one scale, bridged ` +
+    `by the ${GENDER_NOTE}`
+  : `Searching does not renumber anything — a player keeps the rank they hold in the ` +
+    `current list, so results come back sparse. The toggles do change the rank, ` +
+    `because they change who is being ranked; hover a rank to see the player's ` +
+    `position across all ${D.totalRated.toLocaleString()} rated players. ` +
+    `Bands are 90% intervals on the rating as an estimate of current skill. For ` +
+    `the top 1,000 each rating was re-tested by dropping the player from every ` +
+    `roster and replaying; the \"?\" marks results explained at least as well ` +
+    `without that player. Players below ${D.minGames} games are omitted while ` +
+    `the provisional multiplier is still moving their rating quickly. Ratings ` +
+    `never decay, so \"2026 rosters only\" is on by default. A player carries one ` +
+    `rating across every division; filters describe where they played. All ` +
+    `${NDIV} divisions share one scale, bridged by the ${GENDER_NOTE}`;
 
 /* ---------- drill-down: play history + rating curve ---------- */
 /* The core arrives in a second file once the page is already usable, and the
@@ -1691,7 +1702,8 @@ function gamesPane(ckey, evIdx, rowDelta, kind) {
   const head = `${esc(clubLabel(ckey))} · ${gs.length} game` +
     `${gs.length === 1 ? '' : 's'} · ${w}-${gs.length - w} · ` +
     (kind === 'c'
-      ? `${swing(tot)} from results` +
+      ? (IS_GLICKO ? `${swing(tot)} event result update`
+                   : `${swing(tot)} from results`) +
         (Math.abs(rest) >= 1 ? ` · ${swing(rest)} from a changed roster` : '')
       : `club ${swing(tot)}`);
   return `<p class="gsum">${head}</p>` +
@@ -1983,10 +1995,15 @@ function openDetail(kind, key, opts) {
     `event — a weekend tournament is one step, not one point per game. ` +
     `${pts.length} event${pts.length === 1 ? '' : 's'} on record; click one in ` +
     `the table for the games behind it` +
-    (kind === 'p' ? ', which are the games of the club they turned out for. The ' +
-     'per-game move shown there is the club\'s: the engine amplifies each ' +
-     'delta by where a player sits in their provisional window, so the Δ on the ' +
-     'row is their own' : '') + `.</p>` +
+    (kind === 'p'
+      ? (IS_GLICKO
+        ? ', which are the games of the club they turned out for. Glicko-2 updates ' +
+          'the whole event as one rating period; each game line gets an equal share ' +
+          'of the club event move, while the Δ on the event row is the player’s own'
+        : ', which are the games of the club they turned out for. The per-game move ' +
+          'shown there is the club’s; provisional players can move by a different ' +
+          'amount, so the Δ on the event row is their own')
+      : '') + `.</p>` +
     (kind === 'c' ? rosterSection(ckey) : '') +
     (pts.length ? histTable(pts, kind === 'c', ckey) : '');
   if (opts.push !== false) {

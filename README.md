@@ -1,6 +1,7 @@
 # USAU + International Player-Level Elo
 
 ### → **[Live rankings](https://sethlnx.github.io/usau-player-elo/)**
+### → **[Glicko-2 sister rankings](https://sethlnx.github.io/usau-player-glicko/)**
 
 Every player carries a personal Elo across seasons and, where the identity
 bridge is unambiguous, across USAU, European, and official WFDF world
@@ -27,6 +28,19 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
 .venv/bin/python -m analysis.site         # docs/index.html + history.js + t,p,r,g/*.js — no server
 ```
+The sister Glicko-2 publication reuses this complete corpus and static site:
+
+```bash
+.venv/bin/python -m analysis.glicko_rankings
+RANKINGS_DATA_DIR=data/glicko \
+RANKINGS_SITE_OUT=../usau-player-glicko/docs/index.html \
+RATING_NAME=Glicko-2 .venv/bin/python -m analysis.site
+```
+
+Its event-period model, native uncertainty bands, and matched prediction
+metrics are documented in
+[`usau-player-glicko`](https://github.com/sethlnx/usau-player-glicko).
+
 
 **The GraphQL mirror is the default source.** One command pulls all sixteen
 divisions for all thirteen seasons into `data/usau.db` in about thirteen

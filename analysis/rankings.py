@@ -739,6 +739,7 @@ HISTORY_MIN_GAMES = 30
 def write_history(
     con, games, rosters, clubs, snaps, game_deltas, model, season,
     european: EuropeanInputs | None = None,
+    output_dir: Path | None = None,
 ):
     """Emit data/history.json — per-event rating trajectories for the drill-down.
 
@@ -950,7 +951,7 @@ def write_history(
                 latest[key] = value
     team_names = {k: v[1] for k, v in latest.items()}
 
-    out = DB_PATH.parent / "history.json"
+    out = (output_dir or DB_PATH.parent) / "history.json"
     out.write_text(json.dumps({"events": events, "players": players,
                                "teams": teams, "teamKey": alias,
                                "clubNames": list(club_ix),
@@ -969,8 +970,11 @@ def write_history(
           f"{out.stat().st_size/1024/1024:.1f} MB)")
 
 
-def main(cfg: EloConfig | None = None):
+def main(cfg: EloConfig | None = None, replay_fn=replay,
+         output_dir: Path | None = None):
     cfg = cfg or EloConfig(**PUBLISHED)
+    output_dir = output_dir or DB_PATH.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(DB_PATH)
     european = load_european_inputs(con, EUF_DB)
     international = load_international_inputs(con, european, EUF_DB)
@@ -1023,8 +1027,9 @@ def main(cfg: EloConfig | None = None):
                     snaps[("p", p)][eid] = (round(model.players[p].rating),
                                             club or "")
 
-    _, model = replay("player", games, rosters, clubs, cfg, stat_events,
-                      on_game=capture)
+    records, model = replay_fn(
+        "player", games, rosters, clubs, cfg, stat_events, on_game=capture
+    )
 
     latest = last_appearance(con)
     for pid, appearance in european.latest.items():
@@ -1096,7 +1101,7 @@ def main(cfg: EloConfig | None = None):
         for d in keep:
             mask |= 1 << DIVCODE.get(d, 0)
         div_now[pid] = mask
-    out = DB_PATH.parent / "player_elo.csv"
+    out = output_dir / "player_elo.csv"
     with open(out, "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         # player_id is exported because display names are NOT unique: ambiguous
@@ -1111,13 +1116,13 @@ def main(cfg: EloConfig | None = None):
             reverse=True)
         for i, (rating, pid, ngames) in enumerate(ranked, 1):
             name, club, season = latest.get(pid, ("?", "?", "?"))
-            s = rating_sigma(ngames)
+            s = getattr(model.players[pid], "rd", rating_sigma(ngames))
             w.writerow([i, name, pid, round(rating, 1), round(s, 1),
                         round(rating - Z90 * s, 1), round(rating + Z90 * s, 1),
                         ngames, club, season, gender.get(pid, ""),
                         div_ever.get(pid, 0), div_now.get(pid, 0)])
     print(f"wrote {out} ({len(ranked)} players with 5+ games)")
-    bridge_out = DB_PATH.parent / "euf_bridge_audit.csv"
+    bridge_out = output_dir / "euf_bridge_audit.csv"
     with open(bridge_out, "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["name_key", "eu_name", "eu_name_keys", "match_method",
@@ -1129,7 +1134,7 @@ def main(cfg: EloConfig | None = None):
                 ";".join(map(str, row["shared_seasons"])),
             ])
     print(f"wrote {bridge_out} ({len(euf_bridge_rows)} reviewable name bridges)")
-    wfdf_out = DB_PATH.parent / "wfdf_bridge_audit.csv"
+    wfdf_out = output_dir / "wfdf_bridge_audit.csv"
     with open(wfdf_out, "w", newline="") as f:
         w = csv.DictWriter(
             f, fieldnames=["event", "team", "source_name", "match_method",
@@ -1148,7 +1153,7 @@ def main(cfg: EloConfig | None = None):
     for basis, fname in (("completed", "team_elo.csv"),
                          ("upcoming", "team_elo_upcoming.csv"),
                          ("best", "team_elo_best.csv")):
-        team_out = DB_PATH.parent / fname
+        team_out = output_dir / fname
         with open(team_out, "w", newline="") as f:
             w = csv.writer(f, lineterminator="\n")
             # club_key is the model's identity and what the site links on;
@@ -1177,9 +1182,11 @@ def main(cfg: EloConfig | None = None):
         print(f"wrote {team_out} ({total} teams across {len(TEAM_DIVISIONS)} "
               f"divisions, season {season}, {basis} rosters)")
     write_history(
-        con, games, rosters, clubs, snaps, game_deltas, model, season, european
+        con, games, rosters, clubs, snaps, game_deltas, model, season, european,
+        output_dir,
     )
     con.close()
+    return records, model
 
 
 if __name__ == "__main__":
