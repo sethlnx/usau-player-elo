@@ -824,11 +824,12 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <select id="esort">
         <option value="date">Newest first</option>
         <option value="str">Hardest field first</option>
+        <option value="region">Region, then newest</option>
       </select>
       <span class="seg" id="estate" role="group" aria-label="Filter by completion">
-        <button data-state="all" class="on">All</button
-        ><button data-state="done">Completed</button
-        ><button data-state="up">Upcoming</button>
+        <button data-state="all" class="on" aria-pressed="true">All</button
+        ><button data-state="done" aria-pressed="false">Completed</button
+        ><button data-state="up" aria-pressed="false">Upcoming</button>
       </span>
       <span class="count" id="ecount"></span>
     </div>
@@ -2077,6 +2078,47 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                "Grand Masters Men's", "Grand Masters Women's", "Grand Masters Mixed",
                "Great Grand Masters Men's", "Great Grand Masters Women's",
                "Great Grand Masters Mixed"];
+
+/* Event geography is only city/state in the upstream record. Translate the
+   venue state through USA Ultimate's division-specific region boundaries;
+   college and club do not use the same map. This is a venue region, not a
+   claim that every team in an invitational belongs to that region. */
+function regionIndex(groups) {
+  const out = {};
+  groups.forEach(([region, states]) =>
+    states.split(' ').forEach(state => { out[state] = region; }));
+  return out;
+}
+const COLLEGE_DIVS = new Set([1, 2, 5, 6]);
+const COLLEGE_REGIONS = regionIndex([
+  ['Atlantic Coast', 'DC DE MD NC SC VA'],
+  ['Great Lakes', 'IL IN KY MI'],
+  ['Metro East', 'CT NJ NY'],
+  ['New England', 'MA ME NH RI VT'],
+  ['North Central', 'IA MN ND NE SD WI'],
+  ['Northwest', 'AK ID MT OR UT WA'],
+  ['Ohio Valley', 'OH PA WV'],
+  ['South Central', 'AR CO KS MO OK TX WY'],
+  ['Southeast', 'AL FL GA LA MS TN'],
+  ['Southwest', 'AZ CA HI NM NV'],
+]);
+const CLUB_REGIONS = regionIndex([
+  ['Great Lakes', 'IL IN KY MI OH'],
+  ['Mid-Atlantic', 'DC DE MD NJ PA VA WV'],
+  ['North Central', 'IA KS MN MO ND NE SD WI'],
+  ['Northeast', 'CT MA ME NH NY RI VT'],
+  ['Northwest', 'AK ID MT OR UT WA'],
+  ['South Central', 'AR CO NM OK TX WY'],
+  ['Southeast', 'AL FL GA LA MS NC SC TN'],
+  ['Southwest', 'AZ CA HI NV'],
+]);
+function eventGeo(e) {
+  const match = /(?:^|,\s*)([A-Z]{2})$/.exec(e[6] || '');
+  const state = match ? match[1] : '';
+  const regions = COLLEGE_DIVS.has(e[3]) ? COLLEGE_REGIONS : CLUB_REGIONS;
+  return [regions[state] || 'Unknown region', state];
+}
+const EVENT_GEO = new Map(EVS.map(e => [e, eventGeo(e)]));
 /* Rankings, Tournaments and Trends all offer the same divisions, so they are
    filled from EDIVL rather than written out three times — adding a division
    should be one edit in analysis/rankings.py DIVCODE and one here, not HTML
@@ -2161,12 +2203,15 @@ function drawEvents() {
   const q = $('#eq').value.trim().toLowerCase(), div = $('#ediv').value;
   const yr = $('#eyear').value, tier = $('#etier').value;
   const str = $('#estr').value, sort = $('#esort').value;
+  const state = $('#estate button.on').dataset.state;
   let rows = EVS;
   if (div !== 'all') rows = rows.filter(e => e[3] === +div);
   if (yr !== 'all') rows = rows.filter(e => e[2] === +yr);
   if (tier === 'series') rows = rows.filter(e => e[8] > 0);
   else if (tier !== 'all') rows = rows.filter(e => e[8] === +tier);
   if (str !== 'all') rows = rows.filter(e => e[12] === str);
+  if (state === 'done') rows = rows.filter(e => !e[13]);
+  else if (state === 'up') rows = rows.filter(e => e[13]);
   if (q) rows = rows.filter(e => e[1].toLowerCase().includes(q) ||
                                  e[6].toLowerCase().includes(q) ||
                                  ESER[e[9]][0].toLowerCase().includes(q));
@@ -2174,10 +2219,21 @@ function drawEvents() {
   // The cap is a DOM budget, not a filter: the count says how many matched so
   // a narrower search is an obvious next move. An unrated event sorts last on
   // strength rather than as a zero — it is unmeasured, not weak.
-  rows = sort === 'str'
-    ? rows.slice().sort((a, b) => (b[11] ?? -1) - (a[11] ?? -1) ||
-                                  (b[4] || '').localeCompare(a[4] || ''))
-    : rows.slice().sort((a, b) => (b[4] || '').localeCompare(a[4] || ''));
+  if (sort === 'str') {
+    rows = rows.slice().sort((a, b) =>
+      (b[11] ?? -1) - (a[11] ?? -1) ||
+      (b[4] || '').localeCompare(a[4] || ''));
+  } else if (sort === 'region') {
+    rows = rows.slice().sort((a, b) => {
+      const ag = EVENT_GEO.get(a), bg = EVENT_GEO.get(b);
+      return ag[0].localeCompare(bg[0]) || ag[1].localeCompare(bg[1]) ||
+        (a[6] || '').localeCompare(b[6] || '') ||
+        (b[4] || '').localeCompare(a[4] || '');
+    });
+  } else {
+    rows = rows.slice().sort((a, b) =>
+      (b[4] || '').localeCompare(a[4] || ''));
+  }
   const shown = rows.slice(0, 400);
   $('#etb').innerHTML = shown.map(e => {
     const n = ESER[e[9]][1].length;
@@ -2190,9 +2246,11 @@ function drawEvents() {
     // filter already finds them.
     const chip = e[8] >= 3
       ? `<span class="tag t${e[8]}">${esc(TV.tiers[e[8]])}</span> ` : '';
+    const region = EVENT_GEO.get(e)[0];
     return `<tr class="ev" data-ev="${e[0]}"><td class="dt">${daterange(e[4], e[5])}</td>` +
       `<td>${chip}${esc(e[1])}` +
-      `${e[6] ? ` <span class="muted">\u00b7 ${esc(e[6])}</span>` : ''}</td>` +
+      `${e[6] ? ` <span class="muted">\u00b7 ${esc(e[6])}` +
+        `${region === 'Unknown region' ? '' : ` \u00b7 ${esc(region)}`}</span>` : ''}</td>` +
       `<td><span class="tag">${esc(EDIVL[e[3]] || '')}</span></td>` +
       `<td class="n">${e[7]}</td><td class="n">${strCell(e)}</td><td>${ch}</td>` +
       `<td class="n">${n > 1 ? n : '<span class="muted">1</span>'}</td></tr>`;
@@ -2204,6 +2262,16 @@ function drawEvents() {
 ['#eq', '#ediv', '#eyear', '#etier', '#estr', '#esort'].forEach(s => {
   const el = $(s);
   el.oninput = drawEvents; el.onchange = drawEvents;
+});
+$('#estate').addEventListener('click', e => {
+  const button = e.target.closest('[data-state]');
+  if (!button) return;
+  $('#estate').querySelectorAll('[data-state]').forEach(el => {
+    const active = el === button;
+    el.classList.toggle('on', active);
+    el.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  drawEvents();
 });
 $('#etb').addEventListener('click', e => {
   const tr = e.target.closest('[data-ev]');
@@ -2832,14 +2900,16 @@ $('#tnote').textContent =
   `one rating scale, bridged by the ${GENDER_NOTE}`;
 
 $('#enote').innerHTML =
-  `Every event in the corpus with a completed game, ${EVS.length.toLocaleString()} of ` +
-  `them across ${ESER.length.toLocaleString()} tournament series. Click a row for ` +
-  `that event's pools and bracket, and for the other years the same tournament ` +
-  `has run. <b>Editions</b> counts the instances on record — the same tournament ` +
+  `Every event in the corpus with a completed game, plus scheduled future ` +
+  `events whose games have not started: ${EVS.length.toLocaleString()} across ` +
+  `${ESER.length.toLocaleString()} tournament series. Click a row for that ` +
+  `event's pools and bracket, and for the other years the same tournament has ` +
+  `run. <b>Editions</b> counts the instances on record — the same tournament ` +
   `in another division counts, since a Sectional's men's and women's halves are ` +
   `one weekend run twice. The champion is the winner of the championship ` +
   `bracket's final where the schedule names one; events that finished on pool ` +
-  `play, or whose stage labels name no final, show a dash.`;
+  `play, or whose stage labels name no final, show a dash. Regions are inferred ` +
+  `from the event venue's state using the division's USA Ultimate region map.`;
 
 $('#enote').innerHTML +=
   ` <b>Field</b> is the average Elo in the room: how hard the tournament was ` +
