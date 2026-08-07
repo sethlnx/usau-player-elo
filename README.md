@@ -1,10 +1,11 @@
-# USAU + European Player-Level Elo
+# USAU + International Player-Level Elo
 
 ### → **[Live rankings](https://sethlnx.github.io/usau-player-elo/)**
 
 Every player carries a personal Elo across seasons and, where the identity
-bridge is unambiguous, across USAU and European competition. A team's rating
-at an event is the softmax-weighted mean of its event roster's player Elos
+bridge is unambiguous, across USAU, European, and official WFDF world
+competition. A team's rating at an event is the softmax-weighted mean of its
+event roster's player Elos
 (better players weigh more, assuming more playing time). Game deltas are
 applied to every rostered player equally. New seasons need no reset — a team's
 opening rating falls out of whoever is on its roster.

@@ -336,7 +336,7 @@ TEMPLATE = r"""<!doctype html>
 <html lang="en" class="booting">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>USAU + EUF Player-Elo Rankings</title>
+<title>USAU + International Player-Elo Rankings</title>
 <style>
 :root {
   --bg:#f4f5f4; --surface:#fcfcfb; --ink:#12140f; --ink-2:#52544c; --ink-3:#86887e;
@@ -721,7 +721,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div id="dbody"></div></div>
 <div id="tip"></div>
 <header>
-  <h1>USAU + EUF Player-Elo Rankings</h1>
+  <h1>USAU + International Player-Elo Rankings</h1>
   <div class="sub" id="sub"></div>
 </header>
 <nav>
