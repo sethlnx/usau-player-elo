@@ -1,6 +1,6 @@
 """Build the published rankings page.
 
-Five tabs: club rankings, player rankings, per-season Trends, a Tournaments
+Three tabs: combined club/player rankings, per-season Trends, and a Tournaments
 browser showing every event's recovered pools and bracket plus the history of
 the series it belongs to.
 
@@ -708,8 +708,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div class="sub" id="sub"></div>
 </header>
 <nav>
-  <button data-t="clubs" class="on">Club Team Rankings</button>
-  <button data-t="players">Players</button>
+  <button data-t="rankings" class="on">Rankings</button>
   <button data-t="events">Tournaments</button>
   <button data-t="trends">Trends</button>
 </nav>
@@ -723,72 +722,79 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 </div>
 
 
-<section id="clubs" class="on">
+<section id="rankings" class="on">
   <div class="bar">
-    <input type="search" id="cq" placeholder="Search club…" autocomplete="off">
-    <select id="basis">
-      <option value="completed">Most recent completed roster</option>
-      <option value="best">Best full-strength roster of 2026</option>
-      <option value="upcoming">Next event roster</option>
+    <select id="rtype">
+      <option value="club">Club teams</option>
+      <option value="player">Players</option>
     </select>
-    <select id="cdiv"></select>
-    <span class="count" id="ccount"></span>
-  </div>
-  <table><thead><tr>
-    <th class="n">#</th><th>Club</th><th>Division</th><th class="n">Elo</th>
-    <th class="n">Roster</th><th>Rated off</th>
-  </tr></thead><tbody id="ctb"></tbody></table>
-  <p class="note" id="cnote"></p>
-</section>
-
-<section id="players">
-  <div class="bar">
-    <input type="search" id="q" placeholder="Search player or club…" autocomplete="off">
-    <label class="chk"><input type="checkbox" id="only26" checked> Current 2026 rosters only</label>
-    <select id="ming">
-      <option value="30">30+ games</option>
-      <option value="60">60+ games</option>
-      <option value="120">120+ games</option>
-      <option value="200">200+ games</option>
-    </select>
-    <select id="pdiv"></select>
-    <select id="pyear">
+    <select id="rdiv"></select>
+    <select id="ryear">
       <option value="all">All years</option>
     </select>
-    <select id="pgen">
-      <option value="all">All genders</option>
-      <option value="1">Male-matching</option>
-      <option value="2">Female-matching</option>
-    </select>
-    <span class="count" id="pcount"></span>
-    <button class="act" id="pinToggle" title="Show or hide your pinned players list">
-      &#128204; Pinned <span id="pinbadge">0</span></button>
   </div>
-  <div class="pwrap">
-  <div class="ptblwrap">
-  <table><thead><tr>
-    <th class="pin"></th>
-    <th class="n">#</th><th>Player</th><th class="n">Elo</th><th>90% band</th>
-    <th class="n">G</th><th>Last club</th><th class="n">Yr</th>
-  </tr></thead><tbody id="ptb"></tbody></table>
-  <p class="note" id="pnote"></p>
+  <div id="clubRankings">
+    <div class="bar">
+      <input type="search" id="cq" placeholder="Search club…" autocomplete="off">
+      <select id="basis">
+        <option value="completed">Most recent completed roster</option>
+        <option value="best">Best full-strength roster of 2026</option>
+        <option value="upcoming">Next event roster</option>
+      </select>
+      <span class="count" id="ccount"></span>
+    </div>
+    <table><thead><tr>
+      <th class="n">#</th><th>Club</th><th>Division</th><th class="n">Elo</th>
+      <th class="n">Roster</th><th>Rated off</th>
+    </tr></thead><tbody id="ctb"></tbody></table>
+    <p class="note" id="cnote"></p>
   </div>
-  <aside id="pinSidebar" class="collapsed">
-    <div class="pinhead">
-      <h3>Pinned players</h3>
-      <div class="pinactions">
-        <button class="act" id="pinlink">Copy link</button>
-        <button class="act" id="pinclear">Clear</button>
+
+  <div id="playerRankings" hidden>
+    <div class="bar">
+      <input type="search" id="q" placeholder="Search player or club…" autocomplete="off">
+      <label class="chk"><input type="checkbox" id="only26" checked> Current 2026 rosters only</label>
+      <select id="ming">
+        <option value="30">30+ games</option>
+        <option value="60">60+ games</option>
+        <option value="120">120+ games</option>
+        <option value="200">200+ games</option>
+      </select>
+      <select id="pgen">
+        <option value="all">All genders</option>
+        <option value="1">Male-matching</option>
+        <option value="2">Female-matching</option>
+      </select>
+      <span class="count" id="pcount"></span>
+      <button class="act" id="pinToggle" title="Show or hide your pinned players list">
+        &#128204; Pinned <span id="pinbadge">0</span></button>
+    </div>
+    <div class="pwrap">
+    <div class="ptblwrap">
+    <table><thead><tr>
+      <th class="pin"></th>
+      <th class="n">#</th><th>Player</th><th class="n">Elo</th><th>90% band</th>
+      <th class="n">G</th><th>Last club</th><th class="n">Yr</th>
+    </tr></thead><tbody id="ptb"></tbody></table>
+    <p class="note" id="pnote"></p>
+    </div>
+    <aside id="pinSidebar" class="collapsed">
+      <div class="pinhead">
+        <h3>Pinned players</h3>
+        <div class="pinactions">
+          <button class="act" id="pinlink">Copy link</button>
+          <button class="act" id="pinclear">Clear</button>
+        </div>
       </div>
+      <div id="pinlist"></div>
+      <div class="pinaddwrap">
+        <input type="search" id="pinadd" placeholder="Add another player…" autocomplete="off">
+        <div id="pinaddResults"></div>
+      </div>
+      <p class="note" style="margin:8px 0 0">Pins are saved in this browser and baked into
+      the page URL, so copying the address bar shares this exact list.</p>
+    </aside>
     </div>
-    <div id="pinlist"></div>
-    <div class="pinaddwrap">
-      <input type="search" id="pinadd" placeholder="Add another player…" autocomplete="off">
-      <div id="pinaddResults"></div>
-    </div>
-    <p class="note" style="margin:8px 0 0">Pins are saved in this browser and baked into
-    the page URL, so copying the address bar shares this exact list.</p>
-  </aside>
   </div>
 </section>
 
@@ -921,10 +927,19 @@ function showTab(id) {
 }
 document.querySelectorAll('nav button').forEach(
   b => b.onclick = () => showTab(b.dataset.t));
+function drawRankings() {
+  const players = $('#rtype').value === 'player';
+  $('#clubRankings').hidden = players;
+  $('#playerRankings').hidden = !players;
+  if (players) drawPlayers(); else drawClubs();
+}
+$('#rtype').onchange = drawRankings;
+$('#rdiv').onchange = drawRankings;
+$('#ryear').onchange = drawRankings;
 
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
-  `softmax-weighted mean of its event roster. Clubs, Players, Trends and ` +
+  `softmax-weighted mean of its event roster. Rankings, Trends and ` +
   `Tournaments all span the same ${NDIV} divisions — ${NDIV_LIST}. ` +
   `Generated ${D.generated || ''}.`;
 
@@ -949,42 +964,79 @@ const COLLEGE_NOTE =
   '18% of college ones filed an identical roster at every event they entered ' +
   'in 2025, against 1-4% across the club divisions.';
 function drawClubs() {
-  const basis = $('#basis').value, div = $('#cdiv').value;
+  const basis = $('#basis').value;
+  const year = $('#ryear').value;
+  const historical = year !== 'all';
+  const div = $('#rdiv').value;
   const q = $('#cq').value.trim().toLowerCase();
-  // Same shape as the player table: the number is the club's position in
-  // WHATEVER is selected, assigned before the search runs, with its rank
-  // inside its own division on the tooltip. Searching is a lookup, not a
-  // re-ranking, so hits come back sparse (#3, #17, #41).
-  //
-  // All divisions can share one list because they share one rating
-  // scale, bridged through mixed — the same reason the player table and
-  // Trends span them. What the merged order is NOT is a prediction: club
-  // men's and college teams never play, so #4 above #5 across that line is
-  // an arithmetic fact and not a result anyone can go and settle.
-  let pop = D.clubs[basis] || [];
-  if (div !== 'all') pop = pop.filter(r => r[5] === +div);
-  pop = pop.slice().sort((a, b) => b[2] - a[2]);
+  $('#basis').disabled = historical;
+
+  if (historical && !HREADY) {
+    $('#ccount').textContent = 'Loading club history…';
+    $('#cnote').textContent = 'Loading season data…';
+    return;
+  }
+
+  // The number is the club's position in the selected population, assigned
+  // before search. Searching is a lookup, not a re-ranking.
+  let pop;
+  if (historical) {
+    const y = +year;
+    pop = Object.entries(H.teams || {}).map(([key, entry]) => {
+      let snap = null;
+      for (const point of decode(entry)) {
+        if (point.season === y && (div === 'all' || point.div === +div)) {
+          snap = point;
+        }
+      }
+      return snap ? {key, name: clubLabel(key), snap} : null;
+    }).filter(Boolean);
+    pop.sort((a, b) => b.snap.elo - a.snap.elo ||
+      a.key.localeCompare(b.key));
+  } else {
+    pop = (D.clubs[basis] || [])
+      .filter(r => div === 'all' || r[5] === +div)
+      .slice().sort((a, b) => b[2] - a[2])
+      .map(r => ({row: r}));
+  }
+
   const rankOf = new Map();
   pop.forEach((r, i) => rankOf.set(r, i + 1));
-  const rows = q ? pop.filter(r => r[1].toLowerCase().includes(q) ||
-                                   String(r[4]).toLowerCase().includes(q))
-                 : pop;
-  $('#ctb').innerHTML = rows.map(r =>
-    `<tr><td class="rk" title="#${r[0]} of ${DIVLABEL[r[5]]} clubs">` +
-    `${rankOf.get(r)}</td>` +
-    `<td><span class="nmlink" data-club="${esc(r[6])}">${esc(r[1])}</span></td>` +
-    `<td><span class="tag">${esc(EDIVL[r[5]] || '')}</span></td>` +
-    `<td class="n">${r[2].toFixed(0)}</td><td class="n">${r[3]}</td>` +
-    `<td class="muted" style="font-size:13px">${esc(r[4])}</td></tr>`).join('');
+  const rows = q ? pop.filter(r => {
+    const name = historical ? r.name : r.row[1];
+    const event = historical ? r.snap.event : r.row[4];
+    return name.toLowerCase().includes(q) ||
+      String(event).toLowerCase().includes(q);
+  }) : pop;
+  $('#ctb').innerHTML = rows.map(r => {
+    if (historical) {
+      const p = r.snap, rank = rankOf.get(r);
+      return `<tr><td class="rk" title="#${rank} of ${pop.length.toLocaleString()} clubs in ${year}">` +
+        `${rank}</td>` +
+        `<td><span class="nmlink" data-club="${esc(r.key)}">${esc(r.name)}</span></td>` +
+        `<td><span class="tag">${esc(EDIVL[p.div] || '')}</span></td>` +
+        `<td class="n">${p.elo.toFixed(0)}</td><td class="n">${p.n ?? '—'}</td>` +
+        `<td class="muted" style="font-size:13px">${esc(p.event)}</td></tr>`;
+    }
+    const p = r.row;
+    return `<tr><td class="rk" title="#${p[0]} of ${DIVLABEL[p[5]]} clubs">` +
+      `${rankOf.get(r)}</td>` +
+      `<td><span class="nmlink" data-club="${esc(p[6])}">${esc(p[1])}</span></td>` +
+      `<td><span class="tag">${esc(EDIVL[p[5]] || '')}</span></td>` +
+      `<td class="n">${p[2].toFixed(0)}</td><td class="n">${p[3]}</td>` +
+      `<td class="muted" style="font-size:13px">${esc(p[4])}</td></tr>`;
+  }).join('');
   const what = div === 'all' ? 'clubs' : `${DIVLABEL[div]} clubs`;
   $('#ccount').textContent = q
     ? `${rows.length} of ${pop.length} ${what} match`
     : `${pop.length.toLocaleString()} ${what}`;
-  $('#cnote').textContent = CNOTE[basis] + ' ' + COLLEGE_NOTE;
+  $('#cnote').textContent = historical
+    ? `Showing each club after its last ${year} event in ` +
+      `${div === 'all' ? 'all divisions' : EDIVL[div]}.`
+    : CNOTE[basis] + ' ' + COLLEGE_NOTE;
 }
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
-$('#cdiv').onchange = drawClubs;
 
 /* ---------- players ---------- */
 /* Leave-one-out verdict per rating, measured in analysis/identify.py for the
@@ -1035,7 +1087,7 @@ function historicalPlayer(p, year, div) {
 }
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
-  const year = $('#pyear').value;
+  const year = $('#ryear').value;
   const historical = year !== 'all';
   const only26Box = $('#only26');
   if (historical) {
@@ -1048,7 +1100,7 @@ function drawPlayers() {
   }
   const only26 = !historical && only26Box.checked;
   const ming = +$('#ming').value;
-  const gen = $('#pgen').value, div = $('#pdiv').value;
+  const gen = $('#pgen').value, div = $('#rdiv').value;
 
   if (historical && !HREADY) {
     $('#pcount').textContent = 'Loading player history…';
@@ -1093,14 +1145,14 @@ function drawPlayers() {
   const rankOf = new Map();
   pop.forEach((r, i) => rankOf.set(r, i + 1));
   const rows = q ? pop.filter(r => r.p[0].toLowerCase().includes(q) ||
-                                   String(historical ? r.snap.club : r.p[5])
+                                   String(historical ? clubLabel(r.snap.club) : r.p[5])
                                      .toLowerCase().includes(q))
                  : pop;
   const shown = historical ? rows : rows.slice(0, 300);
   $('#ptb').innerHTML = shown.map(r => {
     const p = r.p, snap = r.snap;
     const elo = snap ? snap.elo : p[1];
-    const club = snap ? snap.club : p[5];
+    const club = snap ? clubLabel(snap.club) : p[5];
     const yr = snap ? snap.season : p[6];
     const rank = rankOf.get(r);
     const rankTitle = snap
@@ -1135,8 +1187,6 @@ function drawPlayers() {
   $('#only26').addEventListener(e, drawPlayers);
   $('#ming').addEventListener(e, drawPlayers);
   $('#pgen').addEventListener(e, drawPlayers);
-  $('#pdiv').addEventListener(e, drawPlayers);
-  $('#pyear').addEventListener(e, drawPlayers);
 });
 $('#pnote').textContent =
   `Searching does not renumber anything — a player keeps the rank they hold in the ` +
@@ -1238,13 +1288,13 @@ function applyHistory(h) {
   SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
   SIX = new Map(SEASONS.map((s, i) => [s, i]));
   DEFYEAR = SEASONS.length - 1;
-  const pyear = $('#pyear');
-  if (pyear) {
-    const selected = pyear.value;
-    pyear.innerHTML = '<option value="all">All years</option>' +
+  const ryear = $('#ryear');
+  if (ryear) {
+    const selected = ryear.value;
+    ryear.innerHTML = '<option value="all">All years</option>' +
       [...SEASONS].reverse().map(y =>
         `<option value="${y}">${y}</option>`).join('');
-    pyear.value = SEASONS.includes(+selected) ? selected : 'all';
+    ryear.value = SEASONS.includes(+selected) ? selected : 'all';
   }
   for (const k in trendCache) delete trendCache[k];
   HREADY = true;
@@ -1451,7 +1501,11 @@ renderPinSidebar();
 // visitor's own open/closed choice is remembered instead.
 setPinSidebarOpen(pinsFromUrl !== null ? PINNED.size > 0
   : localStorage.getItem('usau-pinned-open') === '1');
-if (pinsFromUrl !== null && PINNED.size) showTab('players');
+if (pinsFromUrl !== null && PINNED.size) {
+  $('#rtype').value = 'player';
+  drawRankings();
+  showTab('rankings');
+}
 
 /* Stored delta-encoded: rebuild absolute event indices. `runs` (players only)
    is the run-length club affiliation: [startIdx, clubIdx] pairs positioned
@@ -1954,17 +2008,17 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                "Grand Masters Men's", "Grand Masters Women's", "Grand Masters Mixed",
                "Great Grand Masters Men's", "Great Grand Masters Women's",
                "Great Grand Masters Mixed"];
-/* Clubs, Players, Tournaments and Trends all offer the same divisions, so
-   they are filled from EDIVL rather than written out four times — adding an
-   eighth division should be one edit in analysis/rankings.py DIVCODE and one
-   here, not five HTML blocks that drift apart.
+/* Rankings, Tournaments and Trends all offer the same divisions, so they are
+   filled from EDIVL rather than written out three times — adding a division
+   should be one edit in analysis/rankings.py DIVCODE and one here, not HTML
+   blocks that drift apart.
 
    Filtered to divisions that have actually been PLAYED (D.divs, derived from
    the event table). A registered-but-never-contested bracket would otherwise
-   be offered by all four and answer with an empty table — or, on Trends, a
+   be offered by all three and answer with an empty table — or, on Trends, a
    blank chart and no error at all. */
 const DIVS_PRESENT = new Set(D.divs || EDIVL.map((_, i) => i));
-['#cdiv', '#pdiv', '#ediv', '#tdiv'].forEach(sel => {
+['#rdiv', '#ediv', '#tdiv'].forEach(sel => {
   $(sel).innerHTML = '<option value="all">All divisions</option>' +
     EDIVL.map((label, i) => [label, i])
          .filter(([, i]) => DIVS_PRESENT.has(i))
@@ -2415,6 +2469,11 @@ function routeHash() {
   try { key = decodeURIComponent(m[2]); } catch (err) { key = m[2]; }
   if (cur && cur.kind === m[1] && cur.key === key) return;
   if (!known(m[1], key)) { closeDetail(true); return; }
+  if (curEvent === null && (m[1] === 'p' || m[1] === 'c')) {
+    $('#rtype').value = m[1] === 'p' ? 'player' : 'club';
+    drawRankings();
+    showTab('rankings');
+  }
   openDetail(m[1], key);
 }
 window.addEventListener('hashchange', routeHash);
@@ -2745,7 +2804,7 @@ $('#enote').innerHTML +=
 /* ---------- boot ---------- */
 /* Everything above needs only the inline payload, so the page is fully usable
    the moment this runs. The trajectory corpus is then pulled in behind it. */
-drawClubs(); drawPlayers(); drawEvents();
+drawRankings(); drawEvents();
 document.documentElement.classList.remove('booting');
 routeHash();
 
@@ -2762,7 +2821,7 @@ function onHistoryReady() {
     openDetail(cur.kind, cur.key, {push: false});
   }
   if ($('#trends').classList.contains('on')) drawTrends();
-  if ($('#players').classList.contains('on')) drawPlayers();
+  if ($('#rankings').classList.contains('on')) drawRankings();
 }
 
 /* A <script> tag rather than fetch(): a classic script loads from a file://
