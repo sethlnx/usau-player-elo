@@ -744,7 +744,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 <section id="players">
   <div class="bar">
     <input type="search" id="q" placeholder="Search player or club…" autocomplete="off">
-    <label class="chk"><input type="checkbox" id="only26" checked> 2026 rosters only</label>
+    <label class="chk"><input type="checkbox" id="only26" checked> Current 2026 rosters only</label>
     <select id="ming">
       <option value="30">30+ games</option>
       <option value="60">60+ games</option>
@@ -752,6 +752,9 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <option value="200">200+ games</option>
     </select>
     <select id="pdiv"></select>
+    <select id="pyear">
+      <option value="all">All years</option>
+    </select>
     <select id="pgen">
       <option value="all">All genders</option>
       <option value="1">Male-matching</option>
@@ -1002,54 +1005,130 @@ const LOOTIP = {
      'of their own teams\u2019 games, so the rating carries real information.',
   '-1': 'Not measured — leave-one-out covers the top 1,000 by rating.'
 };
+const PYEARS = new Map();
+let ONLY26_BEFORE_YEAR = true;
+function loadAllPlayerHistory(done) {
+  const keys = Object.keys(D.playJs || {});
+  let left = keys.length, ok = true;
+  if (!left) { done(true); return; }
+  keys.forEach(key => faultTier('p', key, good => {
+    ok = ok && good;
+    if (--left === 0) done(ok);
+  }));
+}
+function playerYearMap(pid) {
+  pid = String(pid);
+  if (PYEARS.has(pid)) return PYEARS.get(pid);
+  const out = new Map();
+  for (const point of decode(PLAY[pid])) {
+    // Trajectories are chronological, so the last point wins for a
+    // year/division and is the player's Elo after that year's last event.
+    out.set(`${point.season}|${point.div}`, point);
+    out.set(String(point.season), point);
+  }
+  PYEARS.set(pid, out);
+  return out;
+}
+function historicalPlayer(p, year, div) {
+  return playerYearMap(p[8]).get(div === 'all'
+    ? String(year) : `${year}|${div}`) || null;
+}
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
-  const only26 = $('#only26').checked, ming = +$('#ming').value;
+  const year = $('#pyear').value;
+  const historical = year !== 'all';
+  const only26Box = $('#only26');
+  if (historical) {
+    if (!only26Box.disabled) ONLY26_BEFORE_YEAR = only26Box.checked;
+    only26Box.checked = false;
+    only26Box.disabled = true;
+  } else {
+    if (only26Box.disabled) only26Box.checked = ONLY26_BEFORE_YEAR;
+    only26Box.disabled = false;
+  }
+  const only26 = !historical && only26Box.checked;
+  const ming = +$('#ming').value;
   const gen = $('#pgen').value, div = $('#pdiv').value;
-  // Rank is a property of the player within the POPULATION the toggles define,
-  // so it is assigned before the search runs. Searching is a lookup, not a
-  // re-ranking: find a player and their number is the one they actually hold,
-  // and results come back sparse (#12, #47, #103) rather than renumbered 1..n.
+
+  if (historical && !HREADY) {
+    $('#pcount').textContent = 'Loading player history…';
+    $('#pnote').textContent = 'Loading season data…';
+    return;
+  }
+  if (historical &&
+      !Object.keys(D.playJs || {}).every(k => tierState('p', k) === 'ok')) {
+    $('#pcount').textContent = 'Loading player history…';
+    $('#pnote').textContent = 'Loading season data…';
+    loadAllPlayerHistory(ok => {
+      if (ok) drawPlayers();
+      else $('#pnote').textContent =
+        'The season ratings could not be loaded.';
+    });
+    return;
+  }
+
+  // Rank is a property of the player within the POPULATION the toggles
+  // define, so it is assigned before the search runs. Searching is a lookup,
+  // not a re-ranking: results come back sparse.
   let pop = D.players.filter(p => p[4] >= ming);
   if (only26) pop = pop.filter(p => p[6] === 2026);
-  // Gender-matching is evidence, not a partition: a player with none is in
-  // neither filtered view, so the two never sum to the unfiltered count.
   if (gen !== 'all') pop = pop.filter(p => p[9] === +gen);
-  // Division is a bitmask of where the player turned out, and WHICH mask
-  // depends on the season toggle. With "2026 rosters only" on, the question
-  // is who is in this division NOW, so it reads the last-season mask: Nathan
-  // Champoux has been on Hybrid since 2019 and stops being filed under club
-  // men's for two events in 2018. With the toggle off the list already spans
-  // every era, so the career mask is the honest match. The rating itself is
-  // one number across every division — narrowing selects WHO is listed, it
-  // does not recompute anyone against that division alone.
-  if (div !== 'all') {
-    const bit = 1 << +div;
-    pop = pop.filter(p => (only26 ? p[11] : p[10]) & bit);
+
+  if (historical) {
+    const y = +year;
+    pop = pop.map(p => ({p, snap: historicalPlayer(p, y, div)}))
+      .filter(r => r.snap);
+    pop.sort((a, b) => b.snap.elo - a.snap.elo ||
+      String(a.p[8]).localeCompare(String(b.p[8]), undefined, {numeric: true}));
+  } else {
+    // Division is a bitmask of where the player turned out, and WHICH mask
+    // depends on the current-roster toggle.
+    if (div !== 'all') {
+      const bit = 1 << +div;
+      pop = pop.filter(p => (only26 ? p[11] : p[10]) & bit);
+    }
+    pop = pop.map(p => ({p, snap: null}));
   }
+
   const rankOf = new Map();
-  pop.forEach((p, i) => rankOf.set(p, i + 1));
-  const rows = q ? pop.filter(p => p[0].toLowerCase().includes(q) ||
-                                   String(p[5]).toLowerCase().includes(q))
+  pop.forEach((r, i) => rankOf.set(r, i + 1));
+  const rows = q ? pop.filter(r => r.p[0].toLowerCase().includes(q) ||
+                                   String(historical ? r.snap.club : r.p[5])
+                                     .toLowerCase().includes(q))
                  : pop;
-  const shown = rows.slice(0, 300);
-  $('#ptb').innerHTML = shown.map(p =>
-    `<tr><td class="pin"><button class="pinbtn${PINNED.has(String(p[8])) ? ' on' : ''}" ` +
-    `data-pinid="${p[8]}" title="${PINNED.has(String(p[8])) ? 'Remove from pinned list' : 'Pin to sidebar list'}">` +
-    `&#128204;</button></td>` +
-    `<td class="rk" title="#${p[7]} of all ${D.totalRated.toLocaleString()} rated players">` +
-    `${rankOf.get(p)}</td>` +
-    `<td><span class="nmlink" data-pid="${p[8]}">${esc(p[0])}</span></td>` +
-    `<td class="n">${p[1].toFixed(0)}</td>` +
-    `<td class="band ${LOOCLASS[p[12]] || ''}" title="${esc(LOOTIP[p[12]] || '')}">` +
-    `[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]${p[12] === 0 ? ' <span class="unsup">?</span>' : ''}</td>` +
-    `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(p[5])}</td>` +
-    `<td class="n">${p[6]}</td></tr>`).join('');
+  const shown = historical ? rows : rows.slice(0, 300);
+  $('#ptb').innerHTML = shown.map(r => {
+    const p = r.p, snap = r.snap;
+    const elo = snap ? snap.elo : p[1];
+    const club = snap ? snap.club : p[5];
+    const yr = snap ? snap.season : p[6];
+    const rank = rankOf.get(r);
+    const rankTitle = snap
+      ? `#${rank} of ${pop.length.toLocaleString()} players in ${year}`
+      : `#${p[7]} of all ${D.totalRated.toLocaleString()} rated players`;
+    return `<tr><td class="pin"><button class="pinbtn${PINNED.has(String(p[8])) ? ' on' : ''}" ` +
+      `data-pinid="${p[8]}" title="${PINNED.has(String(p[8])) ? 'Remove from pinned list' : 'Pin to sidebar list'}">` +
+      `&#128204;</button></td>` +
+      `<td class="rk" title="${rankTitle}">${rank}</td>` +
+      `<td><span class="nmlink" data-pid="${p[8]}">${esc(p[0])}</span></td>` +
+      `<td class="n">${elo.toFixed(0)}</td>` +
+      (snap ? `<td class="band muted" title="Historical Elo; current uncertainty band not shown">—</td>` :
+        `<td class="band ${LOOCLASS[p[12]] || ''}" title="${esc(LOOTIP[p[12]] || '')}">` +
+        `[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]${p[12] === 0 ? ' <span class="unsup">?</span>' : ''}</td>`) +
+      `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(club)}</td>` +
+      `<td class="n">${yr}</td></tr>`;
+  }).join('');
   $('#pcount').textContent = q
     ? `${rows.length.toLocaleString()} of ${pop.length.toLocaleString()} match` +
-      (rows.length > 300 ? ' — showing first 300' : '')
+      (!historical && rows.length > 300 ? ' — showing first 300' : '')
     : `${pop.length.toLocaleString()} players` +
-      (pop.length > 300 ? ' — showing first 300' : '');
+      (!historical && pop.length > 300 ? ' — showing first 300' : '');
+  if (historical) {
+    const division = div === 'all' ? 'all divisions' : EDIVL[div];
+    $('#pnote').textContent =
+      `Showing each player's Elo after their last ${year} event in ${division}. ` +
+      `Historical uncertainty bands are not available.`;
+  }
 }
 ['input','change'].forEach(e => {
   $('#q').addEventListener(e, drawPlayers);
@@ -1057,6 +1136,7 @@ function drawPlayers() {
   $('#ming').addEventListener(e, drawPlayers);
   $('#pgen').addEventListener(e, drawPlayers);
   $('#pdiv').addEventListener(e, drawPlayers);
+  $('#pyear').addEventListener(e, drawPlayers);
 });
 $('#pnote').textContent =
   `Searching does not renumber anything — a player keeps the rank they hold in the ` +
@@ -1158,6 +1238,14 @@ function applyHistory(h) {
   SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
   SIX = new Map(SEASONS.map((s, i) => [s, i]));
   DEFYEAR = SEASONS.length - 1;
+  const pyear = $('#pyear');
+  if (pyear) {
+    const selected = pyear.value;
+    pyear.innerHTML = '<option value="all">All years</option>' +
+      [...SEASONS].reverse().map(y =>
+        `<option value="${y}">${y}</option>`).join('');
+    pyear.value = SEASONS.includes(+selected) ? selected : 'all';
+  }
   for (const k in trendCache) delete trendCache[k];
   HREADY = true;
 }
@@ -2674,6 +2762,7 @@ function onHistoryReady() {
     openDetail(cur.kind, cur.key, {push: false});
   }
   if ($('#trends').classList.contains('on')) drawTrends();
+  if ($('#players').classList.contains('on')) drawPlayers();
 }
 
 /* A <script> tag rather than fetch(): a classic script loads from a file://
