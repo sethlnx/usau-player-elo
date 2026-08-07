@@ -509,11 +509,11 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="str">Hardest field first</option>
         <option value="region">Region, then newest</option>
       </select>
-      <span class="seg" id="estate" role="group" aria-label="Filter by completion">
-        <button data-state="all" class="on" aria-pressed="true">All</button
-        ><button data-state="done" aria-pressed="false">Completed</button
-        ><button data-state="up" aria-pressed="false">Upcoming</button>
-      </span>
+      <select id="estate" aria-label="Filter by completion">
+        <option value="all">All events</option>
+        <option value="done">Completed</option>
+        <option value="up">Upcoming</option>
+      </select>
       <span class="count" id="ecount"></span>
     </div>
     <table class="evtbl"><thead><tr>
@@ -1886,7 +1886,7 @@ function drawEvents() {
   const q = $('#eq').value.trim().toLowerCase(), div = $('#ediv').value;
   const yr = $('#eyear').value, tier = $('#etier').value;
   const str = $('#estr').value, sort = $('#esort').value;
-  const state = $('#estate button.on').dataset.state;
+  const state = $('#estate').value;
   let rows = EVS;
   if (div !== 'all') rows = rows.filter(e => e[3] === +div);
   if (yr !== 'all') rows = rows.filter(e => e[2] === +yr);
@@ -1942,19 +1942,9 @@ function drawEvents() {
     (total === 1 ? '' : 's') + (total > shown.length
       ? ` \u00b7 showing ${shown.length}` : '');
 }
-['#eq', '#ediv', '#eyear', '#etier', '#estr', '#esort'].forEach(s => {
+['#eq', '#ediv', '#eyear', '#etier', '#estr', '#esort', '#estate'].forEach(s => {
   const el = $(s);
   el.oninput = drawEvents; el.onchange = drawEvents;
-});
-$('#estate').addEventListener('click', e => {
-  const button = e.target.closest('[data-state]');
-  if (!button) return;
-  $('#estate').querySelectorAll('[data-state]').forEach(el => {
-    const active = el === button;
-    el.classList.toggle('on', active);
-    el.setAttribute('aria-pressed', active ? 'true' : 'false');
-  });
-  drawEvents();
 });
 $('#etb').addEventListener('click', e => {
   const tr = e.target.closest('[data-ev]');
