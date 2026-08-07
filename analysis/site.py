@@ -1070,6 +1070,9 @@ function loadAllPlayerHistory(done) {
 }
 function playerYearMap(pid) {
   pid = String(pid);
+  // A roster can ask for a season before this player's lazy bucket lands.
+  // Do not memoise that temporary absence as an empty career.
+  if (!Object.prototype.hasOwnProperty.call(PLAY, pid)) return new Map();
   if (PYEARS.has(pid)) return PYEARS.get(pid);
   const out = new Map();
   for (const point of decode(PLAY[pid])) {
@@ -1732,13 +1735,57 @@ function rosterSeasons(ckey) {
     season: e[0],
     eis: e[1].sort((a, b) => (HEV[b][0] || '').localeCompare(HEV[a][0] || ''))}));
 }
+function rosterDivision(grp) {
+  const selected = $('#rdiv').value;
+  const actual = new Set(grp.eis.map(ei => HEV[ei] && HEV[ei][3])
+    .filter(d => d !== undefined));
+  if (selected !== 'all' && (!actual.size || actual.has(+selected))) {
+    return selected;
+  }
+  return actual.size === 1 ? String([...actual][0]) : 'all';
+}
+
+function loadRosterRatings(ckey, season, ids) {
+  const keys = new Set();
+  for (const i of ids) {
+    const pid = String(PPID[i]);
+    if (!PBY.has(pid) || Object.prototype.hasOwnProperty.call(PLAY, pid)) continue;
+    const key = +pid % (D.buckets || 1);
+    const st = tierState('p', key);
+    if (st !== 'ok' && st !== 'fail') keys.add(key);
+  }
+  if (!keys.size) return;
+  let left = keys.size;
+  const settled = () => {
+    if (--left) return;
+    const activeClub = cur && cur.kind === 'c' ? (TK[cur.key] || cur.key) : null;
+    const sec = $('#dbody .rsec'), tab = sec && sec.querySelector('.rtab.on');
+    if (activeClub !== ckey || !sec || !tab || +tab.dataset.season !== season) return;
+    const pane = sec.querySelector('#rpane');
+    pane.innerHTML = rosterPane(ckey, season);
+    pane.dataset.season = season;
+  };
+  keys.forEach(key => faultTier('p', key, settled));
+}
+
+function rosterPlayerRating(pid, season, div) {
+  pid = String(pid);
+  if (!PBY.has(pid)) return {elo: null, loading: false};
+  if (!Object.prototype.hasOwnProperty.call(PLAY, pid)) {
+    const st = tierState('p', +pid % (D.buckets || 1));
+    return {elo: null, loading: st !== 'ok' && st !== 'fail'};
+  }
+  const point = playerYearMap(pid).get(
+    div === 'all' ? String(season) : `${season}|${div}`);
+  return {elo: point ? point.elo : null, loading: false};
+}
+
 /* ONE roster per season. For past seasons that is the union of every played
    event's listed squad. For the CURRENT season it is the best full-strength
    roster reported to USAU — the same squad team_elo_best.csv rates the club
    off — which may be registered for an event not yet played; the Ev column
-   then says how many of the season's played events each man was actually
-   listed for, 0 meaning registered only. Clubs with no current registration
-   (college teams; best rosters are club-division only) fall back to the union. */
+   then says how many of the season's played events each person was actually
+   listed for, 0 meaning registered only. */
 function rosterPane(ckey, season) {
   const grp = rosterSeasons(ckey).find(g => g.season === season) || {eis: []};
   const br = season === BSEASON ? BR[ckey] : null;
@@ -1747,24 +1794,29 @@ function rosterPane(ckey, season) {
     i => seen.set(i, (seen.get(i) || 0) + 1)));
   const ids = br ? br[2] : [...seen.keys()];
   if (!ids.length) return '';
+  const div = rosterDivision(grp);
+  loadRosterRatings(ckey, season, ids);
   const rows = ids.map(i => {
-    const pid = PPID[i], r = PBY.get(String(pid));
+    const pid = String(PPID[i]);
+    const rating = rosterPlayerRating(pid, season, div);
     return {pid, name: PEOPLE[i], ev: seen.get(i) || 0,
-            elo: r ? r[1] : null, rank: r ? r[7] : null};
+            elo: rating.elo, loading: rating.loading, linked: PBY.has(pid)};
   });
-  // Strongest first; anyone below the rating floor has no number to sort on
-  // and goes last alphabetically rather than being treated as a zero.
+  // Strongest for THIS season first. Missing trajectories go last
+  // alphabetically rather than inheriting a current rating or becoming zero.
   rows.sort((a, b) => {
     if ((a.elo === null) !== (b.elo === null)) return a.elo === null ? 1 : -1;
     if (a.elo !== null && a.elo !== b.elo) return b.elo - a.elo;
-    return a.name.localeCompare(b.name);
+    return a.name.localeCompare(b.name) || a.pid.localeCompare(b.pid);
   });
-  const body = rows.map(r =>
-    `<tr><td class="rk">${r.rank === null ? '—' : r.rank}</td><td>` +
-    (r.rank !== null
+  const body = rows.map((r, i) =>
+    `<tr><td class="rk">${i + 1}</td><td>` +
+    (r.linked
       ? `<span class="nmlink" data-pid="${esc(r.pid)}">${esc(r.name)}</span>`
       : `<span class="muted">${esc(r.name)}</span>`) +
-    `</td><td class="n">${r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
+    `</td><td class="n" title="Elo after this player's last ${season} ` +
+    `${div === 'all' ? 'event' : EDIVL[div] + ' event'}">` +
+    `${r.loading ? '…' : r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
     `<td class="n">${r.ev}</td></tr>`).join('');
   const sum = br
     ? `${rows.length} players — best full-strength roster reported to USAU, ` +
@@ -1775,7 +1827,9 @@ function rosterPane(ckey, season) {
     : `${rows.length} players · ${grp.eis.length} event` +
       `${grp.eis.length === 1 ? '' : 's'}: ` +
       grp.eis.map(ei => esc(HEV[ei][1])).join(', ');
-  return `<p class="rsum">${sum}</p>` +
+  const scope = div === 'all' ? season : `${season} ${EDIVL[div]}`;
+  return `<p class="rsum">${sum} Elo is after each player's last ` +
+    `${esc(scope)} event.</p>` +
     `<table class="hist"><thead><tr><th class="n">#</th><th>Player</th>` +
     `<th class="n">Elo</th><th class="n" title="Played events listed for, of ` +
     `${grp.eis.length} this season">Ev</th></tr></thead>` +
@@ -1788,12 +1842,15 @@ function rosterSection(ckey) {
   if (BR[ckey] && !groups.some(g => g.season === BSEASON))
     groups.unshift({season: BSEASON, eis: []});
   if (!groups.length) return '';
-  const cur = groups[0].season;
-  return `<details class="rsec" data-ck="${esc(ckey)}">` +
+  const requested = $('#ryear').value;
+  const matched = requested !== 'all' && groups.some(g => g.season === +requested);
+  const selected = matched ? +requested : groups[0].season;
+  return `<details class="rsec" data-ck="${esc(ckey)}"${matched ? ' open' : ''}>` +
     `<summary>Rosters by season</summary><div class="rtabs">` + groups.map(g =>
-      `<button class="rtab${g.season === cur ? ' on' : ''}" ` +
+      `<button class="rtab${g.season === selected ? ' on' : ''}" ` +
       `data-season="${g.season}">${g.season}</button>`).join('') +
-    `</div><div id="rpane">${rosterPane(ckey, cur)}</div></details>`;
+    `</div><div id="rpane" data-season="${selected}">` +
+    (matched ? rosterPane(ckey, selected) : '') + `</div></details>`;
 }
 
 function toggleRoster(el) {
@@ -1973,8 +2030,20 @@ $('#dbody').addEventListener('click', e => {
   if (tb) {
     const sec = tb.closest('.rsec');
     sec.querySelectorAll('.rtab').forEach(x => x.classList.toggle('on', x === tb));
-    sec.querySelector('#rpane').innerHTML =
-      rosterPane(sec.dataset.ck, +tb.dataset.season);
+    const pane = sec.querySelector('#rpane');
+    pane.dataset.season = tb.dataset.season;
+    pane.innerHTML = rosterPane(sec.dataset.ck, +tb.dataset.season);
+    return;
+  }
+  const summary = e.target.closest('.rsec > summary');
+  if (summary) {
+    const sec = summary.closest('.rsec');
+    setTimeout(() => {
+      const pane = sec.querySelector('#rpane');
+      if (sec.open && !pane.innerHTML) {
+        pane.innerHTML = rosterPane(sec.dataset.ck, +pane.dataset.season);
+      }
+    }, 0);
     return;
   }
   const g = e.target.closest('[data-games]');
