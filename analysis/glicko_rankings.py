@@ -33,18 +33,30 @@ def replay_glicko(
     cfg: Glicko2Config,
     stat_events=None,
     on_game=None,
+    *,
+    period: str = "tournament",
 ):
-    """Replay natural event rating periods and return backtest records."""
+    """Replay game, tournament-day, or whole-tournament rating periods."""
     model = PlayerGlicko2(cfg)
     stats = stat_events or []
     stat_index = 0
     records = []
 
-    by_event = OrderedDict()
+    if period not in {"game", "day", "tournament"}:
+        raise ValueError(f"unknown Glicko-2 rating period: {period}")
+    grouped = OrderedDict()
     for game in games:
-        by_event.setdefault(game["event_id"], []).append(game)
+        event_id = game["event_id"]
+        game_date = game.get("date") or game["sort"][0]
+        if period == "game":
+            key = (event_id, game["game_key"])
+        elif period == "day":
+            key = (event_id, game_date)
+        else:
+            key = (event_id,)
+        grouped.setdefault(key, []).append(game)
     event_groups = sorted(
-        by_event.values(), key=lambda group: min(game["sort"] for game in group)
+        grouped.values(), key=lambda group: min(game["sort"] for game in group)
     )
 
     for event_games in event_groups:
@@ -147,6 +159,7 @@ def scorecard(records) -> dict:
     divisions = sorted({division for _season, division, _date, _e, _o in records})
     return {
         "all": metrics(records),
+        "validation_2022_2023": metrics(records, seasons=(2022, 2023)),
         "held_out_2024_2025": metrics(records, seasons=(2024, 2025)),
         "current_2026": metrics(records, seasons=(2026,)),
         "held_out_by_division": {

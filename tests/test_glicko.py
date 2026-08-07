@@ -46,6 +46,36 @@ class Glicko2EngineTests(unittest.TestCase):
         self.assertGreater(model.players[1].rating, 1500.0)
         self.assertLess(model.players[3].rating, 1500.0)
 
+    def test_period_boundary_controls_when_results_become_predictive(self):
+        games = [
+            {"event_id": 1, "game_key": key, "season": 2026,
+             "division": "club-men", "date": day,
+             "sort": (day, time), "home_id": "h", "away_id": "a",
+             "home_score": 15, "away_score": 10, "stage": "Pool"}
+            for key, day, time in (
+                ("a", "2026-05-01", "09:00"),
+                ("b", "2026-05-01", "12:00"),
+                ("c", "2026-05-02", "09:00"),
+            )
+        ]
+        probabilities = {}
+        for period in ("game", "day", "tournament"):
+            records, _model = replay_glicko(
+                "player", games, {"h": [1, 2], "a": [3, 4]},
+                {"h": "Home", "a": "Away"},
+                Glicko2Config(involvement_credit=False), period=period,
+            )
+            probabilities[period] = [record[3] for record in records]
+
+        self.assertGreater(probabilities["game"][1], probabilities["game"][0])
+        self.assertEqual(probabilities["day"][0], probabilities["day"][1])
+        self.assertGreater(probabilities["day"][2], probabilities["day"][1])
+        self.assertEqual(
+            probabilities["tournament"],
+            [probabilities["tournament"][0]] * 3,
+        )
+
+
     def test_inactivity_expands_rating_deviation_not_rating(self):
         model = PlayerGlicko2(Glicko2Config())
         model.players[1] = PlayerState(
