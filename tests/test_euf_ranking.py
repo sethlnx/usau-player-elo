@@ -168,11 +168,12 @@ class EUFRankingIngestionTests(unittest.TestCase):
           );
           INSERT INTO players VALUES
             (1,'Alice Example',0),(2,'Bob Example',0),(3,'Carol Example',0),
-            (4,'Ambiguous Example',1);
+            (4,'Ambiguous Example',1),(5,'Daan De Marrée',0),
+            (6,'Tobe Decraene',0);
           INSERT INTO events VALUES (10,2025),(11,2024);
           INSERT INTO event_teams VALUES ('now',10),('old',11);
           INSERT INTO roster_players VALUES
-            ('now',1),('now',2),('old',3),('now',4);
+            ('now',1),('now',2),('old',3),('now',4),('now',5),('now',6);
         """)
         bridges, audit = _usa_bridge_candidates(
             db,
@@ -181,19 +182,36 @@ class EUFRankingIngestionTests(unittest.TestCase):
                 "bob example": {"Bob Example"},
                 "carol example": {"Carol Example"},
                 "ambiguous example": {"Ambiguous Example"},
+                "daan de marrée": {"Daan De Marrée"},
+                "daan demarree": {"Daan DeMarree"},
+                "tobe decraene": {"Tobe Decraene"},
             },
             {
                 "alice example": {2025},
                 "bob example": {2025},
                 "carol example": {2025},
                 "ambiguous example": {2025},
+                "daan de marrée": {2024, 2025},
+                "daan demarree": {2025},
+                "tobe decraene": {2025},
             },
-            {"bob example"},
+            {"bobexample"},
         )
         db.close()
-        self.assertEqual({"alice example": 1}, bridges)
-        self.assertEqual("alice example", audit[0]["name_key"])
-        self.assertEqual([2025], audit[0]["shared_seasons"])
+        self.assertEqual({
+            "alice example": 1,
+            "daan de marrée": 5,
+            "daan demarree": 5,
+            "tobe decraene": 6,
+        }, bridges)
+        by_name = {row["usau_name"]: row for row in audit}
+        self.assertEqual("exact", by_name["Alice Example"]["match_method"])
+        self.assertEqual("compact", by_name["Daan De Marrée"]["match_method"])
+        self.assertEqual(
+            "daan de marrée;daan demarree",
+            by_name["Daan De Marrée"]["eu_name_keys"],
+        )
+        self.assertEqual([2025], by_name["Tobe Decraene"]["shared_seasons"])
 
 
 if __name__ == "__main__":

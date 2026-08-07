@@ -984,12 +984,14 @@ candidates only; it never merges team identities.
 The rating replay uses 908 scored 2024–2025 EUCS games whose teams all map to a
 captured ranking roster. European-only roster names receive deterministic
 negative IDs within JavaScript's safe-integer range. A name reuses a positive
-USAU player ID only when its exact case/spacing-normalized key is unique and
-non-ambiguous in both corpora, appears in both during the same calendar season,
-and does not occur on two European teams in the same season/division. The
-current snapshot produces 190 such bridges; every one is written to
-`data/euf_bridge_audit.csv`. This is a conservative name bridge, not a stable-ID
-match: EUCS Ranking publishes no player IDs.
+USAU player ID only when its accent-, punctuation-, and spacing-insensitive key
+maps to one non-ambiguous USAU identity, appears in both corpora during the same
+calendar season, and does not occur on two European teams in the same
+season/division. This also joins source variants such as `Daan De Marrée` and
+`Daan DeMarree`. The current snapshot produces 208 bridged people from 218 EU
+name keys: 184 exact and 24 compact matches. Every bridge and match method is
+written to `data/euf_bridge_audit.csv`. These remain conservative name matches,
+not stable-ID matches: EUCS Ranking publishes no player IDs.
 
 The three European division bases and scales are explicit, untuned priors
 copied from their analogous USAU club divisions. Same-player bridges propagate
@@ -1061,9 +1063,8 @@ root and opens SQLite with `mode=ro` plus `PRAGMA query_only=ON`.
 The service never calls an upstream endpoint from a resolver.
 
 The overlap command reports candidate counts under both exact case/spacing and
-diacritic-folded keys. The replay accepts only the 190 exact, unique,
-non-ambiguous, same-season matches recorded in `euf_bridge_audit.csv`;
-diacritic-only candidates are never auto-joined. Because EUCS Ranking
-publishes no stable player ID, the comparable stable-ID match count remains
-zero by construction. The audit file is the review boundary for every
-cross-source identity used by Elo.
+diacritic-folded keys. The replay uses the stricter operational contract above
+and records its 208 accepted people, source-name variants, and match method in
+`euf_bridge_audit.csv`. Because EUCS Ranking publishes no stable player ID, the
+comparable stable-ID match count remains zero by construction. The audit file
+is the review boundary for every cross-source identity used by Elo.

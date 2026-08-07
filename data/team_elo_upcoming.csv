@@ -1,27 +1,27 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
-1,Red Tide,red tide,club-men,1979.7,25,2026,Vacationland 2026,2026-08-08
-2,Sprout,sprout,club-men,1918.0,20,2026,Vacationland 2026,2026-08-08
+1,Red Tide,red tide,club-men,1979.5,25,2026,Vacationland 2026,2026-08-08
+2,Sprout,sprout,club-men,1917.9,20,2026,Vacationland 2026,2026-08-08
 3,Pittsburgh Temper,pittsburgh temper,club-men,1867.5,24,2026,Vacationland 2026,2026-08-08
-4,Phoenix,phoenix,club-men,1846.1,22,2026,Vacationland 2026,2026-08-08
-5,Colt,colt,club-men,1832.4,25,2026,Vacationland 2026,2026-08-08
+4,Phoenix,phoenix,club-men,1846.0,22,2026,Vacationland 2026,2026-08-08
+5,Colt,colt,club-men,1832.3,25,2026,Vacationland 2026,2026-08-08
 6,Iditarod,iditarod,club-men,1774.9,21,2026,Vacationland 2026,2026-08-08
 7,WOMP,womp,club-men,1746.0,15,2026,Kentucky Fried Classic 2026,2026-08-08
-8,Lantern,lantern,club-men,1745.2,26,2026,Vacationland 2026,2026-08-08
-9,Red Circus,red circus,club-men,1738.1,21,2026,Vacationland 2026,2026-08-08
-10,DAPPER,dapper,club-men,1714.6,22,2026,Vacationland 2026,2026-08-08
-11,Shade,shade,club-men,1705.2,26,2026,Vacationland 2026,2026-08-08
-12,Ascension,ascension,club-men,1703.1,18,2026,Vacationland 2026,2026-08-08
+8,Lantern,lantern,club-men,1745.1,26,2026,Vacationland 2026,2026-08-08
+9,Red Circus,red circus,club-men,1738.0,21,2026,Vacationland 2026,2026-08-08
+10,DAPPER,dapper,club-men,1714.5,22,2026,Vacationland 2026,2026-08-08
+11,Shade,shade,club-men,1705.1,26,2026,Vacationland 2026,2026-08-08
+12,Ascension,ascension,club-men,1702.9,18,2026,Vacationland 2026,2026-08-08
 13,Apollo,apollo,club-men,1701.4,25,2026,Kentucky Fried Classic 2026,2026-08-08
 14,Pittsburgh Stealers,pittsburgh stealers,club-men,1695.8,18,2026,Kentucky Fried Classic 2026,2026-08-08
-15,BAG,bag,club-men,1680.1,26,2026,Vacationland 2026,2026-08-08
-16,Big Wrench,big wrench,club-men,1660.0,24,2026,Vacationland 2026,2026-08-08
+15,BAG,bag,club-men,1679.8,26,2026,Vacationland 2026,2026-08-08
+16,Big Wrench,big wrench,club-men,1659.9,24,2026,Vacationland 2026,2026-08-08
 17,Endgame,endgame,club-men,1659.0,21,2026,Kentucky Fried Classic 2026,2026-08-08
 18,Black Lung,black lung,club-men,1655.7,19,2026,Kentucky Fried Classic 2026,2026-08-08
 19,Odyssey,odyssey,club-men,1618.3,24,2026,Vacationland 2026,2026-08-08
-20,Skeleton Squad,skeleton squad,club-men,1606.4,22,2026,Vacationland 2026,2026-08-08
-21,Resurgam Ultimate,resurgam ultimate,club-men,1590.7,23,2026,Vacationland 2026,2026-08-08
+20,Skeleton Squad,skeleton squad,club-men,1606.2,22,2026,Vacationland 2026,2026-08-08
+21,Resurgam Ultimate,resurgam ultimate,club-men,1590.6,23,2026,Vacationland 2026,2026-08-08
 22,Connecticut 9 to 5,connecticut 9 to 5,club-men,1475.2,20,2026,Vacationland 2026,2026-08-08
-23,Wave,wave,club-men,1468.2,25,2026,Vacationland 2026,2026-08-08
+23,Wave,wave,club-men,1468.3,25,2026,Vacationland 2026,2026-08-08
 24,On Ramp,on ramp,club-men,1420.9,22,2026,Kentucky Fried Classic 2026,2026-08-08
 25,East Bay Earthworms,east bay earthworms,club-men,1385.5,5,2026,Kentucky Fried Classic 2026,2026-08-08
 26,Maumee Boys,maumee boys,club-men,1347.3,18,2026,Kentucky Fried Classic 2026,2026-08-08
@@ -35,10 +35,10 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 7,Lights Out,lights out (mixed),club-mixed,1770.9,25,2026,Portland Kleinman 2026,2026-08-08
 8,Porch Bears,porch bears (mixed),club-mixed,1751.7,17,2026,Portland Kleinman 2026,2026-08-08
 9,HVAC,hvac (mixed),club-mixed,1729.0,17,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
-10,Temu Fitness Number One,temu fitness number one (mixed),club-mixed,1686.7,22,2026,Vacationland 2026,2026-08-08
+10,Temu Fitness Number One,temu fitness number one (mixed),club-mixed,1686.6,22,2026,Vacationland 2026,2026-08-08
 11,Viking Blood,viking blood (mixed),club-mixed,1675.6,14,2026,Portland Kleinman 2026,2026-08-08
 12,Shipwreck,shipwreck (mixed),club-mixed,1673.7,26,2026,Flower Power 2026,2026-08-08
-13,Hive,hive (mixed),club-mixed,1667.7,26,2026,Portland Kleinman 2026,2026-08-08
+13,Hive,hive (mixed),club-mixed,1667.8,26,2026,Portland Kleinman 2026,2026-08-08
 14,Heat Wave,heat wave (mixed),club-mixed,1666.4,23,2026,Portland Kleinman 2026,2026-08-08
 15,Indiana Pterodactyl Attack (IPA),indiana pterodactyl attack (ipa) (mixed),club-mixed,1659.6,22,2026,Kentucky Fried Classic 2026,2026-08-08
 16,Seattle Soft Serve,seattle soft serve (mixed),club-mixed,1651.8,24,2026,Portland Kleinman 2026,2026-08-08
@@ -52,7 +52,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 24,Drip,drip (mixed),club-mixed,1594.4,26,2026,Portland Kleinman 2026,2026-08-08
 25,Squid Inc.,squid inc. (mixed),club-mixed,1590.7,21,2026,Portland Kleinman 2026,2026-08-08
 26,solAR,solar (mixed),club-mixed,1583.0,25,2026,Kentucky Fried Classic 2026,2026-08-08
-27,Damfast and Friends,damfast and friends (mixed),club-mixed,1578.4,14,2026,Vacationland 2026,2026-08-08
+27,Damfast and Friends,damfast and friends (mixed),club-mixed,1578.3,14,2026,Vacationland 2026,2026-08-08
 28,T Party,t party (mixed),club-mixed,1574.7,20,2026,Vacationland 2026,2026-08-08
 29,Karma,karma (mixed),club-mixed,1571.7,24,2026,Flower Power 2026,2026-08-08
 30,Choco Ghost House,choco ghost house (mixed),club-mixed,1569.1,20,2026,Portland Kleinman 2026,2026-08-08
@@ -76,7 +76,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 48,Hartford Current,hartford current (mixed),club-mixed,1266.4,19,2026,Vacationland 2026,2026-08-08
 49,SkyLab,skylab (mixed),club-mixed,1245.2,20,2026,Portland Kleinman 2026,2026-08-08
 1,Dish,dish (women's),club-women,1532.3,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
-2,Frosted,frosted (women's),club-women,1478.4,9,2026,Cooler Classic 37 (Men & Women),2026-08-08
+2,Frosted,frosted (women's),club-women,1478.5,9,2026,Cooler Classic 37 (Men & Women),2026-08-08
 3,Compact Disc,compact disc (women's),club-women,1427.3,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
 4,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1368.9,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
 5,Lakeshore Drive,lakeshore drive (women's),club-women,1194.5,16,2026,Cooler Classic 37 (Men & Women),2026-08-08

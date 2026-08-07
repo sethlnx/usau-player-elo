@@ -1110,12 +1110,13 @@ def main(cfg: EloConfig | None = None):
     bridge_out = DB_PATH.parent / "euf_bridge_audit.csv"
     with open(bridge_out, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["name_key", "eu_name", "usau_player_id", "usau_name",
-                    "shared_seasons"])
+        w.writerow(["name_key", "eu_name", "eu_name_keys", "match_method",
+                    "usau_player_id", "usau_name", "shared_seasons"])
         for row in european.bridge_rows:
             w.writerow([
-                row["name_key"], row["eu_name"], row["usau_player_id"],
-                row["usau_name"], ";".join(map(str, row["shared_seasons"])),
+                row["name_key"], row["eu_name"], row["eu_name_keys"],
+                row["match_method"], row["usau_player_id"], row["usau_name"],
+                ";".join(map(str, row["shared_seasons"])),
             ])
     print(f"wrote {bridge_out} ({len(european.bridge_rows)} reviewable name bridges)")
 

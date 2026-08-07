@@ -21,6 +21,7 @@ Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.
 """
 
 import collections
+import hashlib
 import csv
 import json
 import re
@@ -98,9 +99,23 @@ def load_csv(name):
         return list(csv.DictReader(f))
 
 
-def bucket_urls(directory, buckets):
-    """Bucket key -> url, relative to the page."""
-    return {str(k): f"{directory.name}/{k}.js" for k in sorted(buckets)}
+def bucket_urls(directory, buckets, version):
+    """Bucket key -> cache-busted URL, relative to the page."""
+    return {
+        str(k): f"{directory.name}/{k}.js?v={version}" for k in sorted(buckets)
+    }
+
+def content_version(paths):
+    """Fingerprint every source that can change a sidecar's index contract."""
+    digest = hashlib.sha256()
+    for path in paths:
+        if not path.exists():
+            continue
+        digest.update(path.name.encode())
+        with path.open("rb") as source:
+            while chunk := source.read(1024 * 1024):
+                digest.update(chunk)
+    return digest.hexdigest()[:12]
 
 
 def write_buckets(directory, global_name, buckets):
@@ -143,6 +158,7 @@ def build():
     hist_path = DB_PATH.parent / "history.json"
     history = (json.loads(hist_path.read_text()) if hist_path.exists()
                else {"events": [], "players": {}, "teams": {}})
+    asset_version = content_version((DB_PATH, hist_path))
 
     # Gender-matching group, decided in identity.resolve and carried on
     # player_elo.csv: 1 = male-matching, 2 = female-matching, 0 = no evidence.
@@ -271,14 +287,15 @@ def build():
         # tier constants above. `history` is the inline escape hatch: set it
         # and the page skips the sidecar entirely.
         "history": None,
-        "historyJs": HIST_OUT.name,
+        "historyJs": f"{HIST_OUT.name}?v={asset_version}",
         "tourneys": tourneys,
-        # bucket key -> url, emitted rather than built in JS so a renamed
-        # directory is one constant here and nothing in the page changes.
-        "tourneyJs": bucket_urls(TDET_DIR, tbuckets),
-        "playJs": bucket_urls(PLAY_DIR, hplay),
-        "rostJs": bucket_urls(ROST_DIR, hrost),
-        "gameJs": bucket_urls(GAME_DIR, hgame),
+        # Every sidecar URL carries one build fingerprint. Their payloads share
+        # integer indices, so mixing a cached old core with new player buckets
+        # produces plausible-looking but false events and branching curves.
+        "tourneyJs": bucket_urls(TDET_DIR, tbuckets, asset_version),
+        "playJs": bucket_urls(PLAY_DIR, hplay, asset_version),
+        "rostJs": bucket_urls(ROST_DIR, hrost, asset_version),
+        "gameJs": bucket_urls(GAME_DIR, hgame, asset_version),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

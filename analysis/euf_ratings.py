@@ -2,10 +2,10 @@
 
 EUCS Ranking exposes names but no stable player IDs. European-only IDs are
 therefore deterministic, source-scoped negative integers. A European roster
-name reuses a USAU player ID only when the exact case/spacing key maps to one
-non-ambiguous USAU identity and both sources show that identity in the same
-calendar season. Those bridges are reviewable name matches, not provider-ID
-matches.
+name reuses a USAU player ID only when its accent/punctuation/spacing-insensitive
+key maps to one non-ambiguous identity, is not shared by two European teams in
+the same season/division, and both sources show it in the same calendar season.
+Those bridges are reviewable name matches, not provider-ID matches.
 """
 
 from __future__ import annotations
@@ -30,6 +30,14 @@ def team_name_key(name: str | None) -> str:
     value = "".join(char for char in value if not unicodedata.combining(char))
     value = re.sub(r"[^a-z0-9]+", " ", value.casefold())
     return re.sub(r"\s+", " ", value).strip()
+
+def compact_name_key(name: str | None) -> str:
+    """Fold harmless display variation without guessing at different names."""
+    value = unicodedata.normalize("NFKD", name or "").casefold()
+    return "".join(
+        char for char in value
+        if char.isalnum() and not unicodedata.combining(char)
+    )
 
 
 def european_player_id(source_key: str) -> int:
@@ -63,13 +71,15 @@ def _usa_bridge_candidates(
     con: sqlite3.Connection,
     eu_names: dict[str, set[str]],
     eu_seasons: dict[str, set[int]],
-    colliding: set[str],
+    colliding_compact: set[str],
 ) -> tuple[dict[str, int], list[dict[str, Any]]]:
     usa: dict[str, list[tuple[int, str, bool]]] = defaultdict(list)
     for player_id, name, ambiguous in con.execute(
         "SELECT player_id,display_name,ambiguous FROM players"
     ):
-        usa[exact_name_key(name)].append((int(player_id), name, bool(ambiguous)))
+        usa[compact_name_key(name)].append(
+            (int(player_id), name, bool(ambiguous))
+        )
     usa_seasons: dict[int, set[int]] = defaultdict(set)
     for player_id, season in con.execute(
         """SELECT DISTINCT rp.player_id,e.season
@@ -79,25 +89,40 @@ def _usa_bridge_candidates(
     ):
         usa_seasons[int(player_id)].add(int(season))
 
+    eu_groups: dict[str, set[str]] = defaultdict(set)
+    for key in eu_names:
+        eu_groups[compact_name_key(key)].add(key)
+
     bridges: dict[str, int] = {}
     audit = []
-    for key in sorted(eu_names):
-        candidates = usa.get(key, [])
-        if (
-            key in colliding
-            or len(eu_names[key]) != 1
-            or len(candidates) != 1
-            or candidates[0][2]
-        ):
+    for compact in sorted(eu_groups):
+        keys = eu_groups[compact]
+        candidates = usa.get(compact, [])
+        if compact in colliding_compact or len(candidates) != 1:
             continue
-        player_id, usa_name, _ = candidates[0]
-        shared = sorted(eu_seasons[key] & usa_seasons[player_id])
+        player_id, usa_name, ambiguous = candidates[0]
+        if ambiguous:
+            continue
+        seasons = set().union(*(eu_seasons[key] for key in keys))
+        shared = sorted(seasons & usa_seasons[player_id])
         if not shared:
             continue
-        bridges[key] = player_id
+        for key in keys:
+            bridges[key] = player_id
+        names = sorted(
+            {name for key in keys for name in eu_names[key]},
+            key=lambda name: (name.casefold(), name),
+        )
+        exact = (
+            len(keys) == 1
+            and next(iter(keys)) == exact_name_key(usa_name)
+            and len(names) == 1
+        )
         audit.append({
-            "name_key": key,
-            "eu_name": next(iter(eu_names[key])),
+            "name_key": exact_name_key(usa_name),
+            "eu_name": "; ".join(names),
+            "eu_name_keys": ";".join(sorted(keys)),
+            "match_method": "exact" if exact else "compact",
             "usau_player_id": player_id,
             "usau_name": usa_name,
             "shared_seasons": shared,
@@ -130,21 +155,29 @@ def load_european_inputs(
 
         eu_names: dict[str, set[str]] = defaultdict(set)
         eu_seasons: dict[str, set[int]] = defaultdict(set)
-        teams_by_name_season: dict[tuple[str, int, str], set[str]] = defaultdict(set)
+        teams_by_compact_season: dict[
+            tuple[str, int, str], set[str]
+        ] = defaultdict(set)
         for row in entries:
             key = row["name_key"]
+            compact = compact_name_key(key)
             eu_names[key].add(row["player_name"])
             eu_seasons[key].add(int(row["season"]))
-            teams_by_name_season[(key, int(row["season"]), row["division"])].add(
-                team_name_key(row["team_name"])
-            )
-        colliding = {
-            key for (key, _season, _division), teams in teams_by_name_season.items()
+            teams_by_compact_season[
+                (compact, int(row["season"]), row["division"])
+            ].add(team_name_key(row["team_name"]))
+        colliding_compact = {
+            compact
+            for (compact, _season, _division), teams
+            in teams_by_compact_season.items()
             if len(teams) > 1
         }
         bridges, out.bridge_rows = _usa_bridge_candidates(
-            usa_con, eu_names, eu_seasons, colliding
+            usa_con, eu_names, eu_seasons, colliding_compact
         )
+        bridge_names = {
+            row["usau_player_id"]: row["usau_name"] for row in out.bridge_rows
+        }
 
         entry_rows: dict[str, list[sqlite3.Row]] = defaultdict(list)
         for row in entries:
@@ -163,17 +196,19 @@ def load_european_inputs(
             seen: set[int] = set()
             for row in entry_rows.get(observation["roster_id"], []):
                 name_key = row["name_key"]
+                compact = compact_name_key(name_key)
                 source_key = (
-                    f"{name_key}|{division}|{team_key}"
-                    if name_key in colliding else name_key
+                    f"{compact}|{division}|{team_key}"
+                    if compact in colliding_compact else compact
                 )
                 player_id = bridges.get(name_key, european_player_id(source_key))
                 if player_id in seen:
                     continue
                 seen.add(player_id)
+                display_name = bridge_names.get(player_id, row["player_name"])
                 pids.append(player_id)
-                people.append((player_id, row["player_name"]))
-                out.player_names[player_id] = row["player_name"]
+                people.append((player_id, display_name))
+                out.player_names[player_id] = display_name
                 appearance = (player_id, season, division, str(season))
                 if appearance not in appearance_seen:
                     out.appearances.append(appearance)
@@ -181,7 +216,7 @@ def load_european_inputs(
                 order = (season, observation["observed_at"])
                 if player_id not in latest_order or order >= latest_order[player_id]:
                     latest_order[player_id] = order
-                    out.latest[player_id] = (row["player_name"], team_name, season)
+                    out.latest[player_id] = (display_name, team_name, season)
             roster_lookup[(season, division, team_key)] = (pids, people)
             by_club, source, display = out.team_rosters.setdefault(
                 (season, division), ({}, {}, {})
