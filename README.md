@@ -18,6 +18,7 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m scraper.structure     # attach published bracket structure
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m scraper.euf_ranking data/raw/euf-ranking/rosters.json
+.venv/bin/python -m scraper.wfdf all --workers 12  # official 2022/2024 world championships
 .venv/bin/python -m scraper.euf --audit       # must report publication_blocked: false
 .venv/bin/python -m analysis.euf_overlap      # review name candidates before replay
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
@@ -942,28 +943,37 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   unused by the model so far.
 
 
-## European data source reference
+## European and international data source reference
 
-European data is an independently ingested corpus in `data/euf.db`.
-`analysis.rankings` joins its games and season rosters to the USAU replay only
-through the conservative identity contract described below.
+European and world-championship data is independently ingested into
+`data/euf.db`. `analysis.rankings` joins its games and rosters to the USAU
+replay only through the conservative identity contracts described below.
 
 | Surface | Contract used here | Coverage and boundary |
 |---|---|---|
 | [Ultimate Central API](https://help.ultimatecentral.com/support/solutions/articles/4000064797-api-access) | Public, paginated REST endpoints discovered from `/api/help`: events, teams, games, final standings, and public persons | Historical event metadata, scored games, teams, and final standings. Roster responses remain `incomplete` or `restricted` unless public rows are actually returned. |
 | [EUCS Schedule](https://eucs-schedule.ultimatefederation.eu/) | Server-rendered season schedule plus iCalendar cross-check | Schedule rows, scores, pools/stages, divisions, dates, times, fields, and placeholder/forfeit state. There is no roster contract. HTML is cached with URL, observation time, and SHA-256. |
 | [EUCS Ranking](https://ranking.ultimatefederation.eu/) | R/Shiny `dataobj/team_master_roster` responses captured through a browser session | Season/team roster names for 2024–2026. The `session/.../dataobj/...` URLs are transient and are retained only as observation evidence, not presented as a stable API. The source exposes names, not player IDs. |
+| [WFDF Results](https://results.wfdf.sport/) | Official server-rendered championship results: complete team lists, standings, game schedules/scores, team cards, and player cards | WUCC 2022, WUC 2024, WMUCC 2022, and WMUC 2024. Team-card failures are recovered from the public all-player index and player cards; every fetched page is cached with its URL, observation time, and SHA-256. WFDF player IDs are scoped to a results installation, not globally stable. |
 
 The observed `data/euf.db` audit covers Ultimate Central EUCF events from
-2015, 2016, 2019, 2021, and 2022 plus all discoverable completed EUCS
-schedules from 2023–2025. It contains 47 event/division records, 729
-source-scoped canonical teams, 2,001 scored games, and 267 standing rows. The
-normalized divisions are `euf-open`, `euf-women`, and `euf-mixed`. Six 2022
+2015, 2016, 2019, 2021, and 2022; all discoverable completed EUCS schedules
+from 2023–2025; and four official WFDF world championships from 2022 and
+2024. It contains 66 event/division records, 1,087 source-scoped canonical
+teams, 3,749 scored result records, and 623 standing rows. Six 2022 EUF
 carryover records advertise an outcome without scores and remain explicitly
 `incomplete`; 38 rows remain `scheduled` and three remain `teams_not_set`.
-The 14 discoverable 2026 schedules are excluded because they are upcoming.
-Years and event classes not listed above are coverage gaps, not zero-game
-seasons.
+The 14 discoverable 2026 EUCS schedules are excluded because they are
+upcoming. Years and event classes not listed above are coverage gaps, not
+zero-game seasons.
+
+The four WFDF championships contribute 19 event/division records, 358 teams,
+1,748 scored games, and 8,345 event-roster memberships for 7,250 distinct
+published names. All 19 event/divisions have public rosters. The normalized
+divisions include club men's/women's/mixed plus masters, grand masters, and
+great grand masters divisions. The player-card fallback preserves published
+games, assists, and goals when a tournament's team-card route returns HTTP
+500.
 
 The captured EUCS Ranking snapshot adds 384 season/team rosters, 11,274 roster
 memberships, and 6,804 distinct display names across 2024–2026. Eleven
@@ -981,33 +991,40 @@ observation time, and payload hash in `source_entities` or
 IDs are not coerced to integers. Team-name similarity creates review
 candidates only; it never merges team identities.
 
-The rating replay uses 908 scored 2024–2025 EUCS games whose teams all map to a
-captured ranking roster. European-only roster names receive deterministic
-negative IDs within JavaScript's safe-integer range. A name reuses a positive
-USAU player ID only when its accent-, punctuation-, and spacing-insensitive key
-maps to one non-ambiguous USAU identity, appears in both corpora during the same
+The rating replay uses 908 scored 2024–2025 EUCS games whose teams map to a
+captured ranking roster and 1,747 eligible WFDF games with event rosters.
+European-only roster names receive deterministic negative IDs within
+JavaScript's safe-integer range. A European name reuses a positive USAU player
+ID only when its accent-, punctuation-, and spacing-insensitive key maps to
+one non-ambiguous USAU identity, appears in both corpora during the same
 calendar season, and does not occur on two European teams in the same
-season/division. This also joins source variants such as `Daan De Marrée` and
-`Daan DeMarree`. The current snapshot produces 208 bridged people from 218 EU
-name keys: 184 exact and 24 compact matches. Every bridge and match method is
-written to `data/euf_bridge_audit.csv`. These remain conservative name matches,
-not stable-ID matches: EUCS Ranking publishes no player IDs.
+season/division. This produces 208 EU/USA bridges, recorded with their match
+method in `data/euf_bridge_audit.csv`.
 
-The three European division bases and scales are explicit, untuned priors
-copied from their analogous USAU club divisions. Same-player bridges propagate
-observed ratings between corpora, but do not prove that the continent-wide
-scale is calibrated. Six scored games touch an unavailable roster and use the
-engine's existing ghost-team behavior. Current European team tables use the
-captured 2026 season roster in the completed and best views; European teams are
-omitted from the next-event view because EUCS does not expose event-specific
-upcoming rosters.
+WFDF player IDs are event-installation scoped, so they are retained as source
+provenance but are not treated as global identities. The replay instead uses
+the same conservative same-season name rule against USAU and EUF rosters,
+rejects names duplicated across two teams at one championship, and assigns a
+deterministic international ID otherwise. The current build makes 2,504
+WFDF-to-USAU/EUF name bridges; all 8,345 roster-name decisions are written to
+`data/wfdf_bridge_audit.csv`.
+
+The European division bases and scales are explicit, untuned priors copied
+from their analogous USAU club divisions. WFDF club divisions use those same
+club dimensions; masters divisions use the existing masters dimensions.
+Same-player bridges propagate observed ratings between corpora, but do not
+prove that the continent-wide scale is calibrated. Six EUF scored games touch
+an unavailable roster and use the engine's existing ghost-team behavior.
+Current European team tables use the captured 2026 season roster in the
+completed and best views; European teams are omitted from the next-event view
+because EUCS does not expose event-specific upcoming rosters.
 
 `python -m scraper.euf --audit` blocks publication for duplicate source
 mappings, invalid played games, blocking source disagreements, or provenance
 gaps. `python -m analysis.euf_overlap` reproduces the identity-candidate counts
 without treating any name match as authoritative.
 
-## How to build and query the European corpus
+## How to build and query the European and international corpus
 
 Install the declared runtime:
 
@@ -1023,20 +1040,22 @@ Probe the two live contracts without writing the database:
 ```
 
 Create the isolated database, ingest one schedule or one Ultimate Central
-event, and optionally load a captured ranking-roster snapshot:
+event, load a captured ranking-roster snapshot, and ingest the official WFDF
+championship corpus:
 
 ```sh
 .venv/bin/python -m scraper.euf --init-db
 .venv/bin/python -m scraper.euf 2024 --event eucf24
 .venv/bin/python -m scraper.euf --event uc:116389 --request-budget 40
 .venv/bin/python -m scraper.euf_ranking data/raw/euf-ranking/rosters.json
+.venv/bin/python -m scraper.wfdf all --workers 12
 .venv/bin/python -m scraper.euf --audit
 .venv/bin/python -m analysis.euf_overlap
 ```
 
 Rerunning an event transactionally replaces that event; it does not append
-duplicates. A failed replacement rolls back. To refresh EUCS rather than use
-its content-addressed cache, add `--refresh`.
+duplicates. A failed replacement rolls back. Add `--refresh` to an EUCS or
+WFDF command to bypass its content-addressed HTML cache.
 
 Serve the read-only GraphQL facade:
 
@@ -1057,10 +1076,15 @@ Top-level `events`, `teams`, and `games` accept source, event-code, season,
 division, team, and relevant played-state filters. Connections expose
 `nodes`, `totalCount`, and offset page information. `first` must be 1–200.
 Teams imported from `eucs-ranking` expose their observed roster names through
-`players`; a successful zero-row roster returns `[]`. Unknown IDs and roster
-fields with no observed roster source return `null`. The schema has no mutation
-root and opens SQLite with `mode=ro` plus `PRAGMA query_only=ON`.
-The service never calls an upstream endpoint from a resolver.
+`players`; a successful zero-row roster returns `[]`. `eventRosterEntries`
+returns each public event roster with event code, season, division, team,
+number, goals (`points`), assists, Ds, and turns. For example,
+`teams(source:"wfdf-results", eventCode:"wucc-2022:club-men",
+name:"Gentle")` exposes the official WUCC roster and player-card statistics.
+Unknown IDs and roster fields with no observed roster source return `null`.
+The schema has no mutation root and opens SQLite with `mode=ro` plus
+`PRAGMA query_only=ON`. The service never calls an upstream endpoint from a
+resolver.
 
 The overlap command reports candidate counts under both exact case/spacing and
 diacritic-folded keys. The replay uses the stricter operational contract above

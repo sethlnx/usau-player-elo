@@ -24,6 +24,21 @@ class EUFGraphQLContractTests(unittest.TestCase):
             "2024-10-07T00:00:00+00:00", hashlib.sha256(raw).hexdigest(), True,
         ), "fixture24")
         ingest_event(con, 2024, schedule)
+        event_id, event_team_id = con.execute(
+            """SELECT event_id,event_team_id FROM event_teams
+               WHERE display_name='Alpha'"""
+        ).fetchone()
+        con.execute(
+            "UPDATE roster_availability SET state='public' WHERE event_id=?",
+            (event_id,),
+        )
+        con.execute(
+            """INSERT INTO roster_entries
+               (event_team_id,number,name,points,assists,ds,turns)
+               VALUES (?,?,?,?,?,?,?)""",
+            (event_team_id, "7", "Fixture Player", "4", "3", "2", "1"),
+        )
+        con.commit()
         ingest_snapshot(con, {
             "source": RANKING_SOURCE,
             "source_url": "https://ranking.ultimatefederation.eu/",
@@ -79,7 +94,13 @@ class EUFGraphQLContractTests(unittest.TestCase):
               }
             }
             teams(eventCode:"fixture24", name:"Alpha", first:10) {
-              totalCount nodes { id name rosterAvailable players }
+              totalCount nodes {
+                id name rosterAvailable players
+                eventRosterEntries {
+                  eventCode event season division team name number
+                  points assists ds turns
+                }
+              }
             }
           }
         """)
@@ -90,8 +111,20 @@ class EUFGraphQLContractTests(unittest.TestCase):
         self.assertEqual("eucs-schedule", events["nodes"][0]["sources"][0]["source"])
         team = data["teams"]["nodes"][0]
         self.assertEqual("Alpha", team["name"])
-        self.assertIsNone(team["rosterAvailable"])
-        self.assertIsNone(team["players"])
+        self.assertTrue(team["rosterAvailable"])
+        self.assertEqual(["Fixture Player"], team["players"])
+        entry = team["eventRosterEntries"][0]
+        self.assertEqual("fixture24", entry["eventCode"])
+        self.assertTrue(entry["event"])
+        self.assertEqual(2024, entry["season"])
+        self.assertEqual("euf-mixed", entry["division"])
+        self.assertEqual("Alpha", entry["team"])
+        self.assertEqual({
+            "name": "Fixture Player", "number": "7", "points": "4",
+            "assists": "3", "ds": "2", "turns": "1",
+        }, {key: entry[key] for key in (
+            "name", "number", "points", "assists", "ds", "turns",
+        )})
 
     def test_ranking_team_exposes_observed_roster_names(self):
         data = self.execute("""

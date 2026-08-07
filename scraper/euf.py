@@ -430,6 +430,14 @@ def replace_event(
     payload_hash: str,
     roster_entries: list[dict[str, Any]] | None = None,
 ) -> None:
+    rostered_teams = (
+        {
+            canonical(person["team_source_id"])
+            for person in roster_entries
+            if person.get("team_source_id") is not None and person.get("name")
+        }
+        if roster_entries is not None else None
+    )
     score_conflicts = _score_conflicts(con, event_id, source, games)
     _clear_event(con, event_id)
     local_team: dict[str, str] = {}
@@ -447,7 +455,9 @@ def replace_event(
                (event_team_id,event_id,display_name,full_name,city,
                 roster_fetched,canonical_team_id) VALUES (?,?,?,?,?,?,?)""",
             (event_team_id, event_id, team["name"], team["name"],
-             team.get("city"), 1 if roster_state == "public" else 0,
+             team.get("city"),
+             int(sid in rostered_teams) if rostered_teams is not None
+             else int(roster_state == "public"),
              canonical_id),
         )
         local_team[sid] = canonical_id
@@ -522,8 +532,10 @@ def replace_event(
             """INSERT OR REPLACE INTO roster_entries
                (event_team_id,number,name,pronouns,position,height,points,
                 assists,ds,turns) VALUES (?,?,?,?,?,?,?,?,?,?)""",
-            (event_team[team_sid], person.get("number"), person["name"], None,
-             None, None, None, None, None, None),
+            (event_team[team_sid], person.get("number"), person["name"],
+             person.get("pronouns"), person.get("position"), person.get("height"),
+             person.get("points"), person.get("assists"), person.get("ds"),
+             person.get("turns")),
         )
 
     con.execute(

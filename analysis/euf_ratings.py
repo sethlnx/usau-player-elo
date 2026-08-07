@@ -63,8 +63,52 @@ class EuropeanInputs:
     ] = field(default_factory=dict)
     team_names: dict[str, tuple[str, str]] = field(default_factory=dict)
     bridge_rows: list[dict[str, Any]] = field(default_factory=list)
+    identity_rows: list[dict[str, Any]] = field(default_factory=list)
     covered_scored_games: int = 0
     ghost_scored_games: int = 0
+
+
+def merge_inputs(*inputs: EuropeanInputs) -> EuropeanInputs:
+    """Combine independent external corpora without hiding key collisions."""
+    out = EuropeanInputs()
+    appearances: set[tuple[int, int, str, str]] = set()
+
+    def merge_map(target: dict, source: dict, label: str) -> None:
+        for key, value in source.items():
+            if key in target and target[key] != value:
+                raise ValueError(f"conflicting {label} for {key!r}")
+            target[key] = value
+
+    for current in inputs:
+        out.games.extend(current.games)
+        merge_map(out.rosters, current.rosters, "roster")
+        merge_map(out.clubs, current.clubs, "club")
+        for player_id, name in current.player_names.items():
+            out.player_names.setdefault(player_id, name)
+        for player_id, value in current.latest.items():
+            if player_id not in out.latest or value[2] >= out.latest[player_id][2]:
+                out.latest[player_id] = value
+        for appearance in current.appearances:
+            if appearance not in appearances:
+                out.appearances.append(appearance)
+                appearances.add(appearance)
+        merge_map(out.event_info, current.event_info, "event")
+        merge_map(out.event_team_event, current.event_team_event, "event-team event")
+        out.event_roster_rows.extend(current.event_roster_rows)
+        for key, (rosters, source, display) in current.team_rosters.items():
+            target = out.team_rosters.setdefault(key, ({}, {}, {}))
+            merge_map(target[0], rosters, "published roster")
+            merge_map(target[1], source, "published roster source")
+            merge_map(target[2], display, "published roster display")
+        for key, value in current.team_names.items():
+            if key not in out.team_names or value[0] >= out.team_names[key][0]:
+                out.team_names[key] = value
+        out.bridge_rows.extend(current.bridge_rows)
+        out.identity_rows.extend(current.identity_rows)
+        out.covered_scored_games += current.covered_scored_games
+        out.ghost_scored_games += current.ghost_scored_games
+    out.games.sort(key=lambda game: game["sort"])
+    return out
 
 
 def _usa_bridge_candidates(
@@ -233,7 +277,9 @@ def load_european_inputs(
             """SELECT e.event_id,e.name,e.season,e.division,e.start_date,e.end_date,
                       et.event_team_id,et.display_name,et.full_name
                FROM event_teams et JOIN events e USING(event_id)
-               WHERE e.season IN (
+               JOIN euf_event_details d USING(event_id)
+               WHERE d.source_owner IN ('eucs-schedule','ultimate-central:euf')
+                 AND e.season IN (
                  SELECT DISTINCT season FROM ranking_roster_observations
                )"""
         ).fetchall()
@@ -283,7 +329,9 @@ def load_european_inputs(
                       g.home_score,g.away_score,g.stage,e.season,e.division,
                       e.start_date,e.end_date
                FROM games g JOIN events e USING(event_id)
-               WHERE e.season IN (
+               JOIN euf_event_details d USING(event_id)
+               WHERE d.source_owner IN ('eucs-schedule','ultimate-central:euf')
+                 AND e.season IN (
                  SELECT DISTINCT season FROM ranking_roster_observations
                )
                  AND g.home_id IS NOT NULL AND g.away_id IS NOT NULL

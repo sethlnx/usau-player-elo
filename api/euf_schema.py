@@ -90,6 +90,21 @@ class Standing:
 
 
 @strawberry.type
+class RosterEntry:
+    event_id: strawberry.ID
+    event_code: str
+    event: str
+    season: int
+    division: str
+    team: str
+    name: str
+    number: str | None
+    points: str | None
+    assists: str | None
+    ds: str | None
+    turns: str | None
+
+@strawberry.type
 class Team:
     id: strawberry.ID
     name: str
@@ -137,6 +152,39 @@ class Team:
                    ) ORDER BY name""",
                 (str(self.id), str(self.id)),
             )]
+
+    @strawberry.field
+    def event_roster_entries(self) -> list[RosterEntry]:
+        with closing(connect_readonly(self._db)) as con:
+            rows = con.execute(
+                """SELECT e.event_id,d.event_code,e.name event,e.season,
+                          e.division,t.display_name team,r.name,r.number,
+                          r.points,r.assists,r.ds,r.turns
+                   FROM roster_entries r
+                   JOIN event_teams t USING(event_team_id)
+                   JOIN events e USING(event_id)
+                   JOIN euf_event_details d USING(event_id)
+                   WHERE t.canonical_team_id=?
+                   ORDER BY e.start_date,e.event_id,r.name,r.number""",
+                (str(self.id),),
+            ).fetchall()
+        return [
+            RosterEntry(
+                event_id=strawberry.ID(str(row["event_id"])),
+                event_code=row["event_code"],
+                event=row["event"],
+                season=row["season"],
+                division=row["division"],
+                team=row["team"],
+                name=row["name"],
+                number=row["number"],
+                points=row["points"],
+                assists=row["assists"],
+                ds=row["ds"],
+                turns=row["turns"],
+            )
+            for row in rows
+        ]
 
 
 @strawberry.type

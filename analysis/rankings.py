@@ -20,7 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (DB_PATH, load_games, load_maps,
                                load_stat_events, load_ufa_stat_events, replay)
-from analysis.euf_ratings import EUF_DB, EuropeanInputs, load_european_inputs
+from analysis.euf_ratings import (EUF_DB, EuropeanInputs, load_european_inputs,
+                                  merge_inputs)
+from analysis.international_ratings import load_international_inputs
 from elo.engine import EloConfig
 
 
@@ -971,20 +973,28 @@ def main(cfg: EloConfig | None = None):
     cfg = cfg or EloConfig(**PUBLISHED)
     con = sqlite3.connect(DB_PATH)
     european = load_european_inputs(con, EUF_DB)
+    international = load_international_inputs(con, european, EUF_DB)
+    euf_bridge_rows = european.bridge_rows
+    wfdf_identity_rows = international.identity_rows
+    external = merge_inputs(european, international)
     games = sorted(
-        [*load_games(con), *european.games], key=lambda game: game["sort"]
+        [*load_games(con), *external.games], key=lambda game: game["sort"]
     )
     rosters, clubs = load_maps(con)
-    rosters.update(european.rosters)
-    clubs.update(european.clubs)
+    rosters.update(external.rosters)
+    clubs.update(external.clubs)
     stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con),
                          key=lambda e: e[0])
     print(
-        f"loaded {len(european.games):,} European games, "
-        f"{len(european.player_names):,} roster-name identities and "
-        f"{len(european.bridge_rows):,} same-season USAU name bridges "
-        f"({european.ghost_scored_games} games touch an empty roster)"
+        f"loaded {len(european.games):,} European games and "
+        f"{len(international.games):,} international games; "
+        f"{len(external.player_names):,} external roster-name identities, "
+        f"{len(euf_bridge_rows):,} EU/USA bridges, and "
+        f"{sum(row['match_method'] in ('usau-name', 'euf-name') for row in wfdf_identity_rows):,} "
+        f"WFDF name bridges "
+        f"({external.ghost_scored_games} games touch an empty roster)"
     )
+    european = external
 
     # Trajectories are captured from the ONE authoritative replay via the hook,
     # keyed (kind, subject) -> event_id -> payload. Last write per event wins,
@@ -1030,7 +1040,7 @@ def main(cfg: EloConfig | None = None):
     for pid, _season, division, _start in european.appearances:
         european_divisions[pid].add(division)
     for pid, divisions in european_divisions.items():
-        if "euf-women" in divisions and pid not in gender:
+        if any("women" in division for division in divisions) and pid not in gender:
             gender[pid] = "w"
     # Which divisions a player has appeared in, as bitmasks over DIVCODE, so
     # the site can filter the flat table by division. A rating is one number
@@ -1088,7 +1098,7 @@ def main(cfg: EloConfig | None = None):
         div_now[pid] = mask
     out = DB_PATH.parent / "player_elo.csv"
     with open(out, "w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         # player_id is exported because display names are NOT unique: ambiguous
         # names are split per-club into separate players, so several rows can
         # read "Julian Kagi" with different ratings. Join on the id, never the name.
@@ -1109,16 +1119,25 @@ def main(cfg: EloConfig | None = None):
     print(f"wrote {out} ({len(ranked)} players with 5+ games)")
     bridge_out = DB_PATH.parent / "euf_bridge_audit.csv"
     with open(bridge_out, "w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["name_key", "eu_name", "eu_name_keys", "match_method",
                     "usau_player_id", "usau_name", "shared_seasons"])
-        for row in european.bridge_rows:
+        for row in euf_bridge_rows:
             w.writerow([
                 row["name_key"], row["eu_name"], row["eu_name_keys"],
                 row["match_method"], row["usau_player_id"], row["usau_name"],
                 ";".join(map(str, row["shared_seasons"])),
             ])
-    print(f"wrote {bridge_out} ({len(european.bridge_rows)} reviewable name bridges)")
+    print(f"wrote {bridge_out} ({len(euf_bridge_rows)} reviewable name bridges)")
+    wfdf_out = DB_PATH.parent / "wfdf_bridge_audit.csv"
+    with open(wfdf_out, "w", newline="") as f:
+        w = csv.DictWriter(
+            f, fieldnames=["event", "team", "source_name", "match_method",
+                           "player_id", "display_name"], lineterminator="\n",
+        )
+        w.writeheader()
+        w.writerows(wfdf_identity_rows)
+    print(f"wrote {wfdf_out} ({len(wfdf_identity_rows)} roster-name decisions)")
 
     season = max(
         con.execute(
@@ -1131,7 +1150,7 @@ def main(cfg: EloConfig | None = None):
                          ("best", "team_elo_best.csv")):
         team_out = DB_PATH.parent / fname
         with open(team_out, "w", newline="") as f:
-            w = csv.writer(f)
+            w = csv.writer(f, lineterminator="\n")
             # club_key is the model's identity and what the site links on;
             # `club` is the name USAU prints. They differ (aliases, and the
             # suffix that keeps men's and women's Phoenix apart).
