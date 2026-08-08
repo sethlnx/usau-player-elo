@@ -20,6 +20,7 @@ teammate mean minus `rookie_discount` — remains available via
 """
 
 import math
+from datetime import date
 from dataclasses import dataclass, field
 
 
@@ -72,6 +73,13 @@ class EloConfig:
     provisional_multiplier: float = 2.0
     provisional_shape: str = "cliff"
     offseason_regression: float = 0.15  # fraction pulled toward base between seasons
+    # Optional time decay for a player returning after an inactive spell.
+    # `inactivity_decay` is the fraction of the remaining gap to the player's
+    # last division base closed per inactive year, compounded continuously.
+    # The grace window prevents ordinary gaps between tournaments from being
+    # mistaken for ageing. Zero preserves the published model.
+    inactivity_decay: float = 0.0
+    inactivity_grace_days: int = 90
     # Per-player stat lines (G/A/D/T at stat-reporting events), ingested only
     # after an event ends. Mechanism A splits each game delta by usage; B
     # transfers rating zero-sum between teammates by net stat quality.
@@ -149,6 +157,7 @@ class PlayerState:
     division: str = "club-men"  # last division played; offseason regression target
     inv_sum: float = 0.0    # sum of observed usage indices (1.0 = avg teammate)
     inv_events: int = 0
+    last_date: str | None = None
 
 
 class PlayerElo:
@@ -177,6 +186,27 @@ class PlayerElo:
         for pid in roster:
             if pid not in self.players:
                 self.players[pid] = PlayerState(start, division=division)
+
+    def age_players(self, rosters: list[list], division: str, event_date: str):
+        """Apply leakage-safe inactivity decay immediately before a game."""
+        rate = self.cfg.inactivity_decay
+        if not 0.0 <= rate <= 1.0:
+            raise ValueError("inactivity_decay must be between 0 and 1")
+        current = date.fromisoformat(event_date[:10])
+        for roster in rosters:
+            self._materialize(roster, division)
+            for pid in roster:
+                st = self.players[pid]
+                if st.last_date is not None and rate > 0.0:
+                    elapsed = (current - date.fromisoformat(st.last_date[:10])).days
+                    inactive = max(0, elapsed - self.cfg.inactivity_grace_days)
+                    if inactive:
+                        retention = (1.0 - rate) ** (inactive / 365.25)
+                        base = self.cfg.division_bases.get(
+                            st.division, self.cfg.base_rating
+                        )
+                        st.rating = base + retention * (st.rating - base)
+                st.last_date = event_date[:10]
 
     def team_rating(self, roster: list) -> float:
         """Softmax-weighted mean of the roster's ratings."""

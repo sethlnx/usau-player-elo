@@ -282,6 +282,9 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
         else:  # carry
             home = clubs.get(g["home_id"], g["home_id"])
             away = clubs.get(g["away_id"], g["away_id"])
+        if model_kind == "player" and cfg.inactivity_decay > 0:
+            model.age_players([home, away], division, gdate)
+
 
         # The hook wants the rating change across this game. pregame_ratings,
         # not team_rating: reading a rating before play_game has materialized
