@@ -624,9 +624,10 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .gtbl td.wl{font-family:var(--mono);font-size:12px;width:22px;text-align:center}
 .gtbl td.sc{font-family:var(--mono);font-size:12.5px;text-align:right;width:62px}
 /* hovering a season column reorders the legend by that season */
-.tchart .xh{fill:transparent}
+.tchart .xh{fill:transparent;cursor:pointer}
 .tchart .yg{stroke:var(--line-strong);stroke-width:1;opacity:0}
 .tchart .yg.on{opacity:1}
+.tchart .yg.locked{stroke:var(--accent);stroke-width:2;opacity:1}
 /* Past ~40 series the field has to thin out or it reads as a single smear;
    isolation on hover is what makes an individual line legible. */
 .tchart[data-dense] .sg{opacity:.5;stroke-width:1.1}
@@ -2770,7 +2771,7 @@ function trendChart(series) {
   return s + `</svg>`;
 }
 
-let hotIdx = null, pinIdx = null, yearIdx = null;
+let hotIdx = null, pinIdx = null, yearIdx = null, yearLocked = null;
 // The season the legend falls back to is the most recent one, and it moves
 // with the history file: DEFYEAR is set in applyHistory alongside SEASONS.
 // The chart, its baseline and its mode, so the legend can be re-sorted against
@@ -2797,7 +2798,7 @@ function drawTrends() {
   // than silently ignored when the subject is clubs.
   $('#tgen').disabled = kind !== 'p';
   const dat = seasonData(kind, div, gen);
-  hotIdx = null; pinIdx = null; yearIdx = null;
+  hotIdx = null; pinIdx = null; yearIdx = null; yearLocked = null;
   curMode = mode; curMed = dat.med; curSeries = dat.top;
   // Only used to break ties between subjects with no value in the ranked
   // season, which puts the better historical side first among the em dashes.
@@ -2861,7 +2862,7 @@ function orderLegend() {
   });
   leg.appendChild(frag);
   $('#tlhead').textContent = `${rows.length} series · ranked on ${SEASONS[i]}` +
-    (i === DEFYEAR ? ' (current)' : '');
+    (yearLocked === i ? ' (locked)' : i === DEFYEAR ? ' (current)' : '');
 }
 
 function setYear(i) {
@@ -2872,6 +2873,19 @@ function setYear(i) {
   yearIdx = i;
   if (i !== null) { const g = guide(i); if (g) g.classList.add('on'); }
   orderLegend();
+}
+// A locked season survives leaving the chart: clicking a column pins the
+// legend's ranking to that season until it is clicked again (unlock) or a
+// different column is clicked (relock). The hover guide (.on) still tracks
+// the pointer for the live preview; .locked marks the sticky one so the two
+// read as distinct even when they coincide.
+function setYearLock(i) {
+  const svg = $('#tsvg');
+  const guide = j => svg && svg.querySelector(`.yg[data-yi="${j}"]`);
+  if (yearLocked !== null) { const g = guide(yearLocked); if (g) g.classList.remove('locked'); }
+  yearLocked = yearLocked === i ? null : i;
+  if (yearLocked !== null) { const g = guide(yearLocked); if (g) g.classList.add('locked'); }
+  setYear(yearLocked === null ? DEFYEAR : yearLocked);
 }
 
 // Two element writes plus one class on each root, never 25 inline styles.
@@ -2899,7 +2913,11 @@ $('#tchart').addEventListener('mouseover', e => {
   if (h) { setHot(pinIdx); setYear(+h.dataset.yi); }
 });
 $('#tchart').addEventListener('mouseleave',
-  () => { setHot(pinIdx); setYear(DEFYEAR); });
+  () => { setHot(pinIdx); setYear(yearLocked === null ? DEFYEAR : yearLocked); });
+$('#tchart').addEventListener('click', e => {
+  const h = e.target.closest('.xh');
+  if (h) setYearLock(+h.dataset.yi);
+});
 $('#tlegend').addEventListener('click', e => {
   const lab = e.target.closest('[data-pid],[data-club]');
   if (lab) {
@@ -2920,11 +2938,14 @@ $('#tnote').textContent =
   `One point per season: the rating after that season's last event. Every subject ` +
   `that has ever closed a season inside the top 25 gets a line — __TRENDN__ of them ` +
   `depending on the view, which is why the field thins out and hovering is how you ` +
-  `read an individual. The legend is ranked on the most recent season, not on an ` +
+  `read an individual. Click a season column to lock the legend's ranking to ` +
+  `it — the guide line turns solid and stays until you click it again or ` +
+  `another column. The legend is ranked on the most recent season, not on an ` +
   `all-time peak, so it opens as the current table; hover any other season in the ` +
   `chart and it re-ranks on that one, showing that season's rating, and leaving ` +
-  `returns it to the current season. A subject that did not play the ranked ` +
-  `season shows an em dash and sinks to the bottom rather than sorting as zero. ` +
+  `returns it to the locked season, or the current one if none is locked. ` +
+  `A subject that did not play the ranked season shows an em dash and sinks ` +
+  `to the bottom rather than sorting as zero. ` +
   `Hover a line or a legend row to isolate it, click the row to pin, click the ` +
   `name to open its full history. A season a subject did not play breaks the line ` +
   `rather than being interpolated across. "Above season median" subtracts the ` +
