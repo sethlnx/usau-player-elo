@@ -260,6 +260,7 @@ def build():
         "generated": date.today().isoformat(),
         "model": RATING_NAME,
         "metrics": model_metrics,
+        "ratingPeriod": model_metrics.get("period"),
         "minGames": MIN_GAMES,
         "totalRated": total_rated,
         "scale": PUBLISHED["division_scale"]["club-men"],
@@ -908,6 +909,11 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 <script>
 const D = __DATA__;
 const IS_GLICKO = D.model.startsWith('Glicko');
+const PERIOD_LABEL = {
+  game: 'one game',
+  day: 'one tournament day',
+  tournament: 'one tournament',
+}[D.ratingPeriod] || '';
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -965,6 +971,7 @@ $('#sub').textContent =
   `softmax-weighted mean of its event roster. Rankings and Trends span ` +
   `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. The Tournaments browser is ` +
   `USAU-only.` +
+  (IS_GLICKO && PERIOD_LABEL ? ` Ratings update after ${PERIOD_LABEL}.` : '') +
   (heldOut?.n ? ` Held-out 2024–25: ${(heldOut.accuracy * 100).toFixed(1)}% ` +
     `accuracy · ${heldOut.logloss.toFixed(3)} log loss over ` +
     `${heldOut.n.toLocaleString()} games.` : '') +
@@ -1227,8 +1234,10 @@ function drawPlayers() {
 $('#pnote').textContent = IS_GLICKO
   ? `Searching does not renumber anything — a player keeps the rank they hold in ` +
     `the current list. The toggles do change the population and therefore the rank; ` +
-    `hover one to see its denominator. Bands are native 90% Glicko-2 intervals: ` +
-    `rating deviation shrinks as results accumulate and expands during inactivity. ` +
+    `hover one to see its denominator. Ratings update after ${PERIOD_LABEL}; ` +
+    `all games inside that period use its opening ratings. Bands are native 90% ` +
+    `Glicko-2 intervals: rating deviation shrinks as results accumulate and ` +
+    `expands during inactivity. ` +
     `Players below ${D.minGames} games are omitted because their estimates remain ` +
     `too uncertain for a useful ordered list. Ratings themselves do not decay, so ` +
     `\"2026 rosters only\" is on by default instead of mixing eras. A player carries ` +
@@ -1998,8 +2007,8 @@ function openDetail(kind, key, opts) {
     (kind === 'p'
       ? (IS_GLICKO
         ? ', which are the games of the club they turned out for. Glicko-2 updates ' +
-          'the whole event as one rating period; each game line gets an equal share ' +
-          'of the club event move, while the Δ on the event row is the player’s own'
+          `after ${PERIOD_LABEL}; each game line gets an equal share of its period’s ` +
+          'club move, while the Δ on the event row is the player’s own'
         : ', which are the games of the club they turned out for. The per-game move ' +
           'shown there is the club’s; provisional players can move by a different ' +
           'amount, so the Δ on the event row is their own')

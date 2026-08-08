@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from collections import OrderedDict, defaultdict
+from functools import partial
 from pathlib import Path
 
 from analysis.backtest import metrics
@@ -13,6 +14,7 @@ from glicko.engine import Glicko2Config, PlayerGlicko2
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = ROOT / "data" / "glicko"
+PUBLISHED_PERIOD = "day"
 
 
 def published_config() -> Glicko2Config:
@@ -171,11 +173,16 @@ def scorecard(records) -> dict:
 
 def main() -> None:
     output = Path(os.environ.get("GLICKO_OUTPUT_DIR", DEFAULT_OUTPUT))
+    period = os.environ.get("GLICKO_PERIOD", PUBLISHED_PERIOD)
+    if period not in {"game", "day", "tournament"}:
+        raise ValueError(f"unknown Glicko-2 rating period: {period}")
     output.mkdir(parents=True, exist_ok=True)
     records, _model = publish_rankings(
-        cfg=published_config(), replay_fn=replay_glicko, output_dir=output,
+        cfg=published_config(),
+        replay_fn=partial(replay_glicko, period=period),
+        output_dir=output,
     )
-    scores = scorecard(records)
+    scores = {"period": period, **scorecard(records)}
     with open(output / "metrics.json", "w") as handle:
         json.dump(scores, handle, separators=(",", ":"), sort_keys=True)
     for label in ("all", "held_out_2024_2025", "current_2026"):
@@ -186,6 +193,7 @@ def main() -> None:
             f"logloss={result.get('logloss', float('nan')):.6f} "
             f"brier={result.get('brier', float('nan')):.6f}"
         )
+    print(f"rating period: {period}")
     print(f"wrote {output / 'metrics.json'}")
 
 
