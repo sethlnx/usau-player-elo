@@ -212,7 +212,7 @@ class Corpus:
         raw = sorted(load_stat_events(con) + load_ufa_stat_events(con),
                      key=lambda e: e[0])
         self.stat_events = []
-        for end, entries in raw:
+        for end, entries, _etid in raw:
             try:
                 o = _ord(end)
             except (ValueError, TypeError):

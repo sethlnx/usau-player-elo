@@ -35,10 +35,16 @@ def replay_glicko(
     cfg: Glicko2Config,
     stat_events=None,
     on_game=None,
+    on_stats=None,
     *,
     period: str = "tournament",
 ):
-    """Replay game, tournament-day, or whole-tournament rating periods."""
+    """Replay game, tournament-day, or whole-tournament rating periods.
+
+    on_stats is accepted for signature parity with `replay` (both are used as
+    `main`'s pluggable `replay_fn`) but unused: Glicko-2 output is a research
+    comparison, never published, so there is no trajectory to book against.
+    """
     model = PlayerGlicko2(cfg)
     stats = stat_events or []
     stat_index = 0

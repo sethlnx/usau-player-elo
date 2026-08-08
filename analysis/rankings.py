@@ -563,6 +563,7 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=10,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
+                 momentum_strength=0.0,
                  low_info_anchor=0.0, roster_shrink=0.025,
                  division_scale={"club-men": 260.0, "college": 260.0,
                                  "college-d3": 260.0, "club-mixed": 220.0,
@@ -1005,10 +1006,18 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     # so each point is the rating after that subject's final game of the event.
     etev = dict(con.execute("SELECT event_team_id, event_id FROM event_teams"))
     etev.update(european.event_team_event)
+    etev.update(international.event_team_event)
     snaps = defaultdict(dict)
     # The same capture at game grain, club side only: (event, game) -> the two
     # club-rating changes across that game.
     game_deltas = {}
+    # Full-precision rating a subject carried away from their LAST recorded
+    # trajectory point (game or stat event), keyed like snaps. This is what
+    # player_elo.csv publishes as "current": model.players[pid].rating keeps
+    # moving after a stat transfer with no event to attribute it to (a UFA
+    # season with no USAU game backing it), which used to let the CSV report
+    # a rating above every point on the player's own curve.
+    last_rating = {}
 
     def capture(g, home, away, model, pre):
         gkey = (g["event_id"], g["game_key"])
@@ -1024,11 +1033,37 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
                     game_deltas.setdefault(gkey, [0, 0])[n] = round(after - pre[n])
             for p in side:
                 if not str(p).startswith("ghost:"):
-                    snaps[("p", p)][eid] = (round(model.players[p].rating),
-                                            club or "")
+                    rating = model.players[p].rating
+                    snaps[("p", p)][eid] = (round(rating), club or "")
+                    last_rating[p] = rating
+
+    def capture_stats(end, entries, etid, model):
+        # etid is None for a stat event with no rated event of its own (a UFA
+        # season): there is nowhere on the curve to book that movement, so it
+        # updates model state (usage priors, teammates' zero-sum transfer)
+        # but is deliberately left out of both the trajectory and the
+        # published rating.
+        if etid is None:
+            return
+        eid = etev.get(etid)
+        if eid is None:
+            return
+        club = clubs.get(etid)
+        roster = rosters.get(etid)
+        if club and roster:
+            snaps[("c", club)][eid] = (round(model.team_rating(roster)),
+                                        len(roster))
+        for pid, _usage, _quality in entries:
+            if str(pid).startswith("ghost:"):
+                continue
+            rating = model.players[pid].rating
+            prev_club = snaps[("p", pid)].get(eid, (None, ""))[1]
+            snaps[("p", pid)][eid] = (round(rating), prev_club or club or "")
+            last_rating[pid] = rating
 
     records, model = replay_fn(
-        "player", games, rosters, clubs, cfg, stat_events, on_game=capture
+        "player", games, rosters, clubs, cfg, stat_events, on_game=capture,
+        on_stats=capture_stats,
     )
 
     latest = last_appearance(con)
@@ -1110,8 +1145,16 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
         w.writerow(["rank", "player", "player_id", "elo", "sigma", "lo90", "hi90",
                     "games", "last_club", "last_season", "gender", "divisions",
                     "divisions_now"])
+        # Published rating is the LAST value attributed to a real event
+        # (game or stat transfer with an event_team_id), not raw model
+        # state: model.players[pid].rating keeps moving on stat events with
+        # no rated event to book them against (a UFA season with no USAU
+        # game backing it), which used to publish a number above every
+        # point on the player's own trajectory. last_rating falls back to
+        # the model rating for anyone who never took a captured hook path.
         ranked = sorted(
-            ((st.rating, pid, st.games) for pid, st in model.players.items()
+            ((last_rating.get(pid, st.rating), pid, st.games)
+             for pid, st in model.players.items()
              if not str(pid).startswith("ghost:") and st.games >= 5),
             reverse=True)
         for i, (rating, pid, ngames) in enumerate(ranked, 1):

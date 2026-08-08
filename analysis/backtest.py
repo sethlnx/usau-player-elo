@@ -80,10 +80,14 @@ def load_games(con) -> list[dict]:
 def load_stat_events(con) -> list[tuple]:
     """Per-player stat lines grouped by team-event, sorted by event end date.
 
-    Returns [(end_date, [(player_id, usage_index, quality), ...]), ...] where
-    usage_index is the player's share of team G+A+D+T scaled by roster count
-    (1.0 = average teammate) and quality is G+A+D-T. Keyed on end_date so
+    Returns [(end_date, [(player_id, usage_index, quality), ...], event_team_id)]
+    where usage_index is the player's share of team G+A+D+T scaled by roster
+    count (1.0 = average teammate) and quality is G+A+D-T. Keyed on end_date so
     replay ingests an event's stats only after it has finished.
+
+    The event_team_id rides along because ingestion is deferred for leakage
+    safety, NOT because the rating movement happens later: a caller recording
+    trajectories has to book the transfer against the event that earned it.
     """
     rows = con.execute("""
         SELECT re.event_team_id, rp.player_id, ev.end_date,
@@ -108,12 +112,13 @@ def load_stat_events(con) -> list[tuple]:
         g, a, d, t = num(p), num(a), num(d), num(t)
         by_team.setdefault((end, etid), []).append((pid, g + a + d + t, g + a + d - t))
     events = []
-    for (end, _etid), lines in by_team.items():
+    for (end, etid), lines in by_team.items():
         total = sum(inv for _, inv, _ in lines)
         if total <= 0 or len(lines) < 2:
             continue
         n = len(lines)
-        events.append((end, [(pid, inv * n / total, q) for pid, inv, q in lines]))
+        events.append((end, [(pid, inv * n / total, q) for pid, inv, q in lines],
+                       etid))
     events.sort(key=lambda e: e[0])
     return events
 
@@ -129,6 +134,9 @@ def load_ufa_stat_events(con) -> list[tuple]:
     counting-stat form as USAU (G+A+blocks-throwaways-drops), scaled to
     tournament magnitude. Sept 1 dating keeps ingestion after the UFA season
     ends, so nothing leaks into predicting that summer's club games.
+
+    The event_team_id slot is None: a UFA season is not a rated event in this
+    corpus, so the movement it causes has no point to be booked against.
     """
     from ufa.link import resolve_links
     try:
@@ -158,7 +166,7 @@ def load_ufa_stat_events(con) -> list[tuple]:
         entries = [(links[upid], pp * n / total, q * UFA_QUALITY_SCALE)
                    for upid, pp, q in lines if upid in links]
         if len(entries) >= 2:
-            events.append((f"{year}-09-01", entries))
+            events.append((f"{year}-09-01", entries, None))
     events.sort(key=lambda e: e[0])
     return events
 
@@ -234,7 +242,7 @@ def load_maps(con):
 
 
 def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
-           stat_events=None, on_game=None):
+           stat_events=None, on_game=None, on_stats=None):
     """Returns records of (season, expected, outcome) and the final model.
 
     stat_events (from load_stat_events) are ingested strictly walk-forward:
@@ -246,6 +254,14 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
     a caller can record rating trajectories from the one authoritative pass
     rather than monkeypatching the engine or replaying a second time and hoping
     the two agree.
+
+    on_stats(end_date, entries, event_team_id, model) fires after each stat
+    team-event is folded in. Deferred ingestion is a leakage guard, not a
+    claim that the movement happens later — a trajectory caller needs this to
+    book the transfer against the event_team_id that earned it, not against
+    whatever game happens to be replaying when the walk-forward drain fires.
+    event_team_id is None for stat events with no rated event of their own
+    (e.g. a UFA season).
     """
     if model_kind == "player":
         model = PlayerElo(cfg)
@@ -259,7 +275,10 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
     for g in games:
         gdate = g.get("date") or g["sort"][0]
         while si < len(stats) and stats[si][0] < gdate:
-            model.observe_stats(stats[si][1])
+            end, entries, etid = stats[si]
+            model.observe_stats(entries)
+            if on_stats is not None:
+                on_stats(end, entries, etid, model)
             si += 1
         # Regress on ADVANCE only. Keyed on "season changed", a corpus that
         # revisits an earlier season re-fires the offseason regression and
@@ -293,7 +312,16 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
         # when someone asked for a hook.
         pre = (model.pregame_ratings(home, away, division)
                if on_game is not None and isinstance(home, list) else None)
-        exp = model.play_game(home, away, g["home_score"], g["away_score"], division)
+        if model_kind == "player":
+            exp = model.play_game(
+                home, away, g["home_score"], g["away_score"], division,
+                clubs.get(g["home_id"], g["home_id"]),
+                clubs.get(g["away_id"], g["away_id"]),
+            )
+        else:
+            exp = model.play_game(
+                home, away, g["home_score"], g["away_score"], division,
+            )
         outcome = (1.0 if g["home_score"] > g["away_score"]
                    else 0.0 if g["home_score"] < g["away_score"] else 0.5)
         records.append((season, division, g.get("date"), exp, outcome))
