@@ -58,6 +58,16 @@ DIVISIONS = ("club-men", "club-mixed", "club-women", "college", "college-d3",
              "masters-men", "masters-women", "masters-mixed",
              "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
              "greatgrandmasters-men", "greatgrandmasters-women")
+# The GraphQL ingest in scraper/graphql.py also reaches ~25 further
+# divisions (high school, middle school, Youth Club Championships, beach,
+# league, college-mixed — see rankings.PUBLISHED division_scale/bases for
+# the by-analogy priors). They are deliberately NOT added here: several are
+# a handful of events, and the college-women lesson above is exactly this
+# failure mode — a division "descent" barely touches is unidentifiable and
+# the search reports a confident, wrong answer. Score them with
+# analysis.backtest.metrics(divisions=(...)) against the untouched PUBLISHED
+# config instead, the same way masters was reported before it had enough
+# games for its own axes.
 PRUNE_EPS = 0.0003
 
 # Grids. Each axis is (name, values); dict-valued knobs address one key.

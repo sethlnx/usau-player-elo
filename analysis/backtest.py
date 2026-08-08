@@ -223,7 +223,38 @@ def load_ufa_games(con) -> tuple[list, dict, dict]:
 # 2026) collide that way. Mixed and women's keys therefore carry a suffix.
 # The men's group keeps the bare name so every existing key — history.json,
 # CLUB_ALIASES, the U.S. Open tracker — is byte-identical to before.
-CLUB_SUFFIX = {"club-mixed": " (mixed)", "club-women": " (women's)"}
+CLUB_SUFFIX = {"club-mixed": " (mixed)", "club-women": " (women's)",
+               # New GraphQL-only levels: a high school "Warriors" and a
+               # college "Warriors" are unrelated programs, so every new
+               # division gets its own suffix rather than risking a
+               # coincidental name collision in the club-identity map (used
+               # by the TeamElo reset/carry baselines and the display
+               # tables — the player-level PUBLISHED model does not consult
+               # this map for its predictions).
+               "college-mixed": " (college mixed)",
+               "hs-boys": " (HS)", "hs-girls": " (HS girls)",
+               "hs-mixed": " (HS mixed)",
+               "ms-boys": " (MS)", "ms-girls": " (MS girls)",
+               "ms-mixed": " (MS mixed)",
+               "ycc-u20-boys": " (YCC-U20)", "ycc-u20-girls": " (YCC-U20 girls)",
+               "ycc-u20-mixed": " (YCC-U20 mixed)",
+               "ycc-u17-boys": " (YCC-U17)", "ycc-u17-girls": " (YCC-U17 girls)",
+               "ycc-u17-mixed": " (YCC-U17 mixed)",
+               "ycc-u15-boys": " (YCC-U15)", "ycc-u15-girls": " (YCC-U15 girls)",
+               "ycc-u15-mixed": " (YCC-U15 mixed)",
+               "beach-men": " (beach)", "beach-women": " (beach women's)",
+               "beach-mixed": " (beach mixed)",
+               "beach-masters-men": " (beach masters)",
+               "beach-masters-women": " (beach masters women's)",
+               "beach-masters-mixed": " (beach masters mixed)",
+               "beach-grandmasters-men": " (beach grandmasters)",
+               "beach-grandmasters-women": " (beach grandmasters women's)",
+               "beach-grandmasters-mixed": " (beach grandmasters mixed)",
+               "beach-greatgrandmasters-men": " (beach GGM)",
+               "beach-greatgrandmasters-women": " (beach GGM women's)",
+               "beach-greatgrandmasters-mixed": " (beach GGM mixed)",
+               "beach-legends-mixed": " (beach legends)",
+               "league-men": " (league)", "league-mixed": " (league mixed)"}
 
 
 def load_maps(con):

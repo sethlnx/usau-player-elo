@@ -127,6 +127,7 @@ API_DIVISION = {
     "college-d3": ("College", "Men"),
     "college-women": ("College", "Women"),
     "college-women-d3": ("College", "Women"),
+    "college-mixed": ("College", "Mixed"),
     "masters-men": ("Masters", "Men"),
     "masters-women": ("Masters", "Women"),
     "masters-mixed": ("Masters", "Mixed"),
@@ -138,7 +139,69 @@ API_DIVISION = {
     # Offered by the source but never yet contested: zero events in every
     # season 2014-2026 on both the mirror and USAU's own dropdown.
     "greatgrandmasters-mixed": ("Great Grand Masters", "Mixed"),
+    # Youth, high school and beach are their own competition LEVELS upstream,
+    # exactly like the age brackets above, and nothing had ever queried them.
+    # They are where the remaining box scores live: the Youth Club
+    # Championships report G/A/D/T for every player, which is 12,564 stat
+    # lines the corpus did not have, against 48,723 in all of USAU club and
+    # college combined.
+    "hs-boys": ("High School", "Boys"),
+    "hs-girls": ("High School", "Girls"),
+    "hs-mixed": ("High School", "Mixed"),
+    "ms-boys": ("Middle School", "Boys"),
+    "ms-girls": ("Middle School", "Girls"),
+    "ms-mixed": ("Middle School", "Mixed"),
+    "ycc-u20-boys": ("Youth Club U-20", "Boys"),
+    "ycc-u20-girls": ("Youth Club U-20", "Girls"),
+    "ycc-u20-mixed": ("Youth Club U-20", "Mixed"),
+    "ycc-u17-boys": ("Youth Club U-17", "Boys"),
+    "ycc-u17-girls": ("Youth Club U-17", "Girls"),
+    "ycc-u17-mixed": ("Youth Club U-17", "Mixed"),
+    "ycc-u15-boys": ("Youth Club U-15", "Boys"),
+    "ycc-u15-girls": ("Youth Club U-15", "Girls"),
+    "ycc-u15-mixed": ("Youth Club U-15", "Mixed"),
+    # Beach is a different SPORT surface (5v5 on sand), not a weaker grade of
+    # the same one, so every beach bracket is quarantined from its grass
+    # namesake rather than folded into it.
+    "beach-men": ("Beach", "Men"),
+    "beach-women": ("Beach", "Women"),
+    "beach-mixed": ("Beach", "Mixed"),
+    "beach-masters-men": ("Beach Masters", "Men"),
+    "beach-masters-women": ("Beach Masters", "Women"),
+    "beach-masters-mixed": ("Beach Masters", "Mixed"),
+    "beach-grandmasters-men": ("Beach Grand Masters", "Men"),
+    "beach-grandmasters-women": ("Beach Grand Masters", "Women"),
+    "beach-grandmasters-mixed": ("Beach Grand Masters", "Mixed"),
+    "beach-greatgrandmasters-men": ("Beach Great Grand Masters", "Men"),
+    "beach-greatgrandmasters-women": ("Beach Great Grand Masters", "Women"),
+    "beach-greatgrandmasters-mixed": ("Beach Great Grand Masters", "Mixed"),
+    "beach-legends-mixed": ("Beach Legends", "Mixed"),
+    "league-men": ("League", "Men"),
+    "league-mixed": ("League", "Mixed"),
 }
+
+# The mirror files a division as a gender token, optionally followed by an
+# EVENT-LOCAL qualifier: alongside a clean "Men" it emits "Men Upper", "Men
+# Tier 1", "Boys JV", "Womxn's Lower Division" and 100 more one-off labels.
+# Those are pool/tier names an organiser typed, not divisions — 155 raw labels
+# collapse to 48 real (level, gender) pairs — and matching the division string
+# exactly dropped every game played under one. Normalising on the leading
+# gender token recovers them and is total: zero of the 155 labels fail to map.
+GENDERS = ("Mixed", "Women", "Men", "Boys", "Girls", "NA")
+
+
+def gender(label: str | None) -> str | None:
+    """Leading gender token of a mirror division label, or None."""
+    s = (label or "").strip()
+    for g in GENDERS:
+        if s == g or s.startswith(g + " "):
+            return g
+    return None
+
+
+def division_matches(d: dict, level: str, gen: str) -> bool:
+    """Does one `Event.divisions` entry belong to our (level, gender) key?"""
+    return d.get("level") == level and gender(d.get("division")) == gen
 
 
 class GraphQLError(RuntimeError):
@@ -255,7 +318,8 @@ EVENT_LIST = """
 query($f:EventFilter,$n:Int,$a:String){
   events(filter:$f, first:$n, after:$a, orderBy:{field:startDate,direction:asc}){
     pageInfo{ hasNextPage endCursor }
-    edges{ node{ id name url city state startDate endDate } } } }
+    edges{ node{ id name url city state startDate endDate
+                 divisions{ level division } } } } }
 """
 
 EVENT_CORE = """
@@ -316,9 +380,18 @@ def list_events(division: str, season: int) -> list[dict]:
     need it: a genuinely cross-listed event is filed under both levels and
     comes back in a Club query too — measured, 2019 Club/Men returns "2019 USA
     Ultimate North Central Masters Men's Regionals" and 2025 returns none.
+
+    The filter posted to the mirror carries LEVEL and season only, never
+    `division`: the mirror's own division field is an event-local free-text
+    label ("Men Upper", "Boys JV", ...), and its server-side filter matches
+    that string exactly, so filtering on it there would silently drop every
+    event whose organiser typed a qualifier. `gender()` reapplies the real
+    match client-side against every division entry on the event, which is
+    also what lets one event satisfy several of our division keys (a Youth
+    Club Championships entry lists Boys, Girls AND Mixed).
     """
-    level, div = API_DIVISION[division]
-    flt = {"level": level, "division": div,
+    level, gen = API_DIVISION[division]
+    flt = {"level": level,
            "startDateMin": f"{season}-01-01", "startDateMax": f"{season}-12-31"}
     out, after = [], None
     while True:
@@ -330,6 +403,8 @@ def list_events(division: str, season: int) -> list[dict]:
 
     keep = []
     for ev in out:
+        if not any(division_matches(d, level, gen) for d in (ev.get("divisions") or [])):
+            continue  # candidate at this LEVEL, but not our GENDER
         name = ev["name"] or ""
         if division.startswith("college"):
             if _COLLEGE_EXCLUDE.search(name):
@@ -348,13 +423,17 @@ def fetch_event(event_api_id: str, division: str) -> dict | None:
 
     Returns None when the event has no page for this division.
 
-    A division is matched on LEVEL AND DIVISION, never division alone. One
-    event routinely files the same division name at several levels — the U.S.
+    A division is matched on LEVEL AND GENDER, never the raw division string.
+    One event routinely files the same gender at several levels — the U.S.
     Open carries Mixed/Club beside Mixed/Youth Club U-20, the Beach
-    Championships Men/Club beside Men/Grand Masters — so matching on the name
-    alone picks whichever the mirror happens to list first and can rate a youth
-    or masters squad on the open club scale. `_CLUB_EXCLUDE` cannot catch that:
-    it reads the EVENT name, and "Garden State (Club) 2018" is not suspicious.
+    Championships Men/Club beside Men/Grand Masters — so matching on gender
+    alone picks whichever the mirror happens to list first and can rate a
+    youth or masters squad on the open club scale. `_CLUB_EXCLUDE` cannot
+    catch that: it reads the EVENT name, and "Garden State (Club) 2018" is
+    not suspicious. A single event CAN also list our gender more than once
+    at the SAME level — an organiser splitting "Men Upper"/"Men Lower" into
+    separate divisions objects — so every matching entry is merged rather
+    than taking the first.
 
     Team rows are seeded from the DIVISION's membership list, which is
     authoritative, and `Event.teams` then only adds the per-event stat lines.
@@ -369,16 +448,15 @@ def fetch_event(event_api_id: str, division: str) -> dict | None:
     TBD (null team ids) — the division-scoped connection is otherwise
     equivalent but would need re-fetching every division to paginate.
     """
-    want_level, want_div = API_DIVISION[division]
+    want_level, want_gen = API_DIVISION[division]
     core = post(EVENT_CORE, {"id": event_api_id})["event"]
     divs = core.get("divisions") or []
-    mine = next((d for d in divs if d.get("division") == want_div
-                 and d.get("level") == want_level), None)
-    if mine is None:
+    mine = [d for d in divs if division_matches(d, want_level, want_gen)]
+    if not mine:
         return None
 
     members = {t["team"]["id"]: t["team"]
-               for t in (mine.get("teams") or []) if t.get("team")}
+               for d in mine for t in (d.get("teams") or []) if t.get("team")}
     sole = len(divs) == 1
 
     teams = {tid: {

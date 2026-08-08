@@ -20,8 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (DB_PATH, load_games, load_maps,
                                load_stat_events, load_ufa_stat_events, replay)
-from analysis.euf_ratings import (EUF_DB, EuropeanInputs, load_european_inputs,
-                                  merge_inputs)
+from analysis.euf_ratings import (EUF_DB, Appearance, EuropeanInputs,
+                                  load_european_inputs, merge_inputs)
 from analysis.international_ratings import load_international_inputs
 from elo.engine import EloConfig
 
@@ -93,11 +93,16 @@ Z90 = 1.645  # two-sided 90% interval
 
 
 def last_appearance(con):
-    """player_id -> (display_name, club, season) for the latest event seen."""
+    """player_id -> Appearance for the latest USAU event seen.
+
+    USAU rosters are never national teams, so every row here is a club
+    appearance (college included — that split is handled by callers, not
+    by this source).
+    """
     rows = con.execute("""
         SELECT rp.player_id, p.display_name,
                COALESCE(et.full_name, et.display_name) AS club,
-               ev.season, ev.start_date
+               ev.season, COALESCE(ev.start_date, '')
         FROM roster_players rp
         JOIN players p USING (player_id)
         JOIN event_teams et USING (event_team_id)
@@ -105,8 +110,8 @@ def last_appearance(con):
         ORDER BY ev.start_date
     """).fetchall()
     latest = {}
-    for pid, name, club, season, _ in rows:
-        latest[pid] = (name, club, season)
+    for pid, name, club, season, start in rows:
+        latest[pid] = Appearance(name, club, season, start)
     return latest
 
 
@@ -591,8 +596,44 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                                  "greatgrandmasters-men": 260.0,
                                  "masters-women": 200.0, "grandmasters-women": 200.0,
                                  "greatgrandmasters-women": 200.0,
-                                 "masters-mixed": 220.0, "grandmasters-mixed": 220.0,
-                                 "greatgrandmasters-mixed": 220.0},
+                                "masters-mixed": 220.0, "grandmasters-mixed": 220.0,
+                                "greatgrandmasters-mixed": 220.0,
+                                # Every division below is new (GraphQL-only
+                                # levels never previously queried: see
+                                # scraper/graphql.py API_DIVISION). None has
+                                # been through descent.py — there was no game
+                                # data to fit against until this ingest — so
+                                # every value is an explicit BY-ANALOGY prior,
+                                # picked the same way masters started out:
+                                # narrower scale for the girls'/women's-style
+                                # gender split (200), the open-club/boys split
+                                # keeps 260, mixed splits the difference at
+                                # 220. Beach keeps its grass counterpart's
+                                # scale since it draws from the same player
+                                # pool; ages within beach take the identical
+                                # value for the same reason masters does
+                                # (a separate series, not a weaker one).
+                                "college-mixed": 220.0,
+                                "hs-boys": 260.0, "hs-girls": 200.0, "hs-mixed": 220.0,
+                                "ms-boys": 260.0, "ms-girls": 200.0, "ms-mixed": 220.0,
+                                "ycc-u20-boys": 260.0, "ycc-u20-girls": 200.0,
+                                "ycc-u20-mixed": 220.0,
+                                "ycc-u17-boys": 260.0, "ycc-u17-girls": 200.0,
+                                "ycc-u17-mixed": 220.0,
+                                "ycc-u15-boys": 260.0, "ycc-u15-girls": 200.0,
+                                "ycc-u15-mixed": 220.0,
+                                "beach-men": 260.0, "beach-women": 200.0,
+                                "beach-mixed": 220.0,
+                                "beach-masters-men": 260.0, "beach-masters-women": 200.0,
+                                "beach-masters-mixed": 220.0,
+                                "beach-grandmasters-men": 260.0,
+                                "beach-grandmasters-women": 200.0,
+                                "beach-grandmasters-mixed": 220.0,
+                                "beach-greatgrandmasters-men": 260.0,
+                                "beach-greatgrandmasters-women": 200.0,
+                                "beach-greatgrandmasters-mixed": 220.0,
+                                "beach-legends-mixed": 220.0,
+                                "league-men": 260.0, "league-mixed": 220.0},
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0,
@@ -627,8 +668,52 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                                  "greatgrandmasters-men": 1500.0,
                                  "masters-women": 1600.0, "grandmasters-women": 1600.0,
                                  "greatgrandmasters-women": 1600.0,
-                                 "masters-mixed": 1500.0, "grandmasters-mixed": 1500.0,
-                                 "greatgrandmasters-mixed": 1500.0})
+                                "masters-mixed": 1500.0, "grandmasters-mixed": 1500.0,
+                                "greatgrandmasters-mixed": 1500.0,
+                                # UNTUNED priors for the divisions this
+                                # ingest adds — see the matching division_scale
+                                # comment above for why none has been through
+                                # descent.py yet. Ordered on the same ladder
+                                # engine.py already encodes (club > college >
+                                # college-d3): school levels enter BELOW
+                                # college-d3 and step down with age (high
+                                # school, then middle school); Youth Club
+                                # Championship brackets are age-restricted
+                                # CLUB talent, not school talent, so they sit
+                                # between college and club-d3 and step down
+                                # the same way with age. Beach draws from the
+                                # same player pool as its grass counterpart
+                                # (many entrants play both), so it inherits
+                                # the grass base exactly, gender for gender,
+                                # at every age bracket — the same "beach is a
+                                # different surface, not a weaker level"
+                                # reasoning masters already established for
+                                # age brackets. League is casual/recreational
+                                # play open to any skill level; without a
+                                # sharper prior it takes the college-d3 base
+                                # as the closest documented "developmental"
+                                # anchor.
+                                "college-mixed": 1250.0,
+                                "hs-boys": 900.0, "hs-girls": 900.0, "hs-mixed": 900.0,
+                                "ms-boys": 700.0, "ms-girls": 700.0, "ms-mixed": 700.0,
+                                "ycc-u20-boys": 1200.0, "ycc-u20-girls": 1200.0,
+                                "ycc-u20-mixed": 1200.0,
+                                "ycc-u17-boys": 1000.0, "ycc-u17-girls": 1000.0,
+                                "ycc-u17-mixed": 1000.0,
+                                "ycc-u15-boys": 800.0, "ycc-u15-girls": 800.0,
+                                "ycc-u15-mixed": 800.0,
+                                "beach-men": 1500.0, "beach-women": 1600.0,
+                                "beach-mixed": 1500.0,
+                                "beach-masters-men": 1500.0, "beach-masters-women": 1600.0,
+                                "beach-masters-mixed": 1500.0,
+                                "beach-grandmasters-men": 1500.0,
+                                "beach-grandmasters-women": 1600.0,
+                                "beach-grandmasters-mixed": 1500.0,
+                                "beach-greatgrandmasters-men": 1500.0,
+                                "beach-greatgrandmasters-women": 1600.0,
+                                "beach-greatgrandmasters-mixed": 1500.0,
+                                "beach-legends-mixed": 1500.0,
+                                "league-men": 1250.0, "league-mixed": 1250.0})
 # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
 # both "c", which silently labelled every club event as college. Sixteen
 # codes now. Codes are positional: history.json stores them per event,
@@ -641,7 +726,23 @@ DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "grandmasters-men": 10, "grandmasters-women": 11, "grandmasters-mixed": 12,
            "greatgrandmasters-men": 13, "greatgrandmasters-women": 14,
            "greatgrandmasters-mixed": 15,
-           "euf-open": 16, "euf-mixed": 17, "euf-women": 18}
+           "euf-open": 16, "euf-mixed": 17, "euf-women": 18,
+           # New GraphQL-only levels, appended (never reorder existing codes).
+           "college-mixed": 19,
+           "hs-boys": 20, "hs-girls": 21, "hs-mixed": 22,
+           "ms-boys": 23, "ms-girls": 24, "ms-mixed": 25,
+           "ycc-u20-boys": 26, "ycc-u20-girls": 27, "ycc-u20-mixed": 28,
+           "ycc-u17-boys": 29, "ycc-u17-girls": 30, "ycc-u17-mixed": 31,
+           "ycc-u15-boys": 32, "ycc-u15-girls": 33, "ycc-u15-mixed": 34,
+           "beach-men": 35, "beach-women": 36, "beach-mixed": 37,
+           "beach-masters-men": 38, "beach-masters-women": 39,
+           "beach-masters-mixed": 40,
+           "beach-grandmasters-men": 41, "beach-grandmasters-women": 42,
+           "beach-grandmasters-mixed": 43,
+           "beach-greatgrandmasters-men": 44, "beach-greatgrandmasters-women": 45,
+           "beach-greatgrandmasters-mixed": 46,
+           "beach-legends-mixed": 47,
+           "league-men": 48, "league-mixed": 49}
 # Divisions the team tables cover, in display order. College is included so
 # the club tables reach as far as the player table and Trends do, but its
 # three roster bases carry less information than a club division's: a college
@@ -1067,9 +1168,13 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     )
 
     latest = last_appearance(con)
+    latest_club = dict(latest)
     for pid, appearance in european.latest.items():
-        if pid not in latest or appearance[2] >= latest[pid][2]:
+        if pid not in latest or appearance.order >= latest[pid].order:
             latest[pid] = appearance
+    for pid, appearance in european.latest_club.items():
+        if pid not in latest_club or appearance.order >= latest_club[pid].order:
+            latest_club[pid] = appearance
     # Gender-matching group, decided in identity.resolve: 'm' if the identity
     # ever played a men's division, 'w' for the women's division, else the
     # pronoun majority off their mixed roster rows, else '' for unknown. It
@@ -1158,7 +1263,11 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
              if not str(pid).startswith("ghost:") and st.games >= 5),
             reverse=True)
         for i, (rating, pid, ngames) in enumerate(ranked, 1):
-            name, club, season = latest.get(pid, ("?", "?", "?"))
+            appearance = latest.get(pid)
+            name = appearance.name if appearance else "?"
+            club_appearance = latest_club.get(pid) or appearance
+            club = club_appearance.club if club_appearance else "?"
+            season = club_appearance.season if club_appearance else "?"
             s = getattr(model.players[pid], "rd", rating_sigma(ngames))
             w.writerow([i, name, pid, round(rating, 1), round(s, 1),
                         round(rating - Z90 * s, 1), round(rating + Z90 * s, 1),

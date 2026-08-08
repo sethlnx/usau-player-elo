@@ -1,82 +1,82 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
-1,Red Tide,red tide,club-men,1976.7,25,2026,Vacationland 2026,2026-08-08
-2,Sprout,sprout,club-men,1916.2,20,2026,Vacationland 2026,2026-08-08
-3,Pittsburgh Temper,pittsburgh temper,club-men,1864.5,24,2026,Vacationland 2026,2026-08-08
-4,Phoenix,phoenix,club-men,1850.8,22,2026,Vacationland 2026,2026-08-08
-5,Colt,colt,club-men,1830.0,25,2026,Vacationland 2026,2026-08-08
-6,Iditarod,iditarod,club-men,1774.0,21,2026,Vacationland 2026,2026-08-08
-7,WOMP,womp,club-men,1745.1,15,2026,Kentucky Fried Classic 2026,2026-08-08
-8,Lantern,lantern,club-men,1744.0,26,2026,Vacationland 2026,2026-08-08
-9,Red Circus,red circus,club-men,1736.9,21,2026,Vacationland 2026,2026-08-08
-10,DAPPER,dapper,club-men,1713.8,22,2026,Vacationland 2026,2026-08-08
-11,Shade,shade,club-men,1703.7,26,2026,Vacationland 2026,2026-08-08
-12,Ascension,ascension,club-men,1701.8,18,2026,Vacationland 2026,2026-08-08
-13,Apollo,apollo,club-men,1700.1,25,2026,Kentucky Fried Classic 2026,2026-08-08
-14,Pittsburgh Stealers,pittsburgh stealers,club-men,1694.3,18,2026,Kentucky Fried Classic 2026,2026-08-08
-15,BAG,bag,club-men,1679.0,26,2026,Vacationland 2026,2026-08-08
-16,Big Wrench,big wrench,club-men,1659.1,24,2026,Vacationland 2026,2026-08-08
-17,Endgame,endgame,club-men,1657.7,21,2026,Kentucky Fried Classic 2026,2026-08-08
-18,Black Lung,black lung,club-men,1654.8,19,2026,Kentucky Fried Classic 2026,2026-08-08
-19,Odyssey,odyssey,club-men,1617.5,24,2026,Vacationland 2026,2026-08-08
-20,Skeleton Squad,skeleton squad,club-men,1605.5,22,2026,Vacationland 2026,2026-08-08
-21,Resurgam Ultimate,resurgam ultimate,club-men,1589.6,23,2026,Vacationland 2026,2026-08-08
-22,Connecticut 9 to 5,connecticut 9 to 5,club-men,1474.9,20,2026,Vacationland 2026,2026-08-08
-23,Wave,wave,club-men,1467.9,25,2026,Vacationland 2026,2026-08-08
-24,On Ramp,on ramp,club-men,1419.9,22,2026,Kentucky Fried Classic 2026,2026-08-08
-25,East Bay Earthworms,east bay earthworms,club-men,1384.4,5,2026,Kentucky Fried Classic 2026,2026-08-08
-26,Maumee Boys,maumee boys,club-men,1346.6,18,2026,Kentucky Fried Classic 2026,2026-08-08
-27,MBTA,mbta,club-men,1338.7,26,2026,Vacationland 2026,2026-08-08
-1,Big Rig,big rig (mixed),club-mixed,1875.9,26,2026,Vacationland 2026,2026-08-08
-2,Fireball,fireball (mixed),club-mixed,1819.3,14,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
-3,The Buoy Association,the buoy association (mixed),club-mixed,1818.6,26,2026,Vacationland 2026,2026-08-08
-4,Zero Strategy,zero strategy (mixed),club-mixed,1801.6,26,2026,Vacationland 2026,2026-08-08
-5,Landsharks,landsharks (mixed),club-mixed,1777.2,24,2026,Flower Power 2026,2026-08-08
-6,Darkwing,darkwing (mixed),club-mixed,1771.8,25,2026,Vacationland 2026,2026-08-08
-7,Lights Out,lights out (mixed),club-mixed,1768.8,25,2026,Portland Kleinman 2026,2026-08-08
-8,Porch Bears,porch bears (mixed),club-mixed,1749.9,17,2026,Portland Kleinman 2026,2026-08-08
-9,HVAC,hvac (mixed),club-mixed,1727.1,17,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
-10,Temu Fitness Number One,temu fitness number one (mixed),club-mixed,1686.0,22,2026,Vacationland 2026,2026-08-08
-11,Viking Blood,viking blood (mixed),club-mixed,1673.8,14,2026,Portland Kleinman 2026,2026-08-08
-12,Shipwreck,shipwreck (mixed),club-mixed,1670.0,26,2026,Flower Power 2026,2026-08-08
-13,Hive,hive (mixed),club-mixed,1665.9,26,2026,Portland Kleinman 2026,2026-08-08
-14,Heat Wave,heat wave (mixed),club-mixed,1664.9,23,2026,Portland Kleinman 2026,2026-08-08
-15,Indiana Pterodactyl Attack (IPA),indiana pterodactyl attack (ipa) (mixed),club-mixed,1658.7,22,2026,Kentucky Fried Classic 2026,2026-08-08
-16,Seattle Soft Serve,seattle soft serve (mixed),club-mixed,1646.3,24,2026,Portland Kleinman 2026,2026-08-08
-17,Party Wave,party wave (mixed),club-mixed,1639.5,22,2026,Portland Kleinman 2026,2026-08-08
-18,Family Style,family style (mixed),club-mixed,1621.2,24,2026,Flower Power 2026,2026-08-08
-19,Pegasus,pegasus (mixed),club-mixed,1620.0,22,2026,Portland Kleinman 2026,2026-08-08
-20,Lampshade,lampshade (mixed),club-mixed,1612.0,25,2026,Vacationland 2026,2026-08-08
-21,Robot,robot (mixed),club-mixed,1606.9,21,2026,Flower Power 2026,2026-08-08
-22,Taproot,taproot (mixed),club-mixed,1595.9,23,2026,Vacationland 2026,2026-08-08
-23,Sin Nombre,sin nombre (mixed),club-mixed,1595.3,26,2026,Flower Power 2026,2026-08-08
-24,Drip,drip (mixed),club-mixed,1592.7,26,2026,Portland Kleinman 2026,2026-08-08
-25,Squid Inc.,squid inc. (mixed),club-mixed,1589.4,21,2026,Portland Kleinman 2026,2026-08-08
-26,solAR,solar (mixed),club-mixed,1581.5,25,2026,Kentucky Fried Classic 2026,2026-08-08
-27,Damfast and Friends,damfast and friends (mixed),club-mixed,1577.4,14,2026,Vacationland 2026,2026-08-08
-28,T Party,t party (mixed),club-mixed,1573.3,20,2026,Vacationland 2026,2026-08-08
-29,Karma,karma (mixed),club-mixed,1570.1,24,2026,Flower Power 2026,2026-08-08
-30,Choco Ghost House,choco ghost house (mixed),club-mixed,1567.8,20,2026,Portland Kleinman 2026,2026-08-08
-31,Rainbow,rainbow (mixed),club-mixed,1559.6,23,2026,Vacationland 2026,2026-08-08
-32,Aged Cheddar,aged cheddar (mixed),club-mixed,1552.6,22,2026,Vacationland 2026,2026-08-08
-33,BOP,bop (mixed),club-mixed,1533.8,21,2026,Portland Kleinman 2026,2026-08-08
-34,Igneous Ultimate,igneous ultimate (mixed),club-mixed,1531.7,18,2026,Portland Kleinman 2026,2026-08-08
-35,Nova,nova (mixed),club-mixed,1523.4,24,2026,Portland Kleinman 2026,2026-08-08
-36,Spoiler Alert,spoiler alert (mixed),club-mixed,1517.8,21,2026,Flower Power 2026,2026-08-08
-37,Grit City,grit city (mixed),club-mixed,1511.2,25,2026,Portland Kleinman 2026,2026-08-08
-38,Phlagstaff Ultimate,phlagstaff ultimate (mixed),club-mixed,1505.4,20,2026,Flower Power 2026,2026-08-08
-39,Goose Run,goose run (mixed),club-mixed,1492.4,25,2026,Portland Kleinman 2026,2026-08-08
-40,Erosion,erosion (mixed),club-mixed,1483.0,23,2026,Flower Power 2026,2026-08-08
-41,Lightning,lightning (mixed),club-mixed,1479.2,21,2026,Kentucky Fried Classic 2026,2026-08-08
-42,Goose Chase,goose chase (mixed),club-mixed,1466.1,24,2026,Flower Power 2026,2026-08-08
-43,Scarecrow,scarecrow (mixed),club-mixed,1448.0,25,2026,Vacationland 2026,2026-08-08
-44,Y'all,y'all (mixed),club-mixed,1423.1,17,2026,Flower Power 2026,2026-08-08
-45,UV Rays,uv rays (mixed),club-mixed,1421.4,16,2026,Vacationland 2026,2026-08-08
-46,VU,vu (mixed),club-mixed,1388.9,25,2026,Portland Kleinman 2026,2026-08-08
-47,Lobster Disque,lobster disque (mixed),club-mixed,1320.1,10,2026,Vacationland 2026,2026-08-08
-48,Hartford Current,hartford current (mixed),club-mixed,1265.4,19,2026,Vacationland 2026,2026-08-08
-49,SkyLab,skylab (mixed),club-mixed,1245.0,20,2026,Portland Kleinman 2026,2026-08-08
-1,Dish,dish (women's),club-women,1529.4,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
-2,Frosted,frosted (women's),club-women,1474.7,9,2026,Cooler Classic 37 (Men & Women),2026-08-08
-3,Compact Disc,compact disc (women's),club-women,1424.9,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
-4,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1367.6,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
-5,Lakeshore Drive,lakeshore drive (women's),club-women,1193.1,16,2026,Cooler Classic 37 (Men & Women),2026-08-08
+1,Red Tide,red tide,club-men,1919.9,25,2026,Vacationland 2026,2026-08-08
+2,Sprout,sprout,club-men,1857.4,20,2026,Vacationland 2026,2026-08-08
+3,Pittsburgh Temper,pittsburgh temper,club-men,1815.8,24,2026,Vacationland 2026,2026-08-08
+4,Phoenix,phoenix,club-men,1807.3,22,2026,Vacationland 2026,2026-08-08
+5,Colt,colt,club-men,1787.9,25,2026,Vacationland 2026,2026-08-08
+6,Iditarod,iditarod,club-men,1722.8,21,2026,Vacationland 2026,2026-08-08
+7,Lantern,lantern,club-men,1701.0,26,2026,Vacationland 2026,2026-08-08
+8,Red Circus,red circus,club-men,1691.2,21,2026,Vacationland 2026,2026-08-08
+9,WOMP,womp,club-men,1686.8,15,2026,Kentucky Fried Classic 2026,2026-08-08
+10,DAPPER,dapper,club-men,1668.2,22,2026,Vacationland 2026,2026-08-08
+11,Apollo,apollo,club-men,1662.3,25,2026,Kentucky Fried Classic 2026,2026-08-08
+12,Ascension,ascension,club-men,1654.3,18,2026,Vacationland 2026,2026-08-08
+13,Shade,shade,club-men,1644.1,26,2026,Vacationland 2026,2026-08-08
+14,Pittsburgh Stealers,pittsburgh stealers,club-men,1628.9,18,2026,Kentucky Fried Classic 2026,2026-08-08
+15,BAG,bag,club-men,1627.6,26,2026,Vacationland 2026,2026-08-08
+16,Big Wrench,big wrench,club-men,1614.9,24,2026,Vacationland 2026,2026-08-08
+17,Black Lung,black lung,club-men,1610.9,19,2026,Kentucky Fried Classic 2026,2026-08-08
+18,Endgame,endgame,club-men,1610.5,21,2026,Kentucky Fried Classic 2026,2026-08-08
+19,Skeleton Squad,skeleton squad,club-men,1596.5,22,2026,Vacationland 2026,2026-08-08
+20,Odyssey,odyssey,club-men,1553.8,24,2026,Vacationland 2026,2026-08-08
+21,Resurgam Ultimate,resurgam ultimate,club-men,1527.9,23,2026,Vacationland 2026,2026-08-08
+22,Connecticut 9 to 5,connecticut 9 to 5,club-men,1439.6,20,2026,Vacationland 2026,2026-08-08
+23,Wave,wave,club-men,1428.8,25,2026,Vacationland 2026,2026-08-08
+24,On Ramp,on ramp,club-men,1356.8,22,2026,Kentucky Fried Classic 2026,2026-08-08
+25,East Bay Earthworms,east bay earthworms,club-men,1347.9,5,2026,Kentucky Fried Classic 2026,2026-08-08
+26,Maumee Boys,maumee boys,club-men,1311.4,18,2026,Kentucky Fried Classic 2026,2026-08-08
+27,MBTA,mbta,club-men,1301.1,26,2026,Vacationland 2026,2026-08-08
+1,Big Rig,big rig (mixed),club-mixed,1843.3,26,2026,Vacationland 2026,2026-08-08
+2,Fireball,fireball (mixed),club-mixed,1787.6,14,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
+3,The Buoy Association,the buoy association (mixed),club-mixed,1786.7,26,2026,Vacationland 2026,2026-08-08
+4,Zero Strategy,zero strategy (mixed),club-mixed,1762.6,26,2026,Vacationland 2026,2026-08-08
+5,Lights Out,lights out (mixed),club-mixed,1743.1,25,2026,Portland Kleinman 2026,2026-08-08
+6,Darkwing,darkwing (mixed),club-mixed,1736.4,25,2026,Vacationland 2026,2026-08-08
+7,Porch Bears,porch bears (mixed),club-mixed,1728.2,17,2026,Portland Kleinman 2026,2026-08-08
+8,Landsharks,landsharks (mixed),club-mixed,1714.8,24,2026,Flower Power 2026,2026-08-08
+9,HVAC,hvac (mixed),club-mixed,1683.0,17,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
+10,Viking Blood,viking blood (mixed),club-mixed,1647.6,14,2026,Portland Kleinman 2026,2026-08-08
+11,Temu Fitness Number One,temu fitness number one (mixed),club-mixed,1646.9,22,2026,Vacationland 2026,2026-08-08
+12,Shipwreck,shipwreck (mixed),club-mixed,1641.8,26,2026,Flower Power 2026,2026-08-08
+13,Heat Wave,heat wave (mixed),club-mixed,1641.4,23,2026,Portland Kleinman 2026,2026-08-08
+14,Hive,hive (mixed),club-mixed,1633.1,26,2026,Portland Kleinman 2026,2026-08-08
+15,Seattle Soft Serve,seattle soft serve (mixed),club-mixed,1619.1,24,2026,Portland Kleinman 2026,2026-08-08
+16,Party Wave,party wave (mixed),club-mixed,1616.9,22,2026,Portland Kleinman 2026,2026-08-08
+17,Indiana Pterodactyl Attack (IPA),indiana pterodactyl attack (ipa) (mixed),club-mixed,1603.3,22,2026,Kentucky Fried Classic 2026,2026-08-08
+18,Family Style,family style (mixed),club-mixed,1595.2,24,2026,Flower Power 2026,2026-08-08
+19,Pegasus,pegasus (mixed),club-mixed,1590.5,22,2026,Portland Kleinman 2026,2026-08-08
+20,Robot,robot (mixed),club-mixed,1584.1,21,2026,Flower Power 2026,2026-08-08
+21,Lampshade,lampshade (mixed),club-mixed,1576.9,25,2026,Vacationland 2026,2026-08-08
+22,Taproot,taproot (mixed),club-mixed,1569.9,23,2026,Vacationland 2026,2026-08-08
+23,Drip,drip (mixed),club-mixed,1566.9,26,2026,Portland Kleinman 2026,2026-08-08
+24,Sin Nombre,sin nombre (mixed),club-mixed,1557.7,26,2026,Flower Power 2026,2026-08-08
+25,Squid Inc.,squid inc. (mixed),club-mixed,1549.2,21,2026,Portland Kleinman 2026,2026-08-08
+26,solAR,solar (mixed),club-mixed,1548.7,25,2026,Kentucky Fried Classic 2026,2026-08-08
+27,Karma,karma (mixed),club-mixed,1539.8,24,2026,Flower Power 2026,2026-08-08
+28,T Party,t party (mixed),club-mixed,1539.7,20,2026,Vacationland 2026,2026-08-08
+29,Choco Ghost House,choco ghost house (mixed),club-mixed,1536.5,20,2026,Portland Kleinman 2026,2026-08-08
+30,Rainbow,rainbow (mixed),club-mixed,1525.9,23,2026,Vacationland 2026,2026-08-08
+31,Aged Cheddar,aged cheddar (mixed),club-mixed,1519.4,22,2026,Vacationland 2026,2026-08-08
+32,BOP,bop (mixed),club-mixed,1509.4,21,2026,Portland Kleinman 2026,2026-08-08
+33,Damfast and Friends,damfast and friends (mixed),club-mixed,1507.7,14,2026,Vacationland 2026,2026-08-08
+34,Nova,nova (mixed),club-mixed,1505.9,24,2026,Portland Kleinman 2026,2026-08-08
+35,Phlagstaff Ultimate,phlagstaff ultimate (mixed),club-mixed,1494.1,20,2026,Flower Power 2026,2026-08-08
+36,Spoiler Alert,spoiler alert (mixed),club-mixed,1489.1,21,2026,Flower Power 2026,2026-08-08
+37,Grit City,grit city (mixed),club-mixed,1482.6,25,2026,Portland Kleinman 2026,2026-08-08
+38,Igneous Ultimate,igneous ultimate (mixed),club-mixed,1458.6,18,2026,Portland Kleinman 2026,2026-08-08
+39,Erosion,erosion (mixed),club-mixed,1457.3,23,2026,Flower Power 2026,2026-08-08
+40,Goose Run,goose run (mixed),club-mixed,1443.6,25,2026,Portland Kleinman 2026,2026-08-08
+41,Goose Chase,goose chase (mixed),club-mixed,1440.8,24,2026,Flower Power 2026,2026-08-08
+42,Lightning,lightning (mixed),club-mixed,1432.5,21,2026,Kentucky Fried Classic 2026,2026-08-08
+43,Scarecrow,scarecrow (mixed),club-mixed,1408.2,25,2026,Vacationland 2026,2026-08-08
+44,UV Rays,uv rays (mixed),club-mixed,1386.1,16,2026,Vacationland 2026,2026-08-08
+45,Y'all,y'all (mixed),club-mixed,1377.1,17,2026,Flower Power 2026,2026-08-08
+46,VU,vu (mixed),club-mixed,1365.0,25,2026,Portland Kleinman 2026,2026-08-08
+47,Lobster Disque,lobster disque (mixed),club-mixed,1241.4,10,2026,Vacationland 2026,2026-08-08
+48,Hartford Current,hartford current (mixed),club-mixed,1238.4,19,2026,Vacationland 2026,2026-08-08
+49,SkyLab,skylab (mixed),club-mixed,1211.6,20,2026,Portland Kleinman 2026,2026-08-08
+1,Dish,dish (women's),club-women,1486.5,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
+2,Frosted,frosted (women's),club-women,1447.9,9,2026,Cooler Classic 37 (Men & Women),2026-08-08
+3,Compact Disc,compact disc (women's),club-women,1407.8,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
+4,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1325.8,14,2026,Cooler Classic 37 (Men & Women),2026-08-08
+5,Lakeshore Drive,lakeshore drive (women's),club-women,1156.2,16,2026,Cooler Classic 37 (Men & Women),2026-08-08

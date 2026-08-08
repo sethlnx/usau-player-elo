@@ -53,11 +53,29 @@ AMBIGUITY_REPORT = DB_PATH.parent / "ambiguities.csv"
 # bridge, and a mixed player's group is read off the Pronouns column USAU
 # publishes on the roster page.
 MENS_DIVISIONS = {"club-men", "college", "college-d3",
-                  "masters-men", "grandmasters-men", "greatgrandmasters-men"}
+                  "masters-men", "grandmasters-men", "greatgrandmasters-men",
+                  # New GraphQL-only levels. A single-gender division splits
+                  # identity the same way regardless of age or surface: a
+                  # "boys" bracket is exclusively male entrants just as
+                  # "men" is, and beach draws from the same gendered player
+                  # pool as its grass counterpart.
+                  "hs-boys", "ms-boys",
+                  "ycc-u20-boys", "ycc-u17-boys", "ycc-u15-boys",
+                  "beach-men", "beach-masters-men", "beach-grandmasters-men",
+                  "beach-greatgrandmasters-men", "league-men"}
 WOMENS_DIVISIONS = {"club-women", "college-women", "college-women-d3",
-                    "masters-women", "grandmasters-women", "greatgrandmasters-women"}
+                    "masters-women", "grandmasters-women", "greatgrandmasters-women",
+                    "hs-girls", "ms-girls",
+                    "ycc-u20-girls", "ycc-u17-girls", "ycc-u15-girls",
+                    "beach-women", "beach-masters-women", "beach-grandmasters-women",
+                    "beach-greatgrandmasters-women"}
 MIXED_DIVISIONS = {"club-mixed", "masters-mixed", "grandmasters-mixed",
-                   "greatgrandmasters-mixed"}
+                   "greatgrandmasters-mixed",
+                   "college-mixed", "hs-mixed", "ms-mixed",
+                   "ycc-u20-mixed", "ycc-u17-mixed", "ycc-u15-mixed",
+                   "beach-mixed", "beach-masters-mixed", "beach-grandmasters-mixed",
+                   "beach-greatgrandmasters-mixed", "beach-legends-mixed",
+                   "league-mixed"}
 
 
 def division_gender(division: str) -> str | None:
