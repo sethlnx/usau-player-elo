@@ -18,6 +18,7 @@ from analysis.backtest import CLUB_SUFFIX, norm_club
 from analysis.euf_overlap import exact_name_key
 from analysis.euf_ratings import (
     EUF_DB,
+    Appearance,
     EuropeanInputs,
     _usa_bridge_candidates,
     compact_name_key,
@@ -159,6 +160,7 @@ def load_international_inputs(
         source_team: dict[str, str] = {}
         team_club: dict[str, str] = {}
         team_display: dict[str, str] = {}
+        team_is_club: dict[str, bool] = {}
         for row in event_rows:
             event_id = -int(row["event_id"])
             event_team_id = f"wfdf:{row['event_team_id']}"
@@ -180,13 +182,17 @@ def load_international_inputs(
                 if club is None and eu_division is not None:
                     club = _one(eu_clubs.get((eu_division, key)))
             if club is None:
-                kind = "national" if spec and spec.competition == "national" else "club"
+                is_national = bool(spec and spec.competition == "national")
+                kind = "national" if is_national else "club"
                 club = (
                     f"wfdf-{kind}:{row['division']}:"
                     f"{team_name_key(row['country'])}:{key}"
                 )
+            else:
+                is_national = False
             team_club[row["event_team_id"]] = club
             team_display[row["event_team_id"]] = name
+            team_is_club[row["event_team_id"]] = not is_national
             out.clubs[event_team_id] = club
             prior = out.team_names.get(club)
             dated_name = (row["start_date"] or "", name)
@@ -196,6 +202,7 @@ def load_international_inputs(
         assignments: dict[tuple[str, str, str | None], tuple[int, str, str]] = {}
         appearances: set[tuple[int, int, str, str]] = set()
         latest_order: dict[int, tuple[int, str]] = {}
+        latest_club_order: dict[int, tuple[int, str]] = {}
         for row in roster_rows:
             name_key = exact_name_key(row["name"])
             compact = compact_name_key(row["name"])
@@ -252,11 +259,20 @@ def load_international_inputs(
                 out.appearances.append(appearance)
                 appearances.add(appearance)
             order = (season, row["start_date"] or "")
+            this_appearance = Appearance(
+                display_name, team_display[row["event_team_id"]], season,
+                row["start_date"] or "",
+                team_is_club[row["event_team_id"]],
+            )
             if player_id not in latest_order or order >= latest_order[player_id]:
                 latest_order[player_id] = order
-                out.latest[player_id] = (
-                    display_name, team_club[row["event_team_id"]], season
-                )
+                out.latest[player_id] = this_appearance
+            if team_is_club[row["event_team_id"]] and (
+                player_id not in latest_club_order
+                or order >= latest_club_order[player_id]
+            ):
+                latest_club_order[player_id] = order
+                out.latest_club[player_id] = this_appearance
             out.identity_rows.append({
                 "event": row["event_code"].split(":", 1)[0],
                 "team": team_display[row["event_team_id"]],

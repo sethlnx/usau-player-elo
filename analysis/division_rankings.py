@@ -90,7 +90,9 @@ def main(n_teams: int = 15, n_players: int = 25):
         reverse=True)
     print(f"\n== TOP PLAYERS OVERALL — {len(ranked)} rated with 5+ games ==")
     for i, (r, pid, ngames) in enumerate(ranked[:n_players], 1):
-        name, club, season = latest.get(pid, ("?", "?", "?"))
+        appearance = latest.get(pid)
+        name, club, season = (appearance.name, appearance.club, appearance.season) \
+            if appearance else ("?", "?", "?")
         print(f"{i:>3}. {name:<28}{r:7.1f}  {ngames:>4}g  {club} ({season})")
     con.close()
 

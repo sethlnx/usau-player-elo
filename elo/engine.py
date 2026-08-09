@@ -80,6 +80,20 @@ class EloConfig:
     # mistaken for ageing. Zero preserves the published model.
     inactivity_decay: float = 0.0
     inactivity_grace_days: int = 90
+    # Team momentum is an exponentially weighted history of prediction
+    # residuals (result - pregame probability), keyed by canonical club. It
+    # changes only the speed of a *post-game* rating update, never the game's
+    # predicted probability. Both sides receive the same multiplier, retaining
+    # Elo's zero-sum team movement.
+    #
+    # `momentum_retention` is the fraction of the prior signal retained per
+    # club game. `momentum_strength` is the maximum extra K multiplier;
+    # zero preserves the published model. `continuation` only accelerates a
+    # result that extends a hot/cold streak; `intensity` accelerates any game
+    # involving a streaky club, including a reversal.
+    momentum_strength: float = 0.0
+    momentum_retention: float = 0.75
+    momentum_mode: str = "continuation"
     # Per-player stat lines (G/A/D/T at stat-reporting events), ingested only
     # after an event ends. Mechanism A splits each game delta by usage; B
     # transfers rating zero-sum between teammates by net stat quality.
@@ -164,6 +178,7 @@ class PlayerElo:
     def __init__(self, config: EloConfig | None = None):
         self.cfg = config or EloConfig()
         self.players: dict = {}
+        self.momentum: dict = {}
 
     def _state(self, pid) -> PlayerState:
         if pid not in self.players:
@@ -242,9 +257,54 @@ class PlayerElo:
             return 1.0
         return math.log1p(margin) / math.log1p(self.cfg.mov_norm)
 
+    def momentum_multiplier(
+        self, home_team, away_team, residual: float,
+    ) -> float:
+        """Return a shared zero-sum K multiplier from prior club momentum."""
+        strength = self.cfg.momentum_strength
+        if strength < 0.0:
+            raise ValueError("momentum_strength must not be negative")
+        if strength == 0.0 or home_team is None or away_team is None:
+            return 1.0
+        if not 0.0 <= self.cfg.momentum_retention <= 1.0:
+            raise ValueError("momentum_retention must be between 0 and 1")
+        home = self.momentum.get(home_team, 0.0)
+        away = self.momentum.get(away_team, 0.0)
+        if self.cfg.momentum_mode == "continuation":
+            # Residual is positive for a home result better than prediction.
+            # An away continuation has the opposite residual sign.
+            signal = (max(0.0, home * residual) +
+                      max(0.0, away * -residual)) / 2.0
+        elif self.cfg.momentum_mode == "intensity":
+            signal = (abs(home) + abs(away)) / 2.0
+        else:
+            raise ValueError(f"unknown momentum_mode {self.cfg.momentum_mode!r}")
+        return 1.0 + strength * signal
+
+    def update_momentum(
+        self, home_team, away_team, residual: float,
+    ) -> None:
+        """Record this game's residual after its ratings have been updated."""
+        strength = self.cfg.momentum_strength
+        if strength < 0.0:
+            raise ValueError("momentum_strength must not be negative")
+        if strength == 0.0 or home_team is None or away_team is None:
+            return
+        retention = self.cfg.momentum_retention
+        if not 0.0 <= retention <= 1.0:
+            raise ValueError("momentum_retention must be between 0 and 1")
+        weight = 1.0 - retention
+        self.momentum[home_team] = (
+            retention * self.momentum.get(home_team, 0.0) + weight * residual
+        )
+        self.momentum[away_team] = (
+            retention * self.momentum.get(away_team, 0.0) - weight * residual
+        )
+
     def play_game(self, home_roster: list, away_roster: list,
                   home_score: int, away_score: int,
-                  division: str = "club-men") -> float:
+                  division: str = "club-men",
+                  home_team=None, away_team=None) -> float:
         """Update ratings; returns the pre-game P(home wins)."""
         self._materialize(home_roster, division)
         self._materialize(away_roster, division)
@@ -255,11 +315,14 @@ class PlayerElo:
             outcome = 0.5
         else:
             outcome = 1.0 if home_score > away_score else 0.0
+        residual = outcome - expected
         margin = abs(home_score - away_score)
         k = self.cfg.k * self.cfg.k_scale.get(division, 1.0)
-        delta = k * self.mov_multiplier(margin) * (outcome - expected)
+        delta = (k * self.mov_multiplier(margin) * residual *
+                 self.momentum_multiplier(home_team, away_team, residual))
         self._apply(home_roster, delta, division)
         self._apply(away_roster, -delta, division)
+        self.update_momentum(home_team, away_team, residual)
         return expected
 
     def _usage(self, st: PlayerState) -> float:
@@ -372,8 +435,10 @@ class TeamElo:
 
     def play_game(self, home_key, away_key, home_score, away_score,
                   division: str = "club-men") -> float:
-        return self.inner.play_game([home_key], [away_key],
-                                    home_score, away_score, division)
+        return self.inner.play_game(
+            [home_key], [away_key], home_score, away_score, division,
+            home_key, away_key,
+        )
 
     def new_season(self):
         self.inner.new_season()

@@ -17,7 +17,7 @@ import unicodedata
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from analysis.euf_overlap import exact_name_key
 
@@ -46,13 +46,35 @@ def european_player_id(source_key: str) -> int:
     return -int(digest[:13], 16)
 
 
+class Appearance(NamedTuple):
+    """The newest roster sighting known for one player.
+
+    Ordered on ``(season, date)``, so a dated real event always outranks a
+    season-long registration that carries no play date. ``club`` is the name
+    a human reads, never a model club key — this feeds the "last club"
+    column directly. ``is_club`` is False for national-team entries, which
+    are not clubs and must not answer "what club do they play for".
+    """
+
+    name: str
+    club: str
+    season: int
+    date: str = ""
+    is_club: bool = True
+
+    @property
+    def order(self) -> tuple[int, str]:
+        return self.season, self.date
+
+
 @dataclass
 class EuropeanInputs:
     games: list[dict[str, Any]] = field(default_factory=list)
     rosters: dict[str, list[int]] = field(default_factory=dict)
     clubs: dict[str, str] = field(default_factory=dict)
     player_names: dict[int, str] = field(default_factory=dict)
-    latest: dict[int, tuple[str, str, int]] = field(default_factory=dict)
+    latest: dict[int, Appearance] = field(default_factory=dict)
+    latest_club: dict[int, Appearance] = field(default_factory=dict)
     appearances: list[tuple[int, int, str, str]] = field(default_factory=list)
     event_info: dict[int, tuple[str, str, int, str]] = field(default_factory=dict)
     event_team_event: dict[str, int] = field(default_factory=dict)
@@ -86,8 +108,12 @@ def merge_inputs(*inputs: EuropeanInputs) -> EuropeanInputs:
         for player_id, name in current.player_names.items():
             out.player_names.setdefault(player_id, name)
         for player_id, value in current.latest.items():
-            if player_id not in out.latest or value[2] >= out.latest[player_id][2]:
+            if player_id not in out.latest or value.order >= out.latest[player_id].order:
                 out.latest[player_id] = value
+        for player_id, value in current.latest_club.items():
+            if (player_id not in out.latest_club
+                    or value.order >= out.latest_club[player_id].order):
+                out.latest_club[player_id] = value
         for appearance in current.appearances:
             if appearance not in appearances:
                 out.appearances.append(appearance)
@@ -260,7 +286,8 @@ def load_european_inputs(
                 order = (season, observation["observed_at"])
                 if player_id not in latest_order or order >= latest_order[player_id]:
                     latest_order[player_id] = order
-                    out.latest[player_id] = (display_name, team_name, season)
+                    out.latest[player_id] = Appearance(display_name, team_name, season)
+                    out.latest_club[player_id] = out.latest[player_id]
             roster_lookup[(season, division, team_key)] = (pids, people)
             by_club, source, display = out.team_rosters.setdefault(
                 (season, division), ({}, {}, {})

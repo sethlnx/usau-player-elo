@@ -391,3 +391,5 @@ The feature is complete only when all of the following are true:
 - The read-only GraphQL facade returns results consistent with SQLite and performs no live scraping.
 - Focused contract tests and full test discovery pass unchanged.
 - The README reports exact observed coverage rather than inferred completeness.
+
+# Add career plus minus
