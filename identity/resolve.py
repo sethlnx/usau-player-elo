@@ -77,6 +77,14 @@ MIXED_DIVISIONS = {"club-mixed", "masters-mixed", "grandmasters-mixed",
                    "beach-greatgrandmasters-mixed", "beach-legends-mixed",
                    "league-mixed"}
 
+# USAU youth "boys" brackets are frequently OPEN: many states and YCC programs
+# run a single high-school bracket and girls enter it. A girls' entry there is
+# therefore not proof of male entry the way "men" is, which is what the
+# open-bracket exemption in main() turns on. Adult men's divisions are not
+# affected and never qualify for that exemption.
+YOUTH_MENS_DIVISIONS = {"hs-boys", "ms-boys",
+                        "ycc-u20-boys", "ycc-u17-boys", "ycc-u15-boys"}
+
 
 def division_gender(division: str) -> str | None:
     if division in MENS_DIVISIONS:
@@ -206,6 +214,20 @@ def norm_club(full_name: str | None, display_name: str | None) -> str:
     return canonical_club(full_name, display_name).lower()
 
 
+def school_base(club: str) -> str:
+    """The school in a youth club key, before any squad or mascot suffix.
+
+    'durham school of the arts (scoober doo)' -> 'durham school of the arts'
+    'lakeside high school-jv (lakeside hs vikings)' -> 'lakeside high school'
+
+    Deliberately exact after that trim: it is the evidence the open-bracket
+    exemption rests on, so a near-match must NOT pass. 'east chapel hill' and
+    'east chapel hill high school' stay distinct, costing recall to keep two
+    same-named people from being fused on a loose school match.
+    """
+    return re.split(r"\s*[-(]", club)[0].strip()
+
+
 def load_overrides(path: Path) -> dict[str, str]:
     """norm_name -> action ('block' | 'confirm') from the review file."""
     if not path.exists():
@@ -295,6 +317,12 @@ def main():
     display_for = {}
     # nname -> {'m','w'} from DIVISION play only, which is the hard evidence.
     genders_of = defaultdict(set)
+    # Evidence for the open-bracket exemption below: the schools a name entered
+    # under on the youth BOYS side and on the WOMEN'S side, and whether it ever
+    # played an adult men's division, which disqualifies it outright.
+    boys_schools = defaultdict(set)
+    womens_schools = defaultdict(set)
+    adult_mens = set()
     for (etid, raw_name, full_name, disp, season, division,
          start_date, end_date, event_id, pronouns) in rows:
         nname = norm_name(raw_name)
@@ -306,6 +334,12 @@ def main():
         dg = division_gender(division)
         if dg:
             genders_of[nname].add(dg)
+        if division in YOUTH_MENS_DIVISIONS:
+            boys_schools[nname].add(school_base(club))
+        elif division in MENS_DIVISIONS:
+            adult_mens.add(nname)
+        elif division in WOMENS_DIVISIONS:
+            womens_schools[nname].add(school_base(club))
         if start_date:
             windows[nname].append((club, start_date, end_date, event_id))
         roster_rows.append((etid, raw_name, nname, club, season, division,
@@ -313,13 +347,29 @@ def main():
         display_for.setdefault(nname, re.sub(r"\s+", " ", raw_name).strip())
 
     # A name played in BOTH a men's division and the women's division is two
-    # people, not a bridge — 275 names, and no body is eligible for both
-    # series. Their shards are split by gender group, and their mixed rows are
-    # routed by the roster page's own Pronouns column. Mixed rows that pronouns
-    # cannot place get a third shard: guessing would corrupt a real career,
-    # while an unplaced shard only loses the link (see the asymmetry note
-    # below). 181 of the 275 also play mixed, so this is a handful of rows.
+    # people, not a bridge — no body is eligible for both series. Their shards
+    # are split by gender group, and their mixed rows are routed by the roster
+    # page's own Pronouns column. Mixed rows that pronouns cannot place get a
+    # third shard: guessing would corrupt a real career, while an unplaced
+    # shard only loses the link (see the asymmetry note below).
     split_gender = {n for n, gs in genders_of.items() if len(gs) > 1}
+
+    # EXCEPT where the men's side is an open youth bracket. 1,496 of the raw
+    # gender splits have no adult men's play at all, and splitting those cuts a
+    # woman's career in half: Sadie Jezierski's 13-game Westfield High School
+    # shard is severed from her 250-game XIST and 315-game Pawnee Rangers
+    # careers, and 440 of the 770 rated shards this produces fall under the
+    # site's minimum-games cutoff, so they vanish from the table entirely.
+    #
+    # The test is deliberately narrow. The SAME SCHOOL must appear on both the
+    # boys and the women's side — near-proof rather than inference — and any
+    # adult men's appearance disqualifies the name outright. That is 470 names.
+    # The looser "two or more women's divisions" reading would reach 762, but
+    # it rests on inference about who plays what, so it is not taken here.
+    open_bracket = {n for n in split_gender
+                    if n not in adult_mens
+                    and boys_schools[n] & womens_schools[n]}
+    split_gender -= open_bracket
 
     # ambiguous = 2+ clubs within the SAME (division, season). Cross-division
     # same-season appearances are bridge players, not collisions.
@@ -388,6 +438,12 @@ def main():
     for etid, raw_name, nname, club, season, division, pg in roster_rows:
         pid = player_for(nname, club, division, pg)
         dg = division_gender(division)
+        # An open youth bracket is not male evidence for the girls playing in
+        # it; without this their div_evidence holds both 'm' and 'w' and the
+        # identity falls through to the first-name prior instead of resolving
+        # to 'w' off their women's-division play.
+        if dg == "m" and nname in open_bracket and division in YOUTH_MENS_DIVISIONS:
+            dg = None
         if dg:
             div_evidence[pid].add(dg)
         elif pg:
@@ -480,7 +536,8 @@ def main():
           f"{len(raw_ambiguous)} name collisions -> {len(ambiguous_names)} split "
           f"per-club on a same-weekend conflict, "
           f"{len(raw_ambiguous) - len(ambiguous_names)} auto-merged; "
-          f"{len(split_gender)} names split across men's/women's; "
+          f"{len(split_gender)} names split across men's/women's "
+          f"({len(open_bracket)} exempted as open youth brackets); "
           f"{n_bridges} cross-division bridge players\n"
           f"gender-matching: {by_gender.get('m', 0)} male, "
           f"{by_gender.get('w', 0)} female, {by_gender.get('', 0)} unknown "
