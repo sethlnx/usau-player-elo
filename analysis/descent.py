@@ -20,9 +20,18 @@ Two knobs are deliberately NOT axes:
                    imports USAU's seeding into a results-only model. See the
                    note in analysis/rankings.py.
 
-Every surviving move is then dropped one at a time and kept only if reverting
-it costs more than PRUNE_EPS VAL logloss, which is what stops the descent
-publishing a tail of moves that are really fitting VAL.
+Every surviving move is then dropped one at a time, cheapest first, while the
+CUMULATIVE VAL logloss handed back stays within PRUNE_EPS. That is what stops
+the descent publishing a tail of moves that are really fitting VAL, without
+the failure the per-move form had: eighteen individually-marginal moves each
+under the threshold once added up to five times it, and the prune returned
+the published config while discarding a gain a paired bootstrap over VAL put
+outside noise. See prune().
+
+Selection is scored on tier shares (TIER_SHARE), not raw game counts: each
+tier owns a fixed fraction of the objective regardless of how many rows it
+has. See the comment above TIER_SHARE for why n-weighting, and n scaled by a
+per-tier multiplier, both failed.
 
 Usage: python -m analysis.descent [--passes N] [--jobs N] [--quick]
 """
@@ -49,25 +58,68 @@ from elo.engine import EloConfig
 FIT = (2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021)
 VAL = (2022, 2023)
 TEST = (2024, 2025)
-# Every CONTESTED division, n-weighted. This is what scores the global axes,
-# and it was five when there were five; leaving it there would tune k, tau and
-# the provisional window against a third of the corpus and call it global.
+# Every CONTESTED division, weighted by IMPORTANCE, not by row count. Pure
+# n-weighting answers "which model predicts the most games", which is not the
+# question the site asks. The 2026 corpus made the gap concrete: high school
+# arrived as 15,276 games and carried ZERO weight here, so the descent that
+# improved the scored set by 0.00139 VAL simultaneously degraded the unscored
+# divisions by 0.00624 VAL / 0.00997 TEST and had no way to see it. Twelve
+# divisions regressed on TEST, hs-boys and hs-girls worst.
+#
+# Scaling n by a per-tier multiplier does not fix that. It was tried: at a
+# 0.3 multiplier high school is third in name and 4.0% of the objective in
+# fact, because n_d swamps the multiplier — most high school games postdate
+# the VAL window. Tuning the multiplier until it changed the answer would be
+# choosing the objective to produce a result already decided on, the same
+# error as selecting on TEST.
+#
+# So importance is stated directly. Each TIER owns a fixed share of the
+# objective, divided evenly across that tier's games in whatever window is
+# being scored. A tier's influence is then independent of how many rows it
+# happens to have, which is the point: club is half the objective whether it
+# played 12,000 games or 2,000. Shares are normalised over the tiers actually
+# present in the window, so a tier with no games costs nothing.
+#
+# PUBLISHED assigns a scale/base to 51 divisions total; euf-open/euf-mixed/
+# euf-women are excluded on purpose (joined after tuning — see the note
+# above PUBLISHED in rankings.py), ufa is a separate team model (see ufa/),
+# and greatgrandmasters-mixed has never been played. Every other PUBLISHED
+# division is covered below even where it currently has zero rows in the
+# corpus (league-men/league-mixed, several beach brackets, ms-girls,
+# ycc-u15-girls): league in particular is being actively ingested and a
+# division that is zero-weighted the day it gets its first game reproduces
+# the hs-* bug this comment describes.
+TIER_SHARE = {"club": 0.50, "college": 0.30, "hs": 0.15, "other": 0.05}
+_TIERS = (
+    ("club", ("club-men", "club-mixed", "club-women")),
+    ("college", ("college", "college-d3", "college-women",
+                 "college-women-d3", "college-mixed")),
+    ("hs", ("hs-boys", "hs-girls", "hs-mixed", "ms-boys", "ms-girls",
+            "ms-mixed", "ycc-u15-boys", "ycc-u15-girls", "ycc-u15-mixed",
+            "ycc-u17-boys", "ycc-u17-girls", "ycc-u17-mixed",
+            "ycc-u20-boys", "ycc-u20-girls", "ycc-u20-mixed")),
+    ("other", ("masters-men", "masters-women", "masters-mixed",
+               "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
+               "greatgrandmasters-men", "greatgrandmasters-women",
+               "beach-men", "beach-women", "beach-mixed",
+               "beach-masters-men", "beach-masters-women",
+               "beach-masters-mixed",
+               "beach-grandmasters-men", "beach-grandmasters-women",
+               "beach-grandmasters-mixed",
+               "beach-greatgrandmasters-men", "beach-greatgrandmasters-women",
+               "beach-greatgrandmasters-mixed", "beach-legends-mixed",
+               "league-men", "league-mixed")),
+)
+DIVISION_TIER = {d: t for t, ds in _TIERS for d in ds}
+DIVISIONS = tuple(DIVISION_TIER)
+assert set(TIER_SHARE) == {t for t, _ds in _TIERS}, "tier tables disagree"
 # Great grand masters mixed is absent because it has never been played.
-DIVISIONS = ("club-men", "club-mixed", "club-women", "college", "college-d3",
-             "college-women", "college-women-d3",
-             "masters-men", "masters-women", "masters-mixed",
-             "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
-             "greatgrandmasters-men", "greatgrandmasters-women")
-# The GraphQL ingest in scraper/graphql.py also reaches ~25 further
-# divisions (high school, middle school, Youth Club Championships, beach,
-# league, college-mixed — see rankings.PUBLISHED division_scale/bases for
-# the by-analogy priors). They are deliberately NOT added here: several are
-# a handful of events, and the college-women lesson above is exactly this
-# failure mode — a division "descent" barely touches is unidentifiable and
-# the search reports a confident, wrong answer. Score them with
-# analysis.backtest.metrics(divisions=(...)) against the untouched PUBLISHED
-# config instead, the same way masters was reported before it had enough
-# games for its own axes.
+#
+# Widening the SCORED set is not the same as widening the AXES. The thin
+# divisions still get no scale or base axis of their own: a division the
+# descent barely touches is unidentifiable and the search reports a confident,
+# wrong answer (the college-women lesson). They vote on the global knobs,
+# weighted, and inherit their by-analogy priors from rankings.PUBLISHED.
 PRUNE_EPS = 0.0003
 
 # Grids. Each axis is (name, values); dict-valued knobs address one key.
@@ -178,13 +230,27 @@ def _score(args):
                           as_config(overrides), _G["stats"])
     out = {}
     for seasons, tag in ((VAL, "val"), (TEST, "test")):
-        num = den = 0.0
+        per_div = {}
         for d in divs:
             m = metrics(recs, seasons=set(seasons), divisions={d})
             if m["n"]:
                 out[f"{tag}.{d}"] = m["logloss"]
-                num += m["logloss"] * m["n"]
-                den += m["n"]
+                per_div[d] = (m["n"], m["logloss"])
+        # Each tier gets TIER_SHARE[tier] of the objective, split across that
+        # tier's own games; shares renormalise over tiers actually present
+        # (a tier with zero games here costs nothing, e.g. a single-division
+        # axis call, or a window a tier hasn't reached yet).
+        tier_n = {}
+        for d, (n, _ll) in per_div.items():
+            t = DIVISION_TIER[d]
+            tier_n[t] = tier_n.get(t, 0) + n
+        present_share = sum(TIER_SHARE[t] for t in tier_n)
+        num = den = 0.0
+        for d, (n, ll) in per_div.items():
+            t = DIVISION_TIER[d]
+            w = (TIER_SHARE[t] / present_share) * (n / tier_n[t])
+            num += ll * w
+            den += w
         out[tag] = num / den if den else float("inf")
     return out
 
@@ -230,20 +296,42 @@ def descend(pool, passes, axes):
 
 
 def prune(pool, base, history):
-    """Drop each move whose reversion costs <= PRUNE_EPS on VAL."""
+    """Drop marginal moves while the CUMULATIVE VAL cost stays within PRUNE_EPS.
+
+    PRUNE_EPS was an absolute PER-MOVE threshold, which bounds nothing in
+    aggregate. On the tier-weighted objective the 2026 corpus produced 18
+    moves that each cost <= 0.0003 to revert and 0.00147 to revert together,
+    so the prune handed back five times the tolerance it exists to protect
+    and returned the published config unchanged. That 0.00147 is not noise:
+    a paired bootstrap over the 28,570 VAL games puts it at 90% CI
+    [-0.00149, -0.00025], excluding zero, and every tier moves significantly
+    (club -0.00109, hs -0.00696, other -0.00538; college +0.00127 against).
+    The search was right and the threshold was wrong, so the budget is now on
+    the TOTAL given back. Cheapest moves are still considered first, so what
+    survives is the smallest set carrying essentially all of the gain.
+
+    A move whose reversion IMPROVES VAL (negative cost) is always dropped and
+    consumes no budget.
+    """
     kept = dict(base)
     full = evaluate(pool, [("full", kept, DIVISIONS)])["full"]["val"]
-    print(f"\n--- prune (keep a move only if reverting costs > {PRUNE_EPS})")
+    spent = 0.0
+    print(f"\n--- prune (drop while cumulative reverted VAL stays within "
+          f"{PRUNE_EPS})")
     for axis, value, _g in sorted(history, key=lambda h: h[2]):
         if axis not in kept:
             continue
         trial = {k: v for k, v in kept.items() if k != axis}
-        cost = evaluate(pool, [("t", trial, DIVISIONS)])["t"]["val"] - full
-        verdict = "keep" if cost > PRUNE_EPS else "DROP"
-        print(f"  {axis:<28} {str(value):<12} reverting costs {cost:+.5f}  {verdict}")
+        new_val = evaluate(pool, [("t", trial, DIVISIONS)])["t"]["val"]
+        cost = new_val - full
+        would_spend = spent + max(cost, 0.0)
+        verdict = "DROP" if would_spend <= PRUNE_EPS else "keep"
+        print(f"  {axis:<28} {str(value):<12} reverting costs {cost:+.5f}"
+              f"  cumulative {would_spend:.5f}  {verdict}")
         if verdict == "DROP":
             kept = trial
-            full = evaluate(pool, [("f", kept, DIVISIONS)])["f"]["val"]
+            full = new_val
+            spent = would_spend
     return kept
 
 
@@ -276,11 +364,15 @@ def main(passes=3, jobs=8, quick=False):
     print(f"\n=== selected ({time.time()-t0:.0f}s)")
     for k, v in sorted(kept.items()):
         print(f"  {k} = {v!r}")
-    print(f"\n{'division':<14}{'published VAL':>14}{'new VAL':>10}"
+    w = max(len(d) for d in DIVISIONS) + 2
+    print(f"\n{'division':<{w}}{'published VAL':>14}{'new VAL':>10}"
           f"{'published TEST':>15}{'new TEST':>10}")
     for d in DIVISIONS:
-        print(f"{d:<14}{pub['val.'+d]:>14.5f}{final['val.'+d]:>10.5f}"
-              f"{pub['test.'+d]:>15.5f}{final['test.'+d]:>10.5f}")
+        pv, fv = pub.get(f"val.{d}"), final.get(f"val.{d}")
+        pt, ft = pub.get(f"test.{d}"), final.get(f"test.{d}")
+        vs = f"{pv:>14.5f}{fv:>10.5f}" if pv is not None else f"{'-':>14}{'-':>10}"
+        ts = f"{pt:>15.5f}{ft:>10.5f}" if pt is not None else f"{'-':>15}{'-':>10}"
+        print(f"{d:<{w}}{vs}{ts}")
     print(f"{'weighted':<14}{pub['val']:>14.5f}{final['val']:>10.5f}"
           f"{pub['test']:>15.5f}{final['test']:>10.5f}")
     return kept
