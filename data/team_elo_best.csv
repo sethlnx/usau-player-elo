@@ -1708,3 +1708,595 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 27,Catchup,euf:euf-women:catchup,euf-women,1511.9,31,2026,EUCS Ranking 2026 season roster,2026-08-07
 28,SYC,euf:euf-women:syc,euf-women,1488.5,27,2026,EUCS Ranking 2026 season roster,2026-08-07
 29,LMU,euf:euf-women:lmu,euf-women,1484.7,21,2026,EUCS Ranking 2026 season roster,2026-08-07
+1,South Eugene (AXE),south eugene (axe) (HS),hs-boys,1634.4,13,2026,2026 Oregon High School State Championships,2026-05-30
+2,Albany High School (Albany Cougars),albany high school (albany cougars) (HS),hs-boys,1558.3,18,2026,2026 California High School State Championships,2026-05-16
+3,Green Canyon-A (Green Canyon A),green canyon-a (green canyon a) (HS),hs-boys,1538.7,20,2026,2026 Utah Middle & High School State Championships,2026-05-08
+4,Lakeside-Varsity (Vikings),lakeside-varsity (vikings) (HS),hs-boys,1478.5,16,2026,2026 Georgia High School State Championships,2026-04-25
+5,Middleton (Middleton Ultimate),middleton (middleton ultimate) (HS),hs-boys,1469.6,19,2026,2026 Wisconsin High School State Championships,2026-05-23
+6,Santa Cruz (Santa Cruz Ultimate),santa cruz (santa cruz ultimate) (HS),hs-boys,1431.5,19,2026,2026 California High School State Championships,2026-05-16
+7,Fairview (Fairview Open A),fairview (fairview open a) (HS),hs-boys,1419.7,20,2026,High School Spring Warm Up,2026-04-11
+8,El Cerrito (EC HUC),el cerrito (ec huc) (HS),hs-boys,1410.1,25,2026,2026 California High School State Championships,2026-05-16
+9,Lone Peak -A (Lone Peak Boys A),lone peak -a (lone peak boys a) (HS),hs-boys,1390.9,17,2026,2026 Utah Middle & High School State Championships,2026-05-08
+10,Grant (Grant Ultimate),grant (grant ultimate) (HS),hs-boys,1390.3,19,2026,2026 Oregon High School State Championships,2026-05-30
+11,Mason (Mason Comets Ultimate),mason (mason comets ultimate) (HS),hs-boys,1384.0,14,2026,Neuqua Knockout 2026,2026-05-09
+12,Brooklyn Technical-A (Tech Support),brooklyn technical-a (tech support) (HS),hs-boys,1383.1,20,2026,2026 New York High School Boys State Championships,2026-05-23
+13,Liberal Arts and Science Academy  (Vertikills A ),liberal arts and science academy (vertikills a ) (HS),hs-boys,1380.4,21,2026,2026 Texas High School Boys State Championships,2026-05-16
+14,Jackson-Reed (Jackson-Reed),jackson-reed (jackson-reed) (HS),hs-boys,1378.0,23,2026,2026 Virginia High School State Championships,2026-05-16
+15,Berkeley (HC-R) (Berkeley High Coup - Red),berkeley (hc-r) (berkeley high coup - red) (HS),hs-boys,1375.1,23,2026,2026 California High School State Championships,2026-05-16
+16,Parkway (Parkway United Ultimate),parkway (parkway united ultimate) (HS),hs-boys,1372.0,21,2026,Indy Invite High School 2026,2026-04-10
+17,Edwardsville-Varsity (Edwardsville Tigers (boys)),edwardsville-varsity (edwardsville tigers (boys)) (HS),hs-boys,1355.3,17,2026,2026 Illinois High School State Championships,2026-05-29
+18,Columbia-Varsity (Columbia Varsity),columbia-varsity (columbia varsity) (HS),hs-boys,1338.1,23,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+19,Chapel Hill (Chapel Hill Boys Ultimate Frisbee),chapel hill (chapel hill boys ultimate frisbee) (HS),hs-boys,1329.9,39,2026,Carolina Youth Cup 2026,2026-04-25
+20,Montgomery Blair (Blair Ultimate),montgomery blair (blair ultimate) (HS),hs-boys,1319.1,18,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+21,Lafayette-A (Lafayette Warriors A),lafayette-a (lafayette warriors a) (HS),hs-boys,1316.1,22,2026,High School Spring Warm Up,2026-04-11
+22,East Chapel Hill (ECHHS Open),east chapel hill (echhs open) (HS),hs-boys,1314.4,24,2026,Carolina Youth Cup 2026,2026-04-25
+23,Neuqua Valley (NV Ultimate HS Boys),neuqua valley (nv ultimate hs boys) (HS),hs-boys,1314.1,21,2026,Indy Invite High School 2026,2026-04-10
+24,Northfield-Varsity (Northfield Nighthawks),northfield-varsity (northfield nighthawks) (HS),hs-boys,1313.8,14,2026,2026 Colorado High School State Championships,2026-05-09
+25,Franklin-Varsity (Lightning),franklin-varsity (lightning) (HS),hs-boys,1311.7,18,2026,2026 Oregon High School State Championships,2026-05-30
+26,Santa Barbara (Flow),santa barbara (flow) (HS),hs-boys,1311.3,17,2026,2026 California High School State Championships,2026-05-16
+27,Layton-A (Break Force A),layton-a (break force a) (HS),hs-boys,1309.0,12,2026,2026 Utah Middle & High School State Championships,2026-05-08
+28,Midtown-Varsity (Gauntlet (boys)),midtown-varsity (gauntlet (boys)) (HS),hs-boys,1306.7,24,2026,ATL High School Terminus,2026-02-28
+29,West Jessamine-Varsity (West Jessamine),west jessamine-varsity (west jessamine) (HS),hs-boys,1303.8,15,2026,Neuqua Knockout 2026,2026-05-09
+30,River's Edge Christian Academy (RECA) (Eagles),river's edge christian academy (reca) (eagles) (HS),hs-boys,1297.8,17,2026,2026 Tennessee High School State Championships,2026-05-09
+31,Gunn (Control),gunn (control) (HS),hs-boys,1288.6,16,2026,2026 California High School State Championships,2026-05-16
+32,Newton (NSHS Ultimate),newton (nshs ultimate) (HS),hs-boys,1284.2,16,2026,2026 Massachusetts High School State Championships,2026-06-06
+33,Washington-Liberty (Washington-Lee Slarenegs),washington-liberty (washington-lee slarenegs) (HS),hs-boys,1283.6,20,2026,2026 Virginia High School State Championships,2026-05-16
+34,Evanston Township-Varsity (Evanston Ultimate),evanston township-varsity (evanston ultimate) (HS),hs-boys,1282.8,19,2026,Neuqua Knockout 2026,2026-05-09
+35,Druid Hills (Disc Devils),druid hills (disc devils) (HS),hs-boys,1274.3,18,2026,ATL High School Terminus,2026-02-28
+36,Timpview (Provo Pandemonium),timpview (provo pandemonium) (HS),hs-boys,1258.6,19,2026,2026 Utah Middle & High School State Championships,2026-05-08
+37,Holy Family Catholic (Revolution),holy family catholic (revolution) (HS),hs-boys,1255.4,22,2026,Neuqua Knockout 2026,2026-05-09
+38,Jordan (Jordan Falcons),jordan (jordan falcons) (HS),hs-boys,1254.7,24,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+39,Westfield (Westfield Ultimate),westfield (westfield ultimate) (HS),hs-boys,1251.4,20,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+40,Carrboro (Carrboro Clams),carrboro (carrboro clams) (HS),hs-boys,1245.1,32,2026,Carolina Youth Cup 2026,2026-04-25
+41,H-B Woodlawn Secondary Program (H-B Open),h-b woodlawn secondary program (h-b open) (HS),hs-boys,1242.0,19,2026,2026 Virginia High School State Championships,2026-05-16
+42,Montclair Varsity (Montclair Geese Varsity),montclair varsity (montclair geese varsity) (HS),hs-boys,1238.4,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+43,East (Denver East Varsity),east (denver east varsity) (HS),hs-boys,1236.7,18,2026,2026 Colorado High School State Championships,2026-05-09
+44,Monarch (Monarch Boys A),monarch (monarch boys a) (HS),hs-boys,1225.3,14,2026,2026 Colorado High School State Championships,2026-05-09
+45,Madison West (Madison West Ultimate),madison west (madison west ultimate) (HS),hs-boys,1221.4,21,2026,Indy Invite High School 2026,2026-04-10
+46,De Smet Jesuit-JV (DUC (De Smet Jesuit) JV),de smet jesuit-jv (duc (de smet jesuit) jv) (HS),hs-boys,1216.3,10,2026,2026 Missouri High School State Championships,2026-05-02
+47,Falmouth - Waynflete (Falmouth Boys Varsity),falmouth - waynflete (falmouth boys varsity) (HS),hs-boys,1216.1,19,2026,2026 Maine High School Boys State Championships,2026-05-30
+48,Alameda (Monarchs),alameda (monarchs) (HS),hs-boys,1214.4,16,2026,2026 California High School State Championships,2026-05-16
+49,Ridgeline (Ridgeline),ridgeline (ridgeline) (HS),hs-boys,1207.0,18,2026,2026 Utah Middle & High School State Championships,2026-05-08
+50,Verona Area (Verona Area Ultimate),verona area (verona area ultimate) (HS),hs-boys,1205.2,28,2026,2026 Wisconsin High School State Championships,2026-05-23
+51,Portland Waldorf (Waldorf Wolfpack),portland waldorf (waldorf wolfpack) (HS),hs-boys,1204.3,16,2026,2026 Oregon High School State Championships,2026-05-30
+52,Arapahoe High School  (Arapahoe Warriors),arapahoe high school (arapahoe warriors) (HS),hs-boys,1203.9,17,2026,2026 Colorado High School State Championships,2026-05-09
+53,South Lakes (Seahucks),south lakes (seahucks) (HS),hs-boys,1198.3,13,2026,2026 Virginia High School State Championships,2026-05-16
+54,Air Academy (Elevation),air academy (elevation) (HS),hs-boys,1192.8,20,2026,2026 Colorado High School State Championships,2026-05-09
+55,Fresh Coast Ultimate,fresh coast ultimate (HS),hs-boys,1188.0,17,2026,Neuqua Knockout 2026,2026-05-09
+56,Westlake-Varsity (Acton Westlake Ultimate),westlake-varsity (acton westlake ultimate) (HS),hs-boys,1186.3,19,2026,2026 Texas High School Boys State Championships,2026-05-16
+57,Copper Hills (Ultimate CHills),copper hills (ultimate chills) (HS),hs-boys,1179.9,11,2026,2026 Utah Middle & High School State Championships,2026-05-08
+58,South Eugene-JV (AXE JV),south eugene-jv (axe jv) (HS),hs-boys,1175.7,13,2026,2026 Oregon High School State Championships,2026-05-30
+59,Summit-Varsity (Storm),summit-varsity (storm) (HS),hs-boys,1174.4,20,2026,2026 Oregon High School State Championships,2026-05-30
+60,Round Table-Senior,round table-senior (HS),hs-boys,1170.4,19,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
+61,Lyons Township (LT Ultimate),lyons township (lt ultimate) (HS),hs-boys,1169.0,12,2026,2026 Illinois High School State Championships,2026-05-29
+62,Beacon (Beacon Blue Demons),beacon (beacon blue demons) (HS),hs-boys,1168.8,15,2026,2026 New York High School Boys State Championships,2026-05-23
+63,Independence (FLIGHT),independence (flight) (HS),hs-boys,1167.3,16,2026,2026 Tennessee High School State Championships,2026-05-09
+64,McNeil  (Mavericks),mcneil (mavericks) (HS),hs-boys,1166.7,24,2026,2026 Texas High School Boys State Championships,2026-05-16
+65,Vanguard,vanguard (HS),hs-boys,1163.3,12,2026,2026 Utah Middle & High School State Championships,2026-05-08
+66,Center Grove HS (A) (Trojans (A)),center grove hs (a) (trojans (a)) (HS),hs-boys,1161.1,22,2026,Neuqua Knockout 2026,2026-05-09
+67,Lakewood (Lakewood DEEP A),lakewood (lakewood deep a) (HS),hs-boys,1158.5,26,2026,High School Spring Warm Up,2026-04-11
+68,Paideia-Varsity (Gruel),paideia-varsity (gruel) (HS),hs-boys,1157.8,22,2026,AFDC Round Robin #2,2026-04-18
+69,Madison East (MEU (A)),madison east (meu (a)) (HS),hs-boys,1157.2,19,2026,Indy Invite High School 2026,2026-04-10
+70,North Atlanta-JV (NAHS),north atlanta-jv (nahs) (HS),hs-boys,1153.5,12,2026,2026 Georgia High School State Championships,2026-04-25
+71,Charlotte Flight,charlotte flight (HS),hs-boys,1149.6,15,2026,Carolina Youth Cup 2026,2026-04-25
+72,Scarsdale (Raiders Ultimate),scarsdale (raiders ultimate) (HS),hs-boys,1135.9,25,2026,2026 New York High School Boys State Championships,2026-05-23
+73,Mountain Crest (Mountain Crest Boys ),mountain crest (mountain crest boys ) (HS),hs-boys,1133.2,7,2026,2026 Utah Middle & High School State Championships,2026-05-08
+74,Chesterton Academy of the Willamette Valley (Saints),chesterton academy of the willamette valley (saints) (HS),hs-boys,1132.8,13,2026,2026 Oregon High School State Championships,2026-05-30
+75,De Smet Jesuit (DUC (De Smet Jesuit) Varsity),de smet jesuit (duc (de smet jesuit) varsity) (HS),hs-boys,1128.0,11,2026,2026 Missouri High School State Championships,2026-05-02
+76,School Without Walls Y (Flightless Bird Squad),school without walls y (flightless bird squad) (HS),hs-boys,1125.9,22,2026,2026 Virginia High School State Championships,2026-05-16
+77,Vel Phillips Memorial (Memorial Ultimate),vel phillips memorial (memorial ultimate) (HS),hs-boys,1124.2,13,2026,2026 Wisconsin High School State Championships,2026-05-23
+78,West (Krakens.),west (krakens.) (HS),hs-boys,1123.9,20,2026,2026 Utah Middle & High School State Championships,2026-05-08
+79,Bethesda-Chevy Chase (B-CC Barons),bethesda-chevy chase (b-cc barons) (HS),hs-boys,1123.2,21,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+80,Acton-Boxborough Regional High School (Acton-Boxborough Renegade Ultimate),acton-boxborough regional high school (acton-boxborough renegade ultimate) (HS),hs-boys,1123.1,20,2026,2026 Massachusetts High School State Championships,2026-06-06
+81,Princeton International School of Mathematics & Science (PRISMS Peregrines),princeton international school of mathematics & science (prisms peregrines) (HS),hs-boys,1118.7,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+82,Skyline High School (Skyline Ultimate),skyline high school (skyline ultimate) (HS),hs-boys,1116.5,16,2026,2026 Colorado High School State Championships,2026-05-09
+83,Bethlehem Central High School (BCHS Ultimate Eagles),bethlehem central high school (bchs ultimate eagles) (HS),hs-boys,1115.5,13,2026,2026 New York High School Boys State Championships,2026-05-23
+84,DCI Dragons (DC International Boys),dci dragons (dc international boys) (HS),hs-boys,1114.9,13,2026,2026 Virginia High School State Championships,2026-05-16
+85,Friends-Baltimore (Friends School of Baltimore),friends-baltimore (friends school of baltimore) (HS),hs-boys,1111.5,5,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+86,Lakeside-JV (Vikings JV),lakeside-jv (vikings jv) (HS),hs-boys,1110.4,14,2026,ATL High School Terminus,2026-02-28
+87,Northfield-JV (Northfield HS JV),northfield-jv (northfield hs jv) (HS),hs-boys,1106.4,12,2026,2026 Colorado High School State Championships,2026-05-09
+88,Bronx Science-A (Lone Wolves),bronx science-a (lone wolves) (HS),hs-boys,1106.3,21,2026,2026 New York High School Boys State Championships,2026-05-23
+89,Greely (Cumberland Ultimate),greely (cumberland ultimate) (HS),hs-boys,1102.5,14,2026,2026 Maine High School Boys State Championships,2026-05-30
+90,Pueblo  (EC Burns),pueblo (ec burns) (HS),hs-boys,1100.3,23,2026,2026 Colorado High School State Championships,2026-05-09
+91,Walt Whitman (Poets),walt whitman (poets) (HS),hs-boys,1099.1,19,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+92,Regis (Regis A),regis (regis a) (HS),hs-boys,1095.6,18,2026,2026 New York High School Boys State Championships,2026-05-23
+93,Lexington Homeschool (Pi),lexington homeschool (pi) (HS),hs-boys,1093.2,16,2026,Neuqua Knockout 2026,2026-05-09
+94,Sun Prairie United - East/West-A (Sun Prairie Ultimate A),sun prairie united - east/west-a (sun prairie ultimate a) (HS),hs-boys,1093.0,19,2026,2026 Wisconsin High School State Championships,2026-05-23
+95,Druid Hills-JV (Druid Hills JV),druid hills-jv (druid hills jv) (HS),hs-boys,1092.4,18,2026,AFDC Round Robin #1,2026-03-28
+96,Alexandria (Small Titans),alexandria (small titans) (HS),hs-boys,1087.3,17,2026,2026 Virginia High School State Championships,2026-05-16
+97,Lake Travis High School (Lake Travis),lake travis high school (lake travis) (HS),hs-boys,1086.1,12,2026,2026 Texas High School Boys State Championships,2026-05-16
+98,Canyon Ridge-A (RiverHawks - Black),canyon ridge-a (riverhawks - black) (HS),hs-boys,1084.0,11,2026,2026 Utah Middle & High School State Championships,2026-05-08
+99,Digital Harbor-Varsity (Digital Harbor),digital harbor-varsity (digital harbor) (HS),hs-boys,1083.5,13,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+100,Bard High School Early College  (Bardbarians),bard high school early college (bardbarians) (HS),hs-boys,1083.1,23,2026,2026 New York High School Boys State Championships,2026-05-23
+101,Edwardsville-JV (Edwardsville JV),edwardsville-jv (edwardsville jv) (HS),hs-boys,1082.0,16,2026,Indy Invite High School 2026,2026-04-10
+102,Forsyth Central (Eclipse Ultimate),forsyth central (eclipse ultimate) (HS),hs-boys,1067.2,17,2026,ATL High School Terminus,2026-02-28
+103,Maynard Jackson-Varsity (Maynard Jackson Varsity),maynard jackson-varsity (maynard jackson varsity) (HS),hs-boys,1063.6,24,2026,ATL High School Terminus,2026-02-28
+104,Dwight-Englewood (Bulldogs),dwight-englewood (bulldogs) (HS),hs-boys,1061.0,17,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+105,Edward R. Murrow-A (Murrow Magic),edward r. murrow-a (murrow magic) (HS),hs-boys,1056.5,14,2026,2026 New York High School Boys State Championships,2026-05-23
+106,Stewarts Creek (SCUF),stewarts creek (scuf) (HS),hs-boys,1055.6,19,2026,2026 Tennessee High School State Championships,2026-05-09
+107,Lindbergh (Lindbergh Flyers),lindbergh (lindbergh flyers) (HS),hs-boys,1050.8,22,2026,2026 Missouri High School State Championships,2026-05-02
+108,Sky View-A (Bobcats),sky view-a (bobcats) (HS),hs-boys,1047.5,16,2026,2026 Utah Middle & High School State Championships,2026-05-08
+109,Bingham (Bingham Ultimate - White),bingham (bingham ultimate - white) (HS),hs-boys,1046.6,15,2026,2026 Utah Middle & High School State Championships,2026-05-08
+110,Kirkwood (Kirkwood Pioneers),kirkwood (kirkwood pioneers) (HS),hs-boys,1043.6,14,2026,2026 Missouri High School State Championships,2026-05-02
+111,Mounds View (Mounds View Boys),mounds view (mounds view boys) (HS),hs-boys,1043.5,19,2026,Indy Invite High School 2026,2026-04-10
+112,Barrington High School (Barrington High School),barrington high school (barrington high school) (HS),hs-boys,1040.2,15,2026,Neuqua Knockout 2026,2026-05-09
+113,Oakland Technical (Disc-O-Tech),oakland technical (disc-o-tech) (HS),hs-boys,1038.3,22,2026,2026 California High School State Championships,2026-05-16
+114,Anderson (Anderson),anderson (anderson) (HS),hs-boys,1038.2,17,2026,2026 Texas High School Boys State Championships,2026-05-16
+115,Lebanon (Warriors Open),lebanon (warriors open) (HS),hs-boys,1037.5,17,2026,Neuqua Knockout 2026,2026-05-09
+116,McDaniel (McDaniel),mcdaniel (mcdaniel) (HS),hs-boys,1037.1,13,2026,2026 Oregon High School State Championships,2026-05-30
+117,Compass Montessori - Golden (Compass Montessori Unicorns - Open),compass montessori - golden (compass montessori unicorns - open) (HS),hs-boys,1035.1,22,2026,2026 Colorado High School State Championships,2026-05-09
+118,Camden Hills Regional High School (Zombie Panthers),camden hills regional high school (zombie panthers) (HS),hs-boys,1033.0,17,2026,2026 Maine High School Boys State Championships,2026-05-30
+119,Amherst Regional (Hurricanes),amherst regional (hurricanes) (HS),hs-boys,1028.1,20,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+120,St Ignatius (Wildcats),st ignatius (wildcats) (HS),hs-boys,1024.5,17,2026,2026 Ohio High School State Championships,2026-05-30
+121,James B. Conant High School (Cougar Ultimate),james b. conant high school (cougar ultimate) (HS),hs-boys,1022.9,18,2026,2026 Illinois High School State Championships,2026-05-29
+122,Cougars,cougars (HS),hs-boys,1019.9,14,2026,ATL High School Terminus,2026-02-28
+123,Boulder (The Wave (Open)),boulder (the wave (open)) (HS),hs-boys,1019.4,18,2026,High School Spring Warm Up,2026-04-11
+124,Logan (Grizzlies),logan (grizzlies) (HS),hs-boys,1019.2,15,2026,2026 Utah Middle & High School State Championships,2026-05-08
+125,Wakefield-Arlington Career Center (WACC) (WACC),wakefield-arlington career center (wacc) (wacc) (HS),hs-boys,1018.8,21,2026,2026 Virginia High School State Championships,2026-05-16
+126,Parkway (Parkway United JV),parkway (parkway united jv) (HS),hs-boys,1015.2,15,2026,2026 Missouri High School State Championships,2026-05-02
+127,Carolina Friends (Fighting Quakers),carolina friends (fighting quakers) (HS),hs-boys,1013.0,13,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+128,CUDO U20 Youth Club,cudo u20 youth club (HS),hs-boys,1011.8,19,2026,2026 Virginia High School State Championships,2026-05-16
+129,East  (Denver East Junior Varsity),east (denver east junior varsity) (HS),hs-boys,1011.1,23,2026,2026 Colorado High School State Championships,2026-05-09
+130,Stuyvesant (Sticky Fingers ),stuyvesant (sticky fingers ) (HS),hs-boys,1007.5,29,2026,2026 New York High School Boys State Championships,2026-05-23
+131,Lake Braddock (Bruins),lake braddock (bruins) (HS),hs-boys,1006.0,17,2026,2026 Virginia High School State Championships,2026-05-16
+132,Richmond Spinners (Richmond Spinners),richmond spinners (richmond spinners) (HS),hs-boys,1005.5,18,2026,2026 Virginia High School State Championships,2026-05-16
+133,Webster Groves (Webster Whirlwind),webster groves (webster whirlwind) (HS),hs-boys,1003.8,15,2026,2026 Missouri High School State Championships,2026-05-02
+134,XUA (St Xavier),xua (st xavier) (HS),hs-boys,1002.3,14,2026,2026 Ohio High School State Championships,2026-05-30
+135,Lone Peak-B (Lone Peak Boys B),lone peak-b (lone peak boys b) (HS),hs-boys,998.8,16,2026,2026 Utah Middle & High School State Championships,2026-05-08
+136,Grand Rapids (Grand Rapids White Lightning),grand rapids (grand rapids white lightning) (HS),hs-boys,992.3,24,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
+137,Cleveland (Warriors),cleveland (warriors) (HS),hs-boys,988.0,13,2026,2026 Oregon High School State Championships,2026-05-30
+138,Columbia-JV (CHS JV),columbia-jv (chs jv) (HS),hs-boys,987.4,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+139,Berkeley (HC-Y) (Berkeley High Coup - Yellow),berkeley (hc-y) (berkeley high coup - yellow) (HS),hs-boys,984.2,25,2026,2026 California High School State Championships,2026-05-16
+140,Washtenaw Technical Middle College-A (Oriboros),washtenaw technical middle college-a (oriboros) (HS),hs-boys,984.0,22,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
+141,Towson High (Towson Ultimate),towson high (towson ultimate) (HS),hs-boys,983.0,5,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+142,Walter Johnson (Walter Johnson Pitchers),walter johnson (walter johnson pitchers) (HS),hs-boys,982.2,10,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+143,Kennebunk (Kennebunk Rams),kennebunk (kennebunk rams) (HS),hs-boys,980.0,15,2026,2026 Maine High School Boys State Championships,2026-05-30
+144,Yorktown (Patriots),yorktown (patriots) (HS),hs-boys,977.2,18,2026,2026 Virginia High School State Championships,2026-05-16
+145,Mason-B (Shooting Stars),mason-b (shooting stars) (HS),hs-boys,976.4,9,2026,Neuqua Knockout 2026,2026-05-09
+146,Berkeley (LC) (Berkeley High Coup - Lo Coup),berkeley (lc) (berkeley high coup - lo coup) (HS),hs-boys,974.6,17,2026,2026 California High School State Championships,2026-05-16
+147,La Follette (LUF),la follette (luf) (HS),hs-boys,973.4,15,2026,2026 Wisconsin High School State Championships,2026-05-23
+148,Gilman (Gilman Greyhounds),gilman (gilman greyhounds) (HS),hs-boys,973.4,9,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+149,Fairview (Fairview Open B),fairview (fairview open b) (HS),hs-boys,971.5,20,2026,2026 Colorado High School State Championships,2026-05-09
+150,Franklin-JV (Lightning JV),franklin-jv (lightning jv) (HS),hs-boys,970.7,18,2026,2026 Oregon High School State Championships,2026-05-30
+151,Austin (Austin High Maroons),austin (austin high maroons) (HS),hs-boys,969.0,16,2026,2026 Texas High School Boys State Championships,2026-05-16
+152,Urbana High School-JV (Tigers),urbana high school-jv (tigers) (HS),hs-boys,967.0,7,2026,2026 Illinois High School State Championships,2026-05-29
+153,Academe of the Oaks-JV (Firebirds),academe of the oaks-jv (firebirds) (HS),hs-boys,961.6,10,2026,ATL High School Terminus,2026-02-28
+154,Cathedral/Chatard High School-B (Rewind),cathedral/chatard high school-b (rewind) (HS),hs-boys,959.3,18,2026,Indy Invite High School 2026,2026-04-10
+155,Green Canyon-B (Green Canyon B team),green canyon-b (green canyon b team) (HS),hs-boys,958.1,19,2026,2026 Utah Middle & High School State Championships,2026-05-08
+156,Herd Ultimate Club (Mustangs - Boys),herd ultimate club (mustangs - boys) (HS),hs-boys,958.0,16,2026,2026 Colorado High School State Championships,2026-05-09
+157,Hydra,hydra (HS),hs-boys,955.6,14,2026,2026 Utah Middle & High School State Championships,2026-05-08
+158,Amherst (TRASH Ultimate),amherst (trash ultimate) (HS),hs-boys,954.8,16,2026,2026 Wisconsin High School State Championships,2026-05-23
+159,Pine-Richland High School (Pine-Richland Ultimate),pine-richland high school (pine-richland ultimate) (HS),hs-boys,954.5,17,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+160,St. Louis University High (SLUH Ultimate),st. louis university high (sluh ultimate) (HS),hs-boys,949.4,19,2026,2026 Missouri High School State Championships,2026-05-02
+161,St. John Vianney-Varsity (Vianney ),st. john vianney-varsity (vianney ) (HS),hs-boys,948.3,18,2026,2026 Missouri High School State Championships,2026-05-02
+162,Maynard Jackson (Maynard Jackson Open JV),maynard jackson (maynard jackson open jv) (HS),hs-boys,941.8,13,2026,AFDC Round Robin #1,2026-03-28
+163,South Portland (South Portland),south portland (south portland) (HS),hs-boys,941.4,15,2026,2026 Maine High School Boys State Championships,2026-05-30
+164,Asheville (Asheville),asheville (asheville) (HS),hs-boys,940.9,23,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+165,Saint Louis Priory (Priory Ravens),saint louis priory (priory ravens) (HS),hs-boys,938.2,23,2026,2026 Missouri High School State Championships,2026-05-02
+166,Rowland Hall (Rowland Hall),rowland hall (rowland hall) (HS),hs-boys,935.3,17,2026,2026 Utah Middle & High School State Championships,2026-05-08
+167,Skyridge (Skyridge),skyridge (skyridge) (HS),hs-boys,934.8,8,2026,2026 Utah Middle & High School State Championships,2026-05-08
+168,New Vista (Owls),new vista (owls) (HS),hs-boys,934.0,24,2026,2026 Colorado High School State Championships,2026-05-09
+169,Middleton-JV (Middlton Boys B),middleton-jv (middlton boys b) (HS),hs-boys,932.5,19,2026,Neuqua Knockout 2026,2026-05-09
+170,McCallie (Men),mccallie (men) (HS),hs-boys,926.8,22,2026,2026 Tennessee High School State Championships,2026-05-09
+171,Livingston (Livingston Green Inferno),livingston (livingston green inferno) (HS),hs-boys,924.9,16,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+172,Holy Family Catholic (Revolution B),holy family catholic (revolution b) (HS),hs-boys,923.7,10,2026,Indy Invite High School 2026,2026-04-10
+173,Bend Senior (Lava Bears - Varsity),bend senior (lava bears - varsity) (HS),hs-boys,922.4,16,2026,2026 Oregon High School State Championships,2026-05-30
+174,Longmont / Mead High-Varsity (Longmont/Mead High Gordons),longmont / mead high-varsity (longmont/mead high gordons) (HS),hs-boys,912.1,12,2026,2026 Colorado High School State Championships,2026-05-09
+175,Montclair-JV (Montclair Geese),montclair-jv (montclair geese) (HS),hs-boys,911.0,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+176,Madison (MadHouse),madison (madhouse) (HS),hs-boys,910.3,12,2026,2026 Virginia High School State Championships,2026-05-16
+177,Broadneck (Broadneck),broadneck (broadneck) (HS),hs-boys,909.7,7,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+178,University School of Nashville (USN) (Brutal Grassburn),university school of nashville (usn) (brutal grassburn) (HS),hs-boys,902.0,11,2026,2026 Tennessee High School State Championships,2026-05-09
+179,Jackson-Reed (JV) (Jackson-Reed JV),jackson-reed (jv) (jackson-reed jv) (HS),hs-boys,901.5,17,2026,2026 Virginia High School State Championships,2026-05-16
+180,Eleanor Roosevelt (Raiders),eleanor roosevelt (raiders) (HS),hs-boys,901.0,13,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+181,Oak Park River Forest -Varsity (Oak Park River Forest),oak park river forest -varsity (oak park river forest) (HS),hs-boys,898.5,17,2026,Neuqua Knockout 2026,2026-05-09
+182,Chamblee -Varsity (Chamblee JV),chamblee -varsity (chamblee jv) (HS),hs-boys,894.4,18,2026,2026 Georgia High School State Championships,2026-04-25
+183,Niskayuna (Nisky Ultimate),niskayuna (nisky ultimate) (HS),hs-boys,892.2,16,2026,2026 New York High School Boys State Championships,2026-05-23
+184,Neuqua Valley (NV Ultimate Mixed),neuqua valley (nv ultimate mixed) (HS),hs-boys,891.7,19,2026,Neuqua Knockout 2026,2026-05-09
+185,Metea Valley-Varsity (Mustang Varsity),metea valley-varsity (mustang varsity) (HS),hs-boys,888.9,22,2026,Neuqua Knockout 2026,2026-05-09
+186,Forest City (Forest City Boys),forest city (forest city boys) (HS),hs-boys,888.6,15,2026,2026 Maine High School Boys State Championships,2026-05-30
+187,Fieldston-A (Fieldston (B)eagles),fieldston-a (fieldston (b)eagles) (HS),hs-boys,886.3,15,2026,2026 New York High School Boys State Championships,2026-05-23
+188,Liberal Arts and Science Academy (Vertikills B ),liberal arts and science academy (vertikills b ) (HS),hs-boys,885.0,31,2026,2026 Texas High School Boys State Championships,2026-05-16
+189,Oregon (Panther Ultimate),oregon (panther ultimate) (HS),hs-boys,882.5,15,2026,2026 Wisconsin High School State Championships,2026-05-23
+190,Westerville North (Westerville Airbenders),westerville north (westerville airbenders) (HS),hs-boys,877.3,22,2026,2026 Ohio High School State Championships,2026-05-30
+191,Decatur (Boys JV),decatur (boys jv) (HS),hs-boys,875.2,16,2026,ATL High School Terminus,2026-02-28
+192,The Classical Academy (Titans Varsity),the classical academy (titans varsity) (HS),hs-boys,871.4,13,2026,2026 Colorado High School State Championships,2026-05-09
+193,Northern Valley Regional (NV Coalition Ultimate),northern valley regional (nv coalition ultimate) (HS),hs-boys,871.2,16,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+194,Green Canyon-Lower (Green Canyon D2),green canyon-lower (green canyon d2) (HS),hs-boys,871.0,10,2026,2026 Utah Middle & High School State Championships,2026-05-08
+195,Kirkwood High School (Kirkwood Developmental),kirkwood high school (kirkwood developmental) (HS),hs-boys,869.1,15,2026,2026 Missouri High School State Championships,2026-05-02
+196,Columbia-JV2 (CHS JVB),columbia-jv2 (chs jvb) (HS),hs-boys,863.9,24,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+197,Merit Academy (Knights),merit academy (knights) (HS),hs-boys,863.8,13,2026,2026 Utah Middle & High School State Championships,2026-05-08
+198,Ravenwood (Raptors),ravenwood (raptors) (HS),hs-boys,861.4,11,2026,2026 Tennessee High School State Championships,2026-05-09
+199,DHS Open Varsity (Bulldogs),dhs open varsity (bulldogs) (HS),hs-boys,855.1,18,2026,ATL High School Terminus,2026-02-28
+200,St. Thomas (St. Thomas),st. thomas (st. thomas) (HS),hs-boys,853.8,17,2026,2026 Texas High School Boys State Championships,2026-05-16
+201,Westfield (Shamrocks),westfield (shamrocks) (HS),hs-boys,852.4,13,2026,2026 Indiana High School Boys State Championship,2026-04-25
+202,Westfield B2 (Westfield B2),westfield b2 (westfield b2) (HS),hs-boys,851.3,17,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+203,DJUSD (DYU High School),djusd (dyu high school) (HS),hs-boys,847.6,14,2026,2026 California High School State Championships,2026-05-16
+204,The New School-JV (TNS Owls),the new school-jv (tns owls) (HS),hs-boys,846.6,11,2026,2026 Georgia High School State Championships,2026-04-25
+205,Madison West-JV1 (Madison West Ultimate),madison west-jv1 (madison west ultimate) (HS),hs-boys,843.5,19,2026,Neuqua Knockout 2026,2026-05-09
+206,Corvallis-JV (Force JV),corvallis-jv (force jv) (HS),hs-boys,842.0,15,2026,2026 Oregon High School State Championships,2026-05-30
+207,Wauwatosa East  (Tosa Ultimate Frisbee),wauwatosa east (tosa ultimate frisbee) (HS),hs-boys,841.4,17,2026,2026 Wisconsin High School State Championships,2026-05-23
+208,Bowie (Bowie Bulldogs Open),bowie (bowie bulldogs open) (HS),hs-boys,840.0,19,2026,2026 Texas High School Boys State Championships,2026-05-16
+209,Armada (Stick Drift),armada (stick drift) (HS),hs-boys,832.9,18,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
+210,Grimsley High School 2025-2026,grimsley high school 2025-2026 (HS),hs-boys,832.7,14,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+211,St. Louis University High-JV (SLUH Ultimate JV),st. louis university high-jv (sluh ultimate jv) (HS),hs-boys,829.7,15,2026,2026 Missouri High School State Championships,2026-05-02
+212,Bend Senior-JV (Lava Bears - JV),bend senior-jv (lava bears - jv) (HS),hs-boys,827.7,13,2026,2026 Oregon High School State Championships,2026-05-30
+213,Woodward Academy (Woodward Academy),woodward academy (woodward academy) (HS),hs-boys,826.5,16,2026,AFDC Round Robin #2,2026-04-18
+214,Monarch (Monarch HS B),monarch (monarch hs b) (HS),hs-boys,823.4,14,2026,2026 Colorado High School State Championships,2026-05-09
+215,Elmhurst (Elmhurst Evolution),elmhurst (elmhurst evolution) (HS),hs-boys,820.9,9,2026,2026 Illinois High School State Championships,2026-05-29
+216,Watchung Hills Regional (Warriors),watchung hills regional (warriors) (HS),hs-boys,814.1,25,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+217,Fairfax (Fairfax Fog),fairfax (fairfax fog) (HS),hs-boys,813.0,17,2026,2026 Virginia High School State Championships,2026-05-16
+218,Lane Tech (Lane Tech Ultimate),lane tech (lane tech ultimate) (HS),hs-boys,806.6,13,2026,2026 Illinois High School State Championships,2026-05-29
+219,Traverse City  (Lake Effect),traverse city (lake effect) (HS),hs-boys,800.1,18,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
+220,McFarland (McFarland Spartans),mcfarland (mcfarland spartans) (HS),hs-boys,799.6,15,2026,2026 Wisconsin High School State Championships,2026-05-23
+221,Cape Elizabeth (Cape Ultimate - Open),cape elizabeth (cape ultimate - open) (HS),hs-boys,795.3,15,2026,2026 Maine High School Boys State Championships,2026-05-30
+222,Ben Franklin Academy (Ben Franklin Academy),ben franklin academy (ben franklin academy) (HS),hs-boys,794.3,13,2026,AFDC Round Robin #1,2026-03-28
+223,Ladue (Ladue Rams A),ladue (ladue rams a) (HS),hs-boys,793.2,19,2026,2026 Missouri High School State Championships,2026-05-02
+224,Fort Collins Club (Fort Collins AYU Club),fort collins club (fort collins ayu club) (HS),hs-boys,791.9,24,2026,High School Spring Warm Up,2026-04-11
+225,EVU X (EVU X),evu x (evu x) (HS),hs-boys,787.2,12,2026,2026 Oregon High School State Championships,2026-05-30
+226,University High School (Phoenix Flyers),university high school (phoenix flyers) (HS),hs-boys,782.5,18,2026,2026 California High School State Championships,2026-05-16
+227,Brooklyn Technical-B (Tech Support B Team),brooklyn technical-b (tech support b team) (HS),hs-boys,778.3,21,2026,2026 New York High School Boys State Championships,2026-05-23
+228,Ann Arbor Pioneer (Flickity Split),ann arbor pioneer (flickity split) (HS),hs-boys,772.9,12,2026,Neuqua Knockout 2026,2026-05-09
+229,Hampton (Hampton Ultimate Club),hampton (hampton ultimate club) (HS),hs-boys,768.8,15,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
+230,Atlanta International-Varsity (AIS Eagles - Boys Varsity),atlanta international-varsity (ais eagles - boys varsity) (HS),hs-boys,766.6,12,2026,AFDC Round Robin #1,2026-03-28
+231,Montgomery Bell Academy (MBA) (MBA),montgomery bell academy (mba) (mba) (HS),hs-boys,760.8,17,2026,2026 Tennessee High School State Championships,2026-05-09
+232,Midtown-JV (Gauntlet JV Boys),midtown-jv (gauntlet jv boys) (HS),hs-boys,760.7,27,2026,ATL High School Terminus,2026-02-28
+233,St. Louis University High-B (SLUH Ultimate B),st. louis university high-b (sluh ultimate b) (HS),hs-boys,758.5,16,2026,2026 Missouri High School State Championships,2026-05-02
+234,Brighton (ATC),brighton (atc) (HS),hs-boys,754.8,17,2026,2026 New York High School Boys State Championships,2026-05-23
+235,Paideia (Paideia - Boys JV),paideia (paideia - boys jv) (HS),hs-boys,745.6,17,2026,ATL High School Terminus,2026-02-28
+236,Madison East-B (Madison East B),madison east-b (madison east b) (HS),hs-boys,745.0,18,2026,2026 Wisconsin High School State Championships,2026-05-23
+237,District 203-Varsity (D203),district 203-varsity (d203) (HS),hs-boys,725.0,12,2026,2026 Illinois High School State Championships,2026-05-29
+238,Canyon Ridge-B (RiverHawks - White),canyon ridge-b (riverhawks - white) (HS),hs-boys,724.7,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+239,Lafayette-B (Lafayette Warriors B),lafayette-b (lafayette warriors b) (HS),hs-boys,721.7,22,2026,2026 Colorado High School State Championships,2026-05-09
+240,Sky View-B (Sky View B),sky view-b (sky view b) (HS),hs-boys,716.6,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+241,Mason-JV (Green),mason-jv (green) (HS),hs-boys,713.8,14,2026,Indy Invite High School 2026,2026-04-10
+242,Washington-Liberty B (Slarenegs JV),washington-liberty b (slarenegs jv) (HS),hs-boys,695.2,11,2026,2026 Virginia High School State Championships,2026-05-16
+243,White Plains (White Plains),white plains (white plains) (HS),hs-boys,693.6,15,2026,2026 New York High School Boys State Championships,2026-05-23
+244,Fort Collins Club (Div. 2) (FC Spirit),fort collins club (div. 2) (fc spirit) (HS),hs-boys,689.6,21,2026,2026 Colorado High School State Championships,2026-05-09
+245,Wakefield Arlington Career Center-B (WACCtown),wakefield arlington career center-b (wacctown) (HS),hs-boys,685.1,14,2026,2026 Virginia High School State Championships,2026-05-16
+246,Evanston-JV (Evanston Ultimate Kits),evanston-jv (evanston ultimate kits) (HS),hs-boys,675.7,19,2026,2026 Illinois High School State Championships,2026-05-29
+247,Duluth (Wildcats),duluth (wildcats) (HS),hs-boys,675.6,15,2026,AFDC Round Robin #1,2026-03-28
+248,Montgomery Blair-JV (Montgomery Blair JV),montgomery blair-jv (montgomery blair jv) (HS),hs-boys,670.1,9,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+249,HB Woodlawn Secondary Program-JV (H-B Open JV),hb woodlawn secondary program-jv (h-b open jv) (HS),hs-boys,669.0,15,2026,2026 Virginia High School State Championships,2026-05-16
+250,Loyola Blakefield (Loyola Ultimate),loyola blakefield (loyola ultimate) (HS),hs-boys,663.6,5,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+251,Lebanon-B (Warrior Open B),lebanon-b (warrior open b) (HS),hs-boys,656.1,10,2026,Indy Invite High School 2026,2026-04-10
+252,Merit Academy-B (Knights B),merit academy-b (knights b) (HS),hs-boys,640.2,8,2026,2026 Utah Middle & High School State Championships,2026-05-08
+253,Latin School of Chicago (Colossus of Latin),latin school of chicago (colossus of latin) (HS),hs-boys,637.8,14,2026,Neuqua Knockout 2026,2026-05-09
+254,Carnegie Vanguard High School-Varsity (CVHS Rhinos),carnegie vanguard high school-varsity (cvhs rhinos) (HS),hs-boys,609.8,14,2026,2026 Texas High School Boys State Championships,2026-05-16
+255,Fryeburg Academy (Fryeburg Academy),fryeburg academy (fryeburg academy) (HS),hs-boys,607.3,12,2026,2026 Maine High School Boys State Championships,2026-05-30
+256,Christian Brothers College High (CBC Ultimate),christian brothers college high (cbc ultimate) (HS),hs-boys,602.5,17,2026,2026 Missouri High School State Championships,2026-05-02
+257,EVU Y (EVU Y),evu y (evu y) (HS),hs-boys,584.4,13,2026,2026 Oregon High School State Championships,2026-05-30
+258,Kent Island-Varsity (Buccaneers),kent island-varsity (buccaneers) (HS),hs-boys,573.0,3,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+259,Bethlehem Central-B (BCHS Ultimate Eagles (JV)),bethlehem central-b (bchs ultimate eagles (jv)) (HS),hs-boys,555.7,10,2026,2026 New York High School Boys State Championships,2026-05-23
+1,Holy Family Catholic (Omega),holy family catholic (omega) (HS girls),hs-girls,1601.6,11,2026,ATL High School Terminus,2026-02-28
+2,El Cerrito (EC GO),el cerrito (ec go) (HS girls),hs-girls,1463.2,18,2026,2026 California High School State Championships,2026-05-16
+3,South Eugene (South Eugene Girls ),south eugene (south eugene girls ) (HS girls),hs-girls,1446.2,17,2026,2026 Oregon High School State Championships,2026-05-30
+4,Middleton-Varsity (Middleton Ultimate),middleton-varsity (middleton ultimate) (HS girls),hs-girls,1393.5,13,2026,2026 Wisconsin High School State Championships,2026-05-23
+5,Strath Haven (Strath Haven Ultimate Girls),strath haven (strath haven ultimate girls) (HS girls),hs-girls,1370.2,23,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+6,Paideia (PythonsGroove Varsity),paideia (pythonsgroove varsity) (HS girls),hs-girls,1336.8,20,2026,ATL High School Terminus,2026-02-28
+7,West (Krakens),west (krakens) (HS girls),hs-girls,1331.0,10,2026,2026 Utah Middle & High School State Championships,2026-05-08
+8,CA/Lakewood (Lakewood DEEP Girls),ca/lakewood (lakewood deep girls) (HS girls),hs-girls,1329.2,22,2026,High School Spring Warm Up,2026-04-11
+9,HB Woodlawn Secondary Program (Pandamonium),hb woodlawn secondary program (pandamonium) (HS girls),hs-girls,1315.0,23,2026,2026 Virginia High School State Championships,2026-05-16
+10,Springfield (Springfield Cougars Ultimate Teams (SCUT)),springfield (springfield cougars ultimate teams (scut)) (HS girls),hs-girls,1295.6,13,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+11,Madison West (Nemea),madison west (nemea) (HS girls),hs-girls,1294.2,26,2026,Indy Invite High School 2026,2026-04-10
+12,Oak Park and River Forest (OPRF GMPs),oak park and river forest (oprf gmps) (HS girls),hs-girls,1256.9,15,2026,2026 Illinois High School State Championships,2026-05-29
+13,Brooklyn Technical High School (Brooklyn Disco Tech),brooklyn technical high school (brooklyn disco tech) (HS girls),hs-girls,1216.2,20,2026,2026 New York High School Girls State Championships,2026-05-23
+14,James Madison (MADLUV) (Madison),james madison (madluv) (madison) (HS girls),hs-girls,1214.4,20,2026,2026 Virginia High School State Championships,2026-05-16
+15,Jordan (Jordan Falcons Girls),jordan (jordan falcons girls) (HS girls),hs-girls,1209.1,10,2026,ATL High School Terminus,2026-02-28
+16,Summit (Stormbears),summit (stormbears) (HS girls),hs-girls,1207.0,15,2026,2026 Oregon High School State Championships,2026-05-30
+17,Green Canyon-A (Green Canyon Girls A),green canyon-a (green canyon girls a) (HS girls),hs-girls,1206.8,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+18,Oakland Technical (Oak Tech HS Girls),oakland technical (oak tech hs girls) (HS girls),hs-girls,1197.7,12,2026,2026 California High School State Championships,2026-05-16
+19,Fairview (Fairview GMP),fairview (fairview gmp) (HS girls),hs-girls,1194.3,21,2026,High School Spring Warm Up,2026-04-11
+20,Anderson High School (McAnderson GNB team),anderson high school (mcanderson gnb team) (HS girls),hs-girls,1193.3,5,2026,2026 Texas Girls & Non-Binary State Championships,2026-06-09
+21,Madison West (Nemea - Varsity),madison west (nemea - varsity) (HS girls),hs-girls,1190.3,16,2026,2026 Wisconsin High School State Championships,2026-05-23
+22,Berkeley (Berkeley High Coup - Hysteria),berkeley (berkeley high coup - hysteria) (HS girls),hs-girls,1182.3,17,2026,2026 California High School State Championships,2026-05-16
+23,Lafayette/Mohi (Artemis),lafayette/mohi (artemis) (HS girls),hs-girls,1162.8,22,2026,High School Spring Warm Up,2026-04-11
+24,Midtown-Varsity (Gauntlet (girls)),midtown-varsity (gauntlet (girls)) (HS girls),hs-girls,1155.3,17,2026,ATL High School Terminus,2026-02-28
+25,Academe of the Oaks (Firebirds),academe of the oaks (firebirds) (HS girls),hs-girls,1152.0,18,2026,ATL High School Terminus,2026-02-28
+26,Virginia Fall Line (Virginia Fall Line),virginia fall line (virginia fall line) (HS girls),hs-girls,1151.4,21,2026,2026 Virginia High School State Championships,2026-05-16
+27,Timpview (Provo Pandemonium Girls A),timpview (provo pandemonium girls a) (HS girls),hs-girls,1147.6,10,2026,2026 Utah Middle & High School State Championships,2026-05-08
+28,Lower Merion (Lady Baba),lower merion (lady baba) (HS girls),hs-girls,1125.4,13,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+29,Austin High School (Austin High School GNB Team),austin high school (austin high school gnb team) (HS girls),hs-girls,1121.9,5,2026,2026 Texas Girls & Non-Binary State Championships,2026-06-09
+30,Washington-Liberty (WhirlpooL),washington-liberty (whirlpool) (HS girls),hs-girls,1113.9,12,2026,2026 Virginia High School State Championships,2026-05-16
+31,Bingham (Bingham Ultimate - Girls),bingham (bingham ultimate - girls) (HS girls),hs-girls,1111.2,8,2026,2026 Utah Middle & High School State Championships,2026-05-08
+32,Forest City (Forest City Girls),forest city (forest city girls) (HS girls),hs-girls,1108.3,11,2026,2026 Maine High School Girls State Championships,2026-05-30
+33,University School of Nashville (USN) (USN Girls),university school of nashville (usn) (usn girls) (HS girls),hs-girls,1099.8,14,2026,Indy Invite High School 2026,2026-04-10
+34,East High School (East High School),east high school (east high school) (HS girls),hs-girls,1098.4,20,2026,2026 Colorado High School State Championships,2026-05-09
+35,Mounds View (Mounds View Girls),mounds view (mounds view girls) (HS girls),hs-girls,1081.8,16,2026,Indy Invite High School 2026,2026-04-10
+36,Columbia (Sparkle Motion CHS),columbia (sparkle motion chs) (HS girls),hs-girls,1067.4,24,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+37,Mason (Comets Ultimate),mason (comets ultimate) (HS girls),hs-girls,1063.5,12,2026,Indy Invite High School 2026,2026-04-10
+38,Vel Phillips Memorial (Memorial Spartans),vel phillips memorial (memorial spartans) (HS girls),hs-girls,1055.6,16,2026,2026 Wisconsin High School State Championships,2026-05-23
+39,East (Easts United),east (easts united) (HS girls),hs-girls,1045.8,23,2026,2026 Wisconsin High School State Championships,2026-05-23
+40,Lakeside-Varsity (Valkyrie),lakeside-varsity (valkyrie) (HS girls),hs-girls,1043.5,23,2026,AFDC Round Robin #2,2026-04-18
+41,Niskayuna (Nisky Ultimate),niskayuna (nisky ultimate) (HS girls),hs-girls,1037.3,15,2026,2026 New York High School Girls State Championships,2026-05-23
+42,Bard Early College Manhattan-Upper (Ultimaidens),bard early college manhattan-upper (ultimaidens) (HS girls),hs-girls,1021.6,26,2026,2026 New York High School Girls State Championships,2026-05-23
+43,University High School (Valley Sphinx),university high school (valley sphinx) (HS girls),hs-girls,1016.8,13,2026,2026 California High School State Championships,2026-05-16
+44,Science Leadership Academy (Rockets),science leadership academy (rockets) (HS girls),hs-girls,1012.9,14,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+45,Falmouth & Waynflete (Falmouth Varsity Girls),falmouth & waynflete (falmouth varsity girls) (HS girls),hs-girls,1011.5,11,2026,2026 Maine High School Girls State Championships,2026-05-30
+46,Pennsbury (Pennsbury Ultimate Female Frisbee),pennsbury (pennsbury ultimate female frisbee) (HS girls),hs-girls,1009.7,11,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+47,Jackson-Reed (Tigers Ultimate),jackson-reed (tigers ultimate) (HS girls),hs-girls,1007.7,18,2026,2026 Virginia High School State Championships,2026-05-16
+48,Carver (Sparkle Muffin Peacock Spider),carver (sparkle muffin peacock spider) (HS girls),hs-girls,1003.4,11,2026,2026 Virginia High School State Championships,2026-05-16
+49,Chesterton Academy of the Willamette Valley (Saints),chesterton academy of the willamette valley (saints) (HS girls),hs-girls,996.9,8,2026,2026 Oregon High School State Championships,2026-05-30
+50,Midtown-JV (Gauntlet JV Girls),midtown-jv (gauntlet jv girls) (HS girls),hs-girls,984.8,12,2026,ATL High School Terminus,2026-02-28
+51,Abington Friends (Abington Friends Ultimate GNB),abington friends (abington friends ultimate gnb) (HS girls),hs-girls,977.0,10,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+52,School Without Walls X (Flightless Bird Squad),school without walls x (flightless bird squad) (HS girls),hs-girls,973.7,17,2026,2026 Virginia High School State Championships,2026-05-16
+53,Kirkwood High School-Varsity (Kirkwood Girls),kirkwood high school-varsity (kirkwood girls) (HS girls),hs-girls,967.3,12,2026,2026 Missouri High School State Championships,2026-05-02
+54,Wakefield Arlington Career Center Yorktown (WACC-Town),wakefield arlington career center yorktown (wacc-town) (HS girls),hs-girls,954.6,16,2026,2026 Virginia High School State Championships,2026-05-16
+55,Woodward Academy (WAFU -- A Team),woodward academy (wafu -- a team) (HS girls),hs-girls,945.3,12,2026,AFDC Round Robin #2,2026-04-18
+56,Decatur (Decatur Bulldogs),decatur (decatur bulldogs) (HS girls),hs-girls,943.2,14,2026,ATL High School Terminus,2026-02-28
+57,Paideia-JV (Demi Groove - Paideia JV Girls),paideia-jv (demi groove - paideia jv girls) (HS girls),hs-girls,937.5,9,2026,ATL High School Terminus,2026-02-28
+58,Compass Montessori - Golden (Compass Montessori Unicorns - Girls),compass montessori - golden (compass montessori unicorns - girls) (HS girls),hs-girls,923.5,13,2026,2026 Colorado High School State Championships,2026-05-09
+59,Edwardsville (Edwardsville Tigers (girls)),edwardsville (edwardsville tigers (girls)) (HS girls),hs-girls,921.7,16,2026,2026 Missouri High School State Championships,2026-05-02
+60,Corvallis Combined (Force),corvallis combined (force) (HS girls),hs-girls,921.4,24,2026,2026 Oregon High School State Championships,2026-05-30
+61,Boulder (Flower Power),boulder (flower power) (HS girls),hs-girls,901.8,17,2026,2026 Colorado High School State Championships,2026-05-09
+62,Green Canyon-B (Green Canyon Girls B),green canyon-b (green canyon girls b) (HS girls),hs-girls,893.5,12,2026,2026 Utah Middle & High School State Championships,2026-05-08
+63,Radnor (Radnor Girls Varsity),radnor (radnor girls varsity) (HS girls),hs-girls,886.5,12,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+64,Greely (Cumberland Ultimate),greely (cumberland ultimate) (HS girls),hs-girls,883.8,11,2026,2026 Maine High School Girls State Championships,2026-05-30
+65,Watchung Hills Regional (Warriors),watchung hills regional (warriors) (HS girls),hs-girls,881.3,10,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+66,Independence (FLIGHT),independence (flight) (HS girls),hs-girls,879.7,13,2026,2026 Tennessee High School State Championships,2026-05-09
+67,Beacon (Beacon Blue Demons),beacon (beacon blue demons) (HS girls),hs-girls,870.7,17,2026,2026 New York High School Girls State Championships,2026-05-23
+68,Rochester (Rochester),rochester (rochester) (HS girls),hs-girls,868.1,13,2026,2026 New York High School Girls State Championships,2026-05-23
+69,Chick Flicks,chick flicks (HS girls),hs-girls,861.6,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+70,Alexandria City (Small Titans),alexandria city (small titans) (HS girls),hs-girls,851.4,13,2026,2026 Virginia High School State Championships,2026-05-16
+71,Lone Peak-A (Lone Peak A Girls),lone peak-a (lone peak a girls) (HS girls),hs-girls,828.9,6,2026,2026 Utah Middle & High School State Championships,2026-05-08
+72,Cape Elizabeth (Cape Ultimate - Girls),cape elizabeth (cape ultimate - girls) (HS girls),hs-girls,826.4,16,2026,2026 Maine High School Girls State Championships,2026-05-30
+73,DC International School (DCI Girls Varsity),dc international school (dci girls varsity) (HS girls),hs-girls,825.4,11,2026,2026 Virginia High School State Championships,2026-05-16
+74,Fresh Coast Ultimate,fresh coast ultimate (HS girls),hs-girls,818.2,3,2026,2026 Michigan High School Girls State Championship,2026-05-30
+75,Madison West-JV (Nemea - JV),madison west-jv (nemea - jv) (HS girls),hs-girls,817.6,14,2026,2026 Wisconsin High School State Championships,2026-05-23
+76,Sky View (Sky View Girls),sky view (sky view girls) (HS girls),hs-girls,815.6,7,2026,2026 Utah Middle & High School State Championships,2026-05-08
+77,Lindbergh (Flyers),lindbergh (flyers) (HS girls),hs-girls,813.8,17,2026,2026 Missouri High School State Championships,2026-05-02
+78,Montclair Girls (Montclair Ultimate Girls),montclair girls (montclair ultimate girls) (HS girls),hs-girls,803.1,10,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+79,The World (Round Table/White Lightning/Lake Effect),the world (round table/white lightning/lake effect) (HS girls),hs-girls,800.2,4,2026,2026 Michigan High School Girls State Championship,2026-05-30
+80,Maynard Jackson (Jaguars),maynard jackson (jaguars) (HS girls),hs-girls,798.1,13,2026,ATL High School Terminus,2026-02-28
+81,Stuyvesant (Stuyvesant Sticky Fingers),stuyvesant (stuyvesant sticky fingers) (HS girls),hs-girls,787.4,20,2026,2026 New York High School Girls State Championships,2026-05-23
+82,Latur D-Side (Decatur/Lakeside/AIS Combo)-JV (Latur D-Side),latur d-side (decatur/lakeside/ais combo)-jv (latur d-side) (HS girls),hs-girls,783.3,14,2026,ATL High School Terminus,2026-02-28
+83,Decatur-JV (Decatur High School JV),decatur-jv (decatur high school jv) (HS girls),hs-girls,777.7,10,2026,2026 Georgia High School State Championships,2026-04-25
+84,Evanston (Disco),evanston (disco) (HS girls),hs-girls,763.9,11,2026,2026 Illinois High School State Championships,2026-05-29
+85,Garnet Valley (Garnet Valley),garnet valley (garnet valley) (HS girls),hs-girls,749.5,11,2026,2026 Pennsylvania Girls State Championship,2026-05-09
+86,Parkway (Parkway United),parkway (parkway united) (HS girls),hs-girls,609.7,14,2026,2026 Missouri High School State Championships,2026-05-02
+1,Holy Family Catholic (RevMega X),holy family catholic (revmega x) (HS mixed),hs-mixed,1439.4,13,2026,2026 Ohio High School State Championships,2026-05-30
+2,Falmouth - Waynflete-A (Falmouth),falmouth - waynflete-a (falmouth) (HS mixed),hs-mixed,1173.7,13,2026,2026 Maine High School Mixed State Championships,2026-05-23
+3,Westerville/BH/Tangy (Westerville Airbenders),westerville/bh/tangy (westerville airbenders) (HS mixed),hs-mixed,1104.3,15,2026,2026 Ohio High School State Championships,2026-05-30
+4,Greely (Cumberland Ultimate),greely (cumberland ultimate) (HS mixed),hs-mixed,1031.9,22,2026,2026 Maine High School Mixed State Championships,2026-05-23
+5,Mason (Comets Ultimate),mason (comets ultimate) (HS mixed),hs-mixed,929.8,12,2026,2026 Ohio High School State Championships,2026-05-30
+6,Beaumont (Blue Streaks),beaumont (blue streaks) (HS mixed),hs-mixed,928.0,13,2026,2026 Ohio High School State Championships,2026-05-30
+7,Lebanon (Warriors Mixed),lebanon (warriors mixed) (HS mixed),hs-mixed,919.5,10,2026,2026 Ohio High School State Championships,2026-05-30
+8,Cape Elizabeth (Cape Ultimate - Mixed),cape elizabeth (cape ultimate - mixed) (HS mixed),hs-mixed,811.9,31,2026,2026 Maine High School Mixed State Championships,2026-05-23
+1,Westfield MS Travel-A (Westfield Middle),westfield ms travel-a (westfield middle) (MS),ms-boys,1024.4,29,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+2,MS 243 Center School (Outsiders),ms 243 center school (outsiders) (MS),ms-boys,853.8,8,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+3,Montclair Middle-A (Montclair Middle School Ultimate ),montclair middle-a (montclair middle school ultimate ) (MS),ms-boys,804.9,13,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+4,Maplewood/South Orange Middle (Columbia Cougars (Middle School)),maplewood/south orange middle (columbia cougars (middle school)) (MS),ms-boys,685.4,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+5,Montclair Middle-B (Montclair Middle B),montclair middle-b (montclair middle b) (MS),ms-boys,645.6,20,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+6,Tenafly-A (Tiger Ultimate),tenafly-a (tiger ultimate) (MS),ms-boys,557.6,25,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+7,Tenafly-B (Tiger Ultimate B),tenafly-b (tiger ultimate b) (MS),ms-boys,532.2,25,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+1,Lone Peak White (White Knight),lone peak white (white knight) (MS mixed),ms-mixed,1166.2,11,2026,2026 Utah Middle & High School State Championships,2026-05-08
+2,Lone Peak Gold (Gold Knight),lone peak gold (gold knight) (MS mixed),ms-mixed,1156.5,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+3,Flight Crew,flight crew (MS mixed),ms-mixed,1101.7,10,2026,2026 Utah Middle & High School State Championships,2026-05-08
+4,Zig Zag-A (Zig Zag Ultimate Travel Team),zig zag-a (zig zag ultimate travel team) (MS mixed),ms-mixed,1071.2,10,2026,Neuqua Knockout 2026,2026-05-09
+5,De Smet Jesuit MS-Dev (DUClings),de smet jesuit ms-dev (duclings) (MS mixed),ms-mixed,1042.1,5,2026,Neuqua Knockout 2026,2026-05-09
+6,Mason-Dev (Mars),mason-dev (mars) (MS mixed),ms-mixed,1031.3,4,2026,Neuqua Knockout 2026,2026-05-09
+7,West MS (Krakens MS),west ms (krakens ms) (MS mixed),ms-mixed,995.0,16,2026,2026 Utah Middle & High School State Championships,2026-05-08
+8,McClure (McClure Bulldogs),mcclure (mcclure bulldogs) (MS mixed),ms-mixed,976.8,12,2026,2026 Illinois Middle School Classic,2026-05-31
+9,Oak Park Alpha (Oak Park Ultimate),oak park alpha (oak park ultimate) (MS mixed),ms-mixed,909.7,76,2026,2026 Illinois Middle School Classic,2026-05-31
+10,North Cache and South Cache-A (Scorch A),north cache and south cache-a (scorch a) (MS mixed),ms-mixed,899.2,14,2026,2026 Utah Middle & High School State Championships,2026-05-08
+11,Chicago Union Academy (Evanston Contingent),chicago union academy (evanston contingent) (MS mixed),ms-mixed,892.5,10,2026,Neuqua Knockout 2026,2026-05-09
+12,Zig Zag-B (Zig Zag Ultimate Travel Team 2),zig zag-b (zig zag ultimate travel team 2) (MS mixed),ms-mixed,843.9,10,2026,Neuqua Knockout 2026,2026-05-09
+13,Cache Valley Middle School (Cache Valley Kokanee),cache valley middle school (cache valley kokanee) (MS mixed),ms-mixed,843.4,13,2026,2026 Utah Middle & High School State Championships,2026-05-08
+14,Kromrey Middle School (Kromrey Ultimate),kromrey middle school (kromrey ultimate) (MS mixed),ms-mixed,816.3,16,2026,Neuqua Knockout 2026,2026-05-09
+15,Flight Crew B-B,flight crew b-b (MS mixed),ms-mixed,813.7,10,2026,2026 Utah Middle & High School State Championships,2026-05-08
+16,Center Grove Middle (Center Grove Middle School),center grove middle (center grove middle school) (MS mixed),ms-mixed,749.7,20,2026,Neuqua Knockout 2026,2026-05-09
+17,Hamilton Middle School (Capital City Curds),hamilton middle school (capital city curds) (MS mixed),ms-mixed,747.2,16,2026,Neuqua Knockout 2026,2026-05-09
+18,O'Keeffe Middle School (O'Keeffe Ultimate),o'keeffe middle school (o'keeffe ultimate) (MS mixed),ms-mixed,737.5,13,2026,Neuqua Knockout 2026,2026-05-09
+19,Lone Peak Crimson (Crimson Knight),lone peak crimson (crimson knight) (MS mixed),ms-mixed,715.5,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+20,Lake Bluff Middle (Bobcats),lake bluff middle (bobcats) (MS mixed),ms-mixed,707.6,11,2026,Neuqua Knockout 2026,2026-05-09
+21,Glenview/Union (Glenview Ultimate Frisbee Club),glenview/union (glenview ultimate frisbee club) (MS mixed),ms-mixed,654.5,12,2026,2026 Illinois Middle School Classic,2026-05-31
+22,NV Pugs (Youth Team - NV Ultimate),nv pugs (youth team - nv ultimate) (MS mixed),ms-mixed,634.5,6,2026,Neuqua Knockout 2026,2026-05-09
+23,Lone Peak Dark (Dark Knight),lone peak dark (dark knight) (MS mixed),ms-mixed,614.6,9,2026,2026 Utah Middle & High School State Championships,2026-05-08
+24,North Cache and South Cache-B (Scorch B),north cache and south cache-b (scorch b) (MS mixed),ms-mixed,577.3,14,2026,2026 Utah Middle & High School State Championships,2026-05-08
+25,Layton Area MS (Break Force Jr),layton area ms (break force jr) (MS mixed),ms-mixed,562.1,13,2026,2026 Utah Middle & High School State Championships,2026-05-08
+26,Elmhurst (Mid Evo),elmhurst (mid evo) (MS mixed),ms-mixed,447.0,18,2026,Neuqua Knockout 2026,2026-05-09
+27,Flight Crew C-C,flight crew c-c (MS mixed),ms-mixed,437.2,10,2026,2026 Utah Middle & High School State Championships,2026-05-08
+1,SmOAK,smoak (YCC-U20),ycc-u20-boys,1698.4,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+2,Gold Rush,gold rush (YCC-U20),ycc-u20-boys,1673.3,25,2026,Bay Area Youth Club Invite 2026,2026-01-31
+3,BUDA U20B,buda u20b (YCC-U20),ycc-u20-boys,1609.7,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+4,Utah Swarm U20 Boys,utah swarm u20 boys (YCC-U20),ycc-u20-boys,1562.1,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+5,Seven Hills Red Winter 2026,seven hills red winter 2026 (YCC-U20),ycc-u20-boys,1561.2,22,2026,Bay Area Youth Club Invite 2026,2026-01-31
+6,Colorado Cutthroat U-20 Boys,colorado cutthroat u-20 boys (YCC-U20),ycc-u20-boys,1528.9,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+7,Santa Cruz (Santa Cruz Ultimate + Friends),santa cruz (santa cruz ultimate + friends) (YCC-U20),ycc-u20-boys,1521.0,28,2026,Bay Area Youth Club Invite 2026,2026-01-31
+8,Minnesota Superior U20B,minnesota superior u20b (YCC-U20),ycc-u20-boys,1465.1,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+9,Triforce,triforce (YCC-U20),ycc-u20-boys,1459.2,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+10,ATLiens,atliens (YCC-U20),ycc-u20-boys,1457.5,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+11,DEVYL U-20 Open,devyl u-20 open (YCC-U20),ycc-u20-boys,1452.2,24,2026,Edgely YCC Warm Up,2026-07-11
+12,Seven Hills U20 Bx,seven hills u20 bx (YCC-U20),ycc-u20-boys,1425.6,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+13,Oak Storm,oak storm (YCC-U20),ycc-u20-boys,1420.8,19,2026,Bay Area Youth Club Invite 2026,2026-01-31
+14,Texas United,texas united (YCC-U20),ycc-u20-boys,1400.3,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+15,Illinois Illusion,illinois illusion (YCC-U20),ycc-u20-boys,1397.0,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+16,Villains,villains (YCC-U20),ycc-u20-boys,1346.3,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+17,Oregon Trainwreck,oregon trainwreck (YCC-U20),ycc-u20-boys,1329.3,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+18,Philadelphia SEPDA,philadelphia sepda (YCC-U20),ycc-u20-boys,1325.6,21,2026,Edgely YCC Warm Up,2026-07-11
+19,Madison MUFAbots U20B,madison mufabots u20b (YCC-U20),ycc-u20-boys,1314.6,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+20,Michigan Stubble,michigan stubble (YCC-U20),ycc-u20-boys,1277.1,16,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+21,St Louis Storm U20B,st louis storm u20b (YCC-U20),ycc-u20-boys,1265.0,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+22,Flying Pig,flying pig (YCC-U20),ycc-u20-boys,1222.0,21,2026,SCINNY 2026,2026-06-20
+23,Red Dawn,red dawn (YCC-U20),ycc-u20-boys,1204.7,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+24,Carolina Sky,carolina sky (YCC-U20),ycc-u20-boys,1191.3,19,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+25,COSmic U-20 Boys,cosmic u-20 boys (YCC-U20),ycc-u20-boys,1190.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+26,Charlotte Flight,charlotte flight (YCC-U20),ycc-u20-boys,1187.2,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+27,Foggy Bottom Boys,foggy bottom boys (YCC-U20),ycc-u20-boys,1185.5,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+28,Blitz-A,blitz-a (YCC-U20),ycc-u20-boys,1182.7,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+29,Third Rail U20 Bx,third rail u20 bx (YCC-U20),ycc-u20-boys,1175.4,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+30,Impulse,impulse (YCC-U20),ycc-u20-boys,1158.0,27,2026,Edgely YCC Warm Up,2026-07-11
+31,Empire State Eggs,empire state eggs (YCC-U20),ycc-u20-boys,1134.8,17,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+32,Rising Tide U20B,rising tide u20b (YCC-U20),ycc-u20-boys,1100.8,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+33,Virginia Vortex,virginia vortex (YCC-U20),ycc-u20-boys,1035.8,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+34,Utah Swarm U20 Boys - D2,utah swarm u20 boys - d2 (YCC-U20),ycc-u20-boys,996.1,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+35,Colorado Cutthroat U-20 Boys TWO,colorado cutthroat u-20 boys two (YCC-U20),ycc-u20-boys,995.0,29,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+36,Connecticut Harpoon,connecticut harpoon (YCC-U20),ycc-u20-boys,759.9,19,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Dragon Roll + Friends,dragon roll + friends (YCC-U20 girls),ycc-u20-girls,1830.6,28,2026,Bay Area Youth Club Invite 2026,2026-01-31
+2,Seven Hills U20 Gx,seven hills u20 gx (YCC-U20 girls),ycc-u20-girls,1591.5,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+3,Cali Roll,cali roll (YCC-U20 girls),ycc-u20-girls,1515.1,16,2026,Bay Area Youth Club Invite 2026,2026-01-31
+4,California Current,california current (YCC-U20 girls),ycc-u20-girls,1499.8,19,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+5,Minnesota Superior U20G,minnesota superior u20g (YCC-U20 girls),ycc-u20-girls,1465.4,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+6,OAK Embers,oak embers (YCC-U20 girls),ycc-u20-girls,1442.1,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+7,Oregon Downpour,oregon downpour (YCC-U20 girls),ycc-u20-girls,1434.5,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+8,OAK Frost,oak frost (YCC-U20 girls),ycc-u20-girls,1420.1,15,2026,Bay Area Youth Club Invite 2026,2026-01-31
+9,Valley Ultimate,valley ultimate (YCC-U20 girls),ycc-u20-girls,1387.6,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+10,Colorado Cutthroat U-20 Girls,colorado cutthroat u-20 girls (YCC-U20 girls),ycc-u20-girls,1379.7,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+11,Utah Swarm U20 Girls,utah swarm u20 girls (YCC-U20 girls),ycc-u20-girls,1333.8,19,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+12,Seven Hills Red-Blue Gx,seven hills red-blue gx (YCC-U20 girls),ycc-u20-girls,1314.5,20,2026,Bay Area Youth Club Invite 2026,2026-01-31
+13,Warhawks,warhawks (YCC-U20 girls),ycc-u20-girls,1290.2,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+14,Philadelphia Pythons,philadelphia pythons (YCC-U20 girls),ycc-u20-girls,1245.5,12,2026,Edgely YCC Warm Up,2026-07-11
+15,cATLanta,catlanta (YCC-U20 girls),ycc-u20-girls,1233.6,19,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+16,BUDA U20G,buda u20g (YCC-U20 girls),ycc-u20-girls,1231.4,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+17,Bullseye,bullseye (YCC-U20 girls),ycc-u20-girls,1225.2,15,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+18,Texas Tango,texas tango (YCC-U20 girls),ycc-u20-girls,1110.3,15,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+19,Illinois Lucid,illinois lucid (YCC-U20 girls),ycc-u20-girls,1104.1,17,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+20,Philadelphia Phang,philadelphia phang (YCC-U20 girls),ycc-u20-girls,1096.3,14,2026,Edgely YCC Warm Up,2026-07-11
+21,Rogue,rogue (YCC-U20 girls),ycc-u20-girls,1076.2,14,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+22,Rip Tide,rip tide (YCC-U20 girls),ycc-u20-girls,1028.0,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+23,DC Force,dc force (YCC-U20 girls),ycc-u20-girls,957.0,14,2026,Edgely YCC Warm Up,2026-07-11
+24,Virginia Valkyrie,virginia valkyrie (YCC-U20 girls),ycc-u20-girls,928.3,14,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+25,Third Rail U20 Gx,third rail u20 gx (YCC-U20 girls),ycc-u20-girls,918.5,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+26,St Louis Storm U20G,st louis storm u20g (YCC-U20 girls),ycc-u20-girls,799.4,17,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Seven Hills U20 Mixed,seven hills u20 mixed (YCC-U20 mixed),ycc-u20-mixed,1647.8,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+2,MN Superior,mn superior (YCC-U20 mixed),ycc-u20-mixed,1573.7,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+3,KOI,koi (YCC-U20 mixed),ycc-u20-mixed,1519.5,27,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+4,Madison MUFAbots U20X,madison mufabots u20x (YCC-U20 mixed),ycc-u20-mixed,1501.7,26,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+5,Virginia Vanguard,virginia vanguard (YCC-U20 mixed),ycc-u20-mixed,1426.1,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+6,Swing Vote,swing vote (YCC-U20 mixed),ycc-u20-mixed,1392.4,27,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+7,Philadelphia Forge,philadelphia forge (YCC-U20 mixed),ycc-u20-mixed,1387.7,22,2026,Edgely YCC Warm Up,2026-07-11
+8,Equinox,equinox (YCC-U20 mixed),ycc-u20-mixed,1360.3,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+9,Dallas Nightfall,dallas nightfall (YCC-U20 mixed),ycc-u20-mixed,1258.5,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+10,flATLine,flatline (YCC-U20 mixed),ycc-u20-mixed,1230.6,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+11,Maryland Blackout,maryland blackout (YCC-U20 mixed),ycc-u20-mixed,1162.8,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+12,DEVYL U-20 Mixed,devyl u-20 mixed (YCC-U20 mixed),ycc-u20-mixed,1085.8,24,2026,Edgely YCC Warm Up,2026-07-11
+13,LA Sky,la sky (YCC-U20 mixed),ycc-u20-mixed,1029.2,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+14,NWA White Tails,nwa white tails (YCC-U20 mixed),ycc-u20-mixed,900.2,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Oregon Eclipse,oregon eclipse (YCC-U17),ycc-u17-boys,1474.5,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+2,OAK Sparks,oak sparks (YCC-U17),ycc-u17-boys,1423.7,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+3,SoCal Air Show,socal air show (YCC-U17),ycc-u17-boys,1380.5,16,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+4,Philadelphia PADAwans,philadelphia padawans (YCC-U17),ycc-u17-boys,1358.8,22,2026,Edgely YCC Warm Up,2026-07-11
+5,Minnesota Superior U17B,minnesota superior u17b (YCC-U17),ycc-u17-boys,1342.8,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+6,Seven Hills U17 Bx,seven hills u17 bx (YCC-U17),ycc-u17-boys,1317.4,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+7,Capitol Heights,capitol heights (YCC-U17),ycc-u17-boys,1223.7,20,2026,James River Jam 2026,2026-06-13
+8,NC Hammer,nc hammer (YCC-U17),ycc-u17-boys,1179.6,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+9,Richmond Spinners (Richmond Spinners),richmond spinners (richmond spinners) (YCC-U17),ycc-u17-boys,1172.9,15,2026,James River Jam 2026,2026-06-13
+10,Colorado Cutthroat U-17 Boys,colorado cutthroat u-17 boys (YCC-U17),ycc-u17-boys,1170.2,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+11,Aftershock,aftershock (YCC-U17),ycc-u17-boys,1165.6,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+12,Texas Double Trouble,texas double trouble (YCC-U17),ycc-u17-boys,1158.8,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+13,ATLas,atlas (YCC-U17),ycc-u17-boys,1143.8,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+14,DEVYL U-17,devyl u-17 (YCC-U17),ycc-u17-boys,1124.6,24,2026,Edgely YCC Warm Up,2026-07-11
+15,Neap Tide,neap tide (YCC-U17),ycc-u17-boys,1117.6,17,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+16,BUDA U17B,buda u17b (YCC-U17),ycc-u17-boys,1111.9,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+17,Illinois Nightmare,illinois nightmare (YCC-U17),ycc-u17-boys,1070.4,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+18,Utah Swarm U17 Boys,utah swarm u17 boys (YCC-U17),ycc-u17-boys,1037.8,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+19,Capital City Mumbo Sauce,capital city mumbo sauce (YCC-U17),ycc-u17-boys,1032.4,23,2026,Edgely YCC Warm Up,2026-07-11
+20,Lucky PuNCs,lucky puncs (YCC-U17),ycc-u17-boys,980.6,25,2026,James River Jam 2026,2026-06-13
+21,St Louis Storm U17B,st louis storm u17b (YCC-U17),ycc-u17-boys,978.6,24,2026,SCINNY 2026,2026-06-20
+22,Madison MUFAbots U17B,madison mufabots u17b (YCC-U17),ycc-u17-boys,976.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+23,Nashville Tonks,nashville tonks (YCC-U17),ycc-u17-boys,947.0,16,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+24,DEVYL Developmental,devyl developmental (YCC-U17),ycc-u17-boys,910.7,23,2026,Edgely YCC Warm Up,2026-07-11
+25,Colorado Cutthroat U-17 Boys TWO,colorado cutthroat u-17 boys two (YCC-U17),ycc-u17-boys,904.4,19,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+26,Flying Piglet,flying piglet (YCC-U17),ycc-u17-boys,849.5,15,2026,SCINNY 2026,2026-06-20
+27,Philly Dev,philly dev (YCC-U17),ycc-u17-boys,842.5,22,2026,Edgely YCC Warm Up,2026-07-11
+28,MD Blockade,md blockade (YCC-U17),ycc-u17-boys,804.7,16,2026,Edgely YCC Warm Up,2026-07-11
+29,VanDals,vandals (YCC-U17),ycc-u17-boys,788.5,21,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+30,Pulse,pulse (YCC-U17),ycc-u17-boys,772.9,19,2026,Edgely YCC Warm Up,2026-07-11
+31,OAK Ignite,oak ignite (YCC-U17),ycc-u17-boys,688.7,15,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Orcas,orcas (YCC-U17 girls),ycc-u17-girls,1509.0,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+2,Minnesota Superior U17G,minnesota superior u17g (YCC-U17 girls),ycc-u17-girls,1284.5,26,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+3,Philadelphia Pythons,philadelphia pythons (YCC-U17 girls),ycc-u17-girls,1241.2,14,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+4,Seven Hills U17 Gx,seven hills u17 gx (YCC-U17 girls),ycc-u17-girls,1233.5,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+5,BUDA U17G,buda u17g (YCC-U17 girls),ycc-u17-girls,1146.3,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+6,Oregon Tide,oregon tide (YCC-U17 girls),ycc-u17-girls,1117.9,14,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+7,Kitty Hawks,kitty hawks (YCC-U17 girls),ycc-u17-girls,1110.1,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+8,Colorado Cutthroat U-17 Girls,colorado cutthroat u-17 girls (YCC-U17 girls),ycc-u17-girls,1108.7,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+9,DC Force,dc force (YCC-U17 girls),ycc-u17-girls,1024.6,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+10,rATLers,ratlers (YCC-U17 girls),ycc-u17-girls,1012.3,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+11,Flaming Hydras,flaming hydras (YCC-U17 girls),ycc-u17-girls,913.3,16,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+12,Madison MUFAbots U17G,madison mufabots u17g (YCC-U17 girls),ycc-u17-girls,809.9,17,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Men of War (MeOW),men of war (meow) (beach),beach-men,2271.5,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Humiliswag East,humiliswag east (beach),beach-men,2040.8,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,AMPersand,ampersand (beach),beach-men,2031.5,18,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Humiliswag West,humiliswag west (beach),beach-men,1978.3,18,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,NC State Alpha,nc state alpha (beach),beach-men,1977.4,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,Untide,untide (beach),beach-men,1891.0,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+7,Tama,tama (beach),beach-men,1876.0,18,2026,2026 USA Ultimate Beach Championships,2026-05-09
+8,Bowl of Water,bowl of water (beach),beach-men,1784.2,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+9,Paper Time,paper time (beach),beach-men,1783.7,10,2026,2026 USA Ultimate Beach Championships,2026-05-09
+10,SunDogs,sundogs (beach),beach-men,1757.3,18,2026,2026 USA Ultimate Beach Championships,2026-05-09
+11,Zohran is for Everyone,zohran is for everyone (beach),beach-men,1753.7,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+12,Pipe,pipe (beach),beach-men,1644.4,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+13,Belle Isle Boneyard,belle isle boneyard (beach),beach-men,1630.2,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+14,Rough Retrievers,rough retrievers (beach),beach-men,1535.4,18,2026,2026 USA Ultimate Beach Championships,2026-05-09
+15,Shrimp Discs,shrimp discs (beach),beach-men,1486.6,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Blackwidows,blackwidows (beach women's),beach-women,1815.4,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Business Casualties,business casualties (beach women's),beach-women,1694.9,12,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,Porcupineapples,porcupineapples (beach women's),beach-women,1651.9,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Calypso,calypso (beach women's),beach-women,1613.5,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,FMP,fmp (beach women's),beach-women,1595.7,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,Season of Fun,season of fun (beach women's),beach-women,1589.9,12,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Amherst Crop Tops,amherst crop tops (beach mixed),beach-mixed,2014.2,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Beach Bulls,beach bulls (beach mixed),beach-mixed,1953.2,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,Virginia Trippin,virginia trippin (beach mixed),beach-mixed,1868.6,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Big Fish,big fish (beach mixed),beach-mixed,1770.8,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,SoHo,soho (beach mixed),beach-mixed,1766.8,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,CareBexars,carebexars (beach mixed),beach-mixed,1721.1,12,2026,2026 USA Ultimate Beach Championships,2026-05-09
+7,Pocket Sand,pocket sand (beach mixed),beach-mixed,1675.5,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+8,NE Mixed,ne mixed (beach mixed),beach-mixed,1653.4,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+9,midriff'd,midriff'd (beach mixed),beach-mixed,1624.6,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+10,Virginia Vanguard - Beach,virginia vanguard - beach (beach mixed),beach-mixed,1573.4,10,2026,2026 USA Ultimate Beach Championships,2026-05-09
+11,Beachboat,beachboat (beach mixed),beach-mixed,1535.8,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+12,Mixchief,mixchief (beach mixed),beach-mixed,1512.6,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+13,HawtDawggin,hawtdawggin (beach mixed),beach-mixed,1404.7,12,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Banner FC,banner fc (beach masters),beach-masters-men,1946.1,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Durham Pretzels,durham pretzels (beach masters),beach-masters-men,1765.4,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,JoD,jod (beach masters),beach-masters-men,1717.5,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Slow Bern,slow bern (beach masters),beach-masters-men,1704.7,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,Ducks,ducks (beach masters),beach-masters-men,1690.6,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,L'Opossums,l'opossums (beach masters),beach-masters-men,1641.7,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+7,Black Cans & Highlands,black cans & highlands (beach masters),beach-masters-men,1638.5,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+8,Magpies-A,magpies-a (beach masters),beach-masters-men,1483.3,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+9,Ricky Spanish,ricky spanish (beach masters),beach-masters-men,1395.4,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+10,Jalopy,jalopy (beach masters),beach-masters-men,1390.4,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Ripe,ripe (beach masters women's),beach-masters-women,1891.4,12,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Friendship,friendship (beach masters women's),beach-masters-women,1890.6,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,Loose Ends,loose ends (beach masters women's),beach-masters-women,1614.7,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,WarrenPeas,warrenpeas (beach masters women's),beach-masters-women,1595.7,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,Winded City (Beached City),winded city (beached city) (beach masters women's),beach-masters-women,1544.5,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,Space Dust,space dust (beach masters women's),beach-masters-women,1459.0,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Swamp Rats,swamp rats (beach masters mixed),beach-masters-mixed,2097.0,20,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Friends & Lovers,friends & lovers (beach masters mixed),beach-masters-mixed,1825.2,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,Beachwreck,beachwreck (beach masters mixed),beach-masters-mixed,1809.8,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Northern Flights,northern flights (beach masters mixed),beach-masters-mixed,1801.9,11,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,Good Sleep Outside Brooklyn,good sleep outside brooklyn (beach masters mixed),beach-masters-mixed,1726.9,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,Lobstars,lobstars (beach masters mixed),beach-masters-mixed,1701.6,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+7,Echinoderms 2.0,echinoderms 2.0 (beach masters mixed),beach-masters-mixed,1684.8,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+8,SEANILE,seanile (beach masters mixed),beach-masters-mixed,1620.8,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+9,Lazer Lobster Nation,lazer lobster nation (beach masters mixed),beach-masters-mixed,1614.2,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+10,Big Fish (m),big fish (m) (beach masters mixed),beach-masters-mixed,1596.8,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+11,Inflammation Age,inflammation age (beach masters mixed),beach-masters-mixed,1586.1,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+12,Shucks,shucks (beach masters mixed),beach-masters-mixed,1584.9,12,2026,2026 USA Ultimate Beach Championships,2026-05-09
+13,Run Like the Winded,run like the winded (beach masters mixed),beach-masters-mixed,1564.9,13,2026,2026 USA Ultimate Beach Championships,2026-05-09
+14,Stale Pretzels,stale pretzels (beach masters mixed),beach-masters-mixed,1502.2,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+15,Rocko's Mountain Lifeguards,rocko's mountain lifeguards (beach masters mixed),beach-masters-mixed,1497.2,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Riders of Berk,riders of berk (beach grandmasters mixed),beach-grandmasters-mixed,1910.6,18,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Dial Up,dial up (beach grandmasters mixed),beach-grandmasters-mixed,1876.2,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,Johnny Blue,johnny blue (beach grandmasters mixed),beach-grandmasters-mixed,1854.2,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Running With Scissors,running with scissors (beach grandmasters mixed),beach-grandmasters-mixed,1780.9,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,Ran Like The Winded,ran like the winded (beach grandmasters mixed),beach-grandmasters-mixed,1713.7,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,Molasses Disaster,molasses disaster (beach grandmasters mixed),beach-grandmasters-mixed,1673.8,20,2026,2026 USA Ultimate Beach Championships,2026-05-09
+7,Flamingos,flamingos (beach grandmasters mixed),beach-grandmasters-mixed,1637.3,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+8,Echinoderms GM,echinoderms gm (beach grandmasters mixed),beach-grandmasters-mixed,1596.1,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+9,2.Old,2.old (beach grandmasters mixed),beach-grandmasters-mixed,1514.8,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+10,Beaches & Cream,beaches & cream (beach grandmasters mixed),beach-grandmasters-mixed,1424.5,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+11,Lake Effect,lake effect (beach grandmasters mixed),beach-grandmasters-mixed,1396.2,14,2026,2026 USA Ultimate Beach Championships,2026-05-09
+12,Love Handles,love handles (beach grandmasters mixed),beach-grandmasters-mixed,1322.6,16,2026,2026 USA Ultimate Beach Championships,2026-05-09
+1,Sandblast,sandblast (beach GGM),beach-greatgrandmasters-men,1942.8,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+2,Santa Barbara Endors,santa barbara endors (beach GGM),beach-greatgrandmasters-men,1927.9,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+3,Merica,merica (beach GGM),beach-greatgrandmasters-men,1924.2,19,2026,2026 USA Ultimate Beach Championships,2026-05-09
+4,Black Cans,black cans (beach GGM),beach-greatgrandmasters-men,1767.9,20,2026,2026 USA Ultimate Beach Championships,2026-05-09
+5,Graveyard,graveyard (beach GGM),beach-greatgrandmasters-men,1754.1,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+6,NSOM Beach,nsom beach (beach GGM),beach-greatgrandmasters-men,1725.2,17,2026,2026 USA Ultimate Beach Championships,2026-05-09
+7,No Country 50,no country 50 (beach GGM),beach-greatgrandmasters-men,1586.2,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+8,Sandshake,sandshake (beach GGM),beach-greatgrandmasters-men,1432.7,15,2026,2026 USA Ultimate Beach Championships,2026-05-09
+9,MAGMA,magma (beach GGM),beach-greatgrandmasters-men,1353.5,12,2026,2026 USA Ultimate Beach Championships,2026-05-09

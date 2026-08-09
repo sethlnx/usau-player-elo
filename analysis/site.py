@@ -1425,7 +1425,19 @@ const DIVTAG = ["men's", "college men's", "college men's D-III", 'mixed',
                 "grand masters men's", "grand masters women's", "grand masters mixed",
                 "great grand masters men's", "great grand masters women's",
                 "great grand masters mixed", "Europe open", "Europe mixed",
-                "Europe women's"];
+                "Europe women's",
+                'college mixed', 'high school boys', 'high school girls',
+                'high school mixed', 'middle school boys', 'middle school girls',
+                'middle school mixed', 'YCC U-20 boys', 'YCC U-20 girls',
+                'YCC U-20 mixed', 'YCC U-17 boys', 'YCC U-17 girls',
+                'YCC U-17 mixed', 'YCC U-15 boys', 'YCC U-15 girls',
+                'YCC U-15 mixed', "beach men's", "beach women's", 'beach mixed',
+                "beach masters men's", "beach masters women's", 'beach masters mixed',
+                "beach grand masters men's", "beach grand masters women's",
+                'beach grand masters mixed',
+                "beach great grand masters men's", "beach great grand masters women's",
+                'beach great grand masters mixed', 'beach legends mixed',
+                "league men's", 'league mixed'];
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -2127,7 +2139,19 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                "Grand Masters Men's", "Grand Masters Women's", "Grand Masters Mixed",
                "Great Grand Masters Men's", "Great Grand Masters Women's",
                "Great Grand Masters Mixed", "Europe Open", "Europe Mixed",
-               "Europe Women's"];
+               "Europe Women's",
+               'College Mixed', 'High School Boys', 'High School Girls',
+               'High School Mixed', 'Middle School Boys', 'Middle School Girls',
+               'Middle School Mixed', 'YCC U-20 Boys', 'YCC U-20 Girls',
+               'YCC U-20 Mixed', 'YCC U-17 Boys', 'YCC U-17 Girls',
+               'YCC U-17 Mixed', 'YCC U-15 Boys', 'YCC U-15 Girls',
+               'YCC U-15 Mixed', "Beach Men's", "Beach Women's", 'Beach Mixed',
+               "Beach Masters Men's", "Beach Masters Women's", 'Beach Masters Mixed',
+               "Beach Grand Masters Men's", "Beach Grand Masters Women's",
+               'Beach Grand Masters Mixed',
+               "Beach Great Grand Masters Men's", "Beach Great Grand Masters Women's",
+               'Beach Great Grand Masters Mixed', 'Beach Legends Mixed',
+               "League Men's", 'League Mixed'];
 
 /* Event geography is only city/state in the upstream record. Translate the
    venue state through USA Ultimate's division-specific region boundaries;
@@ -2669,7 +2693,22 @@ const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
                   12: 'grand masters mixed',
                   13: "great grand masters men's", 14: "great grand masters women's",
                   15: 'great grand masters mixed',
-                  16: 'Europe open', 17: 'Europe mixed', 18: "Europe women's"};
+                  16: 'Europe open', 17: 'Europe mixed', 18: "Europe women's",
+                  19: 'college mixed', 20: 'high school boys', 21: 'high school girls',
+                  22: 'high school mixed', 23: 'middle school boys',
+                  24: 'middle school girls', 25: 'middle school mixed',
+                  26: 'YCC U-20 boys', 27: 'YCC U-20 girls', 28: 'YCC U-20 mixed',
+                  29: 'YCC U-17 boys', 30: 'YCC U-17 girls', 31: 'YCC U-17 mixed',
+                  32: 'YCC U-15 boys', 33: 'YCC U-15 girls', 34: 'YCC U-15 mixed',
+                  35: "beach men's", 36: "beach women's", 37: 'beach mixed',
+                  38: "beach masters men's", 39: "beach masters women's",
+                  40: 'beach masters mixed',
+                  41: "beach grand masters men's", 42: "beach grand masters women's",
+                  43: 'beach grand masters mixed',
+                  44: "beach great grand masters men's",
+                  45: "beach great grand masters women's",
+                  46: 'beach great grand masters mixed', 47: 'beach legends mixed',
+                  48: "league men's", 49: 'league mixed'};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};

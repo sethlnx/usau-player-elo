@@ -759,7 +759,25 @@ TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
                   "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
                   "greatgrandmasters-men", "greatgrandmasters-women",
                   "greatgrandmasters-mixed",
-                  "euf-open", "euf-mixed", "euf-women"]
+                  "euf-open", "euf-mixed", "euf-women",
+                  # New GraphQL-only divisions (see DIVCODE above). Included
+                  # on the same terms as everything above it: published_rosters
+                  # and best_rosters read the division off the row, not off a
+                  # whitelist, so there is no separate code path to add.
+                  "college-mixed",
+                  "hs-boys", "hs-girls", "hs-mixed",
+                  "ms-boys", "ms-girls", "ms-mixed",
+                  "ycc-u20-boys", "ycc-u20-girls", "ycc-u20-mixed",
+                  "ycc-u17-boys", "ycc-u17-girls", "ycc-u17-mixed",
+                  "ycc-u15-boys", "ycc-u15-girls", "ycc-u15-mixed",
+                  "beach-men", "beach-women", "beach-mixed",
+                  "beach-masters-men", "beach-masters-women", "beach-masters-mixed",
+                  "beach-grandmasters-men", "beach-grandmasters-women",
+                  "beach-grandmasters-mixed",
+                  "beach-greatgrandmasters-men", "beach-greatgrandmasters-women",
+                  "beach-greatgrandmasters-mixed",
+                  "beach-legends-mixed",
+                  "league-men", "league-mixed"]
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
