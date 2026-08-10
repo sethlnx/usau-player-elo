@@ -226,6 +226,45 @@ def build():
     for row in tourneys["events"]:
         row.append(0 if row[0] in played else 1)
     tourneys["strengthNotes"] = FIELD_TIER_NAMES
+    # Tournament forecasts use the strongest current roster rating when it
+    # exists, falling back to the latest completed roster for older or
+    # unranked entrants. Ratings are local to each event's field so the
+    # sidecar remains self-contained and can be simulated offline.
+    rating_by_div = {}
+    rating_by_name = collections.defaultdict(list)
+    for row in clubs["best"] + clubs["completed"]:
+        try:
+            rating = float(row["elo"])
+            div = DIVCODE.get(row["division"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if div is None:
+            continue
+        key = (row["club"].strip().lower(), div)
+        if key not in rating_by_div:
+            rating_by_div[key] = rating
+        rating_by_name[row["club"].strip().lower()].append((div, rating))
+    scale_by_div = {
+        DIVCODE[division]: scale
+        for division, scale in PUBLISHED["division_scale"].items()
+        if division in DIVCODE
+    }
+    for ix, det in tdetail.items():
+        event = tourneys["events"][int(ix)]
+        div = event[3]
+        values = []
+        for global_team in det["t"]:
+            name = tourneys["teams"][global_team]
+            value = rating_by_div.get((name.strip().lower(), div))
+            if value is None:
+                candidates = rating_by_name.get(name.strip().lower(), [])
+                if len({candidate_div for candidate_div, _ in candidates}) == 1:
+                    value = candidates[0][1]
+            values.append(value)
+        det["r"] = values
+        det["s"] = scale_by_div.get(div, PUBLISHED["division_scale"].get(
+            "club-men", 260.0))
+        det["q"] = tourneys["rounds"]
     # division -> [[score, letter], ...]. Published because the bar is not the
     # same in every division and a letter with a hidden threshold is a riddle.
     tourneys["strengthCuts"] = strength_cuts
@@ -323,6 +362,8 @@ def build():
     lo, hi = trend_series_range(hcore)
     OUT.write_text(TEMPLATE
                    .replace("__DATA__", json.dumps(payload, separators=(",", ":")))
+                   .replace("__SIMULATOR__", (Path(__file__).with_name(
+                       "tournament_sim.js")).read_text())
                    .replace("__TRENDN__", f"{lo} to {hi}")
                    .replace("__MULTIDIV__", f"{multi_division_clubs(hcore):,}")
                    .replace("Elo", RATING_NAME))
@@ -725,6 +766,20 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 }
 .stand td.pd{text-align:right;font-family:var(--mono);color:var(--ink-3);
   font-size:11.5px;padding-left:8px}
+.forecast-head{margin:0 0 12px}
+.forecast-head h3{font-size:18px;margin:0 0 3px}
+.forecast-pool select{width:100%;margin-top:5px}
+.forecast-pool .pool-odds{margin-top:8px}
+.forecast-pool .pool-odds tr:first-child td{border-top:0}
+.forecast-pool .pool-odds td{padding:3px 0;font-size:12.5px}
+.forecast-pool .pool-odds td:last-child{text-align:right;font-family:var(--mono)}
+.forecast-note{margin:12px 0;font-size:12.5px;color:var(--ink-3)}
+.forecast-table{overflow-x:auto}
+.forecast-table table{min-width:650px}
+.forecast-table td:first-child{font-weight:550}
+.forecast-table .bar-c{width:24%;padding-right:12px}
+.forecast-table .oddsbar{height:6px}
+.forecast-table .missing{color:var(--ink-3);font-style:italic}
 </style>
 
 <div id="scrim"></div>
@@ -872,6 +927,27 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div id="tview" style="display:none">
     <div class="bar"><button class="act" id="eback">&lsaquo; All tournaments</button></div>
     <div id="tvhead"></div>
+    <div class="bar">
+      <button class="act" id="tpre" aria-expanded="false">Pre-tournament forecast</button>
+    </div>
+    <div id="tforecast" hidden>
+      <div id="tfhead"></div>
+      <div class="bar">
+        <label for="tfruns">Simulation runs</label>
+        <select id="tfruns" aria-label="Simulation runs">
+          <option value="1000">1,000</option>
+          <option value="5000" selected>5,000</option>
+          <option value="20000">20,000</option>
+        </select>
+        <button class="act prim" id="tfsim">Simulate tournament</button>
+        <span class="count" id="tfstatus" aria-live="polite"></span>
+      </div>
+      <p class="note">Select a pool winner to force that team into the selected
+      pool seed in every run. Leave it automatic to let Elo decide each pool
+      game. Percentages are Monte Carlo estimates from the completed runs.</p>
+      <div id="tfpools" class="grid"></div>
+      <div id="tfresults"></div>
+    </div>
     <div id="tvbody"></div>
     <p class="note" id="tvnote"></p>
   </div>
@@ -907,6 +983,9 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 
 
 </main>
+<script>
+__SIMULATOR__
+</script>
 <script>
 const D = __DATA__;
 const IS_GLICKO = D.model.startsWith('Glicko');
@@ -2552,6 +2631,127 @@ function drawTournament(i) {
     `names in <span class="nmlink">this style</span> open that club's rating ` +
     `history.`;
 }
+let forecastEvent = null;
+let forecastResult = null;
+
+function forecastPoolTeams(det) {
+  return det.p
+    .map(([later, games], sourceIndex) => {
+      if (later || !games.length) return null;
+      return {sourceIndex, teams: [...new Set(games.flatMap(g => [g[0], g[1]]))]};
+    })
+    .filter(Boolean);
+}
+
+function forecastPercent(value) {
+  return `${Number(value).toFixed(1)}%`;
+}
+
+function forecastStageLabel(stage) {
+  return {quarterfinal: 'Quarterfinals', semifinal: 'Semifinals',
+          final: 'Final', champion: 'Champion'}[stage];
+}
+
+function renderForecast(i) {
+  forecastEvent = i;
+  const e = EVS[i], det = EDET[i];
+  const pools = det ? forecastPoolTeams(det) : [];
+  $('#tpre').disabled = !det || !pools.length;
+  $('#tfhead').innerHTML = `<div class="forecast-head"><h3>Pre-tournament forecast</h3>` +
+    `<div class="meta">${pools.length ? `Forecasting ${pools.reduce((n, p) => n + p.teams.length, 0)} ` +
+      `entrants from ${pools.length} opening pools using ${esc(D.model)} ratings.`
+      : 'This event has no recovered opening pools to simulate.'}</div></div>`;
+  if (!pools.length) {
+    $('#tfpools').innerHTML = '';
+    $('#tfresults').innerHTML = `<p class="forecast-note">A forecast needs published pool pairings and a championship bracket.</p>`;
+    return;
+  }
+  const selected = forecastResult && forecastResult.selected || {};
+  const poolOdds = forecastResult && forecastResult.result
+    ? new Map(forecastResult.result.pools.map(pool => [pool.sourceIndex,
+        new Map(pool.teams.map(team => [team.team, team.percent]))]))
+    : new Map();
+  $('#tfpools').innerHTML = pools.map((pool, pi) => {
+    const odds = poolOdds.get(pool.sourceIndex);
+    return `<div class="card forecast-pool"><h3>Pool ${POOLTAG[pi] || pi + 1}</h3>` +
+      `<label for="tfpool-${pool.sourceIndex}">Selected winner</label>` +
+      `<select id="tfpool-${pool.sourceIndex}" data-forecast-pool="${pool.sourceIndex}">` +
+      `<option value="">Automatic from Elo</option>` +
+      pool.teams.map(team => `<option value="${team}"${String(selected[pool.sourceIndex]) === String(team) ? ' selected' : ''}>` +
+        `${esc(ETM[det.t[team]])}</option>`).join('') + `</select>` +
+      (odds ? `<table class="pool-odds">${pool.teams.map(team =>
+        `<tr><td>${esc(ETM[det.t[team]])}</td><td>${forecastPercent(odds.get(team) || 0)}</td></tr>`
+      ).join('')}</table>` : '') + `</div>`;
+  }).join('');
+  $('#tfresults').innerHTML = forecastResult && forecastResult.result
+    ? forecastResultsMarkup(det, forecastResult.result) : '';
+  document.querySelectorAll('[data-forecast-pool]').forEach(select => {
+    select.onchange = () => {
+      if (!forecastResult) forecastResult = {selected: {}, result: null};
+      if (select.value === '') delete forecastResult.selected[select.dataset.forecastPool];
+      else forecastResult.selected[select.dataset.forecastPool] = +select.value;
+    };
+  });
+}
+
+function forecastResultsMarkup(det, result) {
+  const labels = ['quarterfinal', 'semifinal', 'final', 'champion'];
+  const participants = new Set(forecastPoolTeams(det).flatMap(pool => pool.teams));
+  if (!participants.size) det.t.forEach((_, team) => participants.add(team));
+  const rows = result.teams.filter(row => participants.has(row.team))
+    .sort((a, b) => b.champion - a.champion || b.final - a.final || a.team - b.team);
+  const heads = labels.map(stage => `<th class="n">${forecastStageLabel(stage)}</th>`).join('');
+  const body = rows.map(row => `<tr><td>${esc(ETM[det.t[row.team]])}</td>` +
+    labels.map(stage => {
+      if (!result.stages[stage]) return '<td class="n missing">\u2014</td>';
+      const value = row[stage];
+      return `<td class="n">${forecastPercent(value)}</td>`;
+    }).join('') + `</tr>`).join('');
+  return `<h3 class="sect">Advancement likelihoods</h3>` +
+    `<p class="forecast-note">Each column is the share of ${result.runs.toLocaleString()} completed runs in which the team reached that stage.</p>` +
+    `<div class="forecast-table"><table><thead><tr><th>Team</th>${heads}</tr></thead>` +
+    `<tbody>${body || '<tr><td colspan="5" class="missing">No bracket entrants could be inferred.</td></tr>'}</tbody></table></div>`;
+}
+
+function runForecast() {
+  const i = forecastEvent, e = EVS[i], det = EDET[i];
+  if (!det || !forecastPoolTeams(det).length) return;
+  const button = $('#tfsim');
+  button.disabled = true;
+  $('#tfstatus').textContent = 'Simulating\u2026';
+  const selected = {};
+  document.querySelectorAll('[data-forecast-pool]').forEach(select => {
+    if (select.value !== '') selected[select.dataset.forecastPool] = +select.value;
+  });
+  // The seed is stable for an event and selection, so a reader can reproduce
+  // the same estimate while changing only the assumptions.
+  const seed = ((Number(e[0]) || i) ^ 0x9e3779b9) >>> 0;
+  try {
+    const result = TournamentSim.simulateTournament(det, {
+      runs: +$('#tfruns').value, selected, seed});
+    forecastResult = {selected, result};
+    renderForecast(i);
+    $('#tfstatus').textContent = `${result.runs.toLocaleString()} runs complete`;
+  } catch (error) {
+    $('#tfstatus').textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$('#tpre').onclick = () => {
+  const open = $('#tforecast').hidden;
+  $('#tforecast').hidden = !open;
+  $('#tvbody').hidden = open;
+  $('#tvnote').hidden = open;
+  $('#tpre').setAttribute('aria-expanded', String(open));
+  if (open) {
+    renderForecast(curEvent);
+    if (!forecastResult || forecastResult.event !== curEvent) runForecast();
+  }
+};
+$('#tfsim').onclick = runForecast;
+
 const POOLTAG = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 function evGameRow(g, nm) {
@@ -3041,9 +3241,10 @@ $('#enote').innerHTML +=
 /* ---------- boot ---------- */
 /* Everything above needs only the inline payload, so the page is fully usable
    the moment this runs. The trajectory corpus is then pulled in behind it. */
-drawRankings(); drawEvents();
-document.documentElement.classList.remove('booting');
-routeHash();
+setTimeout(() => {
+  document.documentElement.classList.remove('booting');
+  drawRankings(); drawEvents(); routeHash();
+}, 0);
 
 /* Anything already on screen that was drawn without the trajectory file gets
    redrawn now: a tournament view gains its club links, an open panel fills in,
