@@ -71,6 +71,40 @@ tr:last-child td{border-bottom:0}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);
   font-size:13px}
 td.rk{color:var(--ink-3);font-family:var(--mono);font-size:12.5px;width:44px}
+/* Head-to-head results use a diverging scale: the hue gives the direction of
+   the record and the fill grows with |wins - losses| / games. The printed
+   W-L remains the source of truth for readers who cannot distinguish color. */
+.result{font-weight:650}
+.result.pos{--result-color:var(--win)}
+.result.neg{--result-color:var(--lose)}
+.result.even{background:var(--chip);color:var(--ink-2)}
+.result.pos.tone1,.result.neg.tone1{
+  background:color-mix(in srgb,var(--result-color) 12%,transparent)}
+.result.pos.tone2,.result.neg.tone2{
+  background:color-mix(in srgb,var(--result-color) 21%,transparent)}
+.result.pos.tone3,.result.neg.tone3{
+  background:color-mix(in srgb,var(--result-color) 30%,transparent)}
+.result.pos.tone4,.result.neg.tone4{
+  background:color-mix(in srgb,var(--result-color) 39%,transparent)}
+.result.pos.tone5,.result.neg.tone5{
+  background:color-mix(in srgb,var(--result-color) 48%,transparent)}
+.matrixwrap{overflow:auto;border:1px solid var(--line);border-radius:10px;
+  background:var(--surface);max-height:72vh}
+.matrixwrap table{border:0;border-radius:0;min-width:max-content}
+.matrixwrap th,.matrixwrap td{white-space:nowrap}
+.matrixwrap th.mxclub,.matrixwrap td.mxclub{position:sticky;left:0;z-index:2;
+  min-width:210px;max-width:280px;overflow:hidden;text-overflow:ellipsis;
+  background:var(--surface)}
+.matrixwrap th.mxclub{z-index:4;background:var(--chip)}
+.matrixwrap th.mxopp,.matrixwrap td.mxresult{width:52px;min-width:52px;
+  text-align:center;padding-left:5px;padding-right:5px}
+.matrixwrap th.mxopp{position:sticky;top:0;z-index:3}
+.matrixwrap th.mxclub{top:0}
+.matrixwrap td.mxself{color:var(--ink-3);background:var(--chip)}
+.recordkey{display:inline-flex;align-items:center;gap:5px;margin-left:5px}
+.recordkey i{display:inline-block;width:13px;height:13px;border-radius:3px}
+.recordkey .good{background:color-mix(in srgb,var(--win) 42%,transparent)}
+.recordkey .bad{background:color-mix(in srgb,var(--lose) 42%,transparent)}
 /* An unpinned rating is marked, not silently printed as if it were measured.
    Muted rather than alarming: it says "we cannot see this", not "this is wrong". */
 td.band.unsupported{color:var(--ink-3)}
@@ -434,24 +468,33 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div id="clubRankings">
     <div class="bar">
       <input type="search" id="cq" placeholder="Search club…" autocomplete="off">
+      <select id="clubView" aria-label="Club rankings view">
+        <option value="ranking">Ranking table</option>
+        <option value="matrix">Results matrix</option>
+      </select>
       <select id="basis">
         <option value="completed">Most recent completed roster</option>
         <option value="best">Best full-strength roster of 2026</option>
         <option value="upcoming">Next event roster</option>
       </select>
-      <label for="h2hTeam">Head-to-head vs</label>
-      <select id="h2hTeam">
-        <option value="">Off</option>
-      </select>
+      <span id="h2hControl">
+        <label for="h2hTeam">Head-to-head vs</label>
+        <select id="h2hTeam">
+          <option value="">Off</option>
+        </select>
+      </span>
       <span class="count" id="ccount"></span>
     </div>
-    <table><thead><tr>
-      <th class="n">#</th><th>Club</th><th>Division</th><th class="n">Elo</th>
-      <th class="n">Roster</th><th>Rated off</th>
-      <th class="n" id="h2hHead" hidden>W–L</th>
-    </tr></thead><tbody id="ctb"></tbody></table>
+    <div id="clubTableWrap">
+      <table><thead><tr>
+        <th class="n">#</th><th>Club</th><th>Division</th><th class="n">Elo</th>
+        <th class="n">Roster</th><th>Rated off</th>
+        <th class="n" id="h2hHead" hidden>W–L</th>
+      </tr></thead><tbody id="ctb"></tbody></table>
+      <p class="note" id="h2hNote" hidden></p>
+    </div>
+    <div id="clubMatrix" hidden></div>
     <p class="note" id="cnote"></p>
-    <p class="note" id="h2hNote" hidden></p>
   </div>
 
   <div id="playerRankings" hidden>
@@ -931,8 +974,65 @@ function h2hCell(team, opponent, year) {
   const body = loading ? '…' : record ? `${record[0]}–${record[1]}` : '—';
   const title = loading ? 'Loading game results…' : record ? `${record[2]} games` :
     (team === opponent ? 'Selected team' : 'No recorded games');
+  const tone = record ? ` result ${recordTone(record)}` : '';
   const hidden = opponent ? '' : ' hidden';
-  return `<td class="n h2hCell"${hidden} title="${title}">${body}</td>`;
+  return `<td class="n h2hCell${tone}"${hidden} title="${title}">${body}</td>`;
+}
+function recordTone(record) {
+  if (!record) return '';
+  const balance = (record[0] - record[1]) / record[2];
+  if (balance === 0) return 'even';
+  return `${balance > 0 ? 'pos' : 'neg'} tone${Math.ceil(Math.abs(balance) * 5)}`;
+}
+function resultCell(team, opponent, year, rowName, opponentName) {
+  if (team === opponent)
+    return `<td class="mxresult mxself" title="${esc(rowName)}">—</td>`;
+  const record = h2hRecord(team, opponent, year);
+  if (!record)
+    return `<td class="mxresult" title="No recorded games between ${esc(rowName)} and ` +
+      `${esc(opponentName)}">—</td>`;
+  const body = `${record[0]}–${record[1]}`;
+  return `<td class="mxresult result ${recordTone(record)}" title="${esc(rowName)} ` +
+    `vs ${esc(opponentName)}: ${body} over ${record[2]} game${record[2] === 1 ? '' : 's'}">` +
+    `${body}</td>`;
+}
+function drawH2HMatrix(rows, rankOf, historical, year) {
+  const matrix = $('#clubMatrix');
+  if (!HREADY) {
+    matrix.innerHTML = `<p class="note">${HFAILED
+      ? 'Game results could not be loaded.'
+      : 'Loading game results…'}</p>`;
+    return 0;
+  }
+  // One club may rank in multiple divisions. A result belongs to the club
+  // identity, so keep its highest-ranked appearance rather than drawing
+  // duplicate rows and a false diagonal between them.
+  const seen = new Set(), shown = [];
+  for (const row of rows) {
+    const key = h2hTeamKey(row, historical);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    shown.push({
+      row, key, rank: rankOf.get(row),
+      name: historical ? row.name : row.row[1],
+      div: historical ? row.snap.div : row.row[5],
+    });
+    if (shown.length === 25) break;
+  }
+  const head = shown.map(x =>
+    `<th class="mxopp n" scope="col" title="#${x.rank} ${esc(x.name)}">#${x.rank}</th>`
+  ).join('');
+  const body = shown.map(x =>
+    `<tr><td class="mxclub"><span class="rk">${x.rank}</span> ` +
+    `<span class="nmlink" data-club="${esc(x.key)}">${esc(x.name)}</span> ` +
+    `<span class="tag">${esc(EDIVL[x.div] || '')}</span></td>` +
+    shown.map(y => resultCell(x.key, y.key, year, x.name, y.name)).join('') +
+    `</tr>`
+  ).join('');
+  matrix.innerHTML = `<div class="matrixwrap"><table class="h2hmatrix">` +
+    `<thead><tr><th class="mxclub" scope="col">Club</th>${head}</tr></thead>` +
+    `<tbody>${body}</tbody></table></div>`;
+  return shown.length;
 }
 function h2hTeamKey(row, historical) {
   return historical ? row.key : row.row[6];
@@ -973,6 +1073,10 @@ function drawClubs() {
   const historical = year !== 'all';
   const div = $('#rdiv').value;
   const q = $('#cq').value.trim().toLowerCase();
+  const matrixView = $('#clubView').value === 'matrix';
+  $('#clubTableWrap').hidden = matrixView;
+  $('#clubMatrix').hidden = !matrixView;
+  $('#h2hControl').hidden = matrixView;
   $('#basis').disabled = historical;
 
   if (historical && !HREADY) {
@@ -1003,7 +1107,7 @@ function drawClubs() {
       .slice().sort((a, b) => b[2] - a[2])
       .map(r => ({row: r}));
   }
-  const selected = updateH2HControls(pop, historical, year);
+  const selected = matrixView ? '' : updateH2HControls(pop, historical, year);
 
   const rankOf = new Map();
   pop.forEach((r, i) => rankOf.set(r, i + 1));
@@ -1013,6 +1117,20 @@ function drawClubs() {
     return name.toLowerCase().includes(q) ||
       String(event).toLowerCase().includes(q);
   }) : pop;
+  if (matrixView) {
+    const shown = drawH2HMatrix(rows, rankOf, historical, year);
+    const what = div === 'all' ? 'clubs' : `${DIVLABEL[div]} clubs`;
+    $('#ccount').textContent = HREADY
+      ? `${shown} of ${rows.length.toLocaleString()} matching ${what} shown`
+      : (HFAILED ? 'Game results unavailable' : 'Loading game results…');
+    $('#cnote').innerHTML =
+      `Head-to-head records for ${year === 'all' ? 'all available seasons' : year}; ` +
+      `the top 25 unique clubs in the selected ranking are shown. Search narrows ` +
+      `the matrix. <span class="recordkey"><i class="good"></i>Winning record ` +
+      `<i class="bad"></i>Losing record</span>. Stronger color means a more ` +
+      `decisive record; tied and missing records remain neutral.`;
+    return;
+  }
   $('#ctb').innerHTML = rows.map(r => {
     if (historical) {
       const p = r.snap, rank = rankOf.get(r);
@@ -1044,6 +1162,7 @@ function drawClubs() {
     : CNOTE[basis] + ' ' + COLLEGE_NOTE) + EU_ROSTER_NOTE;
 }
 $('#h2hTeam').onchange = drawClubs;
+$('#clubView').onchange = drawClubs;
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
 

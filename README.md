@@ -273,7 +273,10 @@ as it does on Pages.
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
 searchable player table over all seven divisions, a **Trends** tab drawing one line per
 season for every player or club that has ever closed a season in the top 25,
-and a **Tournaments** browser over all 3,863 events.
+and a **Tournaments** browser over all 3,863 events. Club rankings can switch
+from the ranked list to a 25-club head-to-head results matrix; green cells are
+winning records, red cells are losing records, and stronger color marks a more
+decisive win-loss split.
 It reads only the published artifacts and never replays the model, so the page
 cannot drift from `data/player_elo.csv` and `data/team_elo*.csv`.
 
