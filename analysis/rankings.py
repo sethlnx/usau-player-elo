@@ -1114,7 +1114,7 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
         f"{len(international.games):,} international games; "
         f"{len(external.player_names):,} external roster-name identities, "
         f"{len(euf_bridge_rows):,} EU/USA bridges, and "
-        f"{sum(row['match_method'] in ('usau-name', 'euf-name') for row in wfdf_identity_rows):,} "
+        f"{sum(row['match_method'] in ('usau-name', 'usau-alias', 'euf-name') for row in wfdf_identity_rows):,} "
         f"WFDF name bridges "
         f"({external.ghost_scored_games} games touch an empty roster)"
     )

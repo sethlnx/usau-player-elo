@@ -1021,9 +1021,12 @@ WFDF player IDs are event-installation scoped, so they are retained as source
 provenance but are not treated as global identities. The replay instead uses
 the same conservative same-season name rule against USAU and EUF rosters,
 rejects names duplicated across two teams at one championship, and assigns a
-deterministic international ID otherwise. The current build makes 2,504
+deterministic international ID otherwise. The current build makes 2,607
 WFDF-to-USAU/EUF name bridges; all 8,345 roster-name decisions are written to
 `data/wfdf_bridge_audit.csv`.
+Reviewed cross-name assignments live in `data/wfdf_player_aliases.csv`. Each
+row maps one WFDF source name to one unique, non-ambiguous USAU display name;
+an event-level duplicate still blocks the assignment.
 
 The European division bases and scales are explicit, untuned priors copied
 from their analogous USAU club divisions. WFDF club divisions use those same

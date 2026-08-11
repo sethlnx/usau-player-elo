@@ -27,6 +27,9 @@ data/*
 # Hand-maintained input, not derived from anything — the identity review queue.
 !data/link_overrides.csv
 
+# Reviewed WFDF source-name -> USAU identity assignments
+!data/wfdf_player_aliases.csv
+
 # Published outputs of `python -m analysis.rankings`
 !data/player_elo.csv
 !data/team_elo.csv

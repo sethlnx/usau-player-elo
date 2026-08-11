@@ -5,6 +5,10 @@ from pathlib import Path
 
 from analysis.euf_overlap import measure_overlap
 from analysis.euf_ratings import _usa_bridge_candidates, european_player_id
+from analysis.international_ratings import (
+    _load_manual_usa_aliases,
+    _usa_assignment,
+)
 from scraper.euf import init_db
 from scraper.euf_ranking import SOURCE, ingest_snapshot
 
@@ -148,6 +152,37 @@ class EUFRankingIngestionTests(unittest.TestCase):
         self.assertLess(first, 0)
         self.assertGreaterEqual(first, -(2**53 - 1))
         self.assertLess(first % 32, 32)
+
+    def test_reviewed_wfdf_alias_targets_one_usau_identity(self):
+        db = sqlite3.connect(":memory:")
+        db.executescript("""
+          CREATE TABLE players (
+            player_id INTEGER PRIMARY KEY,
+            display_name TEXT NOT NULL,
+            ambiguous INTEGER NOT NULL
+          );
+          INSERT INTO players VALUES (12957,'AJ Merriman',0);
+        """)
+        alias_path = Path(self.temp.name) / "wfdf_player_aliases.csv"
+        alias_path.write_text(
+            "source_name,usau_name\nAlexander Merriman,AJ Merriman\n"
+        )
+        aliases = _load_manual_usa_aliases(db, alias_path)
+        db.close()
+
+        self.assertEqual(
+            (12957, "AJ Merriman"),
+            aliases["alexander merriman"],
+        )
+        self.assertEqual(
+            (12957, "AJ Merriman", "usau-alias"),
+            _usa_assignment(
+                "Alexander Merriman", set(), aliases, {}, {},
+            ),
+        )
+        self.assertIsNone(_usa_assignment(
+            "Alexander Merriman", {"alexandermerriman"}, aliases, {}, {},
+        ))
 
     def test_rating_bridge_requires_unique_same_season_noncolliding_name(self):
         db = sqlite3.connect(":memory:")

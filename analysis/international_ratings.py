@@ -8,6 +8,7 @@ teams at one championship is never bridged or merged automatically.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import sqlite3
 from collections import defaultdict
@@ -25,6 +26,8 @@ from analysis.euf_ratings import (
     team_name_key,
 )
 from scraper.wfdf import EVENTS, WFDF_SOURCE
+
+WFDF_PLAYER_ALIASES = EUF_DB.parent / "wfdf_player_aliases.csv"
 
 
 def international_player_id(source_key: str) -> int:
@@ -83,6 +86,65 @@ def _one(values: set[Any] | None) -> Any | None:
     return None
 
 
+def _load_manual_usa_aliases(
+    con: sqlite3.Connection,
+    path: Path = WFDF_PLAYER_ALIASES,
+) -> dict[str, tuple[int, str]]:
+    """Load reviewed WFDF source-name -> unique USAU identity assignments."""
+    if not path.exists():
+        return {}
+    usa: dict[str, list[tuple[int, str, bool]]] = defaultdict(list)
+    for player_id, display_name, ambiguous in con.execute(
+        "SELECT player_id,display_name,ambiguous FROM players"
+    ):
+        usa[exact_name_key(display_name)].append(
+            (int(player_id), display_name, bool(ambiguous))
+        )
+
+    aliases: dict[str, tuple[int, str]] = {}
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            source_name = (row.get("source_name") or "").strip()
+            usau_name = (row.get("usau_name") or "").strip()
+            if not source_name or not usau_name:
+                raise ValueError(f"incomplete WFDF player alias in {path}")
+            source_key = exact_name_key(source_name)
+            candidates = usa.get(exact_name_key(usau_name), [])
+            if len(candidates) != 1 or candidates[0][2]:
+                raise ValueError(
+                    f"WFDF player alias target is not one unambiguous USAU "
+                    f"identity: {source_name!r} -> {usau_name!r}"
+                )
+            assignment = candidates[0][:2]
+            prior = aliases.get(source_key)
+            if prior is not None and prior != assignment:
+                raise ValueError(
+                    f"conflicting WFDF player aliases for {source_name!r}"
+                )
+            aliases[source_key] = assignment
+    return aliases
+
+
+def _usa_assignment(
+    source_name: str,
+    colliding_compact: set[str],
+    manual_aliases: dict[str, tuple[int, str]],
+    name_bridges: dict[str, int],
+    usa_names: dict[int, str],
+) -> tuple[int, str, str] | None:
+    """Return a reviewed or automatic USAU assignment for one WFDF name."""
+    if compact_name_key(source_name) in colliding_compact:
+        return None
+    name_key = exact_name_key(source_name)
+    manual = manual_aliases.get(name_key)
+    if manual is not None:
+        return manual[0], manual[1], "usau-alias"
+    player_id = name_bridges.get(name_key)
+    if player_id is None:
+        return None
+    return player_id, usa_names.get(player_id, source_name), "usau-name"
+
+
 def load_international_inputs(
     usa_con: sqlite3.Connection,
     european: EuropeanInputs,
@@ -135,6 +197,7 @@ def load_international_inputs(
         usa_names = {
             row["usau_player_id"]: row["usau_name"] for row in usa_audit
         }
+        manual_usa_aliases = _load_manual_usa_aliases(usa_con)
         eu_exact, eu_compact = _existing_european_people(european)
         usa_clubs = _usa_club_index(usa_con)
         eu_clubs = _european_club_index(european)
@@ -211,25 +274,26 @@ def load_international_inputs(
             match_method = "generated"
             player_id = None
             display_name = row["name"]
-            if compact not in colliding_compact:
-                player_id = usa_bridges.get(name_key)
-                if player_id is not None:
-                    match_method = "usau-name"
-                    display_name = usa_names.get(player_id, display_name)
-                else:
-                    eu_division = analogous_eu.get(division)
-                    if eu_division is not None:
-                        candidates = eu_exact.get((season, eu_division, name_key))
-                        player_id = _one(candidates)
-                        if player_id is None:
-                            player_id = _one(
-                                eu_compact.get((season, eu_division, compact))
-                            )
-                        if player_id is not None:
-                            match_method = "euf-name"
-                            display_name = european.player_names.get(
-                                player_id, display_name
-                            )
+            usa_assignment = _usa_assignment(
+                row["name"], colliding_compact, manual_usa_aliases,
+                usa_bridges, usa_names,
+            )
+            if usa_assignment is not None:
+                player_id, display_name, match_method = usa_assignment
+            elif compact not in colliding_compact:
+                eu_division = analogous_eu.get(division)
+                if eu_division is not None:
+                    candidates = eu_exact.get((season, eu_division, name_key))
+                    player_id = _one(candidates)
+                    if player_id is None:
+                        player_id = _one(
+                            eu_compact.get((season, eu_division, compact))
+                        )
+                    if player_id is not None:
+                        match_method = "euf-name"
+                        display_name = european.player_names.get(
+                            player_id, display_name
+                        )
             if player_id is None:
                 if compact in colliding_compact:
                     source_key = (
