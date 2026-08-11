@@ -20,7 +20,7 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m scraper.structure     # attach published bracket structure
 .venv/bin/python -m identity.resolve      # names -> player IDs (+ data/ambiguities.csv)
 .venv/bin/python -m scraper.euf_ranking data/raw/euf-ranking/rosters.json
-.venv/bin/python -m scraper.wfdf all --workers 12  # official 2022/2024 world championships
+.venv/bin/python -m scraper.wfdf all --workers 12  # all completed WFDF events on the official index
 .venv/bin/python -m scraper.euf --audit       # must report publication_blocked: false
 .venv/bin/python -m analysis.euf_overlap      # review name candidates before replay
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
@@ -969,26 +969,27 @@ replay only through the conservative identity contracts described below.
 | [Ultimate Central API](https://help.ultimatecentral.com/support/solutions/articles/4000064797-api-access) | Public, paginated REST endpoints discovered from `/api/help`: events, teams, games, final standings, and public persons | Historical event metadata, scored games, teams, and final standings. Roster responses remain `incomplete` or `restricted` unless public rows are actually returned. |
 | [EUCS Schedule](https://eucs-schedule.ultimatefederation.eu/) | Server-rendered season schedule plus iCalendar cross-check | Schedule rows, scores, pools/stages, divisions, dates, times, fields, and placeholder/forfeit state. There is no roster contract. HTML is cached with URL, observation time, and SHA-256. |
 | [EUCS Ranking](https://ranking.ultimatefederation.eu/) | R/Shiny `dataobj/team_master_roster` responses captured through a browser session | Season/team roster names for 2024–2026. The `session/.../dataobj/...` URLs are transient and are retained only as observation evidence, not presented as a stable API. The source exposes names, not player IDs. |
-| [WFDF Results](https://results.wfdf.sport/) | Official server-rendered championship results: complete team lists, standings, game schedules/scores, team cards, and player cards | WUCC 2022, WUC 2024, WMUCC 2022, and WMUC 2024. Team-card failures are recovered from the public all-player index and player cards; every fetched page is cached with its URL, observation time, and SHA-256. WFDF player IDs are scoped to a results installation, not globally stable. |
+| [WFDF Results](https://results.wfdf.sport/) | Official server-rendered results pages plus the BULA Live JSON API: event index, teams, standings, schedules/scores, and (where requested) public rosters | WFDF-only: all 17 completed tournaments available in the official 2022–2025 corpus, covering 69 event/division records, 973 source-scoped teams, and 4,550 games. 2026 events are excluded as current/upcoming. Legacy games without published gameplay links receive deterministic row-based IDs; live API games use WFDF game IDs. WFDF player IDs are scoped to one results installation, not globally stable. |
 
 The observed `data/euf.db` audit covers Ultimate Central EUCF events from
 2015, 2016, 2019, 2021, and 2022; all discoverable completed EUCS schedules
-from 2023–2025; and four official WFDF world championships from 2022 and
-2024. It contains 66 event/division records, 1,087 source-scoped canonical
-teams, 3,749 scored result records, and 623 standing rows. Six 2022 EUF
-carryover records advertise an outcome without scores and remain explicitly
-`incomplete`; 38 rows remain `scheduled` and three remain `teams_not_set`.
-The 14 discoverable 2026 EUCS schedules are excluded because they are
+from 2023–2025; and all 17 completed WFDF tournaments exposed for 2022–2025.
+It contains 116 event/division records, 1,702 source-scoped canonical teams,
+6,548 scored result records, and 1,237 standing rows. Six 2022 EUF carryover
+`incomplete`; 41 rows remain `scheduled` or `teams_not_set`.
+The 2026 WFDF and EUCS events are excluded because they are current or
 upcoming. Years and event classes not listed above are coverage gaps, not
 zero-game seasons.
 
-The four WFDF championships contribute 19 event/division records, 358 teams,
-1,748 scored games, and 8,345 event-roster memberships for 7,250 distinct
-published names. All 19 event/divisions have public rosters. The normalized
-divisions include club men's/women's/mixed plus masters, grand masters, and
-great grand masters divisions. The player-card fallback preserves published
-games, assists, and goals when a tournament's team-card route returns HTTP
-500.
+WFDF-only, the tournaments contribute 69 event/division records, 973
+source-scoped teams, and 4,550 games, of which 4,547 have complete scores. The
+championships previously loaded with public rosters retain 8,345 roster
+memberships. The remaining newly added tournaments publish teams and games
+but no roster rows were requested during the historical load; their roster
+state is explicitly `unavailable`, not inferred empty. Normalized divisions
+include club men's/women's/mixed plus masters, grand masters, and
+great-grandmasters divisions. Legacy games with no gameplay link use a stable
+source-row identifier.
 
 The captured EUCS Ranking snapshot adds 384 season/team rosters, 11,274 roster
 memberships, and 6,804 distinct display names across 2024–2026. Eleven
@@ -1067,6 +1068,10 @@ championship corpus:
 .venv/bin/python -m scraper.euf --audit
 .venv/bin/python -m analysis.euf_overlap
 ```
+
+For a games-and-tournaments-only historical load, add `--skip-rosters` to the
+WFDF command; roster availability remains explicitly `unavailable` for those
+replacements.
 
 Rerunning an event transactionally replaces that event; it does not append
 duplicates. A failed replacement rolls back. Add `--refresh` to an EUCS or

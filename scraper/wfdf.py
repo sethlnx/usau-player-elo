@@ -53,29 +53,111 @@ class EventSpec:
     season: int
     name: str
     competition: str
-    city: str
-    state: str
+    city: str | None
+    state: str | None
+    adapter: str = "legacy"
+    base_url: str | None = None
+    index_href: str | None = None
 
     @property
     def url(self) -> str:
-        return urljoin(BASE_URL, f"{self.slug}/")
+        return self.base_url or urljoin(BASE_URL, f"{self.slug}/")
+
+    @property
+    def listed_href(self) -> str:
+        return self.index_href or f"{self.slug}/"
 
 
 EVENTS = {
     spec.key: spec
     for spec in (
-        EventSpec("wucc-2022", "wucc", "WUCC2022", 2022,
-                  "WFDF World Ultimate Club Championships 2022", "club",
-                  "Lebanon", "Ohio, United States"),
-        EventSpec("wmucc-2022", "wmucc-2022", "WMUCC2022", 2022,
-                  "WFDF World Masters Ultimate Club Championships 2022", "club",
-                  "Limerick", "Ireland"),
-        EventSpec("wuc-2024", "wuc", "WUC2024", 2024,
-                  "WFDF World Ultimate Championships 2024", "national",
-                  "Gold Coast", "Queensland, Australia"),
-        EventSpec("wmuc-2024", "wmuc", "WMUC2024", 2024,
-                  "WFDF World Masters Ultimate Championships 2024", "national",
-                  "Irvine", "California, United States"),
+        EventSpec(
+            "wucc-2022", "wucc", "WUCC2022", 2022,
+            "WFDF World Ultimate Club Championships 2022", "club",
+            "Lebanon", "Ohio, United States",
+        ),
+        EventSpec(
+            "wmucc-2022", "wmucc-2022", "WMUCC2022", 2022,
+            "WFDF World Masters Ultimate Club Championships 2022", "club",
+            "Limerick", "Ireland",
+        ),
+        EventSpec(
+            "wu24-2023", "wu24-2023", "WU24-2023", 2023,
+            "WFDF World Under-24 Ultimate Championships 2023", "national",
+            None, None,
+        ),
+        EventSpec(
+            "aougc-2023", "aougc", "AOUGC-2023", 2023,
+            "WFDF Asia-Oceanic Ultimate & Guts Championships 2023", "club",
+            None, None,
+        ),
+        EventSpec(
+            "wbuc-2023", "wbuc-2023", "WBUC2023", 2023,
+            "WFDF World Beach Ultimate Championships 2023", "national",
+            None, None,
+        ),
+        EventSpec(
+            "pauc-2023", "pauc-2023", "PAUC2023", 2023,
+            "WFDF Pan American Ultimate Championships 2023", "club",
+            None, None,
+        ),
+        EventSpec(
+            "wuc-2024", "wuc", "WUC2024", 2024,
+            "WFDF World Ultimate Championships 2024", "national",
+            "Gold Coast", "Queensland, Australia",
+        ),
+        EventSpec(
+            "wmuc-2024", "wmuc", "WMUC2024", 2024,
+            "WFDF World Masters Ultimate Championships 2024", "national",
+            "Irvine", "California, United States",
+        ),
+        EventSpec(
+            "wjuc-2024", "wjuc-2024", "WJUC2024", 2024,
+            "WFDF World Junior Ultimate Championships 2024", "national",
+            None, None,
+        ),
+        EventSpec(
+            "aobuc-2024", "aobuc", "AOBUC24", 2024,
+            "WFDF Asia-Oceanic Beach Ultimate Championships 2024", "national",
+            None, None,
+        ),
+        EventSpec(
+            "showcase-2024", "showcase", "showcase", 2024,
+            "WFDF 4x4 Beach Ultimate Showcase 2024", "national",
+            None, None,
+        ),
+        EventSpec(
+            "wu24-2025", "wu24", "wu24-2025", 2025,
+            "WFDF World Under-24 Ultimate Championships 2025", "national",
+            None, None,
+        ),
+        EventSpec(
+            "pauc-2025", "pauc", "pauc2025", 2025,
+            "WFDF Pan American Ultimate Championships 2025", "national",
+            None, "Dominican Republic", "live",
+            "https://results.pauc.sport/", "pauc/",
+        ),
+        EventSpec(
+            "wbuc-2025", "wbuc-2025", "wbuc2025", 2025,
+            "WFDF World Beach Ultimate Championships 2025", "national",
+            "Portimão", "Portugal", "live",
+            "https://wbuc.wfdf.sport/", "https://wbuc.wfdf.sport/",
+        ),
+        EventSpec(
+            "aauc-2025", "aauc", "AAUC2025", 2025,
+            "WFDF All Africa Ultimate Championships 2025", "club",
+            None, "Uganda", "live",
+        ),
+        EventSpec(
+            "wwuc-2025", "wwuc", "WWUC2025", 2025,
+            "WFDF World Wheelchair Ultimate Championships 2025", "national",
+            None, "Lithuania", "live",
+        ),
+        EventSpec(
+            "aouc-2025", "aouc", "AOUC2025", 2025,
+            "WFDF Asia-Oceanic Ultimate Championships 2025", "club",
+            "Kamisu", "Japan", "live",
+        ),
     )
 }
 
@@ -160,6 +242,258 @@ def fetch_page(
         hashlib.sha256(raw).hexdigest(),
         False,
     )
+def _json_cache_path(spec: EventSpec, resource: str) -> Path:
+    safe = re.sub(r"[^a-zA-Z0-9_.-]+", "_", resource)
+    return CACHE_DIR / spec.key / f"{safe}.json"
+
+
+def fetch_live_json(
+    spec: EventSpec,
+    entity: str,
+    refresh: bool = False,
+) -> tuple[dict[str, Any], FetchedPage]:
+    """Fetch one BULA Live API entity and retain its source payload."""
+    path = _json_cache_path(spec, entity)
+    api_url = urljoin(spec.url, "index.php")
+    params = {"view": "live/api", "entity": entity}
+    if path.exists() and not refresh:
+        raw = path.read_bytes()
+        observed = datetime.fromtimestamp(
+            path.stat().st_mtime, timezone.utc
+        ).isoformat()
+        page = FetchedPage(
+            raw.decode("utf-8", errors="replace"),
+            requests.Request("GET", api_url, params=params).prepare().url,
+            observed,
+            hashlib.sha256(raw).hexdigest(),
+            True,
+        )
+    else:
+        response = _session().get(api_url, params=params, timeout=45)
+        response.raise_for_status()
+        raw = response.content
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        page = FetchedPage(
+            raw.decode(response.encoding or "utf-8", errors="replace"),
+            response.url,
+            datetime.now(timezone.utc).isoformat(),
+            hashlib.sha256(raw).hexdigest(),
+            False,
+        )
+    payload = json.loads(page.text)
+    if not isinstance(payload, dict) or "error" in payload:
+        raise ValueError(f"invalid WFDF live {entity} response at {page.url}")
+    return payload, page
+
+
+def _live_division(name: str) -> tuple[str, str] | None:
+    return _stage_division(name)
+
+
+def _live_team_index(
+    reference: dict[str, Any],
+) -> tuple[dict[str, dict[str, Any]], dict[int, str]]:
+    countries = {
+        int(country["country_id"]): country.get("name")
+        for country in reference.get("countries", [])
+    }
+    teams = {}
+    for team in reference.get("teams", []):
+        team = dict(team)
+        team["team_id"] = str(team["team_id"])
+        team["country_name"] = countries.get(int(team["country"]))
+        teams[team["team_id"]] = team
+    return teams, {
+        int(series["series_id"]): _clean(series["name"])
+        for series in reference.get("series", [])
+    }
+
+
+def parse_live_games(
+    payload: dict[str, Any],
+    reference: dict[str, Any],
+) -> list[dict[str, Any]]:
+    teams, series_names = _live_team_index(reference)
+    pools = {
+        int(pool["pool_id"]): _clean(pool["poolname"])
+        for pool in reference.get("pools", [])
+    }
+    games: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw in payload.get("games", []):
+        game_id = str(raw["game_id"])
+        if game_id in seen:
+            raise ValueError(f"game {game_id} appears twice in live payload")
+        seen.add(game_id)
+        home = teams.get(str(raw.get("hometeam")))
+        away = teams.get(str(raw.get("visitorteam")))
+        series_name = series_names.get(
+            int(home["series"]) if home is not None else -1,
+            "Unknown",
+        )
+        pool_name = pools.get(int(raw["pool"]), "Unknown")
+        division_info = _live_division(series_name)
+        if division_info is None:
+            continue
+        division_name, division = division_info
+        home_score = raw.get("homescore")
+        away_score = raw.get("visitorscore")
+        state = (
+            "played"
+            if home_score is not None and away_score is not None
+            else "scheduled"
+        )
+        if state == "played" and (home is None or away is None):
+            raise ValueError(
+                f"scored live game {game_id} has unresolved teams"
+            )
+        time_text = _clean(str(raw.get("time", "")))
+        date_text, _, time_value = time_text.partition(" ")
+        games.append({
+            "game_id": game_id,
+            "division_name": division_name,
+            "division": division,
+            "stage": f"{series_name} {pool_name}",
+            "date": date_text or None,
+            "time": time_value or None,
+            "field": None,
+            "home_team_id": str(raw["hometeam"]) if home else None,
+            "away_team_id": str(raw["visitorteam"]) if away else None,
+            "home_name": home["name"] if home else None,
+            "away_name": away["name"] if away else None,
+            "home_score": home_score,
+            "away_score": away_score,
+            "state": state,
+        })
+    if not games:
+        raise ValueError("no games in WFDF live payload")
+    return games
+
+
+def parse_live_teams(
+    reference: dict[str, Any],
+) -> list[dict[str, Any]]:
+    teams, series_names = _live_team_index(reference)
+    out: list[dict[str, Any]] = []
+    for team in teams.values():
+        division_name = series_names.get(int(team["series"]))
+        division_info = _live_division(division_name or "")
+        if division_info is None:
+            continue
+        _published, division = division_info
+        out.append({
+            "team_id": team["team_id"],
+            "name": _clean(team["name"]),
+            "country": team.get("country_name"),
+            "division_name": division_name,
+            "division": division,
+            "place": team.get("final_standing") or team.get(
+                "final_standing_calculated"
+            ),
+        })
+    return out
+
+
+def _live_dates(reference: dict[str, Any]) -> tuple[str | None, str | None]:
+    start = _clean(reference.get("season", {}).get("starttime", ""))
+    end = _clean(reference.get("season", {}).get("endtime", ""))
+    return start[:10] or None, end[:10] or None
+
+
+def ingest_live_event(
+    con,
+    spec: EventSpec,
+    refresh: bool = False,
+) -> list[dict[str, Any]]:
+    reference, reference_page = fetch_live_json(spec, "reference", refresh)
+    games_payload, games_page = fetch_live_json(spec, "games", refresh)
+    teams = parse_live_teams(reference)
+    games = parse_live_games(games_payload, reference)
+    start_date, end_date = _live_dates(reference)
+    source_pages = [reference_page, games_page]
+    event_hash = _combined_hash(source_pages)
+    observed_at = max(page.observed_at for page in source_pages)
+    summaries: list[dict[str, Any]] = []
+    with con:
+        observe(
+            con, WFDF_SOURCE, "reference", spec.key,
+            count=len(teams), source_url=reference_page.url,
+            observed_at=reference_page.observed_at,
+            payload_hash=reference_page.payload_hash, state="ok",
+        )
+        observe(
+            con, WFDF_SOURCE, "games", spec.key,
+            count=len(games), source_url=games_page.url,
+            observed_at=games_page.observed_at,
+            payload_hash=games_page.payload_hash, state="ok",
+        )
+        for division_name in dict.fromkeys(
+            team["division_name"] for team in teams
+        ):
+            division = DIVISIONS[division_name]
+            selected_teams = [
+                team for team in teams if team["division"] == division
+            ]
+            selected_games = [
+                game for game in games if game["division"] == division
+            ]
+            event_id = upsert_event(
+                con, spec.season, spec.name, spec.url, division,
+                f"{spec.key}:{division}", WFDF_SOURCE, spec.season_id,
+                spec.city, spec.state, start_date, end_date,
+            )
+            team_rows = [{
+                "source_id": _prefix(spec, team["team_id"]),
+                "name": team["name"],
+                "country": team["country"],
+                "source_url": reference_page.url,
+                "observed_at": reference_page.observed_at,
+                "payload_hash": reference_page.payload_hash,
+            } for team in selected_teams]
+            game_rows = [{
+                "source_id": _prefix(spec, game["game_id"]),
+                "home_source_id": _prefix(spec, game["home_team_id"]),
+                "away_source_id": _prefix(spec, game["away_team_id"]),
+                "home_name": game["home_name"],
+                "away_name": game["away_name"],
+                "home_score": game["home_score"],
+                "away_score": game["away_score"],
+                "state": game["state"],
+                "date": game["date"],
+                "time": game["time"],
+                "field": game["field"],
+                "stage": game["stage"],
+                "source_url": games_page.url,
+                "observed_at": games_page.observed_at,
+                "payload_hash": games_page.payload_hash,
+            } for game in selected_games]
+            standing_rows = [{
+                "source_id": f"{spec.key}:{division}:{team['place']}:{team['team_id']}",
+                "team_source_id": _prefix(spec, team["team_id"]),
+                "division": division,
+                "place": int(team["place"]),
+                "source_url": reference_page.url,
+                "observed_at": reference_page.observed_at,
+                "payload_hash": reference_page.payload_hash,
+            } for team in selected_teams if team["place"]]
+            replace_event(
+                con, event_id, WFDF_SOURCE, f"{spec.key}:{division}",
+                f"{spec.key}:{division}", team_rows, game_rows,
+                standing_rows, "unavailable", spec.url, observed_at,
+                event_hash,
+            )
+            stats = validate_event(con, event_id)
+            con.execute("UPDATE events SET complete=1 WHERE event_id=?", (event_id,))
+            summaries.append({
+                "event": spec.key,
+                "event_id": event_id,
+                "division": division,
+                "roster_state": "unavailable",
+                "roster_entries": 0,
+                **stats,
+            })
+    return summaries
 
 
 def _clean(value: str) -> str:
@@ -357,9 +691,6 @@ def parse_games(
         if element.name == "h3":
             current_date = _date(element.get_text(" ", strip=True)) or current_date
             continue
-        links = element.find_all("a", href=re.compile(r"[?&]game="))
-        if not links:
-            continue
         heading = element.find("th")
         if heading is None:
             continue
@@ -368,13 +699,22 @@ def parse_games(
         if resolved_division is None:
             continue
         published_division, division = resolved_division
-        for row in element.find_all("tr"):
+        for row_index, row in enumerate(element.find_all("tr")):
             link = row.find("a", href=re.compile(r"[?&]game="))
-            if link is None:
-                continue
-            game_id = _query_id(link.get("href"), "game")
             cells = row.find_all("td", recursive=False)
-            if game_id is None or len(cells) < 7:
+            if len(cells) < 7:
+                continue
+            if link is not None:
+                game_id = _query_id(link.get("href"), "game")
+            else:
+                row_key = "\0".join(
+                    [page.url, current_date or "", stage, str(row_index)]
+                    + [_clean(cell.get_text(" ", strip=True)) for cell in cells]
+                )
+                game_id = "row-" + hashlib.sha256(
+                    row_key.encode()
+                ).hexdigest()[:20]
+            if game_id is None:
                 continue
             if game_id in seen:
                 raise ValueError(f"game {game_id} appears twice in {page.url}")
@@ -392,7 +732,8 @@ def parse_games(
                 return candidates[0] if candidates else None
 
             home_id, away_id = resolve(home_name), resolve(away_name)
-            home_score, away_score = _score(cells[3].get_text()), _score(cells[5].get_text())
+            home_score = _score(cells[3].get_text())
+            away_score = _score(cells[5].get_text())
             status_text = _clean(" ".join(
                 cell.get_text(" ", strip=True) for cell in cells[7:-1]
             )).casefold()
@@ -472,6 +813,7 @@ def parse_team_card(
         })
     return entries
 
+
 def parse_player_index(page: FetchedPage) -> list[str]:
     soup = BeautifulSoup(page.text, "html.parser")
     content = soup.select_one("td.tdcontent") or soup
@@ -550,7 +892,10 @@ def ingest_world_event(
     spec: EventSpec,
     refresh: bool = False,
     workers: int = 4,
+    include_rosters: bool = True,
 ) -> list[dict[str, Any]]:
+    if spec.adapter == "live":
+        return ingest_live_event(con, spec, refresh=refresh)
     standings_page = fetch_page(
         spec, "standings",
         {"view": "teams", "season": spec.season_id, "list": "bystandings"},
@@ -597,16 +942,20 @@ def ingest_world_event(
                 hashlib.sha256(raw).hexdigest(), False,
             )
         return team["team_id"], page, parse_team_card(page, team)
-
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
-        futures = [pool.submit(fetch_roster, team) for team in teams]
+        futures = [
+            pool.submit(fetch_roster, team)
+            for team in (teams if include_rosters else [])
+        ]
         for future in as_completed(futures):
             team_id, page, entries = future.result()
             roster_pages[team_id] = page
             rosters[team_id] = entries
     player_index_page: FetchedPage | None = None
     player_pages: dict[str, FetchedPage] = {}
-    if sum(len(entries) for entries in rosters.values()) < len(teams) * 5:
+    if include_rosters and sum(
+        len(entries) for entries in rosters.values()
+    ) < len(teams) * 5:
         player_index_page = fetch_page(
             spec, "players",
             {"view": "allplayers", "list": "all"}, refresh,
@@ -661,6 +1010,11 @@ def ingest_world_event(
                     if entry["player_id"] not in existing:
                         rosters[entry["team_id"]].append(entry)
 
+    if not include_rosters:
+        roster_pages = {
+            team["team_id"]: teams_page for team in teams
+        }
+        rosters = {team["team_id"]: [] for team in teams}
     dates = sorted(game["date"] for game in games if game["date"])
     if not dates:
         raise ValueError(f"{spec.key} has no dated games")
@@ -796,9 +1150,95 @@ def ingest_world_event(
     return summaries
 
 
+def _discovered_spec(
+    href: str,
+    current_year: int,
+) -> EventSpec | None:
+    url = urljoin(BASE_URL, href)
+    response = _session().get(url, timeout=45)
+    response.raise_for_status()
+    final_url = response.url
+    html = response.text
+    slug = urlparse(final_url).path.strip("/").split("/")[-1]
+    config_match = re.search(
+        r"window\.__APP_CONFIG__\s*=\s*(\{.*?\});</script>",
+        html,
+    )
+    if config_match:
+        config = json.loads(config_match.group(1))
+        season_id = config.get("LIVE_SEASON_ID")
+        season_match = re.search(r"(20\d{2})", str(season_id))
+        if not season_match or not season_id:
+            return None
+        year = int(season_match.group(1))
+        return EventSpec(
+            re.sub(r"[^a-z0-9]+", "-", str(season_id).lower()).strip("-"),
+            slug,
+            season_id,
+            year,
+            config.get("TOURNAMENT_NAME") or str(season_id),
+            "national" if config.get("ISNATIONALTEAMS") else "club",
+            None,
+            config.get("TOURNAMENT_LOCATION"),
+            "live",
+            final_url,
+            href,
+        )
+    season_match = re.search(r"[?&]season=([^&\"']+)", html)
+    title = BeautifulSoup(html, "html.parser").title
+    title_text = _clean(title.get_text(" ", strip=True)) if title else slug
+    season_id = season_match.group(1) if season_match else None
+    year_match = re.search(r"20\d{2}", f"{season_id or ''} {title_text}")
+    if not season_id or not year_match:
+        return None
+    year = int(year_match.group())
+    name = re.sub(r"^(Schedule|Teams)\s+", "", title_text)
+    return EventSpec(
+        f"{slug}-{year}",
+        slug,
+        season_id,
+        year,
+        name,
+        "national",
+        None,
+        None,
+        "legacy",
+        final_url,
+        href,
+    )
+
+
+def discover_events(refresh: bool = False) -> list[EventSpec]:
+    """Discover completed events exposed by the WFDF results index."""
+    response = _session().get(BASE_URL, timeout=45)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    hrefs = list(dict.fromkeys(
+        anchor["href"] for anchor in soup.find_all("a", href=True)
+        if not anchor["href"].startswith("#")
+        and not anchor["href"].startswith("https://docs.google.com/")
+    ))
+    by_url = {
+        urljoin(BASE_URL, spec.listed_href): spec
+        for spec in EVENTS.values()
+    }
+    by_url.update({spec.url: spec for spec in EVENTS.values()})
+    discovered: dict[str, EventSpec] = {}
+    for href in hrefs:
+        url = urljoin(BASE_URL, href)
+        spec = by_url.get(url)
+        if spec is None:
+            spec = _discovered_spec(href, datetime.now(timezone.utc).year)
+        if spec is not None and spec.season < datetime.now(timezone.utc).year:
+            discovered[spec.key] = spec
+    if EVENTS["wucc-2022"].key not in discovered:
+        discovered["wucc-2022"] = EVENTS["wucc-2022"]
+    return list(discovered.values())
+
+
 def _select_events(values: list[str]) -> list[EventSpec]:
     if not values or values == ["all"]:
-        return list(EVENTS.values())
+        return discover_events()
     unknown = sorted(set(values) - set(EVENTS))
     if unknown:
         raise ValueError(f"unknown events: {', '.join(unknown)}")
@@ -810,6 +1250,11 @@ def main() -> None:
     parser.add_argument("events", nargs="*", metavar="EVENT")
     parser.add_argument("--refresh", action="store_true", help="ignore cached HTML")
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument(
+        "--skip-rosters",
+        action="store_true",
+        help="ingest teams and games without fetching player rosters",
+    )
     parser.add_argument("--audit", action="store_true")
     parser.add_argument("--db", type=Path, default=EUF_DB)
     args = parser.parse_args()
@@ -821,7 +1266,11 @@ def main() -> None:
             raise SystemExit(1 if blocked else 0)
         for spec in _select_events(args.events):
             for summary in ingest_world_event(
-                con, spec, refresh=args.refresh, workers=args.workers
+                con,
+                spec,
+                refresh=args.refresh,
+                workers=args.workers,
+                include_rosters=not args.skip_rosters,
             ):
                 print(json.dumps(summary, sort_keys=True))
         report, blocked = audit(con)
