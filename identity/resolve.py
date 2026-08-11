@@ -502,7 +502,7 @@ def main():
     # Every raw collision is logged, split or not: the auto-merged ones are now
     # the false-merge risk and need review more than the split ones do.
     with open(AMBIGUITY_REPORT, "w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["norm_name", "verdict", "division", "season", "clubs"])
         for nname in sorted(raw_ambiguous):
             verdict = "split" if nname in ambiguous_names else "auto-merged"
@@ -517,7 +517,7 @@ def main():
     bridge_report = AMBIGUITY_REPORT.parent / "cross_division_links.csv"
     n_bridges = 0
     with open(bridge_report, "w", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["norm_name", "divisions", "teams", "review"])
         for nname in sorted(divisions_of):
             if (len(divisions_of[nname]) > 1 and nname not in ambiguous_names
