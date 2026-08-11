@@ -926,9 +926,10 @@ function h2hRecord(team, opponent, year) {
   return games ? [wins, losses, games] : null;
 }
 function h2hCell(team, opponent, year) {
-  const record = h2hRecord(team, opponent, year);
-  const body = record ? `${record[0]}–${record[1]}` : '—';
-  const title = record ? `${record[2]} games` :
+  const loading = opponent && !HREADY && !HFAILED;
+  const record = loading ? null : h2hRecord(team, opponent, year);
+  const body = loading ? '…' : record ? `${record[0]}–${record[1]}` : '—';
+  const title = loading ? 'Loading game results…' : record ? `${record[2]} games` :
     (team === opponent ? 'Selected team' : 'No recorded games');
   const hidden = opponent ? '' : ' hidden';
   return `<td class="n h2hCell"${hidden} title="${title}">${body}</td>`;
@@ -954,8 +955,12 @@ function updateH2HControls(pop, historical, year) {
   $('#h2hHead').textContent = selected ? `W–L vs ${name}` : 'W–L';
   $('#h2hNote').hidden = !selected;
   $('#h2hNote').textContent = selected
-    ? `Head-to-head records for ${name}; ${year === 'all' ? 'all available seasons' : year}. ` +
-      `Teams with no recorded games show —.`
+    ? (!HREADY
+      ? `Loading game results…`
+      : HFAILED
+        ? `Game results could not be loaded.`
+        : `Head-to-head records for ${name}; ${year === 'all' ? 'all available seasons' : year}. ` +
+          `Teams with no recorded games show —.`)
     : '';
   return selected;
 }
