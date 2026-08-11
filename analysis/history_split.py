@@ -217,6 +217,29 @@ def club_records(history):
     return out
 
 
+def head_to_head_records(history):
+    """[club A index, club B index, season, A wins, B wins] per matchup.
+
+    Club indices follow ``gameClubs`` and are ordered within each row. Draws
+    and self-fixtures follow ``club_records`` and contribute nothing.
+    """
+    out = collections.defaultdict(lambda: [0, 0])
+    events = history.get("events", [])
+    for ev, rows in history.get("games", {}).items():
+        try:
+            season = events[int(ev)][2]
+        except (IndexError, TypeError, ValueError):
+            continue
+        for r in rows:
+            if r[0] == r[1] or r[2] == r[3]:
+                continue
+            first, second = sorted((r[0], r[1]))
+            winner = r[0] if r[2] > r[3] else r[1]
+            out[(first, second, season)][winner == second] += 1
+    return [[first, second, season, *record]
+            for (first, second, season), record in sorted(out.items())]
+
+
 def with_records(history):
     """Club trajectories with the event record folded into each point.
 
@@ -312,6 +335,7 @@ def split(history, player_names, genders, event_meta=None):
     # undo the whole point of the split.
     core["teams"] = with_records(history)
     core["gameSides"] = sides
+    core["headToHead"] = head_to_head_records(history)
     core["rostByClub"] = rost_by_club
     core["trends"] = _trends(history, player_names, genders, seasons, six)
     # eventIdx -> [strength score, letter, champion club key or null]. Both

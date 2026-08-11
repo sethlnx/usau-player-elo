@@ -825,13 +825,19 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="best">Best full-strength roster of 2026</option>
         <option value="upcoming">Next event roster</option>
       </select>
+      <label for="h2hTeam">Head-to-head vs</label>
+      <select id="h2hTeam">
+        <option value="">Off</option>
+      </select>
       <span class="count" id="ccount"></span>
     </div>
     <table><thead><tr>
       <th class="n">#</th><th>Club</th><th>Division</th><th class="n">Elo</th>
       <th class="n">Roster</th><th>Rated off</th>
+      <th class="n" id="h2hHead" hidden>W–L</th>
     </tr></thead><tbody id="ctb"></tbody></table>
     <p class="note" id="cnote"></p>
+    <p class="note" id="h2hNote" hidden></p>
   </div>
 
   <div id="playerRankings" hidden>
@@ -1082,6 +1088,61 @@ const COLLEGE_NOTE =
   'cross-continent order as provisional: EUF publishes no stable player IDs. ' +
   'College roster bases also mean less because a squad is often registered for ' +
   'the season rather than the event.';
+function h2hRecord(team, opponent, year) {
+  if (!team || !opponent || team === opponent) return null;
+  const a = GCIX.get(team), b = GCIX.get(opponent);
+  if (a == null || b == null) return null;
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  const seasons = year === 'all' ? SEASONS : [+year];
+  let wins = 0, losses = 0, games = 0;
+  for (const season of seasons) {
+    const row = H2H.get(`${lo}|${hi}|${season}`);
+    if (!row) continue;
+    const first = a === lo ? row[0] : row[1];
+    const second = a === lo ? row[1] : row[0];
+    wins += first;
+    losses += second;
+    games += first + second;
+  }
+  return games ? [wins, losses, games] : null;
+}
+function h2hCell(team, opponent, year) {
+  const record = h2hRecord(team, opponent, year);
+  const body = record ? `${record[0]}–${record[1]}` : '—';
+  const title = record ? `${record[2]} games` :
+    (team === opponent ? 'Selected team' : 'No recorded games');
+  const hidden = opponent ? '' : ' hidden';
+  return `<td class="n h2hCell"${hidden} title="${title}">${body}</td>`;
+}
+function h2hTeamKey(row, historical) {
+  return historical ? row.key : row.row[6];
+}
+function updateH2HControls(pop, historical, year) {
+  const select = $('#h2hTeam'), before = select.value;
+  const options = pop.map((r, i) => {
+    const key = h2hTeamKey(r, historical);
+    const name = historical ? r.name : r.row[1];
+    return `<option value="${esc(key)}">#${i + 1} ${esc(name)}</option>`;
+  }).join('');
+  select.innerHTML = '<option value="">Off</option>' + options;
+  select.value = pop.some(r => h2hTeamKey(r, historical) === before) ? before : '';
+  const selected = select.value;
+  const name = selected
+    ? (pop.find(r => h2hTeamKey(r, historical) === selected) || {}).name ||
+      ((pop.find(r => h2hTeamKey(r, historical) === selected) || {}).row || [])[1]
+    : '';
+  $('#h2hHead').hidden = !selected;
+  $('#h2hHead').textContent = selected ? `W–L vs ${name}` : 'W–L';
+  $('#h2hNote').hidden = !selected;
+  $('#h2hNote').textContent = selected
+    ? `Head-to-head records for ${name}; ${year === 'all' ? 'all available seasons' : year}. ` +
+      `Teams with no recorded games show —.`
+    : '';
+  return selected;
+}
+function h2hTeamCell(row, historical, selected, year) {
+  return h2hCell(h2hTeamKey(row, historical), selected, year);
+}
 function drawClubs() {
   const basis = $('#basis').value;
   const year = $('#ryear').value;
@@ -1118,6 +1179,7 @@ function drawClubs() {
       .slice().sort((a, b) => b[2] - a[2])
       .map(r => ({row: r}));
   }
+  const selected = updateH2HControls(pop, historical, year);
 
   const rankOf = new Map();
   pop.forEach((r, i) => rankOf.set(r, i + 1));
@@ -1135,7 +1197,8 @@ function drawClubs() {
         `<td><span class="nmlink" data-club="${esc(r.key)}">${esc(r.name)}</span></td>` +
         `<td><span class="tag">${esc(EDIVL[p.div] || '')}</span></td>` +
         `<td class="n">${p.elo.toFixed(0)}</td><td class="n">${p.n ?? '—'}</td>` +
-        `<td class="muted" style="font-size:13px">${esc(p.event)}</td></tr>`;
+        `<td class="muted" style="font-size:13px">${esc(p.event)}</td>` +
+        h2hTeamCell(r, historical, selected, year) + `</tr>`;
     }
     const p = r.row;
     const scope = div === 'all' ? 'the overall list' : `${DIVLABEL[p[5]]} clubs`;
@@ -1144,7 +1207,8 @@ function drawClubs() {
       `<td><span class="nmlink" data-club="${esc(p[6])}">${esc(p[1])}</span></td>` +
       `<td><span class="tag">${esc(EDIVL[p[5]] || '')}</span></td>` +
       `<td class="n">${p[2].toFixed(0)}</td><td class="n">${p[3]}</td>` +
-      `<td class="muted" style="font-size:13px">${esc(p[4])}</td></tr>`;
+      `<td class="muted" style="font-size:13px">${esc(p[4])}</td>` +
+      h2hTeamCell(r, historical, selected, year) + `</tr>`;
   }).join('');
   const what = div === 'all' ? 'clubs' : `${DIVLABEL[div]} clubs`;
   $('#ccount').textContent = q
@@ -1155,6 +1219,7 @@ function drawClubs() {
       `${div === 'all' ? 'all divisions' : EDIVL[div]}.`
     : CNOTE[basis] + ' ' + COLLEGE_NOTE) + EU_ROSTER_NOTE;
 }
+$('#h2hTeam').onchange = drawClubs;
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
 
@@ -1353,6 +1418,7 @@ let BSEASON = null;   // the season BR applies to (the current one)
 let HEV = [];     // [date, name, season, divisionCode]
 let GC = [], GST = [];
 let GCIX = new Map();
+let H2H = new Map(); // "lowerIndex|higherIndex|season" -> [lower wins, higher wins]
 let GSIDE = {};   // eventIdx -> Set(club index), from the core
 // eventIdx -> [field strength score, letter, champion club key]. Per event,
 // so a club's history row can print the grade and a crown without any fault.
@@ -1383,6 +1449,8 @@ function applyHistory(h) {
   HEV = H.events || [];
   GC = H.gameClubs || []; GST = H.gameStages || [];
   GCIX = new Map(GC.map((k, i) => [k, i]));
+  H2H = new Map((H.headToHead || []).map(r =>
+    [`${r[0]}|${r[1]}|${r[2]}`, [r[3], r[4]]]));
   // Who appears in an event's games. The event table marks a row expandable
   // only where the model scored games, and asking GMS for that would fault
   // every season of every panel just to draw the table.
