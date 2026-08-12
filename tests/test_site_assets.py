@@ -1,11 +1,12 @@
-import math
+import json
 import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
 
 from analysis.backtest import DB_PATH
-from analysis.site import bucket_urls, content_version, load_csv, load_ufa_payload
+from analysis.site import (bucket_urls, content_version, load_csv,
+                           load_ufa_payload, ufa_game_ratings)
 
 
 class SiteAssetContractTests(unittest.TestCase):
@@ -49,7 +50,8 @@ class SiteAssetContractTests(unittest.TestCase):
                 int(row["player_id"]): row
                 for row in load_csv("player_elo.csv")
             }
-            payload = load_ufa_payload(con, players)
+            history = json.loads((DB_PATH.parent / "history.json").read_text())
+            payload = load_ufa_payload(con, players, history)
         finally:
             con.close()
 
@@ -60,16 +62,11 @@ class SiteAssetContractTests(unittest.TestCase):
         self.assertTrue(team["name"])
         self.assertGreater(team["wins"] + team["losses"], 0)
         self.assertGreater(len(team["roster"]), 0)
-        rated = sorted(
-            (player["elo"] for player in team["roster"]
-             if player["elo"] is not None), reverse=True
+        team_id = team["id"].split(":", 1)[1]
+        self.assertEqual(
+            ufa_game_ratings(history)[(2025, team_id)],
+            team["rating"],
         )
-        top = rated[:20]
-        self.assertEqual(team["used"], len(top))
-        peak = top[0]
-        weights = [math.exp((rating - peak) / 500) for rating in top]
-        expected = sum(w * r for w, r in zip(weights, top)) / sum(weights)
-        self.assertAlmostEqual(team["rating"], expected, places=1)
 
 if __name__ == "__main__":
     unittest.main()

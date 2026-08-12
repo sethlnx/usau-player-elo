@@ -1,9 +1,10 @@
 """Pull UFA teams, players, season stats, and games into data/usau.db.
 
-Usage: python -m ufa.scrape [season ...]     (default 2021-2025)
-Idempotent: JSON responses are disk-cached by ufa.api and rows UPSERTed.
+Usage: python -m ufa.scrape [season ...]     (default 2021-current year)
+Idempotent: rows are UPSERTed; the current season bypasses the JSON cache.
 """
 
+from datetime import date
 import sys
 
 import requests
@@ -53,17 +54,28 @@ CREATE TABLE IF NOT EXISTS ufa_game_stats (
 """
 
 
-def scrape_game_stats(con, session) -> int:
+def scrape_game_stats(con, session, refresh_years=()) -> int:
     """Per-game player lines (real game rosters) for every final game."""
+    refresh_years = set(refresh_years)
     done = {r[0] for r in con.execute(
         "SELECT DISTINCT game_id FROM ufa_game_stats")}
-    games = [r[0] for r in con.execute(
-        "SELECT game_id FROM ufa_games WHERE status='Final' ORDER BY game_id")]
+    games = con.execute(
+        "SELECT game_id, year FROM ufa_games "
+        "WHERE status='Final' ORDER BY year, game_id"
+    ).fetchall()
     n = 0
-    for gid in games:
-        if gid in done:
+    for gid, year in games:
+        refresh = year in refresh_years
+        if gid in done and not refresh:
             continue
-        for r in api.get("playerGameStats", {"gameID": gid}, session):
+        rows = api.get(
+            "playerGameStats", {"gameID": gid}, session, refresh=refresh
+        )
+        if not rows:
+            continue
+        if refresh:
+            con.execute("DELETE FROM ufa_game_stats WHERE game_id=?", (gid,))
+        for r in rows:
             con.execute(
                 "INSERT OR REPLACE INTO ufa_game_stats VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (gid, r["player"]["playerID"], r.get("teamID"),
@@ -75,15 +87,15 @@ def scrape_game_stats(con, session) -> int:
     return n
 
 
-def scrape_season(con, session, year: int) -> str:
-    for t in api.get("teams", {"years": year}, session):
+def scrape_season(con, session, year: int, refresh: bool = False) -> str:
+    for t in api.get("teams", {"years": year}, session, refresh=refresh):
         con.execute(
             "INSERT OR REPLACE INTO ufa_teams VALUES (?,?,?,?,?,?,?,?,?)",
             (t["teamID"], year, (t.get("division") or {}).get("name"),
              t.get("city"), t.get("name"), t.get("fullName"), t.get("abbrev"),
              t.get("wins"), t.get("losses")))
 
-    players = api.get("players", {"years": year}, session)
+    players = api.get("players", {"years": year}, session, refresh=refresh)
     pids = []
     for p in players:
         pids.append(p["playerID"])
@@ -99,8 +111,10 @@ def scrape_season(con, session, year: int) -> str:
     n_stats = 0
     for i in range(0, len(pids), 50):
         batch = ",".join(pids[i:i + 50])
-        for r in api.get("playerStats", {"playerIDs": batch, "years": year},
-                         session):
+        for r in api.get(
+            "playerStats", {"playerIDs": batch, "years": year}, session,
+            refresh=refresh,
+        ):
             con.execute(
                 "INSERT OR REPLACE INTO ufa_player_stats VALUES "
                 f"(?,?{',?' * len(STAT_COLUMNS)})",
@@ -108,32 +122,37 @@ def scrape_season(con, session, year: int) -> str:
                  *[r.get(c) for c in STAT_COLUMNS]))
             n_stats += 1
 
-    n_games = 0
-    for month in range(3, 10):   # season runs Apr-Aug; margin either side
-        for g in api.get("games", {"date": f"{year}-{month:02d}"}, session):
-            con.execute(
-                "INSERT OR REPLACE INTO ufa_games VALUES (?,?,?,?,?,?,?,?,?)",
-                (g["gameID"], year, (g.get("startTimestamp") or "")[:10],
-                 g.get("homeTeamID"), g.get("awayTeamID"),
-                 g.get("homeScore"), g.get("awayScore"),
-                 g.get("status"), g.get("week")))
-            n_games += 1
+    games = api.get("games", {"date": str(year)}, session, refresh=refresh)
+    for g in games:
+        con.execute(
+            "INSERT OR REPLACE INTO ufa_games VALUES (?,?,?,?,?,?,?,?,?)",
+            (g["gameID"], year, (g.get("startTimestamp") or "")[:10],
+             g.get("homeTeamID"), g.get("awayTeamID"),
+             g.get("homeScore"), g.get("awayScore"),
+             g.get("status"), g.get("week")))
 
     con.commit()
-    return f"{len(pids)} players, {n_stats} stat lines, {n_games} games"
+    return f"{len(pids)} players, {n_stats} stat lines, {len(games)} games"
 
 
 def main(seasons: list[int]):
     con = connect(DB_PATH)
     con.executescript(SCHEMA)
+    current_year = date.today().year
     with requests.Session() as session:
         for year in seasons:
-            print(f"== UFA {year}: {scrape_season(con, session, year)}",
-                  flush=True)
-        print(f"== game stats: {scrape_game_stats(con, session)} new lines",
-              flush=True)
+            print(
+                f"== UFA {year}: "
+                f"{scrape_season(con, session, year, refresh=year == current_year)}",
+                flush=True,
+            )
+        print(
+            "== game stats: "
+            f"{scrape_game_stats(con, session, refresh_years={current_year})} lines",
+            flush=True,
+        )
     con.close()
 
 
 if __name__ == "__main__":
-    main([int(a) for a in sys.argv[1:]] or [2021, 2022, 2023, 2024, 2025])
+    main([int(a) for a in sys.argv[1:]] or list(range(2021, date.today().year + 1)))

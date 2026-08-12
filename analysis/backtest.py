@@ -174,21 +174,30 @@ def load_ufa_stat_events(con) -> list[tuple]:
 def load_ufa_games(con) -> tuple[list, dict, dict]:
     """UFA games as replay entries, with per-game rosters of linked players.
 
-    Returns (games, rosters_add, clubs_add). Rosters are the players who
-    actually took the field (points played > 0) mapped through accepted
-    links; a team fielding fewer than 7 linked players gets no roster entry,
-    so replay's existing ghost fallback absorbs it (the game still
-    calibrates the linked opponents).
+    Every final game is a one-game synthetic event so the authoritative replay
+    can emit a team Elo point and the underlying score after each game. Rosters
+    are players who took the field (points played > 0), mapped through accepted
+    links. A team with fewer than seven linked players gets no roster entry, so
+    replay's existing ghost fallback absorbs it while preserving the result.
     """
     from ufa.link import resolve_links
     try:
         links = resolve_links(con)
         game_rows = con.execute("""
-            SELECT game_id, year, date, home_team_id, away_team_id,
-                   home_score, away_score
-            FROM ufa_games
-            WHERE status = 'Final'
-              AND home_score IS NOT NULL AND away_score IS NOT NULL""").fetchall()
+            SELECT g.game_id, g.year, g.date, g.home_team_id, g.away_team_id,
+                   g.home_score, g.away_score, g.week,
+                   COALESCE(ht.full_name, g.home_team_id),
+                   COALESCE(at.full_name, g.away_team_id)
+            FROM ufa_games g
+            LEFT JOIN ufa_teams ht
+              ON ht.team_id = g.home_team_id AND ht.year = g.year
+            LEFT JOIN ufa_teams at
+              ON at.team_id = g.away_team_id AND at.year = g.year
+            WHERE g.status = 'Final'
+              AND g.home_score IS NOT NULL AND g.away_score IS NOT NULL
+              AND NOT (g.home_score = 0 AND g.away_score = 0)
+              AND g.home_score + g.away_score >= 4
+        """).fetchall()
         stat_rows = con.execute("""
             SELECT game_id, team_id, player_id FROM ufa_game_stats
             WHERE COALESCE(o_points_played,0) + COALESCE(d_points_played,0) > 0
@@ -200,19 +209,24 @@ def load_ufa_games(con) -> tuple[list, dict, dict]:
         if upid in links:
             fielded.setdefault((gid, team), []).append(links[upid])
     games, rosters_add, clubs_add = [], {}, {}
-    for gid, year, date, home, away, hs, as_ in game_rows:
-        hkey, akey = f"ufa:{gid}:{home}", f"ufa:{gid}:{away}"
+    for gid, year, date, home, away, hs, as_, week, home_name, away_name in game_rows:
+        event_id = f"ufa:{gid}"
+        hkey, akey = f"{event_id}:{home}", f"{event_id}:{away}"
         for key, team in ((hkey, home), (akey, away)):
-            clubs_add[key] = f"ufa-{team}"
-            pids = fielded.get((gid, team), [])
+            clubs_add[key] = f"ufa:{team}"
+            pids = sorted(set(fielded.get((gid, team), [])))
             if len(pids) >= 7:
                 rosters_add[key] = pids
         games.append({
             "sort": (date or f"{year}-06-01", "12:00", 0, gid),
             "date": date, "season": year, "division": "ufa",
+            "event_id": event_id, "game_key": gid, "stage": week or "",
+            "event_name": f"{away_name} at {home_name}",
+            "home_name": home_name, "away_name": away_name,
             "home_id": hkey, "away_id": akey,
             "home_score": hs, "away_score": as_,
         })
+    games.sort(key=lambda game: game["sort"])
     return games, rosters_add, clubs_add
 
 

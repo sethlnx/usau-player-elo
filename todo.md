@@ -393,3 +393,5 @@ The feature is complete only when all of the following are true:
 - The README reports exact observed coverage rather than inferred completeness.
 
 # Add career plus minus
+
+# Allow looking at team vs team records

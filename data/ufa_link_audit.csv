@@ -1,903 +1,507 @@
 ufa_player_id,norm_name,reason,club,evidence
+,,no-match,,
 aagami,axel agami,no-match,,
-aarsenaul,andré arsenault,no-match,,
-aaucoin,arthur aucoin,ambiguous,pony,city:new york years:1
-abarcio,aaron barcio,ambiguous,texas (tuff),city:austin jersey:3 years:2
-abarden,austin barden,no-match,,
-abarnett,alex barnett,no-match,,
-abartlett,aaron bartlett,ambiguous,michigan (magnum),jersey:14 years:3
-abenton,alec benton,no-match,,
+abarnett,alex barnett,no-corroboration,,
+abartlett,aaron bartlett,ambiguous,truck stop,jersey:14 years:3
 abrouwer,alex brouwer,no-match,,
-aburgess,adam burgess,ambiguous,pittsburgh temper,city:pittsburgh jersey:10 years:1
-acameron,alex cameron,no-match,,
-acaon,anderson cañon,no-match,,
-acisneros,adrian cisneros,ambiguous,fungi,
+acaon,anderson canon,no-corroboration,,
 acloud,alex cloud,no-match,,
-acoble,aaron coble,no-match,,
 acoffin,abe coffin,no-match,,
+acohen,andrew cohen,ambiguous,uproar,city:tampa bay years:1
 acurreri,alex curreri,no-match,,
-adavis5,abbie davis,no-match,,
-adixon,allysha dixon,no-match,,
+adavis3,anthony davis,ambiguous,pittsburgh temper,city:pittsburgh years:1
+adavis4,alex davis,ambiguous,overtime,city:raleigh years:1
 adonadio,alex donadio,no-match,,
-aengel,austin engel,ambiguous,nain rouge,
+aengel,austin engel,no-corroboration,,
+agrant,andrew grant,no-match,,
 agravatt,alex gravatt,no-match,,
-agruntz,alan gruntz,no-match,,
 aguerrero,alex guerrero,no-corroboration,,
-agutowsky,anthony gutowsky,ambiguous,chicago machine,jersey:6 years:1
-ahartzog,axel hartzog,no-corroboration,,
 aheath,alex heath,no-match,,
 ahipskind,andy hipskind,no-match,,
-aindhupur,anish indhupuru,ambiguous,el niño,jersey:21 years:2
 ajanelle,alex janelle,no-match,,
-ajirele1,anthony jirele,ambiguous,minnesota (grey duck),years:2
+ajohnson1,austin johnson,ambiguous,mad men,city:madison jersey:91 years:3
 akabat,alex kabat,no-match,,
-akaghazwa,amir kaghazwala,no-match,,
-akapinos,alex kapinos,no-corroboration,,
 akarklins,arvids karklins,no-match,,
-akolick,alan kolick,no-match,,
-alaviolet,allan laviolette,ambiguous,ring of fire,city:raleigh jersey:11;26 years:2
 alaws,alex laws,no-match,,
+ali,andrew li,ambiguous,north carolina (darkside),jersey:5 years:2
+alillis,austin lillis,ambiguous,phoenix f.c.,city:philadelphia jersey:3 years:1
 aliu,alex liu,ambiguous,mad men,city:madison jersey:13 years:1
 aliu1,alex liu,ambiguous,mad men,city:madison jersey:13 years:1
 alopezesc,aidan lopez-escarez,no-match,,
 amacisaac,aj macisaac,no-match,,
-amathena,alec mathena,no-corroboration,,
-amclean,anthony mclean,no-match,,
-ameshnick,andrew meshnick,no-match,,
 amiles,aj miles,no-match,,
-amiller1,adam miller,ambiguous,chain lightning,city:atlanta jersey:18 years:4
+amiller1,adam miller,ambiguous,chain lightning,city:atlanta jersey:18 years:5
+amontanar,andrea montanari,no-match,,
 amoore,andrew moore,ambiguous,revolver,jersey:9 years:1
-amuller,andrew muller,ambiguous,alamode,years:1
-andovu,allan ndovu,no-match,,
-aolcese,angelo olcese,ambiguous,raleigh-durham united,jersey:22 years:3
-apaulus,ashton paulus,no-corroboration,,
 apetersch,aaron peterschmidt,no-corroboration,,
-apillsbur,andrew pillsbury,no-match,,
-araslan,adnan raslan,no-corroboration,,
-arogers,aidan rogers,no-corroboration,,
-arosentha,aaron rosenthal,ambiguous,dartmouth (pain train),years:1
-athomas,alex thomas,no-match,,
-athompson,andrew thompson,ambiguous,suny-geneseo (snail),years:2
+arichards1,aaron richards,ambiguous,bfg,jersey:9
+arogers,aidan rogers,ambiguous,dune cats,
+athomas,alex thomas,no-corroboration,,
+athompson,andrew thompson,ambiguous,ohio (trout),years:4
 athorne,alex thorne,no-match,,
 athorpe,abby thorpe,no-match,,
-awatts,andrew watts,no-match,,
-aweaver,aaron weaver,no-match,,
-awilcox,xander wilcox,ambiguous,raleigh-durham united,jersey:35 years:2
-awilliams,aidan williams,ambiguous,colorado state (hibida),
-awolf,aaron wolf,no-match,,
+awang,andy wang,ambiguous,johns hopkins (dangerzone),years:1
+awatson1,andrew watson,ambiguous,public enemy,jersey:97 years:1
+awilliams,aidan williams,ambiguous,georgetown (justice),years:1
 ayanelli,alex yanelli,no-match,,
-ayearwood,adrian yearwood,no-match,,
 bashton,ben ashton,no-match,,
-battal,benjamin attal,no-match,,
 bbarrett,bj barrett,no-match,,
-bbeers,brandon beers,ambiguous,alliance,years:1
-bbergmeie,bret bergmeier,no-match,,
 bbolan,ben bolan,no-match,,
 bcentracc,ben centracchio,no-match,,
 bclose,ben close,no-match,,
-bdistel,braden distel,ambiguous,arizona state (prime),jersey:72
-bdowney,bryan downey,ambiguous,little john,jersey:36 years:1
+bdial,brandon dial,ambiguous,austin disco club,city:austin jersey:27 years:3
 bevashavi,ben evashavik,no-match,,
-bfein,brandon fein,no-corroboration,,
-bfield,ben field,ambiguous,dig,
 bgagnemay,ben gagne-maynard,no-match,,
-bgeorge,brent george,no-match,,
 bgreen,ben green,no-match,,
-bgreenber,ben greenberg,no-match,,
-bhart,brian hart,no-match,,
 bhenley,becca henley,no-match,,
-bhidaka,brett hidaka,no-match,,
 bhoffman,ben hoffman,no-match,,
 bhorrisbe,benjamin horrisberger,no-match,,
 bhouser,brad houser,no-match,,
+biris,bode iris,no-match,,
 bjagt,ben jagt,no-match,,
-bjordan1,blake jordan,no-corroboration,,
-bkatz1,ben katz,no-match,,
-bkeith,brendan keith,ambiguous,florida untied,jersey:1
-blandry,ben landry,no-match,,
+bkassmull,ben kass-mullet,no-match,,
+bkatz1,ben katz,no-corroboration,,
+blandry,ben landry,no-corroboration,,
 blevinsky,ben levinsky,no-match,,
-blevy,ben levy,no-match,,
-blimoges,basile limoges,no-match,,
-blo,brent lo,ambiguous,ghost train,city:seattle years:1
-bmalecek,brandon malecek,no-match,,
-bmathie,becker mathie,ambiguous,mallard,jersey:30 years:1
-bmccann,brendan mccann,ambiguous,dig,city:boston jersey:13 years:5
-bmoore1,brent moore,no-match,,
-bnguyen,bryan nguyen,no-match,,
+blevy,ben levy,no-corroboration,,
 bobryan,billy obryan,no-match,,
+bperales,brandon perales,ambiguous,weird,jersey:5 years:1
 bpetrowsk,ben petrowski,no-match,,
-bprice,ben price,no-match,,
-broach,brian roach,no-match,,
-brobinson,braedan robinson,ambiguous,phoenix,city:ottawa years:1
-brogers,ben rogers,no-match,,
-bsadok,benjamin sadok,ambiguous,diz,city:boston jersey:3 years:1
+bprice,ben price,no-corroboration,,
+broach,brian roach,ambiguous,ghost train,city:seattle
 bschlaefe,biz schlaefer,no-match,,
-bsimmons,benjamin simmons,no-match,,
-bsokolows,benjamin sokolowsky,no-match,,
-bstout,brian stout,no-match,,
+bsimmons,benjamin simmons,no-corroboration,,
+bstreet,brian street,ambiguous,texas (tuff),city:austin jersey:11 years:1
 btan,bretton tan,no-match,,
 bthompsen,benjamin thompsen,no-match,,
-btrantina,blake trantina,ambiguous,mallard,years:1
 btravers,ben travers,no-match,,
-btseytlin,benjamin tseytlin,no-match,,
-bvohnoutk,bryan vohnoutka,no-match,,
-bwachob,bennett wachob,no-match,,
-bwalsh,bryan walsh,ambiguous,nain rouge,jersey:77 years:1
-bweinstei,ben weinstein,no-corroboration,,
-bwilliams1,brycen williams,no-corroboration,,
-byue,bryan yue,no-match,,
+buran,brian uran,no-match,,
 bzhang,ben zhang,no-match,,
 calbin,cam albin,no-match,,
 carevalo,chris arevalo,no-match,,
-carmstron1,carson armstrong,no-corroboration,,
-casselin,charles asselin,no-match,,
-cbailey,cam bailey,no-corroboration,,
-cbaker,cullen baker,ambiguous,chicago machine,city:chicago years:1
-cbarrera,camilo barrera,no-corroboration,,
-cbelfield,conor belfield,no-match,,
-cblalack,conner blalack,ambiguous,indiana (hoosiermama?s),jersey:0 years:1
-cbosworth,callahan bosworth,ambiguous,dark star,jersey:13 years:1
+cbelfield,conor belfield,ambiguous,bfg,city:seattle years:2
 cbryant,connor bryant,no-match,,
 cburden,cam burden,no-match,,
 ccalhoun,chris calhoun,no-match,,
-ccampbell1,caleb campbell,no-corroboration,,
-ccannon,charles cannon,no-match,,
-ccarey,clayton carey,no-corroboration,,
 ccasella,chris casella,no-match,,
 ccassella,chris cassella,no-match,,
 cchan,chris chan,no-match,,
-cchang,chip chang,no-match,,
+cchanler,cole chanler,no-corroboration,,
 ccochran,chance cochran,no-match,,
 ccogswell,chris cogswell,no-match,,
-ccopeland,cam copeland,ambiguous,chain lightning,city:atlanta jersey:79 years:1
-cdavisbra,cole davis-brand,ambiguous,dig,city:boston jersey:22 years:5
-cellis,chris ellis,ambiguous,omen,jersey:32 years:3
-cenright,caleb enright,no-corroboration,,
-cfortin,connor fortin,no-corroboration,,
+ccolbury,calvin colbury,no-match,,
 cfurse,charlie furse,no-match,,
-cgarrison,connor garrison,ambiguous,arizona state (prime),jersey:76
-cguay,charles guay,ambiguous,mephisto,city:montreal jersey:11 years:4
-charris,cameron harris,no-corroboration,,
+chancock,chris hancock,ambiguous,rhino slam,city:portland jersey:9
 chenderso,conner henderson,no-match,,
-choward,corey howard,no-match,,
-chsu,cheryl hsu,no-match,,
+chill,collin hill,ambiguous,chain lightning,city:atlanta jersey:25 years:2
+choward,corey howard,no-corroboration,,
 cjohnson1,christian johnson,ambiguous,truck stop,jersey:29 years:1
-cjurek,cole jurek,ambiguous,truck stop,jersey:13 years:4
-ckline,conor kline,no-match,,
+ckline,conor kline,no-corroboration,,
 clayden,chris layden,no-match,,
+clevine,cam levine,no-match,,
 cloverane,coby loveranes,no-match,,
 clung,chris lung,no-match,,
-cmah,camden mah,ambiguous,zyzzyva,years:1
-cmarty,chase marty,no-match,,
-cmazur,chris mazur,no-match,,
 cmccutche,charlie mccutcheon,no-match,,
-cmchale,connor mchale,ambiguous,goat,city:toronto jersey:88 years:1
-cmcinnis,cody mcinnis,no-match,,
-cmclaughl,colin mclaughlin,ambiguous,big wrench,years:1
+cmclaughl,colin mclaughlin,ambiguous,tufts (elephant men),jersey:22 years:3
 cmclaughl1,chris mclaughlin,no-match,,
 cmcsweene,caelan mcsweeney,ambiguous,massachusetts (zoodisc),jersey:88 years:2
-cmoore,cole moore,ambiguous,dig,city:boston jersey:6 years:4
-cnewby,caeden newby,no-corroboration,,
-cobrien,cj obrien,no-match,,
-cobrien1,christopher obrien,no-match,,
+cparinell,chris parinella,no-match,,
+cposey,caleb posey,ambiguous,uproar,city:tampa bay jersey:37 years:2
 cressel,cliff ressel,no-match,,
-cspicer,cody spicer,ambiguous,johnny bravo,city:colorado jersey:34 years:2
-cstewart1,clara stewart,no-match,,
-csunde,colin sunde,ambiguous,mad men,city:madison jersey:34 years:2
-ctabor,conor tabor,ambiguous,johnny bravo,city:colorado jersey:25 years:3
+csmith1,colin smith,ambiguous,relics,years:2
+cstoughto,calvin stoughton,ambiguous,dig,city:boston jersey:5 years:1
 cthatcher,cam thatcher,no-match,,
 ctremblay,christophe tremblay-joncas,no-match,,
-cwalls,chris walls,no-corroboration,,
-cwalsh,chris walsh,ambiguous,notre dame (papal rage),jersey:9 years:3
-cwang,clark wang,ambiguous,socal condors,jersey:23 years:3
 cward,chris ward,no-match,,
 cwariner,cam wariner,no-match,,
-cwatkins,curtis watkins,no-corroboration,,
-cwilen,chris wilen,no-match,,
 cwilliams,cooper williams,no-match,,
 cwohl,chris wohl,no-match,,
-cwoodfin,christian woodfin,ambiguous,hazard,jersey:32 years:1
-cyen,chip yen,no-match,,
 czaleski,christopher zaleski,no-match,,
 dbaker,cameron baker,no-match,,
 dbechis,dennis bechis,no-match,,
-dbenvenut,dan benvenuti,no-match,,
-dbossert,dane bossert,no-match,,
-dbraden,david braden,ambiguous,flying dutchmen,jersey:3 years:1
-dbullock,dean bullock,no-match,,
+dbossert,dane bossert,no-corroboration,,
 dbyerssim,danielle byers simonelli,no-match,,
-dcavalero,dominic cavalero,no-match,,
-dclyburn,dexter clyburn,ambiguous,california (ursa major),jersey:14 years:2
-dcox,devin cox,no-match,,
-dcox1,david cox,no-match,,
-dculver,dean culver,no-match,,
-ddeclerck,dylan declerck,no-match,,
-ddemarre,daan de marrée,ambiguous,chicago machine,city:chicago years:1
-ddyer,darren dyer,no-corroboration,,
-delimelec,dena elimelech,no-match,,
-demmons,daniel emmons,no-match,,
-deppstein,daniel eppstein,no-match,,
-dfrongill,david frongillo,no-match,,
-dhenken,dustin henken,no-match,,
+delimelec,dena elimelech,ambiguous,fury,jersey:46 years:1
+dhall,dylan hall,ambiguous,wright state (airstrike),jersey:16 years:1
 dhobday,danny hobday,ambiguous,sub zero,jersey:22 years:1
 djacobs,dominic jacobs,no-match,,
-djensen,david jensen,ambiguous,the incline,jersey:74 years:1
-djoens,dillon joens,no-corroboration,,
-djohnson,delrico johnson,no-match,,
-dkervick,declan kervick,ambiguous,dig,city:boston jersey:82 years:1
 dkhoe,danny khoe,no-match,,
-dknighton,derik knighton,ambiguous,shrimp,city:salt lake jersey:32 years:1
 dlacombeb,dylan lacombe-burgoyne,no-match,,
 dlaird,drew laird,ambiguous,brawl,city:dallas jersey:33 years:1
 dlandesma,danny landesman,no-match,,
-dlarberg,dillon larberg,no-match,,
 dlee,daniel lee,ambiguous,rhino slam!,city:portland jersey:41 years:1
 dleggio,dominic leggio,no-match,,
-dloughnan,drew loughnane,ambiguous,philadelphia pacmen,city:philadelphia years:1
 dluecke,dex luecke,no-match,,
-dlundy,david lundy,no-match,,
+dlundy,david lundy,no-corroboration,,
 dmalderis,didzis malderis,no-match,,
-dmcnally,duncan mcnally,no-match,,
-dmiddlebr,dodger middlebrook,ambiguous,cal poly-slo (slocore),jersey:22 years:1
+dmcnally,duncan mcnally,no-corroboration,,
 dmiller,danny miller,no-match,,
-dmiller2,dax miller,no-match,,
-dnester,david nester,ambiguous,mad men,city:madison jersey:11 years:4
 dotterlei,drew otterlei,no-match,,
-dpryke,daniel pryke,ambiguous,skipjack,city:san diego jersey:23 years:1
 dramsey,dean ramsey,no-match,,
-draskin,dox raskin,no-corroboration,,
-drichmond,dave richmond,no-corroboration,,
-drobinson,donald robinson,no-match,,
 dsilverst,dan silverstein,no-match,,
-dsperling,daniel sperling,no-match,,
 dswanson,drew swanson,no-match,,
-dtunnell,dylan tunnell,no-corroboration,,
-dvalentin,david valentine-elam,no-corroboration,,
+dvalentin,david valentine-elam,ambiguous,columbus cocktails,jersey:6
 dvandam,dan vandam,no-match,,
-dviggiani,daniel viggiani,no-match,,
 dvockerot,dan vockeroth,no-match,,
-dwhitehea,davis whitehead,no-match,,
 dwilliams2,daniel williams,ambiguous,haymaker,city:chicago years:1
 dwiseman,dave wiseman,no-match,,
-dwong,daniel wong,no-match,,
 dyoung1,dan young,no-match,,
-dyu,david yu,no-match,,
-dzhou,david zhou,no-match,,
-ebartlett,emma bartlett,no-match,,
-ebequette,eileen bequette,no-match,,
-eceballos,estéban ceballos,no-match,,
-ecrosbyle,eric crosby lehmann,ambiguous,sub zero,jersey:7 years:1
-eding,eastelle ding,no-match,,
-eeve,elliott eve,no-corroboration,,
+dyu,david yu,ambiguous,flight club,years:2
+eartemaki,eli artemakis,ambiguous,chicago machine,city:chicago years:4
+eatwell,erik atwell,ambiguous,texas state (texas state buckets),years:1
+eceballos,esteban ceballos,no-corroboration,,
 efinley,eddie finley,no-match,,
-efortin,ethan fortin,ambiguous,dig,city:boston jersey:28;8 years:5
-efox,ed fox,ambiguous,ronin,
+eforget,enzo forget,no-match,,
 efriedman,eli friedman,ambiguous,rhino slam!,city:portland jersey:7 years:2
-egrass,everett grass,no-corroboration,,
-ehowey,evan howey,no-corroboration,,
-ehubbard,eric hubbard,no-corroboration,,
-ehunter,erik hunter,no-match,,
-ejaime,elijah jaime,no-match,,
-ejanin,eli janin,no-match,,
 ekerns,eli kerns,no-match,,
-elheureux,eugene lheureux,no-match,,
-emotycka,eli motycka,no-match,,
-enardelli,eric nardelli,no-match,,
-eniedzwie,ethan niedzwiedz,ambiguous,chain lightning,jersey:56 years:1
-enorton,eliana norton,no-match,,
+elee,elliot lee,ambiguous,chicago parlay,city:chicago years:1
+emiller,evan miller,ambiguous,queen city kings,years:1
+epaulausk,eric paulauskas,no-match,,
 eperpich,elliot perpich,no-corroboration,,
 ephanglyn,erich phang-lynn,no-match,,
-epiorier,emma piorier,no-match,,
-epollack,ethan pollack,no-match,,
-erivera,elliot rivera,ambiguous,suny-buffalo (green eggs and ham),years:1
-erivera1,elliot rivera,ambiguous,dapper,
-esarles,ethan sarles,no-corroboration,,
-esaunders,everett saunders,no-corroboration,,
-esebastia,evan sebastian,ambiguous,haymaker,city:chicago years:1
 eshipway,emmet shipway,no-match,,
+esumbi,edgar sumbi,no-match,,
 ffernande,franky fernandez,no-match,,
 fgomez,frankie gomez,no-match,,
-fhare,fletcher hare,ambiguous,chain lightning,city:atlanta years:1
-fleonard,felix leonard,ambiguous,mephisto,city:montreal jersey:19 years:3
-fweng,frank weng,no-match,,
-gabrahams,gavin abrahamsson,ambiguous,dig,city:boston jersey:37 years:1
-gbabbitt,gavin babbitt,ambiguous,texas (tuff),city:austin jersey:73 years:3
-gcardosa,georgia cardosa,no-match,,
 gcohen,greg cohen,no-match,,
-gcole,grant cole,no-corroboration,,
 gcolton,gabe colton,no-match,,
 gcousins,greg cousins,no-match,,
 gdoble,gabriel doble,no-match,,
 gdobrozsi,gabe dobrozsi,no-match,,
-ghaflin,gustav haflin,ambiguous,dig,city:boston jersey:34 years:5
-gharris,grant harris,ambiguous,chicago (fission),city:chicago years:1
-ghernande,gabriel hernandez,ambiguous,flash flood,city:dallas years:1
+gdowd,gabe dowd,no-match,,
+ghernande,gabriel hernandez,ambiguous,crude ultimate,city:dallas jersey:23
 gjagt,gabe jagt,no-match,,
-glarson,gordon larson,ambiguous,mutiny,years:1
-gleahy,gavin leahy,no-match,,
-gmiller,griffin miller,no-match,,
-gmitchell,grant mitchell,no-match,,
-gnakano,genichi nakano,no-match,,
+gjohnson,grant johnson,no-corroboration,,
 gnobis,gabe nobis,no-match,,
-gpangburn,grayson pangburn,ambiguous,knights of ni,years:2
+gnorrbom,gus norrbom,ambiguous,truck stop,jersey:47 years:4
 gplaiajr,gregory plaia jr,no-match,,
-grettberg,grayson rettberg,ambiguous,shrimp,city:salt lake jersey:99 years:2
-gsanner,grayson sanner,no-match,,
-gschoepke,gabe schoepke,ambiguous,haymaker,city:chicago jersey:1 years:1
-gtse,georgia tse,no-match,,
-gturner,graham turner,no-match,,
-gwatkins,grady watkins,ambiguous,hazard,years:1
 gwebster,gabe webster,no-match,,
+gwilson1,garrett wilson,ambiguous,brawl,jersey:30 years:1
 gwray,gabe wray,no-match,,
-hcorbett,hunter corbett,no-match,,
-heverett,henry everett,ambiguous,pittsburgh temper,city:pittsburgh years:1
-hing,henry ing,ambiguous,pittsburgh (en sabah nur),city:pittsburgh years:1
-hlang,hunter lang,no-corroboration,,
-hlaseter,henry laseter,ambiguous,needham squad,years:1
-hordonez,hector ordonez,no-match,,
+hfisher,henry fisher,ambiguous,ring of fire,city:raleigh jersey:10;3 years:3
+hlaseter,henry laseter,ambiguous,yee-haw,years:1
 htaylor,hunter taylor,no-corroboration,,
-htucker,harrison tucker,ambiguous,drought,jersey:24 years:1
 hwachob,hayden wachob,no-corroboration,,
-hwayte,henry wayte,ambiguous,dark star-d,jersey:31 years:1
-ielmi,ikran elmi,no-match,,
-iengler,ian engler,no-corroboration,,
-ifalck,ian falck,ambiguous,trident,city:chicago jersey:8 years:1
 igranstro,isaac granstrom,no-match,,
-ihernande,isaiah hernandez,no-corroboration,,
+ihahn,ian hahn,ambiguous,a la carte-b,jersey:14 years:1
 ilawson,ian lawson,no-corroboration,,
-ileonard,isaac leonard,no-match,,
-imackenzi,iain mackenzie,ambiguous,goat,city:toronto jersey:13
-imccosky,ian mccosky,ambiguous,yogosbo,city:madison years:1
-imoore,isaiah moore,no-corroboration,,
-itran,ivan tran,no-match,,
-iyudkovic,ilya yudkovich,ambiguous,dig,city:boston jersey:25 years:1
-jallen1,jackson allen,ambiguous,firefall,years:1
-janderson,jake anderson,no-corroboration,,
+ilee,isaac lee,ambiguous,truck stop,jersey:2;99 years:4
+jallen1,jackson allen,ambiguous,lil’ huckers,years:1
+janderson,jake anderson,ambiguous,phlagstaff ultimate,years:1
 janderson1,joe anderson,no-match,,
-jartz,jacob artz,no-match,,
 jbabbitt,jeff babbitt,no-match,,
 jbaumer,jake baumer,no-match,,
 jblue,jacob blue,no-match,,
 jbolt,josh bolt,no-match,,
-jbolton,jesse bolton,no-match,,
-jbonilla,julián bonilla,no-match,,
-jboychuk,jay boychuk,no-corroboration,,
-jbranson1,joseph branson,no-match,,
-jbrown,jack brown,no-match,,
+jbonilla,julian bonilla,no-match,,
+jbray,jimmy bray,no-match,,
+jbrown,jack brown,no-corroboration,,
 jbruner,jace bruner,no-match,,
 jburns,jp burns,no-match,,
-jburris,jeffrey burris,ambiguous,colonels,jersey:26 years:1
-jbutrica,jake butrica,no-match,,
-jcaicedo,jean caicedo,no-match,,
+jcaicedo,jean caicedo,no-corroboration,,
 jcanfield,jared canfield,no-match,,
 jcari,joey cari,no-match,,
 jcarol,jackson carol,no-match,,
-jcarreiro,jac carreiro,ambiguous,dig,city:boston jersey:19 years:1
-jcaswell,joel caswell,no-match,,
-jcercello,joe cercello,ambiguous,haymaker,city:chicago jersey:23 years:1
-jchampagn,jean-levy champagne,no-match,,
-jcherwink,justine cherwink,ambiguous,reál hogs fc-b,years:1
-jcheung,justin cheung,ambiguous,dynasty,city:toronto years:1
 jclark,jay clark,no-match,,
-jclutton,joel clutton,no-corroboration,,
-jcohen,jesse cohen,no-match,,
-jcoleman,jake coleman,no-match,,
 jcox,jc cox,no-match,,
-jcwengros,jesse cwengros,no-corroboration,,
-jdavis,jacob davis,no-corroboration,,
 jdecampos,jackson de campos,no-corroboration,,
 jeast,josh east,no-match,,
 jedwards,jonathan edwards,no-corroboration,,
-jerb,jonah erb,no-corroboration,,
-jfaries,jordan faries,no-match,,
 jfeagens,jayden feagens,no-match,,
 jfelton,jake felton,no-match,,
-jfranklin,james franklin,no-match,,
-jfroude,jay froude,ambiguous,johnny bravo,city:colorado jersey:2 years:5
+jgalle,jack galle,ambiguous,i-69,city:indianapolis jersey:38 years:1
 jgenest,joseph genest,no-match,,
-jgiard,jeremie giard,no-match,,
-jgraham,jeff graham,no-corroboration,,
-jhallett,jon hallett,no-match,,
 jhartzog,josh hartzog,no-match,,
-jhenry,jackson henry,no-corroboration,,
-jhess,jeremy hess,ambiguous,truck stop,jersey:3 years:2
-jhighsmit,james highsmith,no-match,,
-jhill1,jordan hill,no-corroboration,,
+jhill1,jordan hill,ambiguous,freaks,jersey:27
 jholm,jeff holm,no-match,,
-jhuang,john huang,no-match,,
 jhuppert,joey huppert,no-match,,
-jisaza,javier isaza,no-match,,
-jjahnke,jacob jahnke,no-corroboration,,
-jjeffery,jordan jeffery,no-match,,
-jjones,john jones,ambiguous,colonels,jersey:85 years:1
+jisaza,javier isaza,no-corroboration,,
+jjones,john jones,ambiguous,spectre,city:indianapolis jersey:85 years:2
 jkarl,jim karl,no-match,,
-jkautz,josh kautz,ambiguous,mallard,years:2
+jkelly,jack kelly,ambiguous,noise,city:madison jersey:77 years:4
 jkelly1,jerry kelly,no-match,,
-jkeusch,jeremy keusch,ambiguous,indiana (hoosiermama?s),jersey:21 years:3
-jkinzel,jay kinzel,no-match,,
-jkittlese,james kittlesen,no-match,,
-jkrebs,jolie krebs,no-match,,
+jkennedy,joey kennedy,ambiguous,chicago machine,city:chicago years:1
+jlane,jacob lane,ambiguous,uproar,city:tampa bay jersey:22 years:2
 jlee,jonathan lee,ambiguous,rhino slam!,city:portland jersey:22 years:1
-jlee2,jason lee,no-match,,
+jlee2,jason lee,ambiguous,anti socal socal club,years:1
 jlewis,james lewis,ambiguous,goat,city:toronto jersey:9 years:3
 jlim,justin lim,no-match,,
-jluo,justin luo,no-corroboration,,
 jlyder,josh lyder,no-match,,
-jlyle,jonathan lyle,no-match,,
-jmalenfan,jonah malenfant,no-match,,
 jmarkette,josh markette,ambiguous,dig,city:boston jersey:99 years:1
+jmast,jonathan mast,ambiguous,pittsburgh temper,city:pittsburgh jersey:2 years:1
+jmcguines,jackson mcguiness,no-match,,
 jmcguinne,jimmy mcguinness,no-match,,
 jmckee,jackson mckee,no-corroboration,,
-jmckeen,jason mckeen,no-corroboration,,
 jmckoy,jonny mckoy,no-match,,
-jmclaughl,jade mclaughlin,no-match,,
 jmcmoniga,john mcmonigal,no-match,,
 jmerrill,joe merrill,no-match,,
 jmillage,jamie millage,no-match,,
-jmiller,jacob miller,ambiguous,southern hospitality,jersey:0 years:1
-jmorris,josh morris,no-match,,
+jmiller,jacob miller,ambiguous,southern hospitality,jersey:0 years:2
+jmoore1,josh moore,ambiguous,rhino slam!,city:portland jersey:12 years:2
+jmorris,josh morris,no-corroboration,,
 jmorris1,jon morris,no-match,,
-jmouw,jacob mouw,no-match,,
-jmurray,jake murray,no-match,,
-jnelson,jack nelson,ambiguous,mad men,city:madison jersey:29 years:4
-jnethercu,jonathan nethercutt,ambiguous,johnny bravo,city:colorado jersey:7 years:2
-jnorden,justin norden,no-match,,
-jnorden1,jeremy norden,no-match,,
+jnelson,jack nelson,ambiguous,mad men,city:madison jersey:29 years:5
+jnorden,justin norden,no-corroboration,,
 joconnell1,jimi oconnell,no-match,,
 jouellett,joe ouellette,no-match,,
+jpardo,james pardo,ambiguous,colt,jersey:40 years:1
 jpollard,james pollard,ambiguous,phoenix f.c.,city:philadelphia jersey:17 years:1
 jraatz,jake raatz,no-match,,
 jradack,jake radack,no-match,,
-jrapisura,june rapisura,no-match,,
 jreinhard,jake reinhardt,ambiguous,gamble,city:dallas jersey:7 years:2
-jrhyne,jordan rhyne,no-match,,
 jrichards,joe richards,no-corroboration,,
 jrobinson,jeffrey robinson,no-match,,
-jsalazar,jordan salazar,ambiguous,alamode,jersey:24 years:2
-jschubert,jeffery schubert,no-match,,
-jshorey,james shorey,ambiguous,seven out,
+jsifakis,joe sifakis,no-match,,
+jsillivan,jonathan sillivant,ambiguous,space force,years:1
 jsilverma,jeffrey silverman,no-match,,
 jsimpson,joseph simpson,no-match,,
-jsmith2,jordan smith,ambiguous,souf,city:seattle years:3
+jsmith,jacob smith,ambiguous,revolver,jersey:12 years:1
+jsmith2,jordan smith,ambiguous,washington (sundodgers),city:seattle years:2
 jsogno,joe sogno,no-match,,
 jspratt,jordan spratt,no-corroboration,,
-jstearns,jackson stearns,no-match,,
 jsteen,jake steen,no-match,,
-jszmanda,jan szmanda,no-match,,
+jszmanda,jan szmanda,no-corroboration,,
 jtalerman,jay talerman,no-match,,
-jtaylor,jordan taylor,ambiguous,sub zero,jersey:11;5 years:3
-jtaylor1,jake taylor,no-match,,
+jtaylor,jordan taylor,ambiguous,h.i.p,city:houston years:4
 jtaylor2,jonah taylor,no-corroboration,,
-jthompson,joe thompson,no-match,,
-jtschida,jason tschida,no-corroboration,,
+jtaylor3,jordan taylor,ambiguous,h.i.p,city:houston
+jthachet,joe thachet,no-match,,
+jthompson,joe thompson,no-corroboration,,
 jturcotte,jake turcotte,no-match,,
-jturner,josh turner,no-match,,
-jverzuh,jack verzuh,no-match,,
 jvicek,jackson vicek,no-match,,
 jweis,jeff weis,no-match,,
-jwham,jacob wham,ambiguous,wisconsin (hodags),city:madison jersey:12 years:2
-jwilson,joshua wilson,ambiguous,yogosbo,city:madison jersey:9 years:1
-jwinn,justin winn,no-match,,
-jwodatch,john wodatch,no-match,,
+jwilson,joshua wilson,ambiguous,mad udderburn,city:madison jersey:9 years:2
+jwinn,justin winn,no-corroboration,,
 jwylie,joey wylie,no-match,,
-jyaez,javier yañez,no-match,,
-jyanez,javier yanez,no-match,,
-jyant,jacob yant,no-match,,
-jzdrodows,joshua zdrodowski,no-match,,
+jyant,jacob yant,no-corroboration,,
 jzhou,jeff zhou,no-match,,
 jzuraw,jimmy zuraw,no-match,,
-kadams,ken adams,ambiguous,mad men,city:madison jersey:10;15 years:2
-kallen,kiron allen,no-match,,
-kbauer,kolbe bauer,ambiguous,texas (tuff),city:austin years:1
-kblaeuer,kyle blaeuer,no-match,,
-kcharnock,kieran charnock,no-match,,
-kchristia,kevin christian,no-match,,
-kdeangeli,kevin deangelis,ambiguous,stl lounar,jersey:16
-kdelorenz,kai delorenzo,ambiguous,mad men,city:madison jersey:1;14 years:2
-kdreger,kyle dreger,ambiguous,mad men,city:madison years:1
-kelsalaam,khalif el-salaam,no-match,,
-kgibson,kurt gibson,no-corroboration,,
-kgroulx,kevin groulx,no-match,,
-khelton,kaela helton,no-match,,
-kherrera,kevin herrera,no-match,,
-khunter,kyle hunter,no-match,,
-kjohnson,kyle johnson,ambiguous,hooch,years:1
-kjohnson1,kristian johnson,ambiguous,sub zero,jersey:15 years:4
-kjohnson3,kevin johnson,ambiguous,lotus,
-kkhoroujn,kyra khoroujnikova,no-match,,
+kbrown,kevin brown,ambiguous,madison club,city:madison jersey:92
+kchao,kevin chao,no-corroboration,,
+kdelorenz,kai delorenzo,ambiguous,zoboomafoo,city:madison jersey:14 years:1
+kfarrell,kevin farrell,ambiguous,sawtooth,jersey:36 years:1
+kjohnson,kyle johnson,ambiguous,mischief,jersey:16 years:3
 kkoo,kj koo,no-match,,
-kmarshall1,keven marshall,no-match,,
-kmccracke,kobi mccracken,ambiguous,socal condors,jersey:28 years:1
+kmarshall1,keven marshall,no-corroboration,,
 kmirabale,kevin mirabal-evans,no-match,,
-kmorris,kade morris,ambiguous,riverside,city:austin jersey:45 years:1
-kpettitsc,kevin pettit-scantling,ambiguous,la raid s.c.,city:madison jersey:80 years:1
-kponzio,kuochuan ponzio,ambiguous,rhino slam!,city:portland years:2
-kshin,kunwoo shin,no-corroboration,,
-ksmart,kodi smart,no-match,,
-ksuelflow,kyle suelflow,no-corroboration,,
+kobrien,kevin obrien,ambiguous,league of shadows,jersey:51
+kpignone,kevin pignone,ambiguous,north carolina (darkside),jersey:51 years:2
+kponzio,kuochuan ponzio,ambiguous,rhino slam!,city:portland jersey:23 years:2
+kstevens,kyle stevens,no-corroboration,,
 ktaylor,kennith taylor,no-match,,
-kvezina,kyle vezina,no-match,,
 kwells,ken wells,no-match,,
-lcomire,luc comire,ambiguous,goat,city:toronto jersey:15;5 years:4
-ldecter,leo decter,no-corroboration,,
 ldufour,logan dufour,no-corroboration,,
-levans,landon evans,ambiguous,haymaker,years:1
 lford,liv ford,no-match,,
-lgivol,lior givol,no-match,,
-lgordon,leo gordon,ambiguous,revolver,jersey:47 years:1
-lgovedic,luka govedic,ambiguous,lantern,city:boston jersey:99
-lhuffman,luke huffman,ambiguous,raleigh-durham united,jersey:34 years:1
-ljay,liam jay,ambiguous,california-santa cruz (slugs),
-lkinney,logan kinney,no-match,,
-llavoie,landon lavoie,ambiguous,team canada open,jersey:21 years:1
-llohre,lisi lohre,no-match,,
-lmonteneg,lina montenegro,no-match,,
-lmorse,linda morse,no-match,,
-lolson,lyra olson,no-match,,
+lolson,lyra olson,ambiguous,brunch club,jersey:3 years:1
 lpepper,leo pepper,no-match,,
-lpruess,logan pruess,no-match,,
 lramirez,leander ramirez,no-match,,
 lsearlesb,liam searles bohs,no-match,,
-lthomas,luke thomas,ambiguous,alliance,jersey:23 years:1
-lwarren,leo warren,no-corroboration,,
-madams,marty adams,no-match,,
-magee,mathieu agee,ambiguous,johnny bravo,city:colorado jersey:24 years:3
 marcata,mike arcata,no-match,,
-maugersem,malik auger-semmar,ambiguous,mephisto,city:montreal jersey:71 years:1
 mayad,max ayad,no-match,,
 mbarcello,matt barcellos,no-match,,
 mbartley,matthew bartley,no-match,,
 mbecich,mike becich,no-match,,
-mbenjemaa,munir ben jemaa,ambiguous,florida (florida),years:1
 mbennett1,matt bennett,no-match,,
-mblaha,mitchell blaha,ambiguous,vault,jersey:34
-mbrisbois,michael brisbois,no-match,,
+mblaha,mitchell blaha,ambiguous,foggy bottom boys,jersey:34 years:1
 mbristol,matthew bristol,no-match,,
+mbrouwer,maarten brouwer,no-match,,
 mburke1,matthew burke,no-match,,
 mcampanel,mike campanella,no-match,,
-mcarpente,max carpenter,no-corroboration,,
-mcrawford,matthew crawford,no-match,,
-mcrawford1,marshall crawford,no-match,,
+mchambers,matt chambers,ambiguous,texas (tuff),city:austin jersey:35 years:3
+mcoe,maxwell coe,no-match,,
 mcruz,martin cruz,no-match,,
 mdehnbost,michael dehnbostel,no-match,,
 mdevine,max devine,no-match,,
-mdewey,marco dewey,ambiguous,mutiny,years:1
-mdinges,marshall dinges,no-match,,
-mdonohue,mark donohue,ambiguous,diy,city:boston years:1
-mdregni,marco dregni,ambiguous,mallard,jersey:22 years:2
+mdewey,marco dewey,ambiguous,the incline,years:1
 mdrost,mike drost,no-match,,
-mdunn,melissa dunn,no-match,,
 mellis,matt ellis,no-match,,
+mevans,mark evans,ambiguous,doublewide,city:austin years:2
 mfinke,michael finke,no-match,,
 mfredrick,matthew fredrickson,no-match,,
-mfreystae,mischa freystaetter,no-match,,
+mfreystae,mischa freystaetter,no-corroboration,,
 mgaleano,mauricio galeano,no-match,,
-mgallant,martin gallant,ambiguous,phoenix,city:ottawa jersey:33 years:2
-mgiere,michael giere,no-match,,
-mglazer,matthew glazer,no-match,,
-mgoderre,miguel goderre,no-match,,
+mgiere,michael giere,no-corroboration,,
 mgoetsch,matt goetsch,no-match,,
 mgrinde,matt grinde,no-match,,
 mgrove,max grove,no-match,,
+mgrovic,miles grovic,ambiguous,maryland (maryland ultimate),jersey:37 years:4
 mhamilton,max hamilton,no-match,,
 mhanna,matt hanna,no-match,,
-mhayes,michael hayes,no-corroboration,,
-mhead,madison head,no-corroboration,,
-mhecht,mac hecht,ambiguous,dig,jersey:74 years:1
-mhlavaty,michael hlavaty,ambiguous,chicago machine,city:chicago years:1
 mhudspith,matt hudspith,no-match,,
-mjaffe,matt jaffe,no-match,,
-mjamison,matt jamison,ambiguous,bonneville flatball club,jersey:32 years:1
-mjarriel,megan jarriel,no-match,,
-mjohnson2,michael johnson,ambiguous,dickinson (junkyard turkeys),years:1
-mjudeh,mohammed judeh,ambiguous,uproar,city:tampa bay
+mjohnson,matthew johnson,ambiguous,blueprint,years:2
+mjohnson2,michael johnson,ambiguous,berry (bucks),years:1
 mkammerma,max kammerman,no-match,,
 mkishi,matt kishi,no-match,,
-mkissmann,matthew kissmann,no-match,,
-mle,martin le,ambiguous,washington (sundodgers),city:seattle jersey:0 years:2
-mlee1,michael lee,ambiguous,ring of fire,jersey:24 years:2
+mlee1,michael lee,ambiguous,toro,jersey:24 years:2
+mlee2,marcus lee,ambiguous,truck stop,jersey:28 years:1
 mlemaitre,matt lemaitre,no-match,,
 mlemar,matt lemar,no-match,,
-mlittle,mat little,no-match,,
 mlopez,max lopez,no-match,,
 mlutz,mitch lutz,no-match,,
-mlyle,matt lyle,no-match,,
 mmackenzi,mike mackenzie,no-match,,
-mmaroon,michael maroon,ambiguous,phantom,city:philadelphia years:1
-mmastroma,mazden mastromauro,no-match,,
-mmattimor,maketa mattimore,no-match,,
 mmccarthy,mitchell mccarthy,no-match,,
-mmcclella,mac mcclellan,no-match,,
 mmcdonald,matt mcdonald,no-match,,
 mmcdonnel,rowan mcdonnell,no-match,,
-mmiller2,mike miller,no-match,,
-mmoran,mario moran,ambiguous,chicago dart frogs,jersey:10 years:1
+mmiller1,matt miller,ambiguous,socal condors,jersey:2;20 years:5
 mmoranrub,mario moran rubiano,no-match,,
 mmunoz,marc munoz,no-match,,
-mnighting,matthew nightingale,ambiguous,north carolina-charlotte (charlotte skyrise),jersey:0 years:2
-mntende,michael ntende,no-match,,
+mntende,michael ntende,no-corroboration,,
 mobrien2,mikey obrien,no-match,,
 mpannone,mike pannone,no-match,,
-mpardo,michael pardo,no-match,,
 mpetersen,michael petersen,no-match,,
-mrick,maxwell rick,no-match,,
-mrivas,milan rivas,ambiguous,haymaker,city:chicago jersey:27 years:2
 mrovner,marc rovner,no-match,,
 mrussnogl,matt russnogle,no-match,,
 msample,max sample,no-match,,
 msanchez,marcelo sanchez,no-match,,
-mscott,mo scott,no-match,,
-msnead,michael snead,no-corroboration,,
+msquires,max squires,no-corroboration,,
 mstevens,matt stevens,no-match,,
-mtheologi,matt theologidy,no-match,,
+mtheologi,matt theologidy,no-corroboration,,
 mtran1,max tran,no-match,,
-mturner,mark turner,no-match,,
+muran,matt uran,no-match,,
 mviscido,matt viscido,no-match,,
-mwagner,micah wagner,no-corroboration,,
 mwalsh,mickey walsh,no-match,,
 mweintrau,matt weintraub,no-match,,
-mwhitton,mark whitton,no-match,,
-mwilbur,morgan wilbur,no-match,,
-mwildmann,marshall wildmann,ambiguous,ucla (smaug),years:1
-mwilken,matt wilken,no-corroboration,,
-mwilliams,max williams,ambiguous,zyzzyva,jersey:87 years:3
+mwilliams,max williams,ambiguous,california (california-berkeley),jersey:87 years:2
+mwilson,matthew wilson,ambiguous,toro,jersey:34 years:1
+mwitkam,morris witkam,no-match,,
 nakers,nicholas akers,no-match,,
 nastrom,nate astrom,no-match,,
-naugust,nate august,no-match,,
-nbacker,noah backer,ambiguous,dig,city:boston jersey:5 years:2
-nboddy,nate boddy,ambiguous,streetgang,
-nbridges,nathan bridges,no-match,,
-nceluch,noah celuch,ambiguous,hazard,city:pittsburgh jersey:5 years:1
-nchampoux,nathan champoux,no-match,,
 nchaouch,nabil chaouch,no-match,,
-ndanduran,nathan dandurand,no-match,,
 ndick,nathanial dick,no-match,,
 ndunbar,nicholas dunbar,no-corroboration,,
 ngagnon,nicolas gagnon,no-match,,
 ngoff,nate goff,no-match,,
-nhanson,noah hanson,ambiguous,sub zero,jersey:4 years:4
 nhuffman,nick huffman,no-match,,
 nhutton,nick hutton,no-match,,
 nknutson,nate knutson,no-match,,
 nlanas,nic lanas,no-match,,
-nlongo,nick longo,no-match,,
-nlyle,nathan lyle,no-corroboration,,
 nmachak,nate machak,no-match,,
-nmahan,nick mahan,no-match,,
-nminfink,nanda min-fink,ambiguous,johnny bravo,city:colorado jersey:46 years:2
 nnagel,nick nagel,no-match,,
-nnicol,noah nicol,ambiguous,wisconsin (hodags),city:madison jersey:28 years:2
+nneid,nick neid,no-match,,
 npappas,nick pappas,no-match,,
 npettyjoh,nate pettyjohn,no-match,,
-nranabhat,nico ranabhat,ambiguous,wisconsin (hodags),city:madison jersey:19 years:4
+nphillips,nick phillips,ambiguous,flash flood,jersey:25 years:1
 nransom,nate ransom,no-match,,
 nredmond,nick redmond,no-match,,
-nrobinson,noah robinson,no-match,,
-nschmalen,nolan schmalenberger,no-match,,
-nsharma,nirek sharma,no-match,,
-nsnuszka,nicholas snuszka,ambiguous,almostimate,jersey:52
+nrobinson,noah robinson,ambiguous,pittsburgh (en sabah nur),city:pittsburgh jersey:21
+nsnuszka,nicholas snuszka,ambiguous,shame.,jersey:52 years:3
 nthompson,nick thompson,no-match,,
-nto,noriaki to,ambiguous,makawua,jersey:27 years:1
 nvogt,nick vogt,no-match,,
-nwilson,natalie wilson,no-match,,
+nwhitlock,nicholas whitlock,no-match,,
+nwilliams,nathan williams,ambiguous,bullet train,jersey:79 years:1
+nwilson,natalie wilson,ambiguous,weird,jersey:96
 nwipfler,nate wipfler,no-match,,
-ocable,orion cable,ambiguous,dig,city:boston jersey:27 years:5
-ochartock,oliver chartock,no-match,,
-ocordes,owen cordes,ambiguous,northeastern (huskies),city:boston years:1
+ofay,oliver fay,ambiguous,doublewide,city:austin jersey:41 years:2
 ofreed,owen freed,no-match,,
-ograff,oscar graff,ambiguous,dig,city:boston years:3
-opoissant,owen poissant,ambiguous,portland tremor,years:1
-orobinson,owen robinson,ambiguous,goat,city:toronto jersey:27 years:2
-oshaff,owen shaff,no-match,,
-osmith,owen smith,ambiguous,lil heroes,city:austin jersey:5 years:1
-ostonehou,oscar stonehouse,ambiguous,goat,city:toronto jersey:8 years:1
-owoodward,owen woodward,ambiguous,i-69,city:indianapolis years:1
-papplegat,paige applegate,no-match,,
+omccall,ollie mccall,no-match,,
+orobinson,owen robinson,ambiguous,goat,city:toronto jersey:27 years:3
+oshaff,owen shaff,no-corroboration,,
+osmith,owen smith,ambiguous,texas (tuff),city:austin jersey:5 years:1
 pbarron,pat barron,no-match,,
-pbisson,philippe bisson,no-match,,
-pboerth,peter boerth,ambiguous,dig,city:boston years:3
 pchang,phil chang,no-match,,
-pgagnon,philippe gagnon,no-corroboration,,
-pgeertzla,peter geertz-larson,no-match,,
-phoward,parker howard,ambiguous,sockeye,city:seattle years:1
-preimers,pablo reimers,no-match,,
+pdoughert,patrick dougherty,ambiguous,dirty bird,city:atlanta
+pearles,pat earles,no-match,,
+pjohnson,peter johnson,ambiguous,washington (sundodgers),city:seattle jersey:27 years:2
+plavallee,pat lavallee,no-match,,
 pschock,peyton schock,no-corroboration,,
-pshering,pavel shering,ambiguous,zyzzyva,jersey:27 years:1
 pshriwise,pat shriwise,no-match,,
-pstarkel,paul starkel,no-match,,
 pturner,phil turner,no-match,,
 pwu,penny wu,no-match,,
 pzaccardi,pete zaccardi,no-match,,
-qbergeron,quinn bergeron,no-match,,
-qfiner,quinn finer,ambiguous,johnny bravo,city:colorado jersey:88 years:4
-qsnider,quinn snider,ambiguous,general strike,jersey:98 years:1
-radkins,raekwon adkins,ambiguous,smoak (u20),city:oakland years:1
-rallenson,ryan allenson,ambiguous,iso atmo,years:1
-ralongi,robert alongi,no-corroboration,,
-rbrowning,reed browning,ambiguous,shrimp,city:salt lake jersey:33 years:1
-rcopemusl,ramzi cope-musleh,no-match,,
+qbergeron,quinn bergeron,no-corroboration,,
+qgarner,quinn garner,ambiguous,north carolina-wilmington (seamen),jersey:19 years:1
+rcopemusl,ramzi cope-musleh,ambiguous,raleigh-durham united,jersey:13 years:2
 rdavenpor1,robby davenport,no-match,,
-rdrost,ryan drost,no-match,,
+rdavenpor2,robert davenport,ambiguous,colonels,jersey:90 years:1
+rdinger,ryan dinger,ambiguous,dig,city:boston jersey:12 years:2
 relston,robert elston,no-match,,
-rfennig,robyn fennig,no-match,,
-rflamberg,ryan flamberg,no-match,,
-rgouldrod,rodrigo gould rodriguez,ambiguous,fungi,jersey:10 years:1
 rhayes,raphy hayes,no-match,,
 rhennigha,rick hennighausen,no-match,,
 rhumphrey,ryan humphrey,no-match,,
-rjones,robert jones,no-corroboration,,
-rkamrat,raina kamrat,no-match,,
-rlacy,ryan lacy,no-match,,
-rlewis,robert lewis,ambiguous,lil heroes,city:austin years:1
+rkatsuta,ryoma katsuta,no-corroboration,,
+rlee1,ryan lee,ambiguous,pennsylvania (void),years:1
+rlewis,robert lewis,ambiguous,doublewide,city:austin years:2
 rlinehan,rocco linehan,no-match,,
-rmartin,reid martin,ambiguous,beachfront property,city:chicago jersey:13 years:1
-rmast,rachel mast,no-match,,
 rmccabe,robby mccabe,no-match,,
+rmcleod,ricky mcleod,no-match,,
 rmendoza,ray mendoza,no-match,,
-rmenon,rudra menon,no-match,,
-rntende,ryan ntende,no-match,,
 rodum,robby odum,no-match,,
 rpalazzo,ray palazzo,no-match,,
-rpurcell,ryan purcell,no-match,,
 rrabut,russell rabut,no-match,,
-rramirez,ricky ramirez,ambiguous,trident i,city:chicago jersey:20 years:2
-rrosenfel,raul rosenfeld,no-match,,
-rsalvas,raphael salvas,ambiguous,mephisto,city:montreal jersey:15 years:4
-rshigley,ryan shigley,ambiguous,sockeye,city:seattle jersey:6 years:1
-rsmith4,ryan smith,ambiguous,georgia southern (eagles),years:1
-rsturm,ryan sturm,no-match,,
-rtakayama,ryan takayama,no-corroboration,,
+rsmith4,ryan smith,ambiguous,black market,years:1
 rtetreaul,ray tetreault,no-match,,
 rtirner,ryan tirner,no-match,,
-rturner,ryan turner,no-match,,
-rwartenbe,ryan wartenberg,ambiguous,colonels,jersey:99 years:1
-rwolfe,ryan wolfe,ambiguous,portland tremor,jersey:81;9 years:1
 rye,ruo ye,no-match,,
-ryeagle,robert yeagle,no-match,,
-sbatson,sam batson,no-corroboration,,
-sberglund,sam berglund,no-match,,
+sastrom,sam astrom,no-match,,
 sbesse,sam besse,no-match,,
 sbisson,samuel bisson,no-match,,
-sbontemps,sofiène bontemps,no-match,,
-scarapell,simon carapella,ambiguous,dig,city:boston jersey:2;9 years:3
-schang,steven chang,no-match,,
-schoi,sun choi,no-match,,
+sdavidson1,shannon davidson,no-match,,
+sdillon,spencer dillon,no-corroboration,,
 sdistrup,simon distrup,no-match,,
-searley,shane earley,no-match,,
-sfaris,seth faris,ambiguous,johnny bravo,city:colorado jersey:11 years:3
 sfeder,sam feder,no-match,,
 sfontaine,sam fontaine,no-match,,
-sfrankste,sasha frank-stempel,ambiguous,puzzles,city:dc years:1
-sgainer,sam gainer,no-match,,
 sgasperin,simone gasperini,no-match,,
-sgoldstei,sam goldstein,ambiguous,colorado state (hibida),years:1
 sgood,sam good,no-match,,
 sgordonko,sam gordon-koven,no-corroboration,,
-sgrondin,stephen grondin,no-match,,
 sharringt,sam harrington,no-match,,
-shebert,sam hebert,ambiguous,mad men,city:madison jersey:12 years:1
-sishii,satoru ishii,no-match,,
-sjeziersk,sadie jezierski,no-match,,
+sheslep,sam heslep,no-match,,
 skapalan,sam kapalan,no-match,,
-smccrory,samuel mccrory,no-corroboration,,
-smcguinne,sean mcguinness,no-match,,
+skilgore,samuel kilgore,no-match,,
 smegerssa,solan megerssa,no-match,,
 smogielsk,steve mogielski,no-match,,
-smolitern,steven moliterno,no-match,,
-smondsche,sarah mondschein,no-match,,
-snaji,steven naji,no-match,,
-spalchuru,saaketh palchuru,ambiguous,doublewide,city:austin jersey:0 years:1
-spew,sam pew,no-match,,
-splasman,sam plasman,no-match,,
+smorrall,sam morrall,no-match,,
+smunnis,sam munnis,no-match,,
 spoitteso,sacha poitte-sokolsky,no-corroboration,,
-spoulos,stephen poulos,ambiguous,uproar,city:tampa bay years:1
-sreischel,sean reischel,no-match,,
-srueschem,solomon rueschemeyer-bailey,ambiguous,dig,jersey:9 years:3
-ssih,spencer sih,ambiguous,california-irvine (nightlife),
-ssisco,shane sisco,no-corroboration,,
 sstark,sam stark,no-match,,
-sswafford,skyler swafford,ambiguous,tennessee folklore,jersey:40 years:1
 stagle,sam tagle,no-match,,
-svankan,sef van kan,ambiguous,mad men,city:madison years:1
+streacy,sean treacy,ambiguous,mad men,city:madison jersey:17 years:1
 svogel,sascha vogel,no-match,,
 sward,sam ward,no-match,,
 swarrick,sam warrick,no-match,,
-sweaver,seth weaver,ambiguous,raleigh-durham united,city:raleigh jersey:4 years:1
-swildavsk,saul wildavsky,no-match,,
 syanuck,sol yanuck,no-match,,
-tabeltins,toms abeltins,ambiguous,goat,city:toronto years:1
-tadams1,trip adams,no-match,,
-tallen1,turner allen,ambiguous,dig,city:boston years:4
-tannen,tom annen,no-match,,
-tbacon,tyler bacon,no-match,,
 tbalfour,tevor balfour,no-match,,
-tbarcus,tanner barcus,no-match,,
 tbarnett,ted barnett,no-match,,
-tcarpente,travis carpenter,ambiguous,i-69,city:indianapolis years:1
-tcoolidge,thomas coolidge,no-match,,
-tdavis,topher davis,ambiguous,dig,city:boston years:3
-tdegirola,tyler degirolamo,no-match,,
-tedmonds,thomas edmonds,ambiguous,pittsburgh temper,city:pittsburgh jersey:8 years:2
-telam,trevor elam,ambiguous,doublewide,city:austin years:1
-telliott,timothy elliott,ambiguous,johnny bravo,city:colorado jersey:14 years:1
-temig,tyler emig,no-corroboration,,
-tfrench,tyler french,no-match,,
+tbrewster,thomas brewster,ambiguous,johnny bravo,city:colorado jersey:22 years:1
 tgallaghe,tommy gallagher,no-match,,
 tgesell,tanner gesell,no-match,,
-tgilman,taylor gilman,no-corroboration,,
 tgoss,tony goss,no-match,,
-tgraham,tanner graham,ambiguous,colonels,jersey:28 years:2
-tgreen,tristan green,no-corroboration,,
-tgriesman,trevor griesman,ambiguous,phantom,city:philadelphia jersey:16 years:1
-tgunaseke,tyler gunasekera,no-corroboration,,
-thawks,trevor hawks,no-match,,
-thedges,tannon hedges,ambiguous,chain lightning,city:atlanta jersey:19 years:4
+thobday,tom hobday,no-corroboration,,
 thodge,tre hodge,no-match,,
 tjohnson1,tannor johnson-go,no-match,,
 tkalmus,tucker kalmus,no-match,,
-tleighton,tavis leighton,no-match,,
 tli,tommy li,no-match,,
-tlin,tommy lin,no-match,,
 tlopez,tony lopez,no-match,,
 tloria,thomas loria,no-match,,
-tmackey,tyler mackey,no-corroboration,,
 tmaguire,thomas maguire,no-match,,
 tmartin,tj martin,no-match,,
-tmasterso,taylor masterson,ambiguous,doublewide,city:austin jersey:22 years:1
 tmcgowan,teddy mcgowan,no-match,,
-tmiller,tremont miller,no-match,,
-tmosher,timothy mosher,ambiguous,doublewide,city:austin jersey:16 years:1
 tmounga,tony mounga,no-match,,
 tmurt,tyler murt,no-match,,
-tnaquin,ty naquin,ambiguous,raleigh-durham united,jersey:28 years:1
-tnye,thomas nye,no-corroboration,,
 tpoletto,tony poletto,no-match,,
-tpratt,travis pratt,no-corroboration,,
 tpredmore,tim predmore,no-match,,
-tpurdy,trevor purdy,no-match,,
-trepasky,tanner repasky,no-match,,
-tschoch,tim schoch,no-match,,
-tscott,trevor scott,ambiguous,haymaker,city:chicago years:1
+trepasky,tanner repasky,no-corroboration,,
 tsither,ted sither,no-match,,
-tslack,thomas slack,no-match,,
-ttaylor,trey taylor,no-corroboration,,
 ttrompete,tommy trompeter,no-match,,
-tward,thalia ward,no-match,,
-twilliams1,tyler williams,ambiguous,yogosbo,city:madison
-twolma,todd wolma,ambiguous,johnny bravo,city:colorado jersey:35 years:1
+tverlaan,terrence-jaden verlaan,no-match,,
+twilliams1,tyler williams,ambiguous,noise,city:madison years:1
 vgamache,vincent gamache,no-match,,
-vmader,vance mader,ambiguous,texas united,city:austin years:1
 vpost,val post,no-match,,
 vwu,victor wu,no-corroboration,,
-vzhou,victor zhou,no-match,,
 wbianca,will bianca,no-match,,
 wbrandt,william brandt,no-match,,
-wjohnson1,walt johnson,ambiguous,colorado (mamabird),jersey:83 years:2
-wkasprzyc,walter kasprzycki,no-match,,
 wlewis,wilkie lewis,no-match,,
 wlindquis,will lindquist,no-match,,
-wlu,wayne lu,no-corroboration,,
 wmcglynn1,will mcglynn,no-match,,
-wmekler,wyatt mekler,no-corroboration,,
-wmiaw,wesley miaw,no-match,,
-wquigley,will quigley,ambiguous,colonels,jersey:99 years:1
-wsaxen,willie saxen,no-match,,
 wstewart,willie stewart,no-match,,
 wtober,william tober,no-match,,
 wturner1,will turner,no-corroboration,,
-wwettenge,william wettengel,ambiguous,chicago machine,city:chicago jersey:77 years:2
-xmaxstadt,xavier maxstadt,ambiguous,oak grove boys,jersey:80
-zarmstron,zachary armstrong,ambiguous,mephisto,years:1
+wwettenge,william wettengel,ambiguous,chicago machine,city:chicago jersey:77 years:3
 zbraun,zach braun,no-match,,
 zburnside,zach burnside,no-match,,
-zburpee,zachary burpee,ambiguous,pony,city:new york jersey:0 years:1
-zcole,zachary cole,no-corroboration,,
-zheiden,zach heiden,ambiguous,portland tremor,years:1
-zmarbach,zach marbach,no-match,,
-zmassi,zakarie massi,no-match,,
+zguerrieo,zach guerrieo,no-match,,
+zmarbach,zach marbach,no-corroboration,,
 znorrbom,zach norrbom,no-match,,
-zraunig,zeppelin raunig,ambiguous,sockeye,city:seattle jersey:30 years:2
 zschakner,zac schakner,no-match,,
 zslayton,zach slayton,no-match,,
-zthoreson,zeke thoreson,ambiguous,johnny bravo,city:colorado jersey:1 years:1
+zsmith,zack smith,ambiguous,emerald city,city:seattle jersey:97 years:1
 zturner,zachery turner,no-match,,

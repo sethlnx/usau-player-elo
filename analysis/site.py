@@ -22,7 +22,6 @@ Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.
 
 import collections
 import hashlib
-import math
 import csv
 import json
 import re
@@ -100,8 +99,26 @@ GAME_GLOBAL = "__USAU_GAME__"
 MIN_GAMES = 30
 
 
-def load_ufa_payload(con, player_rows):
-    """Return current and historical UFA teams with linked player ratings."""
+def ufa_game_ratings(history):
+    """Return each UFA team's postgame Elo at the end of each season."""
+    events = history.get("events", [])
+    out = {}
+    for key, encoded in history.get("teams", {}).items():
+        if not key.startswith("ufa:"):
+            continue
+        event_index = 0
+        for delta, payload in zip(*encoded):
+            event_index += delta
+            if event_index >= len(events):
+                continue
+            event = events[event_index]
+            if len(event) > 3 and event[3] == DIVCODE["ufa"]:
+                out[(event[2], key[4:])] = payload[0]
+    return out
+
+
+def load_ufa_payload(con, player_rows, history):
+    """Return UFA seasons rated after each team's latest game."""
     try:
         links = resolve_links(con)
         teams = con.execute(
@@ -114,6 +131,7 @@ def load_ufa_payload(con, player_rows):
         ).fetchall()
     except sqlite3.OperationalError:
         return {}
+    game_ratings = ufa_game_ratings(history)
 
     by_team = collections.defaultdict(list)
     for upid, year, team, first, last in rosters:
@@ -130,19 +148,10 @@ def load_ufa_payload(con, player_rows):
         })
 
     out = collections.defaultdict(list)
-    tau = float(PUBLISHED.get("tau", 500.0))
     for team, year, city, full_name, wins, losses in teams:
         roster = by_team[(year, team)]
-        rated = sorted(
-            (p["elo"] for p in roster if p["elo"] is not None), reverse=True
-        )
-        used = rated[:20]
-        if used:
-            peak = used[0]
-            weights = [math.exp((rating - peak) / tau) for rating in used]
-            rating = sum(w * r for w, r in zip(weights, used)) / sum(weights)
-        else:
-            rating = None
+        rated = sum(p["elo"] is not None for p in roster)
+        rating = game_ratings.get((year, team))
         roster.sort(key=lambda p: (
             p["elo"] is None, -(p["elo"] or 0), p["name"].lower()))
         out[str(year)].append({
@@ -153,8 +162,7 @@ def load_ufa_payload(con, player_rows):
             "wins": wins or 0,
             "losses": losses or 0,
             "rating": round(rating, 1) if rating is not None else None,
-            "rated": len(rated),
-            "used": len(used),
+            "rated": rated,
             "roster": roster,
         })
     for rows in out.values():
@@ -213,9 +221,7 @@ def build():
     all_players = load_csv("player_elo.csv")
     total_rated = len(all_players)
     players = [r for r in all_players if int(r["games"]) >= MIN_GAMES]
-    ufa = load_ufa_payload(
-        con, {int(r["player_id"]): r for r in all_players}
-    )
+    ufa = None
     clubs = {
         "completed": load_csv("team_elo.csv"),
         "best": load_csv("team_elo_best.csv"),
@@ -229,6 +235,9 @@ def build():
     hist_path = DATA_DIR / "history.json"
     history = (json.loads(hist_path.read_text()) if hist_path.exists()
                else {"events": [], "players": {}, "teams": {}})
+    ufa = load_ufa_payload(
+        con, {int(r["player_id"]): r for r in all_players}, history
+    )
     asset_version = content_version((DB_PATH, hist_path))
 
     # Gender-matching group, decided in identity.resolve and carried on
@@ -1350,8 +1359,7 @@ function drawUfa() {
   $('#clubView').disabled = true;
   $('#h2hControl').hidden = true;
   $('#ufatb').innerHTML = rows.map(r => {
-    const rosterLabel = `${r.roster.length} listed · ${r.rated} linked · ` +
-      `top ${r.used} used`;
+    const rosterLabel = `${r.roster.length} listed · ${r.rated} linked`;
     return `<tr><td class="rk">${ranks.get(r.id)}</td><td>` +
       `<span class="nmlink" data-club="${esc(ufaKey(r))}">${esc(r.name)}</span> ` +
       `<span class="muted">${esc(r.city)}</span></td>` +
@@ -1368,9 +1376,9 @@ function drawUfa() {
   $('#ufanote').innerHTML =
     `UFA seasons ${years[years.length - 1]}–${latest}; ` +
     `${year === 'all' ? 'all seasons shown' : `showing ${year}`}. ` +
-    `Team Elo is the softmax-weighted current Elo of the highest 20 linked ` +
-    `players (or all linked players when a roster has fewer than 20). ` +
-    `Roster details and player ratings appear in the shared club detail panel.`;
+    `Team Elo is the rating after that team’s latest game in the selected ` +
+    `season. Roster details and current linked player ratings appear in the ` +
+    `shared club detail panel.`;
 }
 function drawClubs() {
   const ufa = String(DIVCODE_UFA) === $('#rdiv').value;
@@ -1749,7 +1757,6 @@ function ufaKey(row) {
 function installUfaHistory() {
   const all = D.ufa || {};
   const byKey = new Map();
-  const personIx = new Map();
   const years = Object.keys(all).sort((a, b) => +a - +b);
   for (const year of years) {
     for (const row of all[year]) {
@@ -1763,41 +1770,9 @@ function installUfaHistory() {
       group.byYear.set(+year, row);
       TK[ckey] = ckey;
       TN[ckey] = row.name;
-      const evIdx = HEV.length;
-      HEV.push([`${year}-09-01`, `${row.name} ${year}`, +year, DIVCODE_UFA]);
-      const ids = (row.roster || []).map(player => {
-        const person = player.pid
-          ? `pid:${player.pid}`
-          : `ufa:${row.id}:${player.name}`;
-        if (!personIx.has(person)) {
-          personIx.set(person, PEOPLE.length);
-          PEOPLE.push(player.name);
-          PPID.push(player.pid || '');
-        }
-        return personIx.get(person);
-      });
-      ROST[`${ckey}|${evIdx}`] = ids;
-      const rb = RBC[ckey] || {b: null, evs: [], has: new Set()};
-      rb.evs.push(evIdx); rb.has.add(evIdx); RBC[ckey] = rb;
-      const hist = H.teams[ckey] || [[], []];
-      const prev = hist[0].length ? evIdx - hist[0].reduce((a, d) => a + d, 0) : evIdx;
-      hist[0].push(prev);
-      hist[1].push([row.rating === null ? 0 : row.rating, row.roster.length]);
-      H.teams[ckey] = hist;
     }
   }
   UFA_BY_KEY = byKey;
-  SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
-  SIX = new Map(SEASONS.map((s, i) => [s, i]));
-  DEFYEAR = SEASONS.length - 1;
-  const ryear = $('#ryear');
-  if (ryear) {
-    const selected = ryear.value;
-    ryear.innerHTML = '<option value="all">All years</option>' +
-      [...SEASONS].reverse().map(y =>
-        `<option value="${y}">${y}</option>`).join('');
-    ryear.value = SEASONS.includes(+selected) ? selected : 'all';
-  }
 }
 
 /* ---------- lazy tiers ---------- */
@@ -2317,8 +2292,8 @@ function ufaRosterPane(ckey, season) {
     `</td><td class="n">${player.elo === null ? '—' : player.elo.toFixed(0)}</td>` +
     `</tr>`).join('');
   return `<p class="rsum">${roster.length} listed players · ${row.rated} linked ` +
-    `players, top ${row.used} used for the team Elo. Player ratings are current ` +
-    `linked Elo values for the ${season} UFA roster.</p>` +
+    `players. Team Elo comes from game results; these are current linked player ` +
+    `ratings for the ${season} UFA roster.</p>` +
     `<table class="hist"><thead><tr><th class="n">#</th><th>Player</th>` +
     `<th class="n">Elo</th></tr></thead><tbody>${body}</tbody></table>`;
 }
@@ -2351,7 +2326,7 @@ function rosterPane(ckey, season) {
     (r.linked
       ? `<span class="nmlink" data-pid="${esc(r.pid)}">${esc(r.name)}</span>`
       : `<span class="muted">${esc(r.name)}</span>`) +
-    `</td><td class="n" title="Elo after this player's last ${season} ` +
+    `</td><td class="n" title="Elo after this player’s last ` +
     `${div === 'all' ? 'event' : EDIVL[div] + ' event'}">` +
     `${r.loading ? '…' : r.elo === null ? '—' : r.elo.toFixed(0)}</td>` +
     `<td class="n">${r.ev}</td></tr>`).join('');
@@ -2504,10 +2479,13 @@ function openDetail(kind, key, opts) {
   $('#dbody').innerHTML =
     `<div class="dhead"><h2>${esc(title)}</h2>${pinHead}</div>` +
     `<div class="meta">${parts.join(' · ')}</div>` + chart(pts) +
-    `<p class="note" style="margin:0 0 14px">Each point is the rating after that ` +
-    `event — a weekend tournament is one step, not one point per game. ` +
-    `${pts.length} event${pts.length === 1 ? '' : 's'} on record; click one in ` +
-    `the table for the games behind it` +
+    `<p class="note" style="margin:0 0 14px">` +
+    (kind === 'c' && UFA_BY_KEY.has(ckey)
+      ? `Each point is the rating after one UFA game. ${pts.length} games on record; ` +
+        `click one in the table for its score`
+      : `Each point is the rating after that event — a weekend tournament is one ` +
+        `step, not one point per game. ${pts.length} event${pts.length === 1 ? '' : 's'} ` +
+        `on record; click one in the table for the games behind it`) +
     (kind === 'p'
       ? (IS_GLICKO
         ? ', which are the games of the club they turned out for. Glicko-2 updates ' +

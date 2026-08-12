@@ -1,237 +1,347 @@
 ufa_player_id,norm_name,club,n_evidence,evidence
 aarnstein,atkin arnstein,,3,city:colorado jersey:3 years:2
-aarsenaul1,alec arsenault,,2,city:ottawa years:1
-aatkins,alex atkins,,3,city:colorado jersey:0 years:4
+aarsenaul,andre arsenault,,1,city:montreal
+aarsenaul1,alec arsenault,,3,city:ottawa jersey:22 years:1
+aatkins,alex atkins,,3,city:colorado jersey:0 years:5
+aaucoin,arthur aucoin,,3,city:new york jersey:22 years:1
+abanerji,adrian banerji,,1,jersey:38
+abarcio,aaron barcio,,3,city:austin;houston jersey:3 years:3
+abarden,austin barden,,2,city:seattle years:2
 abelfiore,alexander belfiore,,2,city:seattle jersey:26
-abonnell,aage bonnell,,1,city:seattle
-abordelon,andre bordelon,,1,years:1
+abenton,alec benton,,2,jersey:32;7 years:2
+abonnell,aage bonnell,,3,city:seattle jersey:6 years:1
+abordelon,andre bordelon,,2,jersey:12 years:1
+aburgess,adam burgess,,3,city:pittsburgh jersey:10 years:1
+acameron,alex cameron,,2,city:ottawa jersey:86
+acarne,arthur carne,,2,city:madison years:1
 acarroll,andrew carroll,,2,city:toronto jersey:3
-acohen,andrew cohen,,2,city:tampa bay years:1
-acurry,aidan curry,,2,jersey:71 years:2
-adavis2,antoine davis,,3,city:atlanta;new york jersey:80;81 years:5
-adavis3,anthony davis,,3,city:pittsburgh jersey:10 years:2
-adavis4,alex davis,,1,years:3
-adowney,aidan downey,,2,city:atlanta years:3
-adriehuys,anil driehuys,,2,jersey:16 years:1
-adub,antoine dubé,,3,city:montreal jersey:26 years:3
+acisneros,adrian cisneros,,2,jersey:88 years:2
+acoble,aaron coble,,2,city:san diego years:2
+acurry,aidan curry,,2,jersey:71 years:3
+adavis2,antoine davis,,3,city:atlanta;new york jersey:80;81 years:6
+adavis5,abbie davis,,2,jersey:14 years:1
+adixon,allysha dixon,,1,years:1
+adowney,aidan downey,,2,city:atlanta years:4
+adriehuys,anil driehuys,,2,jersey:16 years:2
+adub,antoine dube,,3,city:montreal jersey:26 years:4
 afall,alexandre fall,,1,years:4
 afegert,ames fegert,,2,city:houston years:1
-afelt,aleksei felt,,1,years:1
-aforsberg,alex forsberg,,3,city:salt lake jersey:25 years:3
-againes1,austin gaines,,1,years:1
+afelt,aleksei felt,,2,jersey:1 years:1
+aforsberg,alex forsberg,,3,city:salt lake jersey:25 years:4
+againes1,austin gaines,,1,years:2
 agardner,andrew gardner,,2,city:pittsburgh jersey:44
 ageisel,andrew geisel,,1,years:1
+aghitterm,avi ghitterman,,1,years:1
 agolay,adrian golay,,1,years:1
-agordon,archer gordon,,2,jersey:23 years:1
+agordon,archer gordon,,2,jersey:23 years:2
+agould,austin gould,,2,jersey:28 years:1
 agrigolet,anthony grigoletti,,2,jersey:92 years:1
-agrossber,adam grossberg,,3,city:philadelphia jersey:42 years:1
+agrossber,adam grossberg,,3,city:philadelphia jersey:42 years:2
+agruntz,alan gruntz,,2,city:pittsburgh jersey:37
+agutowsky,anthony gutowsky,,3,city:madison jersey:6 years:4
 ahamilton,alex hamilton,,1,years:1
+ahartzog,axel hartzog,,1,years:1
+ahasbrook,austin hasbrook,,3,city:seattle jersey:77 years:1
 ahill1,ashton hill,,2,jersey:5 years:1
 ahoffman,ashton hoffman,,1,years:1
-ahom,aaron hom,,1,jersey:27
+ahom,aaron hom,,3,city:oakland jersey:27 years:1
+ahsu,aiden hsu,,1,years:1
+aindhupur,anish indhupuru,,2,jersey:21 years:2
 ajemal,adam jemal,,1,city:seattle
-ajohnson,avery johnson,,2,city:madison years:1
-ajohnson1,austin johnson,,3,city:madison jersey:91 years:3
+ajirele1,anthony jirele,,1,years:2
+ajohnson,avery johnson,,3,city:madison jersey:21 years:4
 ajuengst,anders juengst,,3,city:raleigh jersey:16 years:4
-akelly,austin kelly,,2,city:portland jersey:26
-alandis,aiden landis,,2,city:pittsburgh years:2
-alantz,asher lantz,,3,city:chicago;seattle jersey:96 years:3
+akaghazwa,amir kaghazwala,,3,city:oregon jersey:5 years:1
+akapinos,alex kapinos,,2,city:boston jersey:84
+akelly,austin kelly,,3,city:oregon;portland jersey:26 years:4
+akirages,alexander kirages,,2,city:pittsburgh years:1
+akolick,alan kolick,,1,years:1
+alandis,aiden landis,,2,city:pittsburgh years:3
+alantz,asher lantz,,3,city:chicago;seattle jersey:96 years:4
+alaviolet,allan laviolette,,3,city:raleigh jersey:11;26 years:4
 alearned,aylen learned,,3,city:colorado jersey:1;66 years:2
 alewis,ashton lewis,,2,city:dallas years:1
-ali,andrew li,,2,jersey:5 years:3
-alillis,austin lillis,,3,city:philadelphia jersey:3 years:3
-alomen,aiden lomen,,1,years:1
-alord,andrew lord,,2,city:dallas years:1
-amagee,aidan magee,,2,jersey:41 years:1
+alomen,aiden lomen,,1,years:2
+alord,andrew lord,,3,city:dallas jersey:40 years:1
+amagee,aidan magee,,3,city:philadelphia jersey:41 years:1
 amaloney,andrew maloney,,3,city:dallas jersey:10 years:1
+amathena,alec mathena,,1,years:1
 amcadams,aaron mcadams,,1,years:1
 amcclure,alex mcclure,,2,city:indianapolis years:1
-amckelvey,andrew mckelvey,,3,city:raleigh jersey:30 years:3
-amcnichol,adam mcnichols,,2,jersey:34 years:2
-amerriman,aj merriman,,2,jersey:5 years:4
-amichel,allan michel,,2,city:philadelphia years:4
+amckelvey,andrew mckelvey,,3,city:raleigh jersey:30 years:4
+amclean,anthony mclean,,2,jersey:32 years:1
+amcnichol,adam mcnichols,,2,jersey:34 years:3
+amerriman,aj merriman,,1,years:6
+ameshnick,andrew meshnick,,1,city:madison
+amichel,allan michel,,3,city:philadelphia jersey:23 years:5
 amullen,alex mullen,,3,city:pittsburgh jersey:54 years:3
-amuraoka,akifumi muraoka,goat,2,city:toronto jersey:1
+amuller,andrew muller,,3,city:colorado jersey:32 years:3
+amuraoka,akifumi muraoka,,2,city:toronto jersey:1;3
+andovu,allan ndovu,,1,jersey:1
 anovak,adam novak,,2,city:philadelphia years:1
 aodonnell,adam odonnell,,3,city:toronto jersey:61 years:3
+aolcese,angelo olcese,,3,city:new york jersey:22 years:4
 aolsen,anders olsen,,2,city:boston years:1
-aolson,axel olson,,1,city:seattle
+aolson,axel olson,,3,city:seattle jersey:29 years:1
+aorme,anton orme,,3,city:oakland jersey:75 years:1
 aouchterl,andrew ouchterlony,,2,jersey:43 years:1
-apadula,andrew padula,,1,years:3
+apadula,andrew padula,,2,jersey:9 years:3
+apark,adam park,,2,jersey:12 years:1
+apaulus,ashton paulus,,3,city:oakland jersey:13 years:1
 apestritt,angelo pestritto,,2,jersey:41 years:1
-apien,alex pien,,1,jersey:4
-apiper,alex piper,,2,city:colorado years:1
-aprato,anthony prato,,2,city:philadelphia years:1
-arees,adam rees,,1,years:1
+apien,alex pien,,2,jersey:4 years:2
+apillsbur,andrew pillsbury,,2,city:boston years:1
+apiper,alex piper,,2,city:colorado years:2
+aprato,anthony prato,,3,city:philadelphia jersey:11 years:1
+araslan,adnan raslan,,1,years:1
+arees,adam rees,,2,city:oakland years:2
 areppermu,anson reppermund,,3,city:pittsburgh jersey:6 years:4
 areyes,alejandro reyes,,2,city:san diego jersey:2
-arichards1,aaron richards,kalakala wiffleball club,1,years:1
 ariegel,austin riegel,,2,jersey:9 years:2
-arodrigue,andres rodriguez,,1,years:3
-aroney,andrew roney,,2,jersey:3 years:1
-arousseau,antoine rousseau,,3,city:montreal jersey:38 years:4
-aroy,andrew roy,,2,jersey:32 years:5
+arodrigue,andres rodriguez,,1,years:4
+aroney,andrew roney,,3,city:tampa bay jersey:3 years:1
+arosentha,aaron rosenthal,,2,jersey:1 years:4
+arousseau,antoine rousseau,,3,city:montreal jersey:38 years:5
+aroy,andrew roy,,2,jersey:32 years:6
 arudy,aiden rudy,,2,jersey:45 years:2
-arueda,antonio rueda,,1,years:3
-aschwiete,aaron schwieterman,,2,jersey:54 years:1
-asehgal,araav sehgal,,3,city:toronto jersey:77 years:2
+arueda,antonio rueda,,1,years:4
+aschwiete,aaron schwieterman,,2,jersey:54 years:2
+asehgal,araav sehgal,,3,city:toronto jersey:77 years:3
 aseibert,andrew seibert,,3,city:philadelphia jersey:87 years:1
-asimon,adam simon,,2,city:seattle years:2
-asjogren,andrew sjogren,,2,city:chicago years:5
-astautber,adam stautberg,,1,jersey:20
+ashklar,abe shklar,,2,city:san diego years:1
+asimon,adam simon,,3,city:seattle jersey:10 years:2
+asjogren,andrew sjogren,,2,city:chicago years:6
+astautber,adam stautberg,,2,jersey:20 years:1
+astevenso,alex stevenson,,1,years:1
 atatum,alex tatum,,3,city:colorado jersey:99 years:1
-ataylor,austin taylor,,3,city:atlanta jersey:2 years:2
-ataylor2,avi taylor,,2,jersey:0 years:1
-athai,andrew thai,,2,city:atlanta years:3
-aturcotte,adam turcotte,,3,city:toronto jersey:92 years:4
-avandeber,andrew vande berg,,2,jersey:73 years:4
-avinson,adam vinson,,1,years:1
-awarringt,alex warrington,,2,jersey:99 years:3
-awatson1,andrew watson,,1,years:1
-awhitton,adam whitton,,2,jersey:89 years:1
+ataylor,austin taylor,,3,city:atlanta jersey:2 years:4
+ataylor2,avi taylor,,3,city:oregon jersey:0 years:2
+athai,andrew thai,,2,city:atlanta years:5
+athoennes,andrew thoennes,,1,years:1
+aturcotte,adam turcotte,,3,city:toronto jersey:92 years:5
+avandeber,andrew vande berg,,2,jersey:73 years:5
+avanderge,alex van der geest,,2,jersey:17 years:1
+avinson,adam vinson,,2,jersey:13 years:2
+awarringt,alex warrington,,3,city:pittsburgh jersey:99 years:4
+awatts,andrew watts,,1,city:toronto
+aweaver,aaron weaver,,1,jersey:18
+awhitton,adam whitton,,2,jersey:89;99 years:2
+awilcox,xander wilcox,,2,jersey:35 years:3
 awilsonho,alec wilson holliday,,2,jersey:10 years:4
-awulkan,adam wulkan,,2,city:oakland years:1
-ayuan,albert yuan,,3,city:boston jersey:32 years:2
+awolf,aaron wolf,,2,city:seattle years:2
+awulkan,adam wulkan,,3,city:oakland jersey:3 years:2
+ayearwood,adrian yearwood,,1,city:toronto
+ayuan,albert yuan,,3,city:boston jersey:32 years:3
 ayurchak,andrew yurchak,,2,city:pittsburgh years:1
-badams1,brendan adams,,1,years:2
-badibe,brandon adibe,,3,city:ottawa jersey:0;12 years:3
-ballahdad,bram allahdadi,dark star-d,1,years:1
+badams1,brendan adams,,2,city:houston years:2
+badibe,brandon adibe,,3,city:ottawa jersey:0;12 years:4
+ballahdad,bram allahdadi,,3,city:oregon jersey:33 years:1
+battal,benjamin attal,,3,city:pittsburgh jersey:19 years:3
+bbaird,ben baird,,3,city:madison jersey:26 years:1
+bbeers,brandon beers,,2,city:atlanta years:1
+bbergmeie,bret bergmeier,,2,jersey:0 years:6
+bbogel,brendan bogel,,2,city:seattle jersey:95
+bbrink,ben brink,,3,city:chicago jersey:30 years:1
 bdameron,ben dameron,,2,city:new york years:2
-bdial,brandon dial,,2,jersey:27 years:2
+bdistel,braden distel,,2,jersey:72 years:2
 bdobson,brody dobson,,1,years:1
+bdowney,bryan downey,,2,jersey:36 years:4
 bdunbar,bryan dunbar,,2,jersey:44 years:1
-bdunn,brice dunn,,2,city:philadelphia years:1
+bdunn,brice dunn,,3,city:philadelphia jersey:33;6 years:1
 beberhard,braden eberhard,,2,city:boston;salt lake years:4
 bellis,brad ellis,,1,years:1
-bfleming,bradley fleming,,3,city:atlanta jersey:34 years:4
-bgessner,brendan gessner,,2,jersey:24 years:3
-bgfroerer,brian gfroerer,,2,city:houston years:1
-bhulsmeye,brett hulsmeyer,,3,city:atlanta jersey:6 years:5
+bfein,brandon fein,,2,city:oakland jersey:8
+bfield,ben field,,1,jersey:9
+bfleming,bradley fleming,,3,city:atlanta jersey:34 years:5
+bgeorge,brent george,,2,jersey:3 years:1
+bgessner,brendan gessner,,2,jersey:24 years:4
+bgfroerer,brian gfroerer,,3,city:austin;houston jersey:25 years:2
+bgreenber,ben greenberg,,1,years:1
+bharris,ben harris,,1,jersey:7
+bhart,brian hart,,1,city:madison
+bhidaka,brett hidaka,,1,years:1
+bhulsmeye,brett hulsmeyer,,3,city:atlanta jersey:6 years:6
 bjensen,brock jensen,,1,years:1
 bjordan,brandon jordan,,2,jersey:15 years:1
+bjordan1,blake jordan,,1,jersey:23
+bjoseph,becker joseph,,2,city:philadelphia years:1
+bkeith,brendan keith,,2,jersey:1 years:1
 bkennis,bradley kennis,,3,city:indianapolis jersey:31 years:2
 bklar,ben klar,,2,city:toronto years:1
-bkrapfl,blake krapfl,,2,jersey:51 years:4
+bkrapfl,blake krapfl,,2,jersey:1;51 years:5
 bkuo,bryan kuo,,2,city:toronto jersey:26
 blabertea,bailey laberteaux,,2,city:raleigh years:1
 blafferty,brandon lafferty,,1,years:1
-blamberty,brandon lamberty,,2,city:philadelphia years:3
-blewis,ben lewis,,2,jersey:7 years:2
-bley,bobby ley,,3,city:atlanta jersey:9 years:2
-bli,brandon li,,2,city:seattle jersey:88
-blin,brandon lin,,3,city:houston jersey:31 years:1
+blamberty,brandon lamberty,,2,city:philadelphia years:6
+blewis,ben lewis,,3,city:houston jersey:7 years:6
+bley,bobby ley,,3,city:atlanta;tampa bay jersey:9 years:2
+bli,brandon li,,3,city:seattle jersey:88 years:4
+blimoges,basile limoges,,2,city:montreal jersey:82
+blin,brandon lin,,3,city:houston jersey:31 years:3
 bliumay,benjamin liu-may,,3,city:portland jersey:2 years:1
-blozinski,bryce lozinski,,3,city:san diego jersey:5 years:5
-bmatis,brandon matis,,2,jersey:61 years:2
+blo,brent lo,,3,city:boston;seattle jersey:11 years:2
+blozinski,bryce lozinski,,3,city:san diego jersey:5 years:6
+bmalecek,brandon malecek,,3,city:dallas jersey:0;13 years:3
+bmathie,becker mathie,,2,jersey:30 years:2
+bmatis,brandon matis,,2,jersey:61 years:5
 bmatzuka,brett matzuka,,2,jersey:45 years:2
-bmorrison,brayden morrison,,2,jersey:14 years:1
-bnelson,ben nelson,,1,jersey:68
+bmccann,brendan mccann,,3,city:boston jersey:13 years:6
+bmoore1,brent moore,,2,jersey:13 years:2
+bmorrison,brayden morrison,,2,jersey:0;14 years:2
+bnelson,ben nelson,,2,city:new york jersey:68
+bnguyen,bryan nguyen,,1,years:1
 boort,benjamin oort,,2,jersey:9 years:1
-bpastor,brandon pastor,,3,city:philadelphia jersey:1 years:2
-bperales,brandon perales,,2,jersey:5 years:1
+bpastor,brandon pastor,,3,city:philadelphia jersey:1 years:6
 bpowlay,ben powlay,,1,years:1
 bpreiss,benjamin preiss,,3,city:chicago jersey:13;44 years:3
 bring,bryce ring,,2,city:ottawa jersey:19
 broberts,bailey roberts,,1,years:1
+brobinson,braedan robinson,,2,city:ottawa years:1
 brobinson1,brett robinson,,2,jersey:20 years:1
-bsessums,beckett sessums,,2,jersey:45 years:1
-bseuntjen,bradley seuntjens,,3,city:atlanta jersey:4 years:5
-bshea,benen shea,cosmic u-20 boys,1,years:1
+brogers,ben rogers,,1,years:1
+bsadok,benjamin sadok,,3,city:boston jersey:3 years:2
+bsessums,beckett sessums,,2,jersey:45 years:2
+bseuntjen,bradley seuntjens,,3,city:atlanta jersey:4 years:6
+bseverson,brandon severson,,2,city:san diego years:1
+bshea,benen shea,,2,jersey:1 years:2
 bsimmonds,ben simmonds,,3,city:ottawa jersey:71 years:1
 bsnell,ben snell,,3,city:seattle jersey:77 years:3
-bstreet,brian street,,3,city:austin;dallas jersey:11 years:1
-bthibodea,brock thibodeaux,,1,years:1
-bthoennes,ben thoennes,,2,jersey:4 years:3
+bsokolows,benjamin sokolowsky,,2,jersey:24 years:2
+bstout,brian stout,,3,city:oregon;portland jersey:34 years:2
+bthibodea,brock thibodeaux,,2,city:houston years:2
+bthoennes,ben thoennes,,2,jersey:2;4 years:4
 bthomsen,benj thomsen,,1,years:1
-bvandeuse,brandon van deusen,,2,jersey:99 years:4
+btrantina,blake trantina,,1,years:1
+btseytlin,benjamin tseytlin,,2,city:boston jersey:22
+bvandeuse,brandon van deusen,,2,jersey:99 years:6
 bventresc,benjamin ventresca,,1,years:1
-bwallace,brooks wallace,,3,city:new york jersey:39 years:1
+bvohnoutk,bryan vohnoutka,,2,jersey:3 years:6
+bwachob,bennett wachob,,1,years:1
+bwallace,brooks wallace,,3,city:new york jersey:39 years:3
+bwalsh,bryan walsh,,2,jersey:77 years:3
+bweinstei,ben weinstein,,2,jersey:8 years:1
+bwilliams1,brycen williams,,1,jersey:3
 bwu,bailey wu,,3,city:seattle jersey:7;8 years:2
-bwyer,brian wyer,,1,years:2
+bwyer,brian wyer,,2,city:boston years:2
+byue,bryan yue,,1,city:toronto
+carmstron1,carson armstrong,,2,city:austin years:1
+casselin,charles asselin,,2,city:montreal years:1
 catack,corbin atack,,2,city:seattle jersey:44
+cbailey,cam bailey,,2,city:seattle years:1
+cbaker,cullen baker,,3,city:chicago;houston jersey:88 years:3
 cbarnes,cade barnes,,2,jersey:0 years:1
-cbartoli,chris bartoli,,2,jersey:80 years:3
-cbauman,conor bauman,,2,jersey:44 years:1
+cbarrera,camilo barrera,,1,years:1
+cbartoli,chris bartoli,,3,city:boston jersey:80 years:4
+cbauman,conor bauman,,2,jersey:44 years:5
 cbeaurega,colin beauregard,,1,years:3
-cbellando,cam bellando,,1,years:3
-cbelus,christian belus,,2,jersey:32 years:2
+cbellando,cam bellando,,2,jersey:21 years:6
+cbelus,christian belus,,2,jersey:32 years:3
 cbenafrad,charlie benforado,,2,city:madison years:1
 cbenforad,charlie benforado,,2,city:madison years:1
 cbennett,corey bennett,,2,city:tampa bay years:2
 cbergeron,colum bergeron,,1,years:1
-cberry,colin berry,,1,years:4
-cboxley,christian boxley,,2,jersey:31 years:3
+cbernard,christopher bernard,,2,jersey:12 years:1
+cberry,colin berry,,2,jersey:13 years:4
+cblalack,conner blalack,,3,city:indianapolis jersey:0 years:3
+cbosworth,callahan bosworth,,2,jersey:13 years:2
+cboxley,christian boxley,,3,city:dc jersey:31 years:4
+cboydflie,chander boyd-fliegel,,2,jersey:15 years:1
 cboyle,connor boyle,,2,city:philadelphia years:1
-cbrock,cameron brock,,2,city:indianapolis years:1
+cbrock,cameron brock,,3,city:indianapolis jersey:3 years:1
 cbrown1,calvin brown,,3,city:new york jersey:81 years:3
 cbubernak,chris bubernak,,2,city:seattle years:2
-cburt,caiden burt,,3,city:houston jersey:14 years:3
-ccampbell,curtis campbell,,2,city:ottawa;toronto years:1
-cchamberl,carson chamberlain,,2,jersey:21 years:3
+cburt,caiden burt,,3,city:houston jersey:11;14 years:4
+ccampbell,curtis campbell,,3,city:ottawa;toronto jersey:22 years:2
+ccampbell1,caleb campbell,,3,city:seattle jersey:69 years:4
+ccannon,charles cannon,,1,years:2
+ccarey,clayton carey,,1,years:1
+cchamberl,carson chamberlain,,2,jersey:12;21 years:4
+cchang,chip chang,,2,jersey:40 years:1
 ccoates,cody coates,,3,city:tampa bay jersey:85 years:2
-ccolicchi,cj colicchio,,2,city:philadelphia;pittsburgh years:2
-cconcanno,connor concannon,,1,jersey:5
+ccolicchi,cj colicchio,,2,city:philadelphia;pittsburgh years:3
+cconcanno,connor concannon,,3,city:indianapolis jersey:5 years:2
+ccopeland,cam copeland,,3,city:atlanta;chicago jersey:79 years:3
 ccoulbury,calvin coulbury,,3,city:montreal jersey:37 years:3
-ccunningh,chase cunningham,,3,city:austin jersey:20 years:1
+ccunningh,chase cunningham,,3,city:austin jersey:20;4 years:2
 ccurran,cody curran,,3,city:indianapolis jersey:18 years:2
-cdeluna,connor deluna,,2,city:austin;dallas years:4
-cdixon,caleb dixon,,2,city:houston jersey:77
+cdavisbra,cole davis-brand,,3,city:boston jersey:22 years:6
+cdeluna,connor deluna,,2,city:austin;dallas years:6
+cdixon,caleb dixon,,3,city:houston jersey:77 years:2
 cdowd,connor dowd,,1,years:1
+cellis,chris ellis,,2,jersey:32 years:3
+cenright,caleb enright,,1,years:1
 ceustis,cole eustis,,3,city:portland jersey:7 years:4
-cfoster,christian foster,,1,city:seattle
+cfortin,connor fortin,,2,city:boston years:2
+cfoster,christian foster,,2,city:boston;seattle years:3
 cfremeau,colin fremeau,,2,jersey:27 years:1
 cgaeta,christian gaeta,,3,city:atlanta jersey:26 years:3
 cgall,collin gall,,3,city:san diego jersey:27 years:3
-cginet,chris ginet,,2,jersey:51 years:1
-cgraber,chris graber,,3,city:pittsburgh jersey:23 years:2
+cgarrison,connor garrison,,2,jersey:76 years:2
+cginet,chris ginet,,3,city:indianapolis jersey:51 years:1
+cgraber,chris graber,,3,city:pittsburgh jersey:23 years:4
 cgrant,colin grant,,2,jersey:13 years:1
-cguidry,cameron guidry,,1,jersey:8
-chancock,chris hancock,,1,jersey:9
-chardesty,corey hardesty,,2,jersey:60 years:1
-chawkins,carter hawkins,,2,jersey:39 years:3
-chill,collin hill,,3,city:atlanta jersey:25 years:2
+cguay,charles guay,,3,city:montreal jersey:11 years:5
+cguidry,cameron guidry,,2,city:dallas jersey:8
+chardesty,corey hardesty,,3,city:indianapolis jersey:60 years:1
+charris,cameron harris,,2,city:toronto jersey:91
+chawkins,carter hawkins,,2,jersey:39 years:4
 chines,cedar hines,,3,city:seattle jersey:32 years:2
-chyzer,cole hyzer,,2,city:indianapolis years:3
-cjohnson2,carl johnson,,3,city:pittsburgh;tampa bay jersey:87 years:2
+chsu,cheryl hsu,,2,jersey:24 years:1
+chyzer,cole hyzer,,3,city:indianapolis jersey:13 years:3
+cjohnson2,carl johnson,,3,city:pittsburgh;tampa bay jersey:87 years:4
 cjohnston,cody johnston,,1,city:colorado
+cjurek,cole jurek,,2,jersey:13 years:6
 ckennedy,cameron kennedy,,3,city:ottawa jersey:91 years:2
-ckerns,couper kerns,oklahoma christian (eagles),1,years:1
-cknarr,cj knarr,,2,city:indianapolis jersey:18
+ckerns,couper kerns,,1,years:2
+cknarr,cj knarr,,3,city:indianapolis jersey:18 years:1
 cknox,cameron knox,,1,jersey:45
-clacy,cameron lacy,,2,jersey:28 years:2
-clankford,carter lankford,,2,jersey:24 years:1
-clarberg,chris larberg,,2,jersey:17 years:1
+clacy,cameron lacy,,2,jersey:28 years:4
+clankford,carter lankford,,2,jersey:24 years:2
+clarberg,chris larberg,,3,city:dallas jersey:17 years:1
 clemay,casey lemay,,1,years:1
-cmasino,colin masino,,2,city:philadelphia years:2
-cmcsherry,clint mcsherry,,2,jersey:71 years:5
-cmires,cole mires,,1,years:1
+cmah,camden mah,,1,years:2
+cmarty,chase marty,,2,city:madison jersey:42
+cmasino,colin masino,,3,city:philadelphia jersey:26 years:2
+cmazur,chris mazur,,2,jersey:39 years:2
+cmchale,connor mchale,,3,city:toronto jersey:88 years:1
+cmcinnis,cody mcinnis,,2,city:boston years:1
+cmcsherry,clint mcsherry,,2,jersey:71 years:6
+cmills,corbin mills,,1,jersey:54
+cmires,cole mires,,2,city:oakland years:1
+cmoore,cole moore,,3,city:boston jersey:6 years:6
 cnelson,christopher nelson,,1,years:1
-cnewell,connor newell,,3,city:pittsburgh jersey:26 years:4
-cnguyen,conrad nguyen,,1,jersey:76
-cnichimlu,caoba nichim-luta,,1,years:1
-colsen,christian olsen,,3,city:atlanta jersey:8 years:2
-colson,connor olson,,3,city:colorado jersey:22;23 years:3
+cnewby,caeden newby,,2,city:oregon years:2
+cnewell,connor newell,,3,city:pittsburgh jersey:26 years:5
+cnguyen,conrad nguyen,,2,jersey:76 years:2
+cnichimlu,caoba nichim-luta,,2,jersey:1 years:1
+cobrien,cj obrien,,2,city:chicago jersey:84
+cobrien1,christopher obrien,,2,jersey:47 years:2
+colsen,christian olsen,,3,city:atlanta jersey:24;8 years:2
+colson,connor olson,,3,city:colorado;dallas jersey:22;23 years:3
+cpanarell,charlie panarella,,3,city:new york jersey:30 years:1
 cparker,christian parker,,2,city:dallas years:1
-cpartlow,clayton partlow,,1,jersey:29
+cpartlow,clayton partlow,,2,jersey:29 years:2
 cpederson,curtis pederson,,1,years:1
-cposey,caleb posey,,3,city:tampa bay jersey:37 years:2
+cpetsche,cole petsche,,2,jersey:0 years:1
 crae,carter rae,,2,city:indianapolis years:3
-crassel,collin rassel,,2,jersey:27 years:1
-crawlins,chase rawlins,,1,jersey:85
-cringwood,colin ringwood,,2,jersey:12 years:1
-croach,chris roach,,1,city:seattle
+crassel,collin rassel,,3,city:indianapolis jersey:27 years:1
+crawlins,chase rawlins,,3,city:philadelphia jersey:85 years:3
+cringwood,colin ringwood,,3,city:indianapolis jersey:12 years:2
+croach,chris roach,,2,city:seattle years:5
 cross,connor ross,,1,years:1
-crussell,connor russell,,3,city:raleigh jersey:52 years:3
-cschuweil,charlie schuweiler,,1,years:1
+crussell,connor russell,,3,city:new york;raleigh jersey:52 years:4
+cschuweil,charlie schuweiler,,2,jersey:55 years:1
 cseamon,caleb seamon,,2,jersey:47 years:1
-cshugarma,casey shugarman,,1,years:1
+cshugarma,casey shugarman,,2,city:san diego years:1
 csigerud,caden sigerud,,2,jersey:81 years:2
-csmith1,colin smith,,1,years:1
-csmith2,chase smith,,2,jersey:38 years:1
-cstanish,caleb stanish,,2,jersey:61 years:3
-cstenseth,cole stenseth,,3,city:salt lake jersey:9 years:1
-cstillwel,conner stillwell,,2,jersey:6 years:4
-cstoughto,calvin stoughton,,3,city:boston;colorado jersey:10;5 years:2
+csmith2,chase smith,,2,jersey:38 years:2
+cspicer,cody spicer,,3,city:colorado jersey:34 years:2
+cstanish,caleb stanish,,2,jersey:61 years:4
+cstenseth,cole stenseth,,3,city:salt lake jersey:9 years:2
+cstewart1,clara stewart,,2,jersey:73 years:1
+cstillwel,conner stillwell,,3,city:portland jersey:6 years:4
+csunde,colin sunde,,3,city:boston;madison;san diego jersey:34;41 years:4
+ctabor,conor tabor,,3,city:colorado jersey:0;25 years:3
 ctaleghan,cameron taleghani,,1,years:1
 ctappero,coleman tappero,,3,city:atlanta jersey:21 years:1
 ctexeira,caleb texeira,,1,years:1
@@ -240,904 +350,1396 @@ ctipping,connor tipping,,3,city:pittsburgh jersey:22 years:2
 ctolbert,corey tolbert,,3,city:houston jersey:5 years:2
 ctoriello,cy toriello,,2,jersey:11 years:3
 ctornaben,cal tornabene,,3,city:chicago jersey:21 years:4
-ctrisolin,calvin trisolini,,2,city:philadelphia years:1
-cturner,carson turner,,3,city:ottawa jersey:29 years:1
+ctrisolin,calvin trisolini,,3,city:philadelphia jersey:33 years:1
+cturner,carson turner,phoenix,3,city:ottawa jersey:29 years:1
 cughetta,connor ughetta,,2,jersey:12 years:1
-cvukovic,charlie vukovic,,2,jersey:13;31 years:3
+cvukovic,charlie vukovic,,2,jersey:13;31 years:5
+cwagner,charlie wagner,,3,city:oregon jersey:33 years:1
+cwalls,chris walls,,2,jersey:36 years:1
+cwalsh,chris walsh,,2,jersey:9 years:4
+cwang,clark wang,,3,city:san diego jersey:23 years:4
+cwatkins,curtis watkins,,1,years:1
 cweinberg,charles weinberg,,2,jersey:18;6 years:4
-cwhite,cade white,,3,city:madison jersey:14 years:2
-cwhite1,colin white,,3,city:philadelphia jersey:3 years:2
-cwilder,carson wilder,,1,years:1
-cwilson,chris wilson,,1,years:1
-cwu,casey wu,,1,city:san diego
+cwhite,cade white,,3,city:austin;madison jersey:14 years:3
+cwhite1,colin white,,3,city:philadelphia jersey:3 years:3
+cwilder,carson wilder,,2,jersey:1;9 years:1
+cwilen,chris wilen,,1,city:madison
+cwilson,chris wilson,,2,jersey:22 years:2
+cwoodfin,christian woodfin,,2,jersey:32 years:1
+cwu,casey wu,,3,city:san diego jersey:29 years:4
+cyen,chip yen,,1,years:1
 cyorgason,chad yorgason,,3,city:salt lake jersey:6 years:4
 cyoungblo,chris youngblood,,3,city:atlanta jersey:55 years:1
 dasemota,devon asemota,,2,jersey:4 years:1
-dbaker1,dylan baker,,1,years:1
+dbaker1,dylan baker,,2,city:seattle years:1
 dbarram,david barram,,2,jersey:3 years:2
-dbaumgart,dan baumgartner,,1,years:3
-dbest,dylan best,,1,city:pittsburgh
+dbauman,daniel bauman,,3,city:colorado jersey:55 years:1
+dbaumgart,dan baumgartner,,2,jersey:12 years:4
+dbenvenut,dan benvenuti,,1,city:ottawa
+dberg,david berg,,2,city:pittsburgh years:1
+dbest,dylan best,,3,city:pittsburgh jersey:15 years:2
 dbloodgoo,david bloodgood,,2,jersey:30 years:4
-dbruer,dillon bruer,,2,jersey:44 years:2
-dbrunker,daniel brunker,,3,city:colorado jersey:26 years:2
-dburns,dylan burns,,2,jersey:99 years:2
+dbraden,david braden,,2,jersey:3 years:2
+dbruer,dillon bruer,,2,jersey:44 years:3
+dbrunker,daniel brunker,,3,city:colorado jersey:26 years:3
+dbuckingh,donte buckingham,,3,city:madison jersey:0 years:1
+dbullock,dean bullock,,1,years:1
+dburns,dylan burns,,2,jersey:99 years:3
 dbuwalda,daniel buwalda,,1,years:1
 dcasio,dennis casio,,2,city:seattle years:1
-dchickeri,daniel chickering,,1,city:seattle
-dchiodi,dominic chiodi,,1,city:seattle
+dcavalero,dominic cavalero,,2,city:seattle years:1
+dchickeri,daniel chickering,,3,city:seattle jersey:35 years:1
+dchiodi,dominic chiodi,,2,city:seattle years:1
+dclyburn,dexter clyburn,,2,jersey:12;14 years:4
 dcolic,david colic,,2,city:ottawa years:1
 dcooke,dillon cooke,,2,city:boston years:1
+dcox,devin cox,,2,jersey:42 years:2
+dcox1,david cox,,3,city:indianapolis jersey:31 years:2
 dcranston,david cranston,,1,years:2
-dcunningh,dan cunningham,,2,jersey:6 years:2
-ddamiano,dustin damiano,,3,city:philadelphia jersey:0 years:1
-ddremann,dex dremann,,2,jersey:16 years:1
+dculver,dean culver,,2,jersey:17 years:1
+dcunningh,dan cunningham,,3,city:indianapolis jersey:6 years:2
+ddamiano,dustin damiano,,3,city:philadelphia jersey:0 years:3
+ddeclerck,dylan declerck,,2,jersey:54 years:4
+ddemarre,daan de marree,,3,city:chicago jersey:27 years:2
+ddremann,dex dremann,,3,city:chicago jersey:16 years:1
+ddyer,darren dyer,,1,years:1
+demmons,daniel emmons,,2,city:dallas jersey:18
+deppstein,daniel eppstein,,1,years:1
 dferriter,daniel ferriter,,1,years:2
-dfitzgera,duncan fitzgerald,,3,city:austin jersey:88 years:4
+dfitzgera,duncan fitzgerald,,3,city:austin jersey:88 years:5
 dfoster,devin foster,,2,city:philadelphia years:1
-dgarlock,daniel garlock,,3,city:madison jersey:32 years:1
-dhall,dylan hall,,2,jersey:16 years:1
+dfrongill,david frongillo,,2,jersey:5 years:2
+dgarlock,daniel garlock,,3,city:madison jersey:32 years:4
+dgirard,drew girard,,2,city:pittsburgh years:1
 dhammer,david hammer,,3,city:dallas jersey:87 years:1
 dhappe,drew happe,,2,jersey:43 years:3
-dhawkins,dylan hawkins,,2,jersey:6 years:4
+dhawkins,dylan hawkins,,2,jersey:6 years:5
+dhenken,dustin henken,,2,city:philadelphia jersey:24
 dinnis,david innis,,2,jersey:11 years:3
 djeng,dyllon jeng,,2,jersey:24 years:1
+djensen,david jensen,,2,jersey:74 years:1
+djoens,dillon joens,,1,years:1
+djohnson,delrico johnson,,3,city:dc jersey:4 years:1
+dkervick,declan kervick,,3,city:boston jersey:82 years:4
+dknighton,derik knighton,,3,city:salt lake jersey:32 years:2
 dlafrance,dan lafrance,,2,city:toronto jersey:86
-dlathammc,dylan latham mcgraw,colorado state (hibida),1,years:1
+dlarberg,dillon larberg,,1,jersey:11
+dlathammc,dylan latham mcgraw,,1,years:1
 dlopezesc,dante lopez-escarez,,3,city:seattle jersey:3 years:1
+dloughnan,drew loughnane,,3,city:philadelphia jersey:33 years:2
 dmah,daniel mah,,2,jersey:24 years:1
+dmiddlebr,dodger middlebrook,,2,jersey:22 years:1
+dmiller2,dax miller,,1,city:toronto
 dmiller3,declan miller,,3,city:seattle jersey:22 years:2
-dmiller4,dane miller,,3,city:salt lake jersey:96 years:1
-dmourad,derek mourad,,3,city:seattle jersey:51 years:1
+dmiller4,dane miller,,3,city:salt lake jersey:96 years:2
+dmourad,derek mourad,,3,city:seattle jersey:19;51 years:4
 dmurphy,donovan murphy,,2,city:tampa bay years:1
-dnice,dylan nice,,2,city:chicago years:3
-dnichols,dan nichols,,3,city:pittsburgh jersey:49 years:3
-dperry,david perry,,2,jersey:32 years:3
-dpetsinis,david petsinis,,3,city:toronto jersey:16 years:1
+dnester,david nester,,3,city:madison jersey:11 years:4
+dnice,dylan nice,,3,city:chicago;oakland jersey:7 years:3
+dnichols,dan nichols,,3,city:pittsburgh jersey:49 years:4
+dpadgett,decker padgett,,2,city:austin years:1
+dperry,david perry,,3,city:philadelphia jersey:32 years:4
+dpetsinis,david petsinis,,3,city:toronto jersey:16 years:2
 dphillips,darren phillips,,2,city:dallas years:3
-dpower,dylan power,,3,city:madison jersey:71 years:2
-drichards1,david richardson,,1,jersey:84
-dritthale,daniel ritthaler,,1,years:3
-drobinson1,daniel robinson,tanasi,1,years:1
+dpower,dylan power,,3,city:chicago;madison jersey:71 years:2
+dpryke,daniel pryke,,3,city:san diego jersey:23 years:1
+draskin,dox raskin,,1,years:1
+drasmusse,drew rasmussen,,2,jersey:78 years:1
+drichards1,david richardson,ring of fire,2,city:raleigh jersey:84
+drichmond,dave richmond,,1,years:1
+dritthale,daniel ritthaler,,2,jersey:7 years:4
+drobinson,donald robinson,,1,jersey:0
+drobinson1,daniel robinson,,1,years:1
 drogers,devon rogers,,3,city:atlanta jersey:33 years:1
-dschnaudi,drew schnaudigel,,3,city:new york jersey:25 years:1
+dschnaudi,drew schnaudigel,,3,city:new york jersey:25 years:2
 dsealand,david sealand,,3,city:portland jersey:29 years:1
 dshields,david shields,,2,city:dc jersey:36
 dslade,david slade,,2,jersey:0 years:1
-dsmith,dalton smith,,3,city:chicago jersey:13 years:2
-dsnead,david snead,,1,years:1
+dsmith,dalton smith,,3,city:chicago;dallas;houston jersey:13 years:3
+dsnead,david snead,,2,jersey:11 years:2
+dsperling,daniel sperling,,2,city:atlanta jersey:0
 dstaples,desmond staples,,3,city:ottawa jersey:23 years:1
 dstupar,dean stupar,,3,city:tampa bay jersey:43 years:2
 dsurrell,doc surrell,,1,years:1
-dsuvorov,dmitry suvorov,,3,city:philadelphia jersey:6 years:4
+dsuvorov,dmitry suvorov,,3,city:philadelphia jersey:12;6 years:5
 dterry,devon terry,,2,jersey:4 years:1
-dtravagli,dustin travaglini,,2,jersey:15 years:1
-dwarner,dane warner,,2,jersey:6 years:2
-dwelkener,daniel welkener,,2,city:dallas years:3
+dtravagli,dustin travaglini,,2,jersey:15 years:2
+dtunnell,dylan tunnell,,1,city:atlanta
+dviggiani,daniel viggiani,,2,jersey:29 years:1
+dvilleneu,dylan villeneuve,,1,jersey:6
+dwarner,dane warner,,2,jersey:6 years:3
+dwelkener,daniel welkener,,3,city:austin;dallas jersey:12 years:5
 dwhite,daniel white,,2,jersey:28 years:1
-dwhited,dillon whited,,2,jersey:8 years:1
+dwhited,dillon whited,,3,city:oakland jersey:8 years:2
+dwhitehea,davis whitehead,,2,city:boston years:2
 dwinter,daniel winter,,1,years:3
 dwitte,david witte,,3,city:tampa bay jersey:0 years:2
-dwoods,david woods,,1,years:4
-dzeringue,dylan zeringue,,2,city:houston years:1
-dzhu,daniel zhu,,1,years:2
+dwong,daniel wong,,3,city:toronto jersey:24 years:1
+dwoods,david woods,,3,city:chicago jersey:77 years:4
+dzeringue,dylan zeringue,,3,city:houston jersey:16 years:1
+dzhou,david zhou,,3,city:seattle jersey:2 years:3
+dzhu,daniel zhu,,2,jersey:27 years:2
 dzimmerma,david zimmerman,,2,jersey:20 years:2
-dzoldan,david zoldan,,1,years:1
-eartemaki,eli artemakis,,2,city:chicago years:3
-eatwell,erik atwell,,1,years:1
-ebembenis,evan bembenista,,1,years:1
+dzoldan,david zoldan,,2,jersey:26 years:1
+eaadalen,erik aadalen,,3,city:seattle jersey:7 years:1
+ebartlett,emma bartlett,,2,jersey:38 years:1
+ebaughman,ethan baughman,,1,years:1
+ebeidlers,ezra beidler-shenk,,2,city:philadelphia years:1
+ebembenis,evan bembenista,,1,years:3
+ebemis,eliot bemis,,3,city:new york jersey:19 years:1
+ebequette,eileen bequette,,2,jersey:97 years:1
 ebilolo,emmanuel bilolo,,3,city:austin;dallas jersey:4;5 years:4
 eblais,eric blais,,3,city:madison jersey:99 years:3
-ebloodwor,ethan bloodworth,,3,city:raleigh jersey:87 years:5
+ebloodwor,ethan bloodworth,,3,city:raleigh jersey:10;87 years:5
 ebolthous,ethan bolthouse,,3,city:raleigh jersey:19 years:1
 ebonnet,elliot bonnet,,2,jersey:22 years:1
-ebrodbeck,eric brodbeck,,2,city:austin years:3
+ebrodbeck,eric brodbeck,,3,city:austin jersey:6 years:6
 ebrown,erica brown,,2,city:philadelphia jersey:32
-ecarter,eric carter,,2,city:austin;dallas years:1
-echartock,elliott chartock,,2,city:new york years:2
+ecampion,ethan campion,,3,city:pittsburgh jersey:23 years:1
+ecarter,eric carter,,2,city:austin;dallas years:3
+echartock,elliott chartock,,3,city:new york jersey:10 years:1
+econneely,eamon conneely,,1,years:1
+ecrosbyle,eric crosby lehmann,,2,jersey:7 years:2
 edavis,elliot davis,,2,jersey:32 years:1
 edeeds,elliot deeds,,2,jersey:10 years:2
 ediamond,elijah diamond,,3,city:seattle jersey:49 years:1
+eding,eastelle ding,,2,jersey:19 years:1
+eeve,elliott eve,,3,city:san diego jersey:24 years:1
+efortin,ethan fortin,,3,city:boston jersey:28;8 years:5
+efox,ed fox,,1,years:1
+egrass,everett grass,,1,years:1
 egriffin,elias griffin,,3,city:new york jersey:34 years:2
 ehare,elliot hare,,3,city:pittsburgh jersey:18 years:2
-ehawkins,elliot hawkins,,3,city:colorado jersey:23;47 years:2
+ehawkins,elliot hawkins,,3,city:colorado jersey:23;47 years:3
 eheloir,eliott heloir,,3,city:montreal jersey:35 years:2
-eholmgren,ethan holmgren,,3,city:philadelphia jersey:36 years:1
-ehotaling,erik hotaling,johnny bravo,2,city:colorado years:2
+eholmgren,ethan holmgren,,3,city:philadelphia jersey:36 years:4
+ehotaling,erik hotaling,,2,city:colorado years:2
+ehowey,evan howey,,1,years:1
+ehubbard,eric hubbard,,1,years:1
 ehuber,elijah huber,,1,years:1
+ehunter,erik hunter,,2,city:ottawa jersey:17
 ehurd,eric hurd,,1,jersey:36
-ejoyce,eoin joyce,,1,jersey:99
+ejaime,elijah jaime,,2,jersey:55 years:5
+ejanin,eli janin,,1,city:portland
+ejeevaraj,eelavan jeevarajah,,3,city:toronto jersey:23 years:1
+ejoyce,eoin joyce,,2,jersey:99 years:1
 ekameri,emmanuel kameri,,3,city:dallas jersey:60 years:1
-elee,elliot lee,,1,years:1
-eli,ethan li,,3,city:san diego jersey:13 years:2
-elieman,ethan lieman,,3,city:new york jersey:14 years:1
-elong,elijah long,,2,city:raleigh years:3
-emagsig,evan magsig,,2,jersey:32 years:4
-emalone,eliav malone,,2,city:boston years:1
+elheureux,eugene lheureux,,2,jersey:89 years:6
+eli,ethan li,,3,city:san diego jersey:13 years:5
+elieman,ethan lieman,,3,city:new york jersey:14 years:2
+elong,elijah long,,3,city:raleigh jersey:11;45 years:6
+emagsig,evan magsig,,3,city:oakland jersey:32 years:5
+emalone,eliav malone,,3,city:boston jersey:99 years:1
 emeer,everitt meer,,2,city:pittsburgh years:1
-emiller,evan miller,queen city kings,1,years:1
 emock,eli mock,,3,city:indianapolis jersey:21 years:1
-emoore,elliott moore,,2,city:austin years:4
-eolsen,erik olsen,on ramp,1,years:1
+emoore,elliott moore,,2,city:austin;new york years:6
+emotycka,eli motycka,,2,jersey:65 years:3
+emurray,ethan murray,,2,city:seattle jersey:31
+enardelli,eric nardelli,,3,city:philadelphia jersey:99 years:5
+enewhouse,ellis newhouse,,2,jersey:95 years:1
+eniedzwie,ethan niedzwiedz,,2,jersey:56 years:2
+enorton,eliana norton,,2,jersey:87 years:1
+eode,ethan ode,,2,jersey:44 years:1
+eolsen,erik olsen,,1,years:1
+epar,erwan pare,,1,years:1
 epark,eli park,,3,city:toronto jersey:63 years:1
+eperry,evan perry,,2,jersey:9 years:1
 epigeon,ethan pigeon,,3,city:philadelphia jersey:11 years:1
+epiorier,emma piorier,,2,jersey:53 years:1
+epollack,ethan pollack,,2,city:austin jersey:19
+erivera,elliot rivera,,1,years:1
+erivera1,elliot rivera,,1,years:2
 erosenber,elliott rosenberg,,2,city:boston years:2
-erudder,elliott rudder,,1,years:1
-esakach,elliot sakach,,3,city:houston jersey:27 years:1
-esalmon,elijah salmon,,1,years:3
-eshapiro,everest shapiro,,2,jersey:23 years:3
-esjostrom,eric sjostrom,,2,city:madison jersey:5
-eswiatek,evan swiatek,,2,city:austin years:4
+erudder,elliott rudder,,2,city:houston years:1
+esakach,elliot sakach,,3,city:houston jersey:27 years:2
+esalmon,elijah salmon,,2,jersey:70;8 years:4
+esarles,ethan sarles,,3,city:philadelphia jersey:91 years:2
+esaunders,everett saunders,,1,years:1
+esebastia,evan sebastian,,3,city:chicago jersey:15 years:2
+eshapiro,everest shapiro,,3,city:new york jersey:23 years:4
+esjostrom,eric sjostrom,,3,city:atlanta;madison jersey:5 years:5
+eswiatek,evan swiatek,,3,city:austin jersey:5 years:5
 etaylor,eric taylor,,3,city:raleigh jersey:15 years:3
+ethoreson,ezra thoreson,,2,city:colorado years:1
 eun,edmund un,,2,city:toronto jersey:10
-ewarner,elliot warner,,1,years:3
-ewarner1,emmett warner,,1,years:2
-ewimmer,ethan wimmer,,2,city:salt lake years:1
-ewitmer,eric witmer,,2,city:philadelphia years:2
+ewarner,elliot warner,,3,city:san diego jersey:1 years:3
+ewarner1,emmett warner,,2,jersey:16;18 years:3
+ewimmer,ethan wimmer,,2,city:salt lake years:2
+ewitmer,eric witmer,,3,city:philadelphia jersey:13 years:5
 ewright,eric wright,,1,years:1
-eyoung,emmett young,dig,2,city:boston years:1
-ffarah,frederick farah,,2,jersey:73 years:4
-fmoren,felix moren,,3,city:portland jersey:5 years:2
-fpronove,felix pronove,johnny bravo,3,city:colorado jersey:4 years:2
+eyoung,emmett young,,2,city:boston years:1
+ezhuang,eric zhuang,,2,city:toronto years:1
+ffarah,frederick farah,,2,jersey:73 years:5
+fhare,fletcher hare,,3,city:atlanta jersey:16 years:4
+fleonard,felix leonard,,3,city:montreal jersey:19 years:3
+fmoren,felix moren,,3,city:portland jersey:1;5;7 years:3
+fpronove,felix pronove,,3,city:colorado jersey:4 years:4
 frusso,francesco russo,,1,years:1
+fweng,frank weng,,1,jersey:0
+gabrahams,gavin abrahamsson,,3,city:boston;philadelphia jersey:37 years:4
+gbabbitt,gavin babbitt,,3,city:austin jersey:73 years:4
 gbevan,geoff bevan,,3,city:montreal;ottawa;toronto jersey:10;9 years:3
 gbraun,garrett braun,,2,jersey:15 years:2
+gcardosa,georgia cardosa,,1,jersey:71
+gchatha,gagan chatha,,2,jersey:10 years:1
+gcole,grant cole,,3,city:portland jersey:22 years:1
 gellis,greg ellis,,2,city:ottawa jersey:30
 ggeib,garrett geib,,1,years:1
-ghable,garrett hable,,1,jersey:88
+ggust,george gust,,2,city:austin years:1
+ghable,garrett hable,,2,jersey:88 years:2
+ghaflin,gustav haflin,,3,city:boston jersey:34 years:6
+gharris,grant harris,,3,city:chicago;seattle jersey:28;63 years:3
 ghazlewoo,graham hazlewood,,3,city:austin jersey:62 years:1
 gknobel,garrett knobel,,3,city:tampa bay jersey:91 years:1
-glampron,george lampron,,1,years:1
+glampron,george lampron,,2,city:dallas years:1
+glarson,gordon larson,,1,years:5
+gleahy,gavin leahy,,3,city:seattle jersey:50 years:3
 glindsley,grant lindsley,,1,years:2
-gmartin,greg martin,,1,years:3
-gmartin1,garrett martin,,3,city:seattle jersey:12 years:5
-gmay,gavin may,,3,city:new york jersey:0 years:4
-gmaynard,grant maynard,,1,years:1
-gmckee,griffin mckee,,2,city:toronto years:1
+gmartin,greg martin,,2,city:philadelphia years:3
+gmartin1,garrett martin,,3,city:seattle jersey:12 years:6
+gmay,gavin may,,3,city:new york jersey:0 years:5
+gmaynard,grant maynard,,1,years:2
+gmckee,griffin mckee,,3,city:toronto jersey:97 years:1
+gmiller,griffin miller,,2,city:dallas years:3
+gmitchell,grant mitchell,,1,years:1
 gmohler,greg mohler,,3,city:philadelphia jersey:13 years:1
 gmonfette,gabriel monfette,,2,city:montreal jersey:21
-gmoreno,gregory moreno,,2,jersey:6 years:1
-gnorrbom,gus norrbom,,2,jersey:47 years:4
+gmoreno,gregory moreno,,2,jersey:6 years:3
+gnakano,genichi nakano,,2,city:oregon years:1
+gpangburn,grayson pangburn,,2,jersey:12 years:3
 gpowell,geoff powell,,2,city:toronto jersey:21
+grettberg,grayson rettberg,,3,city:salt lake jersey:99 years:3
+grichman,grady richman,,3,city:atlanta jersey:0 years:1
+gsanner,grayson sanner,,2,jersey:7 years:5
 gsanti,garrett santi,,2,jersey:66 years:2
+gschoepke,gabe schoepke,,3,city:chicago jersey:1 years:3
 gschwartz,gabriel schwartz-ketchner,,2,jersey:49 years:1
-gvordick,gabe vordick,,3,city:madison jersey:85 years:2
-gwilson1,garrett wilson,,3,city:austin jersey:30 years:3
-gwysen,glenn wysen,,1,jersey:11
+gtse,georgia tse,,1,years:1
+gturner,graham turner,,2,jersey:2 years:1
+gvordick,gabe vordick,,3,city:madison jersey:85 years:3
+gwatkins,grady watkins,,1,years:2
+gwysen,glenn wysen,,2,jersey:11 years:1
 gyas,griffin yas,,2,jersey:4 years:1
-haustinkn,hayden austin-knab,,3,city:atlanta jersey:17 years:5
+haustinkn,hayden austin-knab,,3,city:atlanta jersey:17 years:6
 hbabcock,henry babcock,,2,city:boston years:2
 hcannon,harris cannon,,1,years:1
 hcookson,holden cookson,,1,years:1
-hfisher,henry fisher,ring of fire,3,city:raleigh jersey:10;3 years:3
-hfuruta,henry furuta,,1,years:1
-hgarcia,henry garcia,,1,years:1
-hgoldenbe,henry goldenberg,,3,city:chicago;madison jersey:4 years:5
+hcorbett,hunter corbett,,1,jersey:17
+heverett,henry everett,,3,city:pittsburgh jersey:8 years:2
+hfuruta,henry furuta,,2,city:dallas years:1
+hgarcia,henry garcia,,2,city:oakland years:1
+hgoldenbe,henry goldenberg,,3,city:chicago;madison jersey:4 years:6
 hhavlin,hank havlin,,2,city:indianapolis years:1
+hing,henry ing,,2,city:pittsburgh years:1
+hlang,hunter lang,,2,city:boston years:1
 hlatson,hunter latson,,2,city:chicago years:2
-hmay,hunter may,,3,city:colorado jersey:10 years:1
+hmay,hunter may,,3,city:colorado jersey:10 years:2
+hmcallist,hobbs mcallister,,1,years:1
 hmcnamara,harry mcnamara,,3,city:pittsburgh jersey:41 years:1
-hnorris,harry norris,,2,city:toronto years:1
-hparks,houston parks,,2,jersey:4 years:1
+hnorris,harry norris,,2,city:toronto years:2
+hordonez,hector ordonez,,1,years:1
+hpark,harry park,,3,city:pittsburgh jersey:11 years:1
+hparks,houston parks,,3,city:dc jersey:4 years:1
 hphan,henry phan,,2,city:seattle years:1
-hstone,hayden stone,,3,city:austin;montreal jersey:14 years:2
-hstuck,hudson stuck,,2,jersey:77 years:1
-ichang,itay chang,,1,jersey:5
+hstone,hayden stone,,3,city:austin;montreal jersey:14 years:3
+hstuck,hudson stuck,,2,jersey:77 years:3
+htucker,harrison tucker,,3,city:austin jersey:24 years:2
+hwang,henry wang,,2,city:houston years:1
+hwayte,henry wayte,,2,jersey:31 years:1
+ibaker,isaac baker,,2,city:houston years:1
+ichang,itay chang,,2,jersey:5 years:2
 idave,ishaan dave,,2,city:atlanta years:1
-idietrich,ian dietrich,,2,city:philadelphia years:5
-ihahn,ian hahn,,2,jersey:14 years:4
+idecker,ian decker,,1,years:1
+idietrich,ian dietrich,,3,city:philadelphia jersey:35 years:6
+ielmi,ikran elmi,,2,jersey:0 years:1
+ielsayed,ibrahim el-sayed,,2,city:houston years:1
+iengler,ian engler,,2,city:boston;pittsburgh years:3
+ifalck,ian falck,,3,city:chicago jersey:8;80 years:3
+ifuzat,isaac fuzat,,2,city:houston years:1
+ihernande,isaiah hernandez,,1,years:1
 ihsu,isaac hsu,,2,jersey:3 years:3
 ikassim,ismail kassim,,2,city:houston years:1
-ikawaguch,isamu kawaguchi,,1,years:2
-iladner,ian ladner,,1,years:3
-ilee,isaac lee,,2,jersey:2 years:4
+ikawaguch,isamu kawaguchi,,2,city:san diego years:2
+iladner,ian ladner,,2,city:san diego years:4
+ileonard,isaac leonard,,2,jersey:17 years:1
+imackenzi,iain mackenzie,,2,city:toronto jersey:13
 imasekkel,isaiah masek-kelly,,2,city:toronto jersey:17
-imcnamara,ian mcnamara,,1,jersey:13
-isweeney,ian sweeney,,3,city:portland jersey:33;77 years:3
+imason,isaiah mason,,2,jersey:20 years:1
+imccosky,ian mccosky,,3,city:madison jersey:11;23 years:6
+imcnamara,ian mcnamara,,2,jersey:13 years:1
+imoore,isaiah moore,,2,jersey:30 years:1
+ipiper,ian piper,,3,city:pittsburgh jersey:25 years:1
+isweeney,ian sweeney,,3,city:portland;seattle jersey:33;77 years:5
 itan,isaac tan,,3,city:seattle jersey:6 years:1
+itran,ivan tran,,2,city:boston years:6
 ivilevac,ian vilevac,,1,years:1
 iwallace,ian wallace,,3,city:ottawa jersey:14 years:2
 iwoldemar,isaac woldemariam,,2,city:seattle years:1
+iyudkovic,ilya yudkovich,,3,city:boston jersey:25 years:3
 jabel,justin abel,,3,city:colorado jersey:12 years:1
 jaceil,javid aceil,,2,city:san diego years:1
 jallen,justin allen,,3,city:raleigh jersey:1 years:2
-jalorro,josue alorro,,2,city:new york jersey:30
-janthuvan,jacob anthuvan,,1,years:2
-jbanks,jarrod banks,vault,1,years:1
+jalorro,josue alorro,,3,city:new york jersey:30 years:3
+janthuvan,jacob anthuvan,,2,jersey:29 years:2
+jartz,jacob artz,,2,jersey:21 years:2
+jbanks,jarrod banks,,1,years:1
 jbansfiel,johnny bansfield,,2,jersey:5 years:1
+jbaxandal,julian baxandall,,1,years:1
 jbembenek,jack bembenek,,1,years:1
 jbenson,jordan benson,,3,city:madison jersey:13 years:1
-jbernat,julien bernat,,3,city:montreal jersey:20 years:4
+jbernat,julien bernat,,3,city:montreal jersey:20 years:5
 jblackman,jacob blackman,,2,jersey:64 years:3
 jboezi,john boezi,,2,city:atlanta years:1
-jbranson,jeremiah branson,,2,jersey:4 years:1
+jbolton,jesse bolton,,2,city:seattle years:1
+jboychuk,jay boychuk,,2,city:seattle jersey:89
+jbranson,jeremiah branson,,2,jersey:4 years:4
+jbranson1,joseph branson,,1,years:1
 jbrissett,jakob brissette,,3,city:montreal jersey:86 years:4
-jburnett,justin burnett,,3,city:atlanta jersey:5 years:2
-jburril,jeremy burril,,3,city:chicago jersey:12 years:1
+jburnett,justin burnett,,3,city:atlanta jersey:5;7 years:4
+jburril,jeremy burril,,3,city:chicago jersey:12 years:2
+jburris,jeffrey burris,,2,jersey:26 years:2
 jbuss,john buss,,3,city:pittsburgh jersey:99 years:1
-jcarrico,jake carrico,,3,city:madison jersey:3 years:4
-jcarrprie,james carr-pries,,2,jersey:42 years:1
-jcecil,john cecil,,1,jersey:1
+jbutrica,jake butrica,,3,city:philadelphia jersey:70 years:1
+jcarreiro,jac carreiro,,3,city:boston jersey:19 years:4
+jcarrico,jake carrico,,3,city:madison jersey:3 years:5
+jcarrprie,james carr-pries,,3,city:toronto jersey:42 years:2
+jcasas,jedi casas,,3,city:oregon jersey:0 years:1
+jcaswell,joel caswell,,3,city:oregon jersey:55 years:1
+jcecil,john cecil,,2,city:austin jersey:1
+jcercello,joe cercello,,3,city:chicago jersey:23 years:4
+jchampagn,jean-levy champagne,,2,city:montreal years:2
+jcherwink,justine cherwink,,1,years:1
+jcheung,justin cheung,,2,city:toronto years:2
 jclarke,jimmy clarke,,3,city:philadelphia jersey:56 years:1
-jclary,jacob clary,,2,city:tampa bay jersey:11
-jclose,joel close,,3,city:indianapolis jersey:77 years:3
+jclary,jacob clary,,3,city:tampa bay jersey:11 years:2
+jclose,joel close,,3,city:indianapolis jersey:77 years:4
+jclutton,joel clutton,,2,jersey:19;77 years:1
 jclyde,john clyde,,3,city:austin jersey:25 years:3
+jcohen,jesse cohen,,3,city:san diego jersey:84 years:3
+jcoleman,jake coleman,,1,years:1
+jconroy,jack conroy,,2,city:boston years:1
 jcostello,jonathan costello,,2,city:dallas years:1
-jcowan,jacob cowan,,3,city:new york jersey:24 years:1
+jcowan,jacob cowan,,3,city:new york jersey:24 years:2
 jcretella,joey cretella,,3,city:raleigh jersey:12 years:1
-jcubitt,joseph cubitt,,1,years:3
-jdahl,james dahl,,1,years:1
+jcubitt,joseph cubitt,,3,city:indianapolis jersey:1;51 years:5
+jcwengros,jesse cwengros,,1,years:1
+jdahl,james dahl,,2,jersey:3 years:1
 jdasilva,jose dasilva,,2,city:philadelphia years:1
-jdeamicis,jon deamicis,,3,city:dallas jersey:50 years:1
-jdean,jace dean,truck stop,2,jersey:92 years:2
-jdean1,jasper dean,,3,city:seattle jersey:20 years:1
+jdavis,jacob davis,,1,years:1
+jdeamicis,jon deamicis,,3,city:dallas jersey:50 years:2
+jdean,jace dean,,2,jersey:92 years:2
+jdean1,jasper dean,,2,city:seattle years:1
 jdelgado,jorge delgado,,2,jersey:33 years:2
 jdewitt,jordan dewitt,,2,jersey:98 years:1
 jdick,jason dick,,2,city:dallas years:1
-jdowling,jack dowling,,3,city:austin jersey:12 years:3
+jdowling,jack dowling,,2,city:austin years:2
 jduennebe,jace duennebeil,,3,city:salt lake jersey:22 years:4
 jdummeldi,jacob dummeldinger,,1,years:1
 jduquette,jacob duquette,,3,city:montreal jersey:29 years:4
+jerb,jonah erb,,2,jersey:99 years:2
 jfairfax,jacob fairfax,,3,city:raleigh jersey:20 years:5
+jfaries,jordan faries,,1,city:montreal
+jfeagans,jayden feagans,,3,city:chicago jersey:40 years:1
 jfella,jacob fella,,3,city:indianapolis jersey:52 years:1
 jfey,jon fey,,3,city:atlanta jersey:42 years:1
 jflowers,jacob flowers,,2,city:indianapolis years:1
 jfloyd,jake floyd,,3,city:dallas jersey:0 years:2
+jfranklin,james franklin,,2,jersey:84 years:3
+jfroude,jay froude,,3,city:colorado jersey:2 years:6
 jgabella,joshua gabella,,2,jersey:19 years:1
-jgalle,jack galle,,3,city:indianapolis jersey:38 years:3
 jgao,jeff gao,,1,years:1
-jgolden,jonas golden,,2,city:seattle jersey:19
+jgiard,jeremie giard,,3,city:montreal jersey:62 years:3
+jgolden,jonas golden,,3,city:seattle jersey:19 years:1
 jgraber,josh graber,,2,jersey:5 years:1
+jgraham,jeff graham,,2,city:boston jersey:85
 jgreenber2,jesse greenberg,,1,jersey:4
-jgu,joseph gu,,1,years:1
+jgu,joseph gu,,2,jersey:14 years:1
+jhallett,jon hallett,,2,city:ottawa jersey:31
 jhanni,john hanni,,2,jersey:19 years:2
+jharris,jeremy harris,,1,years:1
 jhatchett,jack hatchett,,3,city:portland jersey:27 years:1
-jhau,jacky hau,,1,jersey:15
-jhavey,jack havey,,2,jersey:26 years:5
+jhau,jacky hau,,2,city:toronto jersey:15
+jhavey,jack havey,,3,city:detroit jersey:26 years:6
 jheglie,jackson heglie,,2,jersey:77 years:1
 jhelton,jonathan helton,,2,jersey:0 years:2
+jhenry,jackson henry,,1,years:1
+jhess,jeremy hess,,2,jersey:3 years:2
+jhighsmit,james highsmith,,2,jersey:30 years:1
 jhill,jeremy hill,,3,city:ottawa;toronto jersey:95 years:2
-jhoffman,jonny hoffman,,2,jersey:24 years:3
-jhustad,jason hustad,,2,jersey:9 years:4
+jhoffman,jonny hoffman,,2,jersey:24 years:5
+jhoffman1,jacob hoffman,,2,jersey:27 years:1
+jhuang,john huang,,1,city:toronto
+jhustad,jason hustad,,3,city:dallas jersey:9 years:4
 jhuynh,jason huynh,,2,city:toronto jersey:83
 jivey,james ivey,,1,years:1
-jjohnson,jesse johnson,,3,city:chicago jersey:0 years:3
-jjohnson1,jake johnson,,2,city:portland years:2
-jkaplan,jacob kaplan,,2,city:austin years:1
+jjahnke,jacob jahnke,,1,years:1
+jjeffery,jordan jeffery,,2,city:new york years:1
+jjohnson,jesse johnson,,3,city:chicago jersey:0 years:6
+jjohnson1,jake johnson,,3,city:portland jersey:0 years:2
+jjoshi,jack joshi,,3,city:houston jersey:27 years:1
+jkaplan,jacob kaplan,,3,city:austin;boston jersey:18 years:2
 jkauffman,jamie kauffman,,3,city:seattle jersey:95 years:2
-jkeller,justin keller,,2,city:philadelphia years:2
-jkelly,jack kelly,,3,city:madison jersey:77 years:3
-jkempe,jason kempe,,2,city:indianapolis years:3
-jkempe1,jack kempe,,2,city:indianapolis years:2
-jkennedy,joey kennedy,,2,city:chicago years:1
+jkautz,josh kautz,,1,years:2
+jkeller,justin keller,,3,city:philadelphia jersey:12 years:5
+jkempe,jason kempe,,2,city:indianapolis years:4
+jkempe1,jack kempe,,2,city:indianapolis years:3
 jkenniv,jake kenniv,,2,jersey:15 years:4
-jkerr,jordan kerr,,3,city:salt lake jersey:66 years:5
+jkerr,jordan kerr,,3,city:salt lake jersey:66 years:6
+jkeusch,jeremy keusch,,3,city:austin;indianapolis jersey:21 years:3
 jkinde,jordan kinde,,1,years:1
-jklane,josh klane,,2,jersey:29 years:3
+jkinzel,jay kinzel,,2,jersey:3 years:1
+jkittlese,james kittlesen,,2,jersey:34 years:1
+jklane,josh klane,,2,jersey:29 years:6
 jkloss,james kloss,,3,city:houston jersey:13 years:3
-jknopf,jeremy knopf,,3,city:colorado jersey:25;78 years:5
+jknopf,jeremy knopf,,3,city:colorado jersey:25;78 years:6
+jkrebs,jolie krebs,,2,jersey:24 years:1
 jkrugler,jack krugler,,2,city:atlanta years:1
-jkurmanfa,jonah kurman-faber,,1,years:1
+jkurmanfa,jonah kurman-faber,,3,city:boston jersey:17 years:1
 jlam,jason lam,,2,city:toronto jersey:6
-jlane,jacob lane,,3,city:tampa bay jersey:22 years:2
 jlaney,john laney,,1,years:1
-jlaney1,john laney,,1,years:1
-jlangdon,jeremy langdon,,3,city:atlanta jersey:20 years:4
+jlaney1,john laney,,1,years:2
+jlangdon,jeremy langdon,,3,city:atlanta jersey:20 years:5
 jleibfort,joe leibforth,,3,city:madison jersey:64 years:2
+jlightner,joshua lightner,,3,city:dc jersey:10 years:1
 jlithio,john lithio,,3,city:chicago;new york jersey:54 years:4
 jlochhead,jake lochhead,,2,city:ottawa jersey:1
 jlontoc,jigo lontoc,,2,jersey:67 years:1
+jlouie,jacob louie,,1,years:1
+jluo,justin luo,,2,city:toronto jersey:11
+jlyle,jonathan lyle,,1,years:2
+jmalenfan,jonah malenfant,,2,jersey:25 years:1
 jmalks,jonny malks,,2,jersey:53 years:4
-jmarsh1,john marsh,,3,city:chicago jersey:20 years:1
-jmast,jonathan mast,,3,city:pittsburgh jersey:2 years:1
+jmarsh1,john marsh,,3,city:chicago jersey:20 years:2
+jmaskalun,jeff maskalunas,,1,city:madison
+jmattes,john mattes,,1,city:seattle
 jmcclean,james mcclean,,2,city:toronto years:2
-jmcdonnel,john mcdonnell,,2,jersey:80 years:1
+jmcdonnel,john mcdonnell,,2,jersey:80 years:2
+jmcguinne1,jackson mcguinness,,2,city:boston years:1
+jmcgurrin,jonathan mcgurrin,,3,city:san diego jersey:41 years:1
+jmckeen,jason mckeen,,1,jersey:64
 jmckisic,josh mckisic,,3,city:tampa bay jersey:28 years:1
+jmclaughl,jade mclaughlin,,2,jersey:14 years:1
 jmecham,justin mecham,,1,years:1
 jmeron,jaret meron,,2,city:toronto jersey:9
 jmieser,jibran mieser,,3,city:new york jersey:66 years:1
 jmills,justin mills,,1,years:1
-jmolder,joe molder,,2,city:pittsburgh years:3
-jmoore1,josh moore,,3,city:portland jersey:12 years:4
+jmolder,joe molder,,2,city:pittsburgh years:4
 jmorrow,jared morrow,,1,city:toronto
+jmouw,jacob mouw,,3,city:raleigh jersey:9 years:2
 jmunoz,jonah munoz,,3,city:ottawa jersey:24 years:1
-jnissen,jacques nissen,,2,jersey:24 years:5
-jnordgren,jeff nordgren,,1,years:1
-joravic,jeffrey oravic,,1,city:atlanta
+jmurray,jake murray,,3,city:pittsburgh jersey:14 years:2
+jnethercu,jonathan nethercutt,,3,city:colorado jersey:7 years:4
+jnissen,jacques nissen,,2,jersey:24 years:6
+jnorden1,jeremy norden,,3,city:seattle jersey:42 years:1
+jnordgren,jeff nordgren,,2,city:raleigh years:2
+joravic,jeffrey oravic,,2,city:atlanta years:1
 jortiz,javier ortiz,,2,jersey:9 years:1
 jpadgett,josiah padgett,,2,jersey:15 years:1
-jpark,jack park,,2,jersey:66 years:1
+jpark,jack park,,3,city:toronto jersey:66 years:2
 jpatel,jup patel,,1,years:1
 jpeeters,joost peeters,,1,years:1
-jperez,jaime perez,,3,city:tampa bay jersey:8 years:1
-jperivier,jacques perivier,,2,city:atlanta years:2
+jperez,jaime perez,,3,city:tampa bay jersey:8 years:2
+jperivier,jacques perivier,,3,city:atlanta jersey:21 years:2
 jperticon,justin perticone,,2,jersey:2 years:1
-jpeterson,john peterson,,1,years:1
+jpeterson,john peterson,,2,jersey:0 years:1
+jpodnar,justin podnar,,3,city:toronto jersey:0 years:1
 jpoe,james poe,,1,years:1
-jpolk,jakeem polk,,3,city:atlanta jersey:14 years:2
+jpolk,jakeem polk,,3,city:atlanta jersey:14 years:5
 jpoterack,josh poterack,,2,jersey:9 years:1
 jpotts,jackson potts,,3,city:austin jersey:28 years:5
-jqueckboe,jordan queckboerner,,3,city:san diego jersey:33 years:3
-jrandolph,john randolph,,3,city:new york jersey:34 years:4
+jqueckboe,jordan queckboerner,,3,city:san diego jersey:33 years:4
+jrandolph,john randolph,,3,city:new york jersey:34 years:5
+jrapisura,june rapisura,,2,city:seattle jersey:15
 jreeves,julian reeves,,2,jersey:20 years:1
 jregruth,jared regruth,,1,jersey:35
+jrhyne,jordan rhyne,,2,city:philadelphia years:3
 jrollins,jacob rollins,,2,city:pittsburgh years:1
-jrubinmil,jake rubin-miller,,3,city:chicago;madison jersey:75 years:1
+jrominski,jonah rominski,,1,years:1
+jrubinmil,jake rubin-miller,,3,city:chicago;madison jersey:75 years:3
 jrussnogl,james russnogle,,1,years:1
-jsames,jacob sames,,2,city:austin years:3
+jsaad,joshua saad,,1,years:1
+jsalazar,jordan salazar,,2,jersey:24 years:4
+jsames,jacob sames,,3,city:austin jersey:9 years:3
 jsaunt,julian saunt,,2,jersey:23 years:1
-jschmiesi,jude schmiesing,,2,city:pittsburgh years:1
+jscheinbe,jared scheinberg,,1,years:1
+jschmiesi,jude schmiesing,,2,city:pittsburgh years:2
+jschubert,jeffery schubert,,2,city:indianapolis years:1
+jsears,josef sears,,1,years:1
 jsefton,joe sefton,,3,city:austin jersey:24 years:1
-jshanahan,jack shanahan,,3,city:chicago jersey:7 years:5
-jshelley,john shelley,alamode,2,jersey:47 years:2
+jshanahan,jack shanahan,,3,city:chicago jersey:7 years:6
+jshelley,john shelley,,2,jersey:47 years:2
+jshorey,james shorey,,2,jersey:27 years:1
 jshoyer,jake shoyer,,3,city:seattle jersey:15 years:3
 jsickles,john sickles,,2,city:colorado years:1
 jsimonell,joe simonelli,,1,years:1
-jsmith,jacob smith,revolver,2,jersey:12 years:1
-jsnchal,julien sénéchal,,3,city:montreal jersey:5 years:2
-jsnyder,jon snyder,,2,city:portland years:1
-jstangosb,jonah stang-osborne,,2,jersey:15 years:1
-jsteslick,jake steslicki,,2,city:chicago years:3
+jsingleto,josh singleton,,2,jersey:14 years:1
+jsnchal,julien senechal,,3,city:montreal jersey:5 years:2
+jsnyder,jon snyder,,3,city:oregon;portland jersey:11 years:3
+jstangosb,jonah stang-osborne,,3,city:boston jersey:15 years:2
+jstearns,jackson stearns,,2,city:oakland jersey:21
+jsteslick,jake steslicki,,3,city:chicago jersey:10 years:4
 jstubbs,john stubbs,,2,city:atlanta years:2
-jsykora,james sykora,yogosbo,2,city:madison years:1
-jtan1,john tan,,3,city:madison jersey:49 years:5
-jtapper,jason tapper,,2,city:boston years:2
-jtaylor3,jordan taylor,gamble,1,years:1
-jthorne,jake thorne,,2,jersey:23 years:2
-jtom,jasper tom,,2,jersey:57 years:4
+jsunukjia,joseph sunukjian,,2,jersey:42 years:1
+jsykora,james sykora,,3,city:madison jersey:24 years:3
+jtan1,john tan,,3,city:madison jersey:49 years:6
+jtapper,jason tapper,,2,city:boston years:3
+jtaylor1,jake taylor,,1,jersey:0
+jthorne,jake thorne,,2,jersey:16;23 years:3
+jthornton,jesse thornton,,3,city:philadelphia jersey:9 years:1
+jtom,jasper tom,,2,jersey:57 years:6
 jtowle,jimmy towle,,3,city:pittsburgh jersey:48 years:5
-jvallee,jason vallee,,3,city:chicago jersey:94 years:5
+jtschida,jason tschida,,2,jersey:66 years:1
+jturner,josh turner,,1,city:atlanta
+jvallee,jason vallee,,3,city:chicago jersey:94 years:6
 jvenegas,joshua venegas,,3,city:indianapolis jersey:99 years:1
-jwahl,jake wahl,,3,city:indianapolis jersey:8 years:3
+jverzuh,jack verzuh,,2,city:seattle years:1
+jwahl,jake wahl,,3,city:indianapolis jersey:8 years:4
+jwaite,jared waite,,1,years:1
 jwashingt,justin washington,,2,city:seattle years:1
-jwelkener,joseph welkener,,3,city:dallas jersey:32 years:1
-jwellers,john wellers,,1,years:2
+jwelkener,joseph welkener,,3,city:dallas jersey:32 years:3
+jwellers,john wellers,,1,years:3
 jwells,jensen wells,,3,city:salt lake jersey:23;5 years:3
+jwham,jacob wham,,3,city:madison jersey:12 years:4
+jwhealan,james whealan,,2,jersey:19 years:1
 jwherry,jason wherry,,1,years:1
 jwhite2,joe white,,3,city:chicago jersey:91 years:3
-jwilliams,jack williams,,2,city:new york years:3
+jwilliams,jack williams,,3,city:new york jersey:11 years:3
 jwillison,joel willison,,3,city:chicago jersey:5 years:2
-jwisner,jack wisner,,3,city:philadelphia jersey:14 years:1
-jwodatch1,jeff wodatch,,2,jersey:45 years:5
+jwisner,jack wisner,,3,city:philadelphia jersey:14 years:2
+jwodatch,john wodatch,,1,jersey:0
+jwodatch1,jeff wodatch,,2,jersey:45 years:6
 jwollin,justin wollin,,2,jersey:11 years:3
 jwooldrid,jack wooldridge,,3,city:dallas jersey:89 years:3
-jworthing,jake worthington,,3,city:austin jersey:81 years:5
+jworthing,jake worthington,,3,city:austin jersey:81 years:6
+jyaez,javier yanez,,2,jersey:70 years:1
+jyanez,javier yanez,,2,jersey:70 years:1
+jzdrodows,joshua zdrodowski,,2,city:austin jersey:99
 jzeidman,jason zeidman,,1,jersey:21
-jzhao,jeff zhao,,2,city:seattle years:2
+jzhao,jeff zhao,,3,city:seattle jersey:99 years:2
 jziemer,jack ziemer,,1,jersey:39
-kalexande,kelsen alexander,,3,city:madison jersey:55 years:1
+kadams,ken adams,,3,city:madison jersey:10;15 years:4
+kalexande,kelsen alexander,,3,city:madison jersey:55 years:5
+kallen,kiron allen,,3,city:raleigh jersey:14 years:1
 kanthony,kevin anthony,,2,jersey:35 years:1
-kbrown,kevin brown,,1,years:1
+kbauer,kolbe bauer,,3,city:austin jersey:1 years:2
+kblaeuer,kyle blaeuer,,2,city:oregon years:2
 kcampbell,kayle campbell,,3,city:ottawa jersey:77 years:2
-kcantal,kyle cantal,,2,city:ottawa years:1
+kcantal,kyle cantal,,3,city:ottawa jersey:88 years:1
+kcard,koven card,,1,years:1
 kcarroll,kegan carroll,,1,years:1
-kchunmoy,kainoa chun-moy,,3,city:madison;philadelphia jersey:93 years:4
+kcharnock,kieran charnock,,2,city:toronto jersey:22
+kchristia,kevin christian,,3,city:portland jersey:21 years:1
+kchunmoy,kainoa chun-moy,,3,city:madison;philadelphia jersey:5;93 years:4
 kcombs,kaenan combs,,2,jersey:8 years:1
-kconniff,kyle conniff,,2,jersey:13 years:1
+kconniff,kyle conniff,,3,city:madison jersey:13 years:2
+kcreed,kai creed,,2,jersey:24 years:1
 kdaftari,kamron daftari,,3,city:raleigh jersey:52 years:2
+kdeangeli,kevin deangelis,,2,jersey:16 years:1
 kdew,kyle dew,,2,jersey:98 years:1
-kekwurtze,karl ekwurtzel,,3,city:atlanta jersey:32 years:2
-kfarrell,kevin farrell,,2,jersey:36 years:1
-kfroebe,kaden froebe,,1,years:1
+kdreger,kyle dreger,,2,city:madison years:1
+kekwurtze,karl ekwurtzel,,3,city:atlanta jersey:32 years:3
+kelsalaam,khalif el-salaam,,3,city:san diego;seattle jersey:99 years:6
+kfroebe,kaden froebe,,1,years:2
 kfurdella,kenny furdella,,3,city:pittsburgh jersey:14 years:1
-kgoldberg,kevin goldberg,,2,jersey:17 years:2
+kgibson,kurt gibson,,3,city:chicago jersey:1 years:1
+kgoldberg,kevin goldberg,,2,jersey:17 years:5
 kgomatam,krishna gomatam,,3,city:san diego jersey:24 years:1
 kgreene,ki greene,,3,city:atlanta jersey:77 years:1
+kgroulx,kevin groulx,,2,city:montreal jersey:80
 khancock,kyle hancock,,1,years:1
-kharrison,kris harrison,,1,years:2
-khealey,kevin healey,,2,jersey:18 years:5
-khenke,kyle henke,,3,city:austin jersey:23 years:4
+kharrison,kris harrison,,2,jersey:3 years:2
+khealey,kevin healey,,2,jersey:18 years:6
+khelton,kaela helton,,2,jersey:5 years:1
+khenke,kyle henke,,3,city:austin jersey:23 years:5
+kherrera,kevin herrera,,2,city:chicago years:1
 khuang,kelvin huang,,3,city:toronto jersey:26 years:4
+khuang1,kai huang,,3,city:toronto jersey:13 years:1
+khunter,kyle hunter,,2,city:ottawa jersey:10
 kjay,kevin jay,,3,city:toronto jersey:4 years:4
+kjohnson1,kristian johnson,,2,jersey:15;6 years:5
+kjohnson3,kevin johnson,shame.,1,years:1
 kkawaguch,kenta kawaguchi,,2,jersey:9 years:1
 kkhangaon,kushal khangaonkar,,2,jersey:6 years:2
-kkingma,karl kingma,,2,city:indianapolis years:1
+kkhoroujn,kyra khoroujnikova,,2,jersey:22 years:1
+kkingma,karl kingma,,3,city:indianapolis jersey:11 years:1
 kkolafa,kyle kolafa,,1,years:2
-kland,kevin land,,2,jersey:18 years:3
-klaneiii,kenny lane iii,,2,city:seattle years:2
-klaurence,keenan laurence,,3,city:colorado jersey:51 years:1
-klew,kyle lew,,2,jersey:50 years:1
-klin,kevin lin,,1,jersey:7
+kland,kevin land,,3,city:houston jersey:18 years:3
+klaneiii,kenny lane iii,,2,city:seattle years:3
+klaurence,keenan laurence,,3,city:colorado;oakland jersey:51 years:3
+klew,kyle lew,,2,jersey:50 years:2
+klin,kevin lin,,2,jersey:7 years:1
+kmallany,kelsi mallany,,2,city:toronto years:1
 kmarcus,kai marcus,,3,city:madison jersey:97 years:1
-kmarshall,kai marshall,,3,city:colorado jersey:31 years:4
+kmarshall,kai marshall,,3,city:colorado;dallas jersey:31 years:4
 kmaurer,kaplan maurer,,2,jersey:2 years:2
-kmccarter,keali mccarter,,2,jersey:3 years:2
-kmcrae,keith mcrae,,3,city:toronto jersey:41 years:3
-knicholl,kevin nicholl,,1,years:5
+kmccarter,keali mccarter,,3,city:oregon;portland jersey:3 years:2
+kmccracke,kobi mccracken,,3,city:san diego jersey:28 years:2
+kmcrae,keith mcrae,,3,city:toronto jersey:41 years:5
+kmorris,kade morris,,3,city:austin jersey:45 years:2
+knicholl,kevin nicholl,,3,city:pittsburgh jersey:45 years:6
 knoh,ken noh,,1,years:1
-knorth,keegan north,,2,city:chicago years:3
-kobrien,kevin obrien,magma bears,1,years:1
-kpew,kimball pew,,2,city:salt lake years:1
-kpignone,kevin pignone,,2,jersey:51 years:2
-kquinlan,kevin quinlan,,3,city:montreal jersey:81 years:3
-kraslan,kamal raslan,,2,city:seattle jersey:36
-krichards,kevin richardson,,2,jersey:19 years:2
+knorth,keegan north,,3,city:chicago jersey:15 years:4
+korser,keaton orser,,3,city:seattle jersey:6 years:1
+kpettitsc,kevin pettit-scantling,,3,city:madison jersey:80 years:2
+kpew,kimball pew,,2,city:salt lake years:2
+kquinlan,kevin quinlan,,3,city:montreal jersey:81 years:5
+kraslan,kamal raslan,,3,city:seattle jersey:36 years:2
+krichards,kevin richardson,,3,city:dallas jersey:19 years:2
 krobertso,khirode robertson,,3,city:ottawa jersey:8 years:1
 kromard,kyle romard,,1,years:1
-krubin,kyle rubin,,2,jersey:18 years:4
+krubin,kyle rubin,,2,jersey:18 years:5
 krutledge,kyle rutledge,,2,city:chicago years:2
+kschniede,kai schniedergers,,3,city:new york jersey:58 years:1
+kshin,kunwoo shin,,1,years:1
+ksmart,kodi smart,,3,city:seattle jersey:2 years:1
+kstaber,karl staber,,2,city:salt lake years:1
+ksuelflow,kyle suelflow,,1,years:2
 ksugahara,kota sugahara,,3,city:seattle jersey:74 years:1
-ktien,kevin tien,,1,years:2
+kthiers,kaiden thiers,,2,jersey:20 years:1
+ktien,kevin tien,,2,jersey:7 years:2
 ktong,kevin tong,,1,jersey:13
 kvanroosm,kevin van roosmalen,,2,jersey:21 years:1
-kversteeg,kevin versteeg,,1,years:2
+kversteeg,kevin versteeg,,2,jersey:51 years:2
+kvezina,kyle vezina,,1,jersey:15
 kweinberg,kyle weinberg,,3,city:salt lake jersey:34 years:4
-kwilliams,kelvin williams,,3,city:atlanta jersey:11 years:1
+kwilliams,kelvin williams,,3,city:atlanta jersey:11 years:2
 kyoung,kydan young,,2,jersey:85 years:1
-lambrose,lukas ambrose,,1,years:2
-lbertonci,louie bertoncin,,3,city:seattle jersey:63 years:1
+lambrose,lukas ambrose,,2,city:seattle years:3
+lbarry,luke barry,,2,jersey:16 years:1
+lbecker,liam becker,,3,city:pittsburgh jersey:13 years:1
+lbertonci,louie bertoncin,,3,city:seattle jersey:63 years:3
 lbestian,liam bestian,,1,years:1
 lbleers,luke bleers,,1,years:2
+lblooston,leo blooston,,2,city:boston years:1
+lblumenfe,lev blumenfeld,,1,years:1
 lbrennan,luke brennan,,3,city:chicago jersey:74 years:2
-lcall,logan call,,1,years:3
+lcall,logan call,,1,years:4
+lchristie,lucius christie,,2,city:pittsburgh years:1
 lclarke,logan clarke,,2,jersey:18 years:2
-lconiaris,lucas coniaris,,2,jersey:8 years:5
+lcomire,luc comire,,3,city:toronto jersey:15;5 years:5
+lconiaris,lucas coniaris,,3,city:indianapolis jersey:8 years:5
+ldecraene,lander decraene,,3,city:boston jersey:50 years:1
+ldecter,leo decter,,2,jersey:13 years:2
 ldiehl,logan diehl,,2,jersey:23 years:2
-lfitzpatr,langley fitzpatrick,,2,city:seattle years:1
-lgosart,louis gosart,,1,years:1
-lgrench,lincoln grench,,2,jersey:77 years:2
-lhaberfie,liam haberfield,,3,city:atlanta;new york jersey:37 years:3
-lharwood,luca harwood,,1,years:3
+levans,landon evans,,1,years:1
+lfitzpatr,langley fitzpatrick,,2,city:seattle years:2
+lgivol,lior givol,,1,jersey:0
+lgordon,leo gordon,,2,jersey:47 years:2
+lgosart,louis gosart,,1,years:2
+lgovedic,luka govedic,,3,city:boston jersey:99 years:1
+lgrench,lincoln grench,,2,jersey:77 years:3
+lhaberfie,liam haberfield,,3,city:atlanta;new york jersey:37 years:4
+lharwood,luca harwood,,2,city:boston years:4
 lhenry,lucas henry,,2,jersey:82 years:2
+lhuffman,luke huffman,,2,jersey:34 years:2
 ljacobs,levi jacobs,,3,city:indianapolis jersey:7 years:1
+ljay,liam jay,,1,years:1
+lkeillor,logan keillor,,2,city:toronto years:1
+lkinney,logan kinney,,1,jersey:29
+llavoie,landon lavoie,,2,jersey:21 years:2
+llohre,lisi lohre,,2,jersey:42 years:1
+lmargison,lochlan margison,,1,years:1
 lmarks,luke marks,,3,city:madison jersey:74 years:5
 lmarx,leandro marx,,2,city:portland years:2
-lmcclamro,lukas mcclamrock,,3,city:atlanta jersey:45 years:4
+lmcclamro,lukas mcclamrock,,3,city:atlanta jersey:45;8 years:5
 lmcdonald,liam mcdonald,,3,city:madison jersey:22 years:2
 lmckeown,liam mckeown,,3,city:montreal jersey:69 years:2
-lnorby,luke norby,,2,jersey:22 years:1
-lpaz,luis paz,,1,years:1
-lpierson,leo pierson,,2,jersey:78 years:2
-lrehfuss,luke rehfuss,,2,jersey:11 years:5
+lmonteneg,lina montenegro,,2,jersey:14 years:1
+lmorse,linda morse,,2,jersey:21 years:1
+lnorby,luke norby,,3,city:dallas jersey:22 years:1
+lpaz,luis paz,,2,jersey:53 years:1
+lpierson,leo pierson,,2,jersey:78 years:3
+lpruess,logan pruess,,2,city:madison years:1
+lreavy,lucas reavy,,1,years:1
+lrehfuss,luke rehfuss,,2,jersey:11 years:6
 lshank,landon shank,,2,jersey:4 years:1
-lsovellfe,leo sovell-fernandez,,2,jersey:30 years:2
-lstorm,lucas storm,,3,city:pittsburgh jersey:31 years:1
+lsovellfe,leo sovell-fernandez,,2,jersey:30 years:3
+lstahl,levi stahl,,1,years:1
+lstorm,lucas storm,,3,city:pittsburgh jersey:31 years:2
 ltapper,levi tapper,,2,jersey:12 years:1
-lwebb,luke webb,,1,city:boston
+lthomas,luke thomas,,1,jersey:23
+luhl,lawrence uhl,,1,years:1
+lwarren,leo warren,,2,city:philadelphia years:1
+lwebb,luke webb,,2,city:boston jersey:0
 lyorgason,luke yorgason,,2,jersey:2 years:3
-mames,michael ames,,2,jersey:78 years:1
-marbutine,michael arbutine,,2,jersey:10 years:3
-marmour,matthew armour,,3,city:austin jersey:50 years:5
-marmstron,myles armstrong,,3,city:dallas jersey:2 years:1
-martis,martis artis,,2,city:portland years:2
-maverill,morey averill,,3,city:philadelphia;pittsburgh jersey:25 years:3
-mbaldauf,mark baldauf,,3,city:houston jersey:26 years:2
-mballman,matthew ballman,,2,jersey:47 years:1
+madams,marty adams,,2,jersey:12 years:3
+magee,mathieu agee,,3,city:colorado jersey:24 years:3
+mames,michael ames,,3,city:indianapolis jersey:78 years:2
+marbutine,michael arbutine,,2,jersey:10;13 years:3
+marmour,matthew armour,,3,city:austin jersey:50 years:6
+marmstron,myles armstrong,,3,city:austin;dallas jersey:2;22 years:4
+martis,martis artis,,3,city:portland jersey:98 years:3
+maugersem,malik auger-semmar,,3,city:montreal jersey:71 years:3
+maverill,morey averill,,3,city:philadelphia;pittsburgh jersey:14;25 years:3
+mawais,muhammad awais,,2,city:oakland years:1
+mbaldauf,mark baldauf,,3,city:houston jersey:26 years:3
+mballman,matthew ballman,,3,city:philadelphia jersey:47 years:1
 mbarowski,max barowski,,2,city:pittsburgh years:2
+mbeidler,marcus beidler,,2,jersey:9 years:1
 mbell,matthew bell,,2,jersey:78 years:1
+mbenjemaa,munir ben jemaa,,1,years:1
 mbode,matt bode,,2,jersey:79 years:1
-mbrichet,melvyn brichet,,2,city:montreal years:2
-mbrownlee,marques brownlee,,3,city:new york jersey:82 years:5
+mbrichet,melvyn brichet,,2,city:montreal years:3
+mbrisbois,michael brisbois,,3,city:seattle jersey:69 years:1
+mbrownlee,marques brownlee,,3,city:new york jersey:82 years:6
+mbruggema,michael bruggeman,,2,jersey:28 years:1
 mburton,mark burton,,2,city:seattle years:1
-mbustaman,martin bustamante,suny-buffalo (green eggs and ham),1,years:1
-mbuyco,michael buyco,,2,city:seattle jersey:29
-mchambers,matt chambers,,3,city:austin jersey:35 years:3
-mcharles,max charles,,1,city:philadelphia
-mchope,mace chope,,3,city:indianapolis jersey:11 years:2
+mbustaman,martin bustamante,,1,years:1
+mbuyco,michael buyco,,3,city:seattle jersey:29 years:1
+mcarpente,max carpenter,,1,years:1
+mcharles,max charles,,2,city:philadelphia years:2
+mchope,mace chope,,3,city:indianapolis jersey:0;11 years:3
 mcombs,max combs,,1,years:1
 mcooper,myles cooper,,2,city:pittsburgh years:2
-mdehlin,max dehlin,,1,years:3
+mcote,michael cote,,1,years:1
+mcrawford,matthew crawford,,3,city:oakland jersey:5 years:5
+mcrawford1,marshall crawford,,1,years:1
+mdavis,micah davis,,2,jersey:88 years:1
+mdehlin,max dehlin,,2,jersey:9 years:3
 mdia,moussa dia,,2,jersey:17 years:5
-mdillard,michael dillard,,3,city:pittsburgh jersey:65 years:5
+mdillard,michael dillard,,3,city:boston;pittsburgh jersey:65 years:6
+mdinges,marshall dinges,,1,jersey:6
 mdomingue,mateo dominguez,,2,jersey:24;48 years:3
+mdonohue,mark donohue,,2,city:boston;colorado years:2
+mdregni,marco dregni,,2,jersey:22 years:2
+mdunn,melissa dunn,,2,jersey:11 years:1
 meckert,manuel eckert,,3,city:seattle jersey:86 years:2
 medula,mahith edula,,2,city:pittsburgh years:1
-messer,matt esser,,1,years:2
-mevans,mark evans,,2,city:austin years:2
+messer,matt esser,,3,city:philadelphia jersey:10 years:3
 mfairley,michael fairley,,3,city:atlanta jersey:5 years:5
 mfedorenk,mark fedorenko,,3,city:pittsburgh jersey:7 years:1
 mfocchi,matteo focchi,,2,jersey:17 years:1
-mgaleanor,mauricio galeano rios,shift,1,years:1
-mgazzerro,mark gazzerro,,1,years:1
-mgibson,max gibson,,3,city:san diego jersey:99 years:3
-mglass,mica glass,,1,years:2
+mfredrick1,marcus fredrickson,,2,jersey:1 years:1
+mgaleanor,mauricio galeano rios,,1,years:1
+mgallant,martin gallant,,3,city:ottawa;toronto jersey:33 years:3
+mgazzerro,mark gazzerro,,2,jersey:15 years:1
+mgibson,max gibson,,3,city:san diego jersey:99 years:4
+mglass,mica glass,,2,city:chicago years:2
+mglazer,matthew glazer,,2,city:philadelphia jersey:14
+mgoderre,miguel goderre,,1,jersey:27
 mgouchoeh,matt gouchoe-hanas,,3,city:raleigh jersey:21 years:3
-mgrovic,miles grovic,,2,jersey:37 years:3
-mgubernic,matt gubernick,,3,city:chicago jersey:71 years:1
+mgubernic,matt gubernick,,3,city:chicago jersey:71 years:2
 mgulbrons,matthew gulbronson,,2,city:toronto jersey:77
-mhanscom,max hanscom,,1,jersey:96
-mhenke,mark henke,,3,city:austin jersey:3 years:4
+mgunter,matthew gunter,,1,years:1
+mhanscom,max hanscom,,2,jersey:96 years:2
+mhayes,michael hayes,,3,city:portland jersey:6 years:1
+mhead,madison head,,2,city:atlanta years:1
+mhecht,mac hecht,,2,jersey:74 years:2
+mhenke,mark henke,,3,city:austin jersey:3 years:5
+mhlavaty,michael hlavaty,,2,city:chicago years:1
 mhuang,michael huang,,3,city:san diego jersey:3 years:2
-mhume,maxwell hume,,2,jersey:9 years:4
+mhume,maxwell hume,,3,city:san diego jersey:9 years:4
 mhumm,michael-angelo humm,,3,city:atlanta jersey:83 years:1
+mimm,matthew imm,,1,years:1
 mjackson,matt jackson,,3,city:colorado jersey:6 years:5
-mjohnson,matthew johnson,,1,years:4
-mjohnson1,matt johnson,,1,years:1
-mjordan,michael jordan,,1,years:1
-mjunga,max junga,,3,city:madison jersey:23 years:1
+mjaffe,matt jaffe,,3,city:chicago jersey:42 years:2
+mjamison,matt jamison,,2,jersey:32 years:1
+mjarriel,megan jarriel,,2,jersey:5 years:1
+mjohnson1,matt johnson,,2,jersey:0 years:1
+mjordan,michael jordan,,2,jersey:10 years:1
+mjudeh,mohammed judeh,,2,city:tampa bay years:1
+mjunga,max junga,,3,city:madison jersey:23 years:2
 mkelley,mason kelley,,2,city:dallas years:1
-mkiyoi,michael kiyoi,,2,jersey:1 years:2
-mknowles,matthew knowles,,3,city:atlanta jersey:3 years:2
+mkissmann,matthew kissmann,,2,jersey:88 years:1
+mkiyoi,michael kiyoi,,2,jersey:1 years:3
+mknowles,matthew knowles,,3,city:atlanta jersey:3 years:3
 mkobyra,mike kobyra,,3,city:atlanta jersey:44 years:4
 mkrauss,matt krauss,,3,city:philadelphia jersey:77 years:1
-mlabar,matt labar,,3,city:new york jersey:2 years:5
+mlabar,matt labar,,3,city:new york jersey:2 years:6
 mladyman,mathew ladyman,,1,jersey:5
 mlam,matthew lam,,3,city:toronto jersey:6 years:1
+mle,martin le,,3,city:seattle jersey:0 years:2
 mlee,mike lee,,2,city:ottawa jersey:8
-mlee2,marcus lee,truck stop,2,jersey:28 years:1
 mlin,mark lin,,3,city:new york jersey:33 years:2
-mling,matthias ling,,3,city:new york jersey:84 years:1
-mlloyd,mark lloyd,,1,jersey:89
-mlun,michael lun,johnny bravo,2,city:colorado years:1
-mmarshall,malachi marshall,,2,jersey:2 years:4
+mling,matthias ling,,3,city:new york jersey:84 years:2
+mlittle,mat little,,2,city:boston jersey:11
+mlloyd,mark lloyd,,2,city:toronto jersey:89
+mlun,michael lun,,2,city:colorado years:1
+mlyle,matt lyle,,3,city:houston jersey:82 years:3
+mmaroon,michael maroon,,2,city:philadelphia years:2
+mmarshall,malachi marshall,,2,jersey:2;22 years:5
+mmastroma,mazden mastromauro,,3,city:san diego jersey:8 years:1
 mmatthis,michael matthis,,3,city:austin jersey:6 years:3
+mmattimor,maketa mattimore,,2,jersey:2 years:1
+mmcclella,mac mcclellan,,3,city:atlanta jersey:99 years:1
 mmcknight,matthew mcknight,,3,city:raleigh jersey:50 years:3
-mmendelev,mark mendelevitz,,2,jersey:86 years:1
-mmiller1,matt miller,,2,jersey:2;20 years:4
+mmendelev,mark mendelevitz,,2,jersey:86 years:3
+mmiller2,mike miller,,1,years:2
+mmoar,merick moar,,2,jersey:23 years:1
 mmontera,matthew montera,,1,years:2
-mneil,malachi neil,,2,jersey:18 years:2
+mmoran,mario moran,,2,jersey:10 years:1
+mneil,malachi neil,,2,jersey:18 years:3
 mnelson,matt nelson,,1,years:2
+mnighting,matthew nightingale,,2,jersey:0 years:4
 mobrien,matt obrien,,3,city:ottawa jersey:11 years:1
+molesen,maxwell olesen,,3,city:pittsburgh jersey:80 years:1
 moliart,marcel oliart,,3,city:pittsburgh jersey:47 years:2
-mosborne,marcel osborne,,2,jersey:42 years:3
+mosborne,marcel osborne,,3,city:san diego jersey:42 years:4
+mpardo,michael pardo,,2,city:chicago jersey:24
 mpetrovic,matej petrovic,,2,jersey:25 years:2
-mphilipso,mark philipson,,2,city:philadelphia years:1
-mpoe,michael poe,,3,city:atlanta jersey:69 years:1
+mpettenuz,max pettenuzzo,,3,city:toronto jersey:49 years:1
+mphilipso,mark philipson,,3,city:philadelphia jersey:14 years:1
+mpoe,michael poe,,3,city:atlanta jersey:69 years:2
 mramstad,max ramstad,,2,city:seattle years:1
 mravanell,milan ravenell,,2,jersey:89 years:3
-mraymond,malachi raymond,,3,city:boston jersey:24 years:2
-mrehder,matthew rehder,,3,city:seattle jersey:31 years:4
+mraymond,malachi raymond,,3,city:boston jersey:24 years:3
+mrehder,matthew rehder,,3,city:seattle jersey:14;31 years:4
 mreynolds,matt reynolds,,3,city:pittsburgh jersey:88 years:2
+mrick,maxwell rick,,3,city:boston jersey:7 years:1
+mrivas,milan rivas,,3,city:chicago jersey:27 years:6
 mrodrigue,mario rodriguez,,2,jersey:74 years:1
-msands,marc sands,,2,city:philadelphia years:2
+msands,marc sands,,3,city:philadelphia jersey:41 years:3
 msavage,mitchell savage,,1,years:1
-msayasene,mitchell sayasene,,1,jersey:21
-msheppard,max sheppard,,3,city:pittsburgh jersey:1 years:3
+msayasene,mitchell sayasene,,2,jersey:21 years:2
+mscott,mo scott,,1,jersey:20
+msheppard,max sheppard,,3,city:pittsburgh jersey:1 years:4
 mshiu,martin shiu,,2,city:toronto years:1
 msmith,matt smith,,1,years:4
-msommer,morgan sommer,,1,jersey:28
-msteiner,mitchell steiner,,2,jersey:12 years:4
-mstone,mason stone,,2,city:seattle jersey:21
+msnead,michael snead,,1,years:1
+msommer,morgan sommer,,2,jersey:28 years:2
+msotomayo,miguel sotomayor,,1,years:1
+mspanuth,malte spanuth,,3,city:atlanta jersey:31 years:1
+msteiner,mitchell steiner,,2,jersey:12 years:5
+mstone,mason stone,,3,city:seattle jersey:21 years:1
 msutton,matthew sutton,,2,city:dallas years:2
-mthahir,munis thahir,,1,years:1
-mthaw,marcus thaw,,1,years:2
+mthahir,munis thahir,,3,city:oakland jersey:12;91 years:2
+mthaw,marcus thaw,,2,jersey:66 years:2
 mthomas,matt thomas,,1,years:1
 mthorne,max thorne,,2,city:atlanta years:2
-mtran,michael tran,,3,city:san diego jersey:21 years:4
-mtrifilli,max trifillis,,3,city:philadelphia jersey:37 years:1
-mtucker,matt tucker,,3,city:madison jersey:6;9 years:2
-mverdugo,mario verdugo,,1,years:1
-mwalter,mick walter,,1,years:5
+mtran,michael tran,,3,city:san diego jersey:21 years:5
+mtrifilli,max trifillis,,3,city:philadelphia jersey:37;7 years:3
+mtucker,matt tucker,,3,city:madison jersey:6;9 years:3
+mturner,mark turner,,3,city:houston jersey:55 years:2
+mverdugo,mario verdugo,,2,jersey:3 years:1
+mwagner,micah wagner,,2,jersey:17;34 years:2
+mwalter,mick walter,,2,city:austin years:6
 mweaver,matthew weaver,,2,city:indianapolis years:2
 mweber1,michael weber,,2,jersey:84 years:1
-mweber2,mac weber,,2,city:madison years:3
-mwilson,matthew wilson,,1,years:1
+mweber2,mac weber,,2,city:madison years:4
+mwhitton,mark whitton,,2,jersey:88 years:2
+mwilbur,morgan wilbur,,3,city:portland jersey:15 years:1
+mwildmann,marshall wildmann,,1,years:1
+mwilken,matt wilken,,1,years:1
 mwuensch,mason wuensch,,1,years:1
-myorgason,mckay yorgason,,1,years:2
-mzetsch,mason zetsch,,3,city:austin jersey:29 years:2
+myorgason,mckay yorgason,,1,years:4
+mzetsch,mason zetsch,,3,city:austin jersey:29 years:5
 mzlatic,marijo zlatic,,2,city:toronto jersey:14
-naustin,nathaniel austin,,2,city:dallas years:1
-nbetsch,nicholas betsch,,2,jersey:2 years:5
+mzwerin,max zwerin,,2,jersey:13 years:1
+naugust,nate august,,3,city:boston jersey:88 years:1
+naustin,nathaniel austin,,3,city:dallas jersey:18 years:4
+nbacker,noah backer,,3,city:boston jersey:31;5 years:3
+nbanks,nick banks,,2,city:colorado years:1
+nbetsch,nicholas betsch,,2,jersey:2 years:6
 nbinuya,nico binuya,,2,city:seattle years:1
+nboddy,nate boddy,,1,jersey:8
 nboucher,nick boucher,,3,city:ottawa jersey:89 years:1
+nbridges,nathan bridges,,1,years:1
 nbuchholz,nathan buchholz,,3,city:colorado jersey:81 years:3
-nchambers,noah chambers,,2,city:austin years:3
-ncoolman,noah coolman,,3,city:colorado;seattle jersey:59 years:4
-ndahms,nicholas dahms,,1,years:1
-ndemorgan,nathan de morgan,,2,city:salt lake jersey:31
-ndigiorgi,nicholas digiorgio,,3,city:philadelphia jersey:45 years:3
-nfurrh,noah furrh,,1,years:1
+nbush,noah bush,,2,jersey:95 years:1
+nceluch,noah celuch,,3,city:pittsburgh jersey:5 years:5
+nchambers,noah chambers,,3,city:austin;dallas jersey:26 years:4
+nchampoux,nathan champoux,,2,jersey:42 years:1
+ncoolman,noah coolman,,3,city:colorado;seattle jersey:59 years:5
+ndahms,nicholas dahms,,2,jersey:14 years:2
+ndanduran,nathan dandurand,,1,years:1
+ndemorgan,nathan de morgan,,3,city:salt lake jersey:31 years:2
+ndigiorgi,nicholas digiorgio,,3,city:philadelphia jersey:45;81 years:6
+nfurrh,noah furrh,,2,city:houston years:1
+ngonder,nathan gonder,,2,jersey:15 years:1
+nhanson,noah hanson,,2,jersey:4 years:5
 nhirst,nathan hirst,,2,city:toronto jersey:27
-nho,nam ho,,1,city:toronto
-nhsieh,nathan hsieh,,2,city:toronto years:2
+nho,nam ho,,3,city:toronto jersey:28 years:1
+nhsieh,nathan hsieh,,2,city:toronto years:3
 nhuff,nathan huff,,3,city:salt lake jersey:1 years:4
 njohnson,nathan johnson,,1,years:1
 nkirchhof,nate kirchhofer,,2,jersey:37 years:1
 nlake,nico lake,,3,city:chicago jersey:6 years:1
-nleitmann,nicolas leitmann-niimi,colorado state (hibida),1,years:1
-nlittle,nate little,,3,city:philadelphia jersey:25 years:4
-nlong,nate long,,2,city:philadelphia years:3
-nloughran,nick loughran,,1,years:1
-nmbaevoge,nasser mbae vogel,,2,jersey:32 years:1
-nmock,nash mock,,1,jersey:13
-npatel,nick patel,,2,city:boston years:1
-npetersen,noah petersen,,2,city:madison jersey:38
-nphillips,nick phillips,,2,jersey:25 years:2
-nploeger,nathan ploeger,,1,years:4
+nleitmann,nicolas leitmann-niimi,,2,jersey:33 years:1
+nlemarois,nathanael le marois,,3,city:montreal jersey:55 years:1
+nlhamo,nima lhamo,,2,city:new york years:1
+nlittle,nate little,,3,city:philadelphia jersey:25 years:5
+nlong,nate long,,2,city:philadelphia years:4
+nlongo,nick longo,,3,city:chicago jersey:72 years:2
+nloughran,nick loughran,,3,city:austin;indianapolis jersey:20;70 years:4
+nlyle,nathan lyle,,1,years:2
+nmahan,nick mahan,,1,city:seattle
+nmbaevoge,nasser mbae vogel,,3,city:new york jersey:32 years:1
+nmccloske,nolan mccloskey,,3,city:philadelphia jersey:66 years:1
+nminfink,nanda min-fink,,3,city:colorado jersey:46 years:3
+nmock,nash mock,,3,city:austin jersey:13 years:2
+nnicol,noah nicol,,3,city:madison jersey:28 years:5
+nnishizak,noah nishizaki,,2,city:toronto years:1
+npatel,nick patel,dig,2,city:boston years:1
+npetersen,noah petersen,,3,city:madison jersey:38 years:2
+nploeger,nathan ploeger,,2,jersey:3 years:5
 npollack,noah pollack,,2,city:madison years:1
-npowell,noah powell,,3,city:austin jersey:24 years:4
+npowell,noah powell,,3,city:austin;houston jersey:24 years:5
 nprior,nathan prior,,2,jersey:43 years:1
+nranabhat,nico ranabhat,,3,city:madison jersey:19 years:6
 nsaul,noah saul,,3,city:raleigh jersey:24 years:2
-nsawyer,noah sawyer,michigan state (arc),1,years:1
+nsawyer,noah sawyer,,1,years:1
+nschmalen,nolan schmalenberger,,3,city:san diego jersey:6 years:1
+nsharma,nirek sharma,,1,jersey:55
 nstoppel,nolan stoppel,,3,city:seattle jersey:42 years:1
 nstuart1,nayland stuart,,2,jersey:25 years:1
-nsullivan,noah sullivan,iso atmo,1,years:1
+nsullivan,noah sullivan,,1,years:1
+nto,noriaki to,,3,city:new york jersey:27 years:5
 ntolfa,nick tolfa,,2,jersey:15 years:1
-nwahl,noah wahl,,2,city:indianapolis years:3
-nwilliams,nathan williams,romulus,1,years:1
-oarmstron,oakley armstrong,,2,city:dallas years:4
-oartus,oliver artus,,1,jersey:52
+nwahl,noah wahl,,2,city:indianapolis years:4
+oarmstron,oakley armstrong,,3,city:dallas jersey:44 years:5
+oartus,oliver artus,,3,city:san diego jersey:52 years:3
 obastien,olivier bastien,,1,city:montreal
-obinnun,oren binnun,,1,city:toronto
-obrown,oscar brown,,3,city:salt lake jersey:11 years:2
-oedwards,owen edwards,john doe,1,years:1
-ofay,oliver fay,,3,city:austin;new york jersey:41 years:4
-ofeder,oliver feder,,2,city:new york years:1
-ogamache,olivier gamache,,1,years:1
-oheh,owen heh,,2,jersey:19 years:1
+obinnun,oren binnun,,2,city:toronto years:2
+obrown,oscar brown,,3,city:salt lake jersey:11 years:3
+ocable,orion cable,,3,city:boston jersey:27 years:6
+ochartock,oliver chartock,,3,city:new york jersey:13 years:5
+ocordes,owen cordes,,2,city:boston years:2
+ocunningh,oliver cunningham,,2,jersey:52 years:1
+oedwards,owen edwards,,1,years:1
+oerdman,owen erdman,,2,city:philadelphia years:1
+ofeder,oliver feder,,2,city:austin;new york years:3
+ogamache,olivier gamache,,2,city:montreal years:1
+ograff,oscar graff,,3,city:boston jersey:13;7 years:5
+oheh,owen heh,,2,jersey:19 years:2
 ohines,ocean hines,,2,city:seattle years:2
-oimpas,orlando impas,,1,jersey:1
-ojohnson,owen johnson,,2,city:austin years:2
-okohut,oscar kohut,,1,city:new york
+oimpas,orlando impas,,3,city:oregon jersey:1 years:2
+ojohnson,owen johnson,,3,city:austin;dallas jersey:21 years:3
+okohut,oscar kohut,,3,city:new york jersey:2 years:2
+opoissant,owen poissant,,1,years:1
+ostonehou,oscar stonehouse,,3,city:toronto jersey:8 years:1
+ostout,owen stout,,2,jersey:85 years:1
+osuelflow,owen suelflow,,2,jersey:77 years:1
 owatt,owen watt,,3,city:pittsburgh jersey:22 years:1
 owilliams1,otis williams,,2,city:seattle years:1
+owoodward,owen woodward,,2,city:indianapolis years:2
+papplegat,paige applegate,,2,jersey:7 years:1
 parters,paul arters,,2,city:chicago years:4
-pbeckett,patrick beckett,,2,city:austin jersey:42
+pbeckett,patrick beckett,,3,city:austin jersey:42 years:1
+pbisson,philippe bisson,,2,city:montreal jersey:3
+pboerth,peter boerth,,3,city:boston jersey:11 years:4
 pbray,parker bray,,3,city:atlanta jersey:7 years:3
-pbuermeye,patrick buermeyer,,1,years:1
+pbuermeye,patrick buermeyer,,2,jersey:62 years:1
+pburt1,peter burt,,2,city:philadelphia years:1
 pcauchy,peter cauchy,,2,city:philadelphia years:1
-pdoughert,patrick dougherty,,1,city:atlanta
+pgagnon,philippe gagnon,,1,years:1
+pgeertzla,peter geertz-larson,,2,city:seattle years:2
 pgraffy,peter graffy,,3,city:chicago jersey:26 years:1
-phooley,paul hooley,,2,city:montreal years:3
-pjanas,pawel janas,,3,city:chicago jersey:55 years:5
-pjohnson,peter johnson,,3,city:seattle jersey:27 years:2
-pjoyce,phillip joyce,,2,jersey:12 years:2
+phooley,paul hooley,,2,city:montreal years:5
+phoward,parker howard,,2,city:seattle years:1
+pjanas,pawel janas,,3,city:chicago jersey:55 years:6
+pjoyce,phillip joyce,,2,jersey:0;12 years:4
 pkorolog,phillip korolog,,3,city:seattle jersey:39 years:2
-pkotz,peter kotz,,3,city:boston jersey:15 years:1
-pkrenik,paul krenik,,2,jersey:23 years:5
-plally,paul lally,,1,years:1
+pkotz,peter kotz,,3,city:boston jersey:15 years:2
+pkrenik,paul krenik,,2,jersey:23 years:6
+plally,paul lally,,2,jersey:27 years:3
 plaurie,payton laurie,,2,jersey:12 years:1
 plebourda,philippe le bourdais,,3,city:montreal jersey:30 years:2
-plenz,peter lenz,,3,city:san diego;seattle jersey:21 years:1
-pmans,peter mans,,1,years:3
+plenz,peter lenz,,3,city:san diego;seattle jersey:11;21 years:4
+pmans,peter mans,,2,jersey:13 years:4
 pmcmullen,patrick mcmullen,,3,city:pittsburgh jersey:9 years:1
-pmensah,paul mensah,,2,city:ottawa jersey:3
-powens,paul owens,,3,city:philadelphia jersey:88 years:3
-poyler,porter oyler,,3,city:salt lake jersey:17 years:4
-ppierce,player pierce,,3,city:atlanta jersey:4 years:1
-prenaud,paul renaud,,2,city:ottawa years:1
-pstobbe,porter stobbe,,1,years:1
+pmensah,paul mensah,,2,city:ottawa;toronto jersey:3
+powens,paul owens,,3,city:philadelphia jersey:88 years:6
+poyler,porter oyler,,3,city:salt lake jersey:17 years:5
+ppierce,player pierce,,3,city:atlanta jersey:4 years:3
+preimers,pablo reimers,,1,city:boston
+prenaud,paul renaud,,3,city:ottawa jersey:20 years:1
+psamuels,phillip samuels,,1,years:1
+pshering,pavel shering,,2,jersey:27 years:1
+pstarkel,paul starkel,,3,city:austin jersey:32 years:2
+pstobbe,porter stobbe,,2,city:salt lake years:2
 pxu,patrick xu,,1,years:2
-qbonnaud,quentin bonnaud,,2,city:montreal years:1
+qbonnaud,quentin bonnaud,,3,city:montreal jersey:44 years:2
 qbuermeye,quinn buermeyer,,3,city:portland jersey:62 years:4
-qgarner,quinn garner,,2,jersey:19 years:1
+qfiner,quinn finer,,3,city:colorado jersey:88 years:5
+qsnider,quinn snider,,2,jersey:98 years:4
+radkins,raekwon adkins,,3,city:oakland jersey:26 years:4
 ralin,rainor alin,,3,city:salt lake jersey:5 years:1
-rbacon,reid bacon,,2,jersey:14 years:2
+rallenson,ryan allenson,,1,years:1
+ralongi,robert alongi,,2,jersey:19 years:2
+rbacon,reid bacon,,3,city:austin jersey:14 years:2
 rbarker,ross barker,,3,city:chicago jersey:25 years:2
 rbergeron,rhys bergeron,,2,jersey:21 years:5
-rbowman,reese bowman,,2,city:austin years:3
+rbowman,reese bowman,,2,city:austin years:6
 rbrinn,reno brinn,,2,city:chicago jersey:17
+rbrowning,reed browning,,3,city:boston;salt lake jersey:33 years:2
 rbuckingh,ryan buckingham,,3,city:dallas jersey:35 years:1
 rcarvalho,rui carvalho,,2,city:toronto years:3
-rcastro,rafael castro,,1,years:1
-rchard,ryan chard,,1,years:1
-rdinger,ryan dinger,,3,city:boston jersey:12 years:1
-rduncan,reid duncan,,3,city:pittsburgh jersey:0 years:4
-rdunkerle,roan dunkerley,,2,jersey:66 years:2
+rcastro,rafael castro,,2,jersey:1;2 years:1
+rchard,ryan chard,,3,city:tampa bay jersey:75 years:1
+rdrost,ryan drost,,3,city:new york jersey:80 years:6
+rduncan,reid duncan,,3,city:pittsburgh jersey:0 years:5
+rdunkerle,roan dunkerley,,3,city:boston jersey:66 years:3
 rdusaire,ryan dusaire,,2,jersey:11 years:1
-rflick,ryan flick,,3,city:atlanta jersey:15 years:2
+rfennig,robyn fennig,,2,jersey:49 years:1
+rflamberg,ryan flamberg,,1,years:1
+rflick,ryan flick,,3,city:atlanta jersey:15 years:3
+rgouldrod,rodrigo gould rodriguez,,2,jersey:10 years:2
 rgretsch,rhys gretsch,,2,jersey:81 years:3
-rgross,rick gross,,2,city:indianapolis years:3
+rgross,rick gross,,3,city:indianapolis jersey:2 years:3
 rgrundy,royce grundy,,1,years:1
-rhausmann,robert hausmann,,2,city:austin years:2
+rhausmann,robert hausmann,,3,city:austin jersey:10 years:4
 rhiser,ryan hiser,,3,city:tampa bay jersey:7 years:2
-rholmes,ryan holmes,,1,years:2
-rhuang,ridge huang,,2,jersey:21 years:1
+rholmes,ryan holmes,,2,jersey:23 years:2
+rhuang,ridge huang,,3,city:oakland jersey:21 years:1
 rishaque,raheem ishaque,,2,jersey:42 years:1
-rjamieson,rowan jamieson,,1,years:1
-rkatsuta,ryoma katsuta,,2,city:seattle years:1
-rkindell,ryan kindell,,3,city:pittsburgh jersey:29 years:1
+rjamieson,rowan jamieson,,1,years:2
+rjimenez,rudy jimenez,,2,jersey:45 years:1
+rjones,robert jones,,1,years:1
+rkamrat,raina kamrat,,2,jersey:89 years:1
+rkindell,ryan kindell,,3,city:pittsburgh jersey:29 years:4
 rkirkpatr,ricky kirkpatrick,,2,jersey:3 years:1
-rlalondel,raphaël lalonde-landry,,3,city:montreal jersey:23 years:4
-rlee1,ryan lee,pennsylvania (void),1,years:1
-rliao,ryan liao,,1,city:seattle
+rlacy,ryan lacy,,2,jersey:36 years:1
+rlalondel,raphael lalonde-landry,,3,city:montreal jersey:23 years:4
+rliao,ryan liao,,2,city:seattle years:2
+rlu,raymond lu,,2,jersey:16 years:1
 rmaillard,robin maillard,,2,city:pittsburgh years:2
+rmartin,reid martin,,3,city:chicago jersey:13;20 years:4
 rmartin1,ryan martin,,2,jersey:16 years:1
+rmast,rachel mast,,1,years:1
 rmauntel,ray mauntel,,3,city:chicago jersey:2 years:2
-rmcdevitt,rees mcdevitt,,2,jersey:34 years:2
+rmcdevitt,rees mcdevitt,,2,jersey:34 years:3
+rmenon,rudra menon,,1,years:1
+rntende,ryan ntende,,2,jersey:20 years:2
 rojo,remi ojo,,2,city:toronto jersey:12
 rorloff,rory orloff,,1,years:2
 rosgar,ryan osgar,,3,city:new york jersey:1 years:4
 rpaust,rami paust,,3,city:madison jersey:22 years:3
-rpesch,ryan pesch,,1,jersey:35
-rpieran,pieran robert,,3,city:madison jersey:94 years:1
+rpesch,ryan pesch,,2,jersey:35 years:1
+rpieran,pieran robert,,3,city:madison jersey:94 years:2
 rpoloz,ryan poloz,,3,city:toronto jersey:18 years:3
+rpurcell,ryan purcell,,1,city:austin
+rramirez,ricky ramirez,,3,city:chicago jersey:20;83 years:2
 rramnarai,ravin ramnarain,,1,city:toronto
+rrosenfel,raul rosenfeld,,1,city:chicago
 rsaffa,ryan saffa,,2,city:new york years:1
+rsalvas,raphael salvas,,3,city:montreal jersey:15 years:5
 rshephard,ryan shephard,,1,years:2
 rsheridan,ryan sheridan,,1,jersey:11
+rshigley,ryan shigley,,3,city:seattle jersey:6 years:1
 rsmith3,rutledge smith,,1,years:2
-rsung,reggie sung,,2,city:san diego years:5
-rtoogood,rhys toogood,,2,city:ottawa years:1
+rsturm,ryan sturm,,2,city:seattle jersey:46
+rsung,reggie sung,,2,city:san diego years:6
+rtakayama,ryan takayama,,1,years:1
+rthomas,ryan thomas,,2,jersey:28 years:1
+rtoogood,rhys toogood,,3,city:ottawa;toronto jersey:61 years:1
+rturner,ryan turner,,3,city:boston jersey:10 years:2
 rulmer,riley ulmer,,1,years:2
-rvickersb,robin vickers batzdorf,,2,jersey:2 years:4
-rwallace,ryan wallace,,2,city:ottawa years:1
-rware,richard ware,,2,jersey:12 years:2
+rvickersb,robin vickers batzdorf,,2,jersey:2 years:5
+rwallace,ryan wallace,,3,city:ottawa jersey:16 years:1
+rward1,ryan ward,,3,city:pittsburgh jersey:28 years:1
+rware,richard ware,,2,jersey:12;28 years:2
+rwartenbe,ryan wartenberg,,2,jersey:99 years:1
 rweaver,ryan weaver,,2,jersey:48 years:2
-rwoodhous,ryan woodhouse,,1,jersey:33
-rye1,ray ye,,2,city:seattle years:1
+rwolfe,ryan wolfe,,3,city:oregon jersey:81;9 years:3
+rwoodhous,ryan woodhouse,,3,city:boston jersey:33 years:3
+rye1,ray ye,,3,city:seattle jersey:46 years:1
+ryeagle,robert yeagle,,2,jersey:13;25 years:3
+sabel,stephen abel,,1,years:1
 sacevedo,santiago acevedo,,1,jersey:57
 salladi,shashank alladi,,3,city:new york jersey:10 years:3
-salston,sam alston,,2,city:new york years:2
-sbrady,sean brady,,1,city:austin
-sbrauer,sebastian brauer,,2,jersey:9 years:5
-sbrown1,sandy brown,,2,city:colorado jersey:29
+salston,sam alston,blueprint,2,city:new york years:2
+sanderson1,sam anderson,,2,jersey:8 years:1
+sbatson,sam batson,,3,city:atlanta jersey:82 years:1
+sberglund,sam berglund,,1,years:1
+sblair,sawyer blair,,3,city:seattle jersey:47 years:1
+sbontemps,sofiene bontemps,,3,city:chicago jersey:9 years:1
+sbrady,sean brady,,2,city:austin jersey:16
+sbrauer,sebastian brauer,,2,jersey:9 years:6
+sbrown1,sandy brown,,3,city:colorado jersey:29 years:3
+scarapell,simon carapella,,3,city:boston jersey:2;9 years:4
+schang,steven chang,,1,years:1
 scharette,simon charette,,3,city:montreal jersey:64 years:1
-sconnole,sean connole,,2,jersey:7 years:2
+schoi,sun choi,,3,city:atlanta jersey:23 years:1
+sconnole,sean connole,,2,jersey:7 years:3
 scook,sam cook,,2,jersey:29 years:2
 sdahl,soren dahl,,3,city:seattle jersey:52 years:1
-sdastrup,simon dastrup,,2,jersey:61 years:3
+sdastrup,simon dastrup,,3,city:chicago jersey:61 years:4
 sdavidson,shane davidson,,2,jersey:11 years:2
+sdavies,steele davies,,3,city:atlanta jersey:30 years:1
+sdavies1,sam davies,,2,city:philadelphia years:1
 sdiffin,sam diffin,,2,city:atlanta years:1
 sdolan,stephen dolan,,1,years:1
 sdupontgr,samuel dupont-gratton,,1,city:ottawa
+searley,shane earley,,3,city:oakland jersey:84 years:2
+sebastian,sebastian,,1,years:1
+sfaris,seth faris,,3,city:colorado jersey:11 years:5
 sfil,sawyer fil,,2,jersey:25 years:2
+sfisherol,seth fisher-olvera,,2,city:boston years:1
 sfraner,sam franer,,3,city:portland jersey:30 years:2
-sgabriels,sam gabrielson,,2,jersey:42 years:1
+sfrankste,sasha frank-stempel,,2,city:dc years:1
+sgabriels,sam gabrielson,,3,city:atlanta;chicago jersey:42 years:4
+sgainer,sam gainer,,2,city:atlanta years:1
+sgoldstei,sam goldstein,,2,jersey:9 years:4
+sgrondin,stephen grondin,,3,city:detroit jersey:64 years:3
 sgrossber,sam grossberg,,2,city:philadelphia years:1
-sgudeman,seth gudeman,,2,jersey:17 years:4
+sgudeman,seth gudeman,,3,city:indianapolis jersey:17 years:5
+shawkins,spencer hawkins,,2,city:indianapolis years:1
 shearne,scott hearne,,3,city:austin jersey:6 years:3
 sheath,shane heath,,2,city:austin years:1
-sheyman,scott heyman,,2,jersey:44 years:5
-singham,samuel ingham,,2,city:indianapolis years:1
+shebert,sam hebert,,3,city:madison jersey:12 years:1
+sheyman,scott heyman,,2,jersey:44 years:6
+singham,samuel ingham,,2,city:indianapolis years:2
+sishii,satoru ishii,,2,jersey:20 years:1
+siwata,shun iwata,,2,jersey:0 years:1
+sjeziersk,sadie jezierski,,2,jersey:77 years:1
 sjonas,sam jonas,,1,jersey:12
-sjones,selim jones,,2,jersey:36 years:1
-skaltenec,scott kaltenecker,,1,years:2
-skaminsky,sam kaminsky,,2,city:chicago years:1
-skeegan,sean keegan,,1,city:new york
-skelley1,stewart kelley,,1,years:1
-skelly,steven kelly,,2,city:houston years:3
+sjones,selim jones,,3,city:oakland jersey:36 years:1
+sjones1,stephen jones,,2,city:austin years:1
+skaltenec,scott kaltenecker,,2,jersey:14 years:2
+skaminsky,sam kaminsky,,2,city:chicago years:2
+skeegan,sean keegan,,2,city:new york jersey:3
+skelley1,stewart kelley,,1,years:2
+skelly,steven kelly,,2,city:houston years:4
 sknoche,sterling knoche,,3,city:madison jersey:18 years:1
-sland,spencer land,,1,city:seattle
+skoenigsb,seiji koenigsberg,,1,years:1
+sland,spencer land,,2,city:seattle years:2
 slarson,sten larson,,2,jersey:30 years:2
 slatarski,spencer latarski,,2,jersey:21 years:2
 slauzy,sebastien lauzy,,2,city:austin years:1
-slofink,spencer lofink,,3,city:seattle jersey:9 years:4
-smadiraju,suraj madiraju,,2,city:raleigh years:5
-smadiraju1,suhas madiraju,,2,jersey:2 years:2
+sliston,sean liston,,2,jersey:20 years:1
+slofink,spencer lofink,,3,city:seattle jersey:9 years:5
+smadiraju,suraj madiraju,,2,city:raleigh years:6
+smadiraju1,suhas madiraju,,2,jersey:2 years:3
 smatonis,spencer matonis,,2,city:pittsburgh years:1
-smccall1,stefan mccall,smoak (u20),1,city:oakland
-smcdonald,sean mcdonald,,2,jersey:11 years:2
-smcdougal,sean mcdougall,,2,jersey:10 years:2
-smilardov,steven milardovich,,1,years:1
-smott,sean mott,,3,city:philadelphia jersey:81 years:4
-sotis,shane otis,,3,city:madison jersey:27 years:3
+smccall1,stefan mccall,,2,city:oakland years:2
+smccrory,samuel mccrory,,2,jersey:8 years:2
+smcdonald,sean mcdonald,,2,jersey:11 years:3
+smcdougal,sean mcdougall,,2,jersey:10 years:3
+smcguinne,sean mcguinness,,2,jersey:42 years:1
+smilardov,steven milardovich,,3,city:san diego jersey:11 years:1
+smoghazy,sharief moghazy,,2,city:houston years:1
+smolitern,steven moliterno,,1,years:1
+smondsche,sarah mondschein,drag'n thrust,1,years:1
+smott,sean mott,,3,city:philadelphia jersey:81 years:6
+snaji,steven naji,,2,city:austin jersey:36
+solinger,scott olinger,,1,city:pittsburgh
+sotis,shane otis,,3,city:madison jersey:27 years:4
+spalchuru,saaketh palchuru,,3,city:austin jersey:0 years:3
 spaterka,sam paterka,,1,years:1
+spearlman,steven pearlman,,2,city:colorado jersey:30
 sperez,simon perez,,2,city:chicago years:1
-splunkett,sean plunkett,,1,jersey:9
-sradlauer,scott radlauer,,2,jersey:4 years:4
+spew,sam pew,,1,jersey:29;4
+splasman,sam plasman,,1,jersey:26
+splunkett,sean plunkett,,2,jersey:9 years:1
+spoulos,stephen poulos,,3,city:tampa bay jersey:80 years:2
+sradlauer,scott radlauer,,3,city:oregon;san diego jersey:4 years:4
+sreischel,sean reischel,,2,jersey:31 years:1
 sroberts,samuel roberts,,2,jersey:57 years:2
-srobinson,seamus robinson,,2,jersey:30 years:4
+srobinson,seamus robinson,,2,jersey:30 years:5
 srossi,sebastian rossi,,3,city:boston jersey:80 years:1
+sruelle,simon ruelle,,1,years:1
+srueschem,solomon rueschemeyer-bailey,,3,city:new york jersey:9 years:6
 ssamu,stefan samu,,2,city:san diego years:1
-sseidenbe,shaun seidenberger,,3,city:houston jersey:24 years:1
+sseidenbe,shaun seidenberger,,3,city:houston jersey:24 years:2
 ssemrin,saeed semrin,,3,city:colorado jersey:10;13 years:4
+ssih,spencer sih,,1,years:1
+ssisco,shane sisco,,3,city:raleigh jersey:13 years:3
+sswafford,skyler swafford,,2,jersey:40 years:1
 staylor1,skylohr taylor,,2,jersey:40 years:1
-sthompson,sawyer thompson,,2,jersey:18 years:2
-streacy,sean treacy,,3,city:madison jersey:17 years:1
-svandusen,sam vandusen,,2,city:colorado;pittsburgh years:4
+sthompson,sawyer thompson,,3,city:oakland jersey:18 years:3
+svandusen,sam vandusen,,2,city:colorado;pittsburgh years:5
+svankan,sef van kan,,2,city:madison years:1
 swalker,simon walker,,2,city:ottawa years:1
-swartinbe,steven wartinbee,,1,years:3
+swartinbe,steven wartinbee,,3,city:dc jersey:27 years:3
+sweaver,seth weaver,,3,city:raleigh jersey:4 years:5
 swells,seth wells,,3,city:colorado jersey:47 years:4
-swhitcomb,spencer whitcomb,,2,jersey:77 years:1
+swhitcomb,spencer whitcomb,,2,jersey:17;77 years:2
+swildavsk,saul wildavsky,,2,jersey:90 years:2
 swiles,sean wiles,,1,jersey:13
-swilliams,sebastian williamson,,1,jersey:11
+swilliams,sebastian williamson,,3,city:oregon jersey:11 years:1
 sworthing,shane worthington,,3,city:seattle jersey:90 years:4
 sxu,scott xu,,1,years:4
-takyuz,tarik akyuz,,3,city:seattle jersey:64 years:1
+tabeltins,toms abeltins,,2,city:toronto years:1
+tadams1,trip adams,,3,city:indianapolis jersey:95 years:1
+takyuz,tarik akyuz,,3,city:seattle jersey:64 years:2
+tallen1,turner allen,,3,city:boston jersey:7 years:5
+tannen,tom annen,,2,city:madison years:3
+tbacon,tyler bacon,,1,years:2
 tbankston,tucker bankston,,2,city:dallas years:1
 tbarbieri,ty barbieri,,3,city:toronto jersey:5 years:1
+tbarcus,tanner barcus,,2,jersey:14 years:3
 tbarrett,tyler barrett,,2,city:chicago years:1
 tbarton,taylor barton,,1,jersey:11
 tblasman,tom blasman,,3,city:toronto jersey:1 years:1
-tbrewster,thomas brewster,,3,city:colorado jersey:22 years:1
-tbrooks1,tobias brooks,,3,city:colorado jersey:1 years:3
-tchan,tyler chan,,3,city:boston jersey:44 years:2
-tchrzanow,tom chrzanowski,,1,city:tampa bay
-tchukwume,toya chukwumerije,,3,city:houston jersey:25 years:3
+tbrooks1,tobias brooks,,3,city:colorado jersey:1 years:4
+tcarpente,travis carpenter,,3,city:indianapolis jersey:37 years:3
+tchan,tyler chan,,3,city:boston jersey:44 years:4
+tchrzanow,tom chrzanowski,,3,city:tampa bay jersey:34 years:1
+tchukwume,toya chukwumerije,,3,city:houston jersey:25 years:4
+tcoolidge,thomas coolidge,,3,city:madison jersey:48 years:1
 tcrowley,trip crowley,,3,city:atlanta jersey:1 years:4
-tdecraene,tobe decraene,,3,city:boston jersey:33 years:2
+tdavis,topher davis,,2,city:boston years:5
+tdecraene,tobe decraene,,3,city:boston jersey:33 years:3
+tdegirola,tyler degirolamo,,1,years:1
 tdoi,tom doi,,2,jersey:93 years:2
 tdubois,thomas dubois,,3,city:montreal jersey:34 years:1
 tduke,thomas duke,,3,city:portland jersey:28 years:1
-tdunn,travis dunn,,2,jersey:80 years:1
+tdunn,travis dunn,,3,city:san diego jersey:80 years:6
 tduplaix,thomas duplaix,,3,city:montreal jersey:43 years:2
 tdynes,trey dynes,,3,city:indianapolis jersey:45 years:1
-techols,thomas echols,,1,city:colorado
+techols,thomas echols,,2,city:colorado years:1
+tedmonds,thomas edmonds,,3,city:boston;pittsburgh jersey:8 years:6
+telam,trevor elam,,3,city:austin jersey:22;89 years:4
+telliott,timothy elliott,,3,city:colorado jersey:14 years:3
+temig,tyler emig,,1,years:1
 tfong,tomas fong,,2,jersey:25 years:2
-tgaither,terry gaither,,2,jersey:33 years:4
+tfrench,tyler french,,1,city:atlanta
+tfriesen,timothy friesen,,2,city:montreal years:1
+tgaither,terry gaither,,2,jersey:33 years:5
+tgilman,taylor gilman,,2,jersey:67 years:1
+tgraham,tanner graham,,2,jersey:28 years:2
+tgreen,tristan green,,3,city:raleigh jersey:34 years:1
+tgriesman,trevor griesman,,3,city:philadelphia jersey:16 years:1
+tgunaseke,tyler gunasekera,,1,years:1
 thalkyard,tanner halkyard,,3,city:boston jersey:4 years:1
-thansen,thomas hansen,,2,city:pittsburgh years:3
+thansen,thomas hansen,,3,city:pittsburgh jersey:88 years:3
+thawks,trevor hawks,,1,years:1
 thebert,tyler hebert,,3,city:tampa bay jersey:0 years:2
-thebert1,trenton hebert,,3,city:austin jersey:9 years:1
+thebert1,trenton hebert,,3,city:austin jersey:9 years:2
+thedges,tannon hedges,,3,city:atlanta jersey:19;87 years:5
 thoffman,tucker hoffman,,1,years:1
 tholland,troy holland,,2,jersey:91 years:3
+thusband,tyler husband,,1,years:1
 thustad,tyler hustad,,2,city:dallas years:1
-tkelley,trevor kelley,shrimp,2,city:salt lake years:1
-tkoch,trey koch,,2,city:indianapolis years:1
-tkonogeri,thomas konogeris,,3,city:san diego jersey:16 years:2
+tkelley,trevor kelley,,2,city:salt lake years:1
+tkim,theo kim,,1,years:1
+tkoch,trey koch,,2,city:indianapolis years:2
+tkonogeri,thomas konogeris,,3,city:san diego jersey:16 years:3
 tkunsa,tyler kunsa,,2,city:atlanta years:1
-tlalondel,thomas lalonde-landry,,3,city:montreal jersey:24 years:4
+tlalondel,thomas lalonde-landry,,3,city:montreal jersey:24 years:5
+tleighton,tavis leighton,,2,city:chicago years:1
 tlemos,tucker lemos,,2,jersey:33 years:2
-tlootens,tim lootens,uproar,2,city:tampa bay years:2
-tlynch,trevor lynch,,3,city:raleigh jersey:76 years:5
-tmcallist,tim mcallister,,1,city:raleigh
-tmccarthy,tyler mccarthy,,1,years:1
+tlin,tommy lin,,3,city:seattle jersey:25 years:6
+tlootens,tim lootens,,2,city:tampa bay years:2
+tlynch,trevor lynch,,3,city:raleigh jersey:76 years:6
+tmackey,tyler mackey,,2,city:philadelphia years:2
+tmasterso,taylor masterson,,3,city:austin jersey:22 years:1
+tmazur,thomas mazur,,2,city:pittsburgh years:1
+tmcallist,tim mcallister,,3,city:raleigh jersey:51 years:1
+tmccarthy,tyler mccarthy,,2,jersey:16 years:2
 tmcknight,thomson mcknight,,2,city:toronto jersey:19
-tmitchell,terrence mitchell,,3,city:raleigh jersey:8 years:3
+tmeyer1,thomas meyer,,1,years:1
+tmiller,tremont miller,,2,city:seattle jersey:7
+tmitchell,terrence mitchell,,3,city:raleigh jersey:8 years:5
 tmitchuso,tyler mitchuson,,2,jersey:36 years:2
-tmonroe,tyler monroe,,1,years:4
-tmurthy,tej murthy,,3,city:new york jersey:3 years:2
-tnguyen,tyler nguyen,,3,city:colorado jersey:27 years:2
-tokita,tim okita,,2,jersey:44 years:1
+tmonroe,tyler monroe,,2,city:dc years:4
+tmosher,timothy mosher,,3,city:austin;dallas jersey:13;16 years:3
+tmurthy,tej murthy,,3,city:new york jersey:10;3 years:3
+tnaquin,ty naquin,,2,jersey:28 years:2
+tnguyen,tyler nguyen,,3,city:colorado jersey:27 years:3
+tnye,thomas nye,,3,city:philadelphia jersey:22 years:2
+tokita,tim okita,,3,city:san diego jersey:44 years:1
 tpage,thomas page,,2,jersey:18 years:1
 tperston,timmy perston,,3,city:portland jersey:13 years:1
-tpeterson,tynan peterson,,2,city:montreal years:1
-tpolisukb,trevor polisuk-balfour,,2,jersey:4 years:3
-tpreston,thomas preston,,2,city:philadelphia jersey:2
+tpeterson,tynan peterson,,3,city:montreal jersey:2 years:2
+tpolisukb,trevor polisuk-balfour,,2,jersey:4 years:4
+tpratt,travis pratt,,1,years:1
+tpreston,thomas preston,,3,city:philadelphia jersey:2 years:1
 tpuckrin,travis puckrin,,1,years:1
+tpurdy,trevor purdy,,2,city:san diego jersey:55
 trandall,tyler randall,,3,city:atlanta jersey:11 years:4
-treinhard,tyler reinhardt,,3,city:dallas jersey:13 years:4
-troberts1,tanner roberts,,3,city:dallas jersey:98 years:4
+treinhard,tyler reinhardt,,3,city:dallas;houston jersey:13;34 years:4
+triedl,thomas riedl,,2,jersey:95 years:1
+troberts1,tanner roberts,,3,city:dallas jersey:98 years:5
 trobinson,tanner robinson,,3,city:atlanta jersey:22 years:5
 tsander,tynan sander,,3,city:san diego jersey:15 years:2
 tsawatzky,trevor sawatzky,,2,city:austin years:2
 tschaidhe,theo schaid hefley,,2,jersey:42 years:1
-tschewe,ted schewe,,3,city:madison jersey:66 years:5
+tschewe,ted schewe,,3,city:madison jersey:66 years:6
+tschoch,tim schoch,,2,city:chicago years:2
+tscott,trevor scott,,2,city:chicago years:1
 tshanahan,tyler shanahan,,2,jersey:26 years:1
-tshapinsk,theo shapinsky,,1,jersey:23
-tshope,thomas shope,sub zero,1,years:2
-tspinks,trenton spinks,,3,city:atlanta jersey:87 years:4
+tshapinsk,theo shapinsky,,2,jersey:23 years:2
+tshope,thomas shope,,1,years:3
+tslack,thomas slack,,2,city:dallas jersey:27
+tspinks,trenton spinks,,3,city:atlanta jersey:87 years:5
 tstanton,tj stanton,,1,years:1
 tstanton1,thomas stanton,,3,city:ottawa jersey:81 years:1
+ttaylor,trey taylor,,1,years:1
 tthomegre,tyler thomegreene,,2,jersey:7 years:4
-tvandemoo,tristan van de moortele,,2,jersey:99 years:3
+tvandemoo,tristan van de moortele,,2,jersey:99 years:5
 tvenneri,tony venneri,,2,city:seattle years:3
-twarren,toby warren,,2,jersey:31 years:1
-twatkins,theodore watkins,,1,years:1
-tyarter,tristan yarter,,3,city:new york;pittsburgh jersey:46 years:3
+tward,thalia ward,,2,jersey:4 years:1
+twarren,toby warren,,3,city:oakland jersey:31 years:2
+twatkins,theodore watkins,fungi,1,years:2
+twolma,todd wolma,,3,city:colorado jersey:35 years:1
+twong,trey wong,,2,city:houston years:1
+tyarter,tristan yarter,,3,city:new york;pittsburgh jersey:46 years:4
 upatel,unmil patel,,2,jersey:25 years:1
 valanguil,von alanguilan,,3,city:chicago jersey:10 years:1
 vcalderon,vincent calderon,,2,city:raleigh years:1
-vcurodeau,victor curodeau,,2,jersey:33 years:1
+vcurodeau,victor curodeau,,2,jersey:33 years:2
 vgenest,vincent genest,,3,city:montreal jersey:16 years:1
 vlemieux,vincent lemieux,,2,city:montreal jersey:6
-vluo,victor luo,,3,city:chicago jersey:10 years:5
+vluo,victor luo,,3,city:chicago;madison jersey:10 years:6
+vmader,vance mader,,2,city:austin years:2
 vpria,victor pria,,2,city:atlanta years:1
-vsachdeva,vedant sachdeva,,2,city:chicago years:1
-vsauv,victor sauvé,,3,city:montreal jersey:4 years:1
+vsachdeva,vedant sachdeva,,2,city:chicago years:3
+vsauv,victor sauve,,3,city:montreal jersey:4 years:2
 vvalsaraj,vinay valsaraj,,2,city:austin years:2
 vzhivich,victor zhivich,,2,jersey:63 years:1
+vzhou,victor zhou,,2,jersey:27 years:1
 wanderson,watson anderson,,3,city:dallas jersey:42 years:2
-wberreman,wyatt berreman,,2,jersey:98 years:1
+wberreman,wyatt berreman,,2,jersey:98 years:4
+wbrockman,warner brockman,,1,years:1
 wbrooks,wyatt brooks,,2,city:pittsburgh years:1
 wcasperso,will casperson,,3,city:madison jersey:11 years:3
-wcoffin,william coffin,,2,jersey:12 years:3
+wcoffin,william coffin,,2,jersey:12 years:5
 wdickson,will dickson,,3,city:ottawa jersey:40 years:1
-wdillende,will dillender-kinast,,2,jersey:99 years:2
-wellard,walter ellard,,1,city:atlanta
-wfrankenb,walker frankenberg,,2,jersey:4 years:3
-wfrolich,will frolich,,3,city:chicago jersey:36 years:2
+wdillende,will dillender-kinast,,2,jersey:99 years:3
+wellard,walter ellard,,3,city:atlanta jersey:11 years:2
+wfrankenb,walker frankenberg,,2,jersey:4 years:4
+wfrolich,will frolich,,3,city:atlanta;chicago jersey:36 years:2
 wgoal,willy goal,,3,city:dallas jersey:10 years:1
-wgroth,wesley groth,,3,city:san diego jersey:22;33 years:1
+wgroth,wesley groth,,3,city:chicago;san diego jersey:22;33 years:2
 whelenski,will helenski,,3,city:philadelphia jersey:15 years:1
-whoffenka,will hoffenkamp,,3,city:pittsburgh jersey:24 years:2
+whoffenka,will hoffenkamp,,3,city:pittsburgh jersey:24 years:3
 wjansen,walt jansen,,3,city:chicago jersey:6 years:1
+wjohnson1,walt johnson,,2,jersey:83 years:3
+wkasprzyc,walter kasprzycki,,1,years:2
 wkellman,wyatt kellman,,3,city:boston jersey:10 years:3
 wkrisky,wyatt krisky,,2,city:pittsburgh years:1
+wkrisky1,wyatt krisky,,2,city:pittsburgh years:1
 wlohre,will lohre,,2,jersey:42 years:1
-wmatthews,walker matthews,,3,city:raleigh jersey:23 years:4
-wmatthews1,wilson matthews,,3,city:chicago jersey:0;11 years:4
+wlu,wayne lu,,1,jersey:50
+wmatthews,walker matthews,,3,city:raleigh jersey:23 years:5
+wmatthews1,wilson matthews,,3,city:chicago jersey:0;11 years:5
 wmcdonald,will mcdonald,,2,jersey:51 years:2
-wselfridg,will selfridge,,3,city:salt lake jersey:8 years:3
-wstpierre,william st-pierre,,3,city:montreal jersey:10 years:3
+wmekler,wyatt mekler,,1,jersey:48
+wmiaw,wesley miaw,,1,city:dallas
+wquigley,will quigley,,2,jersey:99 years:1
+wsaxen,willie saxen,,2,city:seattle jersey:5
+wselfridg,will selfridge,,3,city:atlanta;salt lake jersey:5;8 years:4
+wstpierre,william st-pierre,,3,city:montreal jersey:10 years:4
 wturner,will turner,,1,years:1
+wvandenbr,wiebe van den brink,,1,years:1
+wwallace,william wallace,,1,years:1
+wyan,wes yan,,1,years:1
+wzamsky,will zamsky,,2,city:philadelphia years:1
 xcharles,xavier charles,,2,jersey:0 years:1
 xdaniel,xavier daniel,,2,city:houston jersey:4
-xfuzat,xavier fuzat,,2,jersey:10 years:2
-xpayne,xavier payne,,3,city:chicago jersey:23 years:5
+xfuzat,xavier fuzat,,3,city:houston jersey:10 years:3
+xmaxstadt,xavier maxstadt,,2,jersey:80 years:1
+xpayne,xavier payne,,3,city:chicago jersey:23 years:6
 xprochask,xavier prochaska,,1,years:1
-xschafer,xavier schafer,,1,years:3
+xschafer,xavier schafer,,1,years:4
 ycohonner,ywan cohonner,,3,city:montreal jersey:22 years:4
-ydemiralp,yigit demiralp,,1,city:boston
+ydemiralp,yigit demiralp,,2,city:boston years:1
 ywang,yipeng wang,,2,jersey:38 years:2
 zabdulla,zubair abdulla,,2,jersey:63 years:2
-zbyrnes,zac byrnes,,1,years:1
-zcotter,zachary cotter,,2,city:houston years:2
-zkieffer,zach kieffer,,2,jersey:15 years:1
+zarmstron,zachary armstrong,,1,years:4
+zburpee,zachary burpee,,3,city:new york jersey:0;6 years:4
+zbyrnes,zac byrnes,,1,years:3
+zcole,zachary cole,,1,city:atlanta
+zcotter,zachary cotter,,3,city:houston jersey:20 years:3
+zheiden,zach heiden,,2,jersey:45 years:1
+zkieffer,zach kieffer,,3,city:chicago jersey:15 years:2
+zmassi,zakarie massi,,3,city:montreal jersey:88 years:1
 zmorneau,zacharie morneau,,2,city:montreal years:1
-zmorton,zach morton,,1,years:1
-zscheuerm,zac scheuerman,,2,jersey:18 years:1
-zsinger,zach singer,,1,years:1
-zsmith,zack smith,,3,city:seattle jersey:97 years:1
-zwenner,zachary wenner,,3,city:dallas jersey:2 years:2
-zwolfe,zach wolfe,,1,jersey:20
+zmorton,zach morton,,1,years:2
+zraunig,zeppelin raunig,,3,city:seattle jersey:0;30 years:5
+zscheuerm,zac scheuerman,,2,jersey:18 years:2
+zsinger,zach singer,,1,years:4
+zthoreson,zeke thoreson,,3,city:colorado jersey:1 years:3
+zwenner,zachary wenner,,3,city:dallas jersey:2;5 years:2
+zwolfe,zach wolfe,,2,jersey:20 years:1

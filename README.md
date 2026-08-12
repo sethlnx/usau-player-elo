@@ -277,13 +277,13 @@ and a **Tournaments** browser over all 3,863 events. Club rankings can switch
 from the ranked list to a 25-club head-to-head results matrix; green cells are
 winning records, red cells are losing records, and stronger color marks a more
 decisive win-loss split. The **UFA** division includes current and historical
-teams from 2021 onward; each team is rated from its highest 20 linked players
-(or all linked players when fewer than 20 are available). Clicking a UFA team
-opens the same club detail panel as other clubs, including season rosters and
-player ratings.
-It reads the published rating artifacts plus the UFA roster database and identity
-links; it never replays the model, so the page cannot drift from the generated
-ratings.
+teams from 2021 onward. Its season table reports each team's Elo after its
+latest game in that season; the team detail chart has one point per UFA game,
+and each point expands to the score and Elo change behind it. Season rosters
+and current linked player ratings remain available in the same detail panel.
+The site reads the published rating and history artifacts plus the UFA roster
+database and identity links; it never replays the model, so the page cannot
+drift from the generated ratings.
 
 Every tab now spans the same seven divisions, and every tab defaults to all of
 them. **Clubs** used to show one division at a time, ranked within it, on the
@@ -699,9 +699,10 @@ and there was no on-demand split to be had while that was true.
   published-bracket backfill plus its champion audit (`structure.py`), and the
   top-up for events that ended mid-scrape (`refresh.py`).
 - `ufa/` — UFA (watchufa.com) integration: cached JSON API client (`api.py`),
-  season scraper into `ufa_*` tables (`scrape.py` — teams, players, per-season
-  stats incl. true points played, games), and name→identity linker with
-  city/jersey/year corroboration (`link.py` → `data/ufa_links.csv` +
+  annual schedule and season scraper into `ufa_*` tables (`scrape.py` — teams,
+  players, per-season stats, every scheduled game status, and per-game player
+  lines for completed games), and name→identity linker with city/jersey/year
+  corroboration (`link.py` → `data/ufa_links.csv` +
   `data/ufa_link_audit.csv` review queue).
 - `identity/` — name→player resolution. A name on 2+ clubs in one
   (division, season) collides, but only SPLITS per club if the shards also
@@ -741,11 +742,12 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   stat quality. Published rankings config lives in `analysis/rankings.py`
   (`PUBLISHED`): plain roster mean + both stat mechanisms. Linked UFA
   seasons feed the same mechanisms (true points-played as usage; counting
-  stats scaled to tournament magnitude), ingested each Sept 1. UFA game
-  *results* were measured as a third division (`load_ufa_games`,
-  `k_scale={"ufa": ...}`) and hurt club prediction at every weight, so the
-  published rankings exclude them; the fully intermingled variant lives in
-  `data/*_elo_intermingled.csv`.
+  stats scaled to tournament magnitude), ingested each Sept 1. Final UFA game
+  results also enter the authoritative replay as a third division through
+  `load_ufa_games`; each game uses the linked players who recorded a point
+  played in its per-game stats. Every scheduled API row remains in `ufa_games`;
+  a Final 0–0 or forfeit-code score is retained there but is not treated as a
+  played Elo result.
 - `analysis/` — backtest (headline eval on club; slices for early-club and
   college), the `descent.py` selection harness, CSV exports, and `bridge_audit.py` — ranks bridge
   links by false-merge suspicion (height contradictions across every division

@@ -19,7 +19,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (DB_PATH, load_games, load_maps,
-                               load_stat_events, load_ufa_stat_events, replay)
+                               load_stat_events, load_ufa_games,
+                               load_ufa_stat_events, replay)
 from analysis.euf_ratings import (EUF_DB, Appearance, EuropeanInputs,
                                   load_european_inputs, merge_inputs)
 from analysis.international_ratings import load_international_inputs
@@ -881,11 +882,28 @@ def write_history(
         "FROM events")}
     if european is not None:
         evinfo.update(european.event_info)
+    # UFA games are intentionally one-game events. Other external adapters
+    # provide event_info explicitly; this fallback gives any game-grain source
+    # the same trajectory and expandable-score contract.
+    for game in games:
+        event_id = game["event_id"]
+        if event_id not in evinfo:
+            evinfo[event_id] = (
+                game.get("event_name") or game["game_key"],
+                game.get("date") or game["sort"][0],
+                game["season"],
+                game.get("division", "club-men"),
+            )
     keep = {p for p, st in model.players.items()
             if not str(p).startswith("ghost:") and st.games >= HISTORY_MIN_GAMES}
-    used = sorted({e for subj, evs in snaps.items() for e in evs
-                   if subj[0] == "p" and subj[1] in keep} |
-                  {e for subj, evs in snaps.items() for e in evs if subj[0] == "c"})
+    used_set = (
+        {e for subj, evs in snaps.items() for e in evs
+         if subj[0] == "p" and subj[1] in keep}
+        | {e for subj, evs in snaps.items() for e in evs if subj[0] == "c"}
+    )
+    used = sorted(used_set, key=lambda event: (
+        evinfo[event][1] or "", str(event)
+    ))
     ix = {e: i for i, e in enumerate(used)}
     events = [[evinfo[e][1][:10], evinfo[e][0][:46], evinfo[e][2],
                DIVCODE.get(evinfo[e][3], 0)]
@@ -968,6 +986,28 @@ def write_history(
             person = (name, str(pid))
             seen.add(person)
             roster_rows.append((f"{key}|{i}", person))
+    # UFA rosters are game-specific and already restricted to linked players
+    # who took the field. They do not live in roster_players, so add them from
+    # the same replay maps used to calculate each game-level Elo point.
+    ufa_names = dict(con.execute("SELECT player_id, display_name FROM players"))
+    if european is not None:
+        ufa_names.update(european.player_names)
+    for game in games:
+        if game.get("division") != "ufa":
+            continue
+        i = ix.get(game["event_id"])
+        if i is None:
+            continue
+        for side_id in (game["home_id"], game["away_id"]):
+            key = clubs.get(side_id)
+            if key not in teams:
+                continue
+            for pid in rosters.get(side_id, []):
+                name = ufa_names.get(pid)
+                if name:
+                    person = (name, str(pid))
+                    seen.add(person)
+                    roster_rows.append((f"{key}|{i}", person))
     # The most recent season's roster tab shows the club's BEST reported
     # full-strength squad — the same selection team_elo_best.csv rates off —
     # which may belong to an event not yet played and therefore absent from
@@ -1071,6 +1111,19 @@ def write_history(
                 key not in latest or value[0] >= latest[key][0]
             ):
                 latest[key] = value
+    for game in games:
+        if game.get("division") != "ufa":
+            continue
+        sd = game.get("date") or ""
+        for side_id, name in (
+            (game["home_id"], game.get("home_name")),
+            (game["away_id"], game.get("away_name")),
+        ):
+            key = clubs.get(side_id)
+            if not name or (key not in teams and key not in club_num):
+                continue
+            if key not in latest or sd >= latest[key][0]:
+                latest[key] = (sd, name)
     team_names = {k: v[1] for k, v in latest.items()}
 
     out = (output_dir or DB_PATH.parent) / "history.json"
@@ -1103,12 +1156,16 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     euf_bridge_rows = european.bridge_rows
     wfdf_identity_rows = international.identity_rows
     external = merge_inputs(european, international)
+    ufa_games, ufa_rosters, ufa_clubs = load_ufa_games(con)
     games = sorted(
-        [*load_games(con), *external.games], key=lambda game: game["sort"]
+        [*load_games(con), *external.games, *ufa_games],
+        key=lambda game: game["sort"],
     )
     rosters, clubs = load_maps(con)
     rosters.update(external.rosters)
+    rosters.update(ufa_rosters)
     clubs.update(external.clubs)
+    clubs.update(ufa_clubs)
     stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con),
                          key=lambda e: e[0])
     print(
@@ -1119,6 +1176,9 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
         f"{sum(row['match_method'] in ('usau-name', 'usau-alias', 'euf-name') for row in wfdf_identity_rows):,} "
         f"WFDF name bridges "
         f"({external.ghost_scored_games} games touch an empty roster)"
+        f"; {len(ufa_games):,} UFA games "
+        f"({sum(side in ufa_rosters for game in ufa_games for side in (game['home_id'], game['away_id'])):,}/"
+        f"{2 * len(ufa_games):,} sides have linked rosters)"
     )
     european = external
 
@@ -1128,6 +1188,9 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     etev = dict(con.execute("SELECT event_team_id, event_id FROM event_teams"))
     etev.update(european.event_team_event)
     etev.update(international.event_team_event)
+    for game in ufa_games:
+        etev[game["home_id"]] = game["event_id"]
+        etev[game["away_id"]] = game["event_id"]
     snaps = defaultdict(dict)
     # The same capture at game grain, club side only: (event, game) -> the two
     # club-rating changes across that game.
