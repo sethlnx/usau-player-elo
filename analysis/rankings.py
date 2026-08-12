@@ -563,12 +563,28 @@ def latest_rosters(con, season: int, basis: str = "completed",
 # hyperparameter, but a different eval. The mirror carries 231 club-men events
 # the HTML scrape never had, so the 2024-25 games being scored are not the
 # same games. Compare the weighted figures above, not that pair.
+#
+# DIVISION K DESCENT. Competition-family K multipliers were swept separately
+# over the then-current corpus, including 901 UFA games in the replay and
+# objective. The later AUDL backfill expanded that replay to the 2012 season;
+# this records the sweep that selected the published value, not a rerun.
+# Lower-weight UFA and beach updates were rejected by the data: UFA improved
+# monotonically through 1.5, while beach's global optimum stayed at 1.0.
+# College, masters, and school also stayed at 1.0. YCC alone survived the
+# cumulative 0.0003 prune at 1.25: weighted VAL 0.45944 -> 0.45925 and TEST
+# 0.46446 -> 0.46425. The point is deliberately not interpreted as "youth
+# matters more"; YCC results need a 25% faster update to predict later games.
 PUBLISHED = dict(tau=500.0, involvement_credit=True,
                  involvement_shrink=1.0, stat_transfer_beta=12.0,
                  stat_transfer_clamp=90.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=10,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
+                 k_scale={"ycc-u20-boys": 1.25, "ycc-u20-girls": 1.25,
+                          "ycc-u20-mixed": 1.25, "ycc-u17-boys": 1.25,
+                          "ycc-u17-girls": 1.25, "ycc-u17-mixed": 1.25,
+                          "ycc-u15-boys": 1.25, "ycc-u15-girls": 1.25,
+                          "ycc-u15-mixed": 1.25},
                  momentum_strength=0.0,
                  low_info_anchor=0.0, roster_shrink=0.025,
                  division_scale={"club-men": 260.0, "college": 260.0,

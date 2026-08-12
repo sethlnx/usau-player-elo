@@ -55,7 +55,8 @@ class SiteAssetContractTests(unittest.TestCase):
         finally:
             con.close()
 
-        self.assertIn("2021", payload)
+        self.assertIn("2012", payload)
+        self.assertTrue(any(team["rating"] is not None for team in payload["2012"]))
         self.assertIn("2025", payload)
         self.assertGreaterEqual(len(payload["2025"]), 20)
         team = payload["2025"][0]

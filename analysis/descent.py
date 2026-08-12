@@ -4,12 +4,11 @@
     VAL   2022-2023   every parameter is CHOSEN here
     TEST  2024-2025   reported once, never selected on
 
-Selection scores the n-weighted mean logloss across ALL FIVE divisions, not
-club men's alone. That is the change from the previous descent: club men's is
-now 19,682 of 90,284 games, so tuning global knobs on it alone would let 78%
-of the corpus be collateral. Per-division bases and scales are still scored on
-their own division's games — the D-III lesson in analysis/rankings.py — since
-a base only governs the pool it initialises.
+Selection scores the tier-weighted mean logloss across every scored division,
+not club men's alone. Per-division bases and scales are still scored on their
+own division's games — the D-III lesson in analysis/rankings.py — since a base
+only governs the pool it initialises. Division K multipliers are scored across
+the whole corpus because their updates transfer through shared players.
 
 Two knobs are deliberately NOT axes:
   low_info_anchor  It costs logloss on purpose (see EloConfig); a logloss
@@ -34,6 +33,7 @@ has. See the comment above TIER_SHARE for why n-weighting, and n scaled by a
 per-tier multiplier, both failed.
 
 Usage: python -m analysis.descent [--passes N] [--jobs N] [--quick]
+                                           [--division-k-only]
 """
 
 import itertools
@@ -47,7 +47,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import DB_PATH, load_games, load_maps, load_stat_events, \
-    load_ufa_stat_events, metrics, replay
+    load_ufa_games, load_ufa_stat_events, metrics, replay
 from analysis.rankings import PUBLISHED
 from elo.engine import EloConfig
 
@@ -81,14 +81,15 @@ TEST = (2024, 2025)
 # present in the window, so a tier with no games costs nothing.
 #
 # PUBLISHED assigns a scale/base to 51 divisions total; euf-open/euf-mixed/
-# euf-women are excluded on purpose (joined after tuning — see the note
-# above PUBLISHED in rankings.py), ufa is a separate team model (see ufa/),
-# and greatgrandmasters-mixed has never been played. Every other PUBLISHED
-# division is covered below even where it currently has zero rows in the
-# corpus (league-men/league-mixed, several beach brackets, ms-girls,
-# ycc-u15-girls): league in particular is being actively ingested and a
-# division that is zero-weighted the day it gets its first game reproduces
-# the hs-* bug this comment describes.
+# euf-women are excluded on purpose (joined after tuning — see the note above
+# PUBLISHED in rankings.py), and greatgrandmasters-mixed has never been played.
+# Every other PUBLISHED division is covered below even where it currently has
+# zero rows in the corpus (league-men/league-mixed, several beach brackets,
+# ms-girls, ycc-u15-girls): league in particular is being actively ingested and
+# a division that is zero-weighted the day it gets its first game reproduces
+# the hs-* bug this comment describes. UFA is included because its game updates
+# feed the same player ratings and its K multiplier would otherwise be
+# unidentifiable.
 TIER_SHARE = {"club": 0.50, "college": 0.30, "hs": 0.15, "other": 0.05}
 _TIERS = (
     ("club", ("club-men", "club-mixed", "club-women")),
@@ -108,7 +109,7 @@ _TIERS = (
                "beach-grandmasters-mixed",
                "beach-greatgrandmasters-men", "beach-greatgrandmasters-women",
                "beach-greatgrandmasters-mixed", "beach-legends-mixed",
-               "league-men", "league-mixed")),
+               "league-men", "league-mixed", "ufa")),
 )
 DIVISION_TIER = {d: t for t, ds in _TIERS for d in ds}
 DIVISIONS = tuple(DIVISION_TIER)
@@ -122,10 +123,37 @@ assert set(TIER_SHARE) == {t for t, _ds in _TIERS}, "tier tables disagree"
 # weighted, and inherit their by-analogy priors from rankings.PUBLISHED.
 PRUNE_EPS = 0.0003
 
+# One K multiplier per competition family. Individual beach, masters, and
+# youth brackets are too thin to identify independently; grouping lets their
+# games answer one shared question without pretending that 10-40 VAL games can
+# fit a stable constant. Club remains the 1.0 gauge. Every grid includes values
+# above 1.0 so the user's lower-weight hypothesis can lose on evidence.
+K_SCALE_GROUPS = {
+    "college": tuple(d for d in DIVISIONS if d.startswith("college")),
+    "masters": (
+        "masters-men", "masters-women", "masters-mixed",
+        "grandmasters-men", "grandmasters-women", "grandmasters-mixed",
+        "greatgrandmasters-men", "greatgrandmasters-women",
+    ),
+    "school": tuple(d for d in DIVISIONS if d.startswith(("hs-", "ms-"))),
+    "ycc": tuple(d for d in DIVISIONS if d.startswith("ycc-")),
+    "beach": tuple(d for d in DIVISIONS if d.startswith("beach-")),
+    "ufa": ("ufa",),
+}
+K_SCALE_AXES = [
+    ("k_scale_group.college", [0.5, 0.75, 1.0, 1.25, 1.5]),
+    ("k_scale_group.masters", [0.25, 0.5, 0.75, 1.0, 1.25, 1.5]),
+    ("k_scale_group.school",  [0.25, 0.5, 0.75, 1.0, 1.25, 1.5]),
+    ("k_scale_group.ycc",     [0.25, 0.5, 0.75, 1.0, 1.25, 1.5]),
+    ("k_scale_group.beach",   [0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]),
+    ("k_scale_group.ufa",     [0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]),
+]
+
 # Grids. Each axis is (name, values); dict-valued knobs address one key.
 AXES = [
     ("roster_shrink",          [0.0, 0.003, 0.006, 0.01, 0.015, 0.025]),
     ("k",                      [32.0, 40.0, 44.0, 48.0, 56.0, 64.0]),
+    *K_SCALE_AXES,
     ("tau",                    [400.0, 500.0, 600.0, 700.0, 900.0, math.inf]),
     ("provisional_multiplier", [1.0, 2.0, 3.0, 4.0, 6.0, 8.0]),
     ("provisional_games",      [4, 6, 10, 14, 20, 30]),
@@ -201,8 +229,12 @@ def _init():
     """Load the corpus once per worker process."""
     import sqlite3
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    _G["games"] = load_games(con)
-    _G["rosters"], _G["clubs"] = load_maps(con)
+    games = load_games(con)
+    rosters, clubs = load_maps(con)
+    ufa_games, ufa_rosters, ufa_clubs = load_ufa_games(con)
+    _G["games"] = sorted(games + ufa_games, key=lambda g: g["sort"])
+    _G["rosters"] = {**rosters, **ufa_rosters}
+    _G["clubs"] = {**clubs, **ufa_clubs}
     _G["stats"] = sorted(load_stat_events(con) + load_ufa_stat_events(con),
                          key=lambda e: e[0])
     con.close()
@@ -212,8 +244,13 @@ def as_config(overrides: dict) -> EloConfig:
     cfg = dict(PUBLISHED)
     cfg["division_scale"] = dict(PUBLISHED["division_scale"])
     cfg["division_bases"] = dict(PUBLISHED["division_bases"])
+    cfg["k_scale"] = dict(PUBLISHED.get("k_scale", {}))
     for key, value in overrides.items():
-        if "." in key:
+        if key.startswith("k_scale_group."):
+            group = key.split(".", 1)[1]
+            for division in K_SCALE_GROUPS[group]:
+                cfg["k_scale"][division] = value
+        elif "." in key:
             group, sub = key.split(".", 1)
             cfg[group][sub] = value
         else:
@@ -347,8 +384,8 @@ def paired_ci(a, b, n_boot=2000, seed=0):
     return sum(d)/n, bs[int(.05*n_boot)], bs[int(.95*n_boot)]
 
 
-def main(passes=3, jobs=8, quick=False):
-    axes = AXES[:6] if quick else AXES
+def main(passes=3, jobs=8, quick=False, division_k_only=False):
+    axes = K_SCALE_AXES if division_k_only else (AXES[:6] if quick else AXES)
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=jobs, initializer=_init) as pool:
         base, history = descend(pool, passes, axes)
@@ -383,4 +420,4 @@ if __name__ == "__main__":
     def opt(name, default):
         return int(argv[argv.index(name) + 1]) if name in argv else default
     main(passes=opt("--passes", 3), jobs=opt("--jobs", 8),
-         quick="--quick" in argv)
+         quick="--quick" in argv, division_k_only="--division-k-only" in argv)

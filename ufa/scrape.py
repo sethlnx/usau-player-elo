@@ -1,6 +1,6 @@
 """Pull UFA teams, players, season stats, and games into data/usau.db.
 
-Usage: python -m ufa.scrape [season ...]     (default 2021-current year)
+Usage: python -m ufa.scrape [season ...]     (default 2012-current year)
 Idempotent: rows are UPSERTed; the current season bypasses the JSON cache.
 """
 
@@ -12,6 +12,9 @@ import requests
 from scraper.build_db import DB_PATH, connect
 
 from . import api
+
+AUDL_START_YEAR = 2012
+
 
 STAT_COLUMNS = [
     "assists", "goals", "hockeyAssists", "completions", "throwAttempts",
@@ -155,4 +158,5 @@ def main(seasons: list[int]):
 
 
 if __name__ == "__main__":
-    main([int(a) for a in sys.argv[1:]] or list(range(2021, date.today().year + 1)))
+    main([int(a) for a in sys.argv[1:]]
+         or list(range(AUDL_START_YEAR, date.today().year + 1)))

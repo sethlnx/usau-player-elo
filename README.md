@@ -239,6 +239,21 @@ Masters TEST does degrade slightly under the retune (masters men's 0.39336 ->
 are n-weighted and masters is 4.5% of VAL. That is the intended trade and it
 is worth naming rather than burying.
 
+**Division-specific update speed was tested rather than assumed.** A grouped
+K-factor descent gives college, masters, school, beach, and UFA their own
+candidate multiplier while leaving club at the 1.0 gauge. Thin brackets share
+a competition-family axis: at the time of this sweep, beach had only 377 VAL
+games across its contested brackets and UFA had 316. The replay and objective
+included all 901 UFA games then available; without that merge, a UFA K-factor
+would have been a dead knob.
+
+The proposed lower weights did not survive. Beach's global VAL optimum remains
+1.0. UFA improves monotonically toward 1.5, not below 1.0, but that move
+prunes as noise. College, masters, and school also remain 1.0. YCC alone keeps
+a 1.25 multiplier: weighted VAL 0.45944 -> 0.45925 and untouched TEST
+0.46446 -> 0.46425. This is update speed, not an assertion that a YCC game is
+more important than a club game.
+
 ## Gender-matching
 
 Every division shares ONE rating scale, bridged by mixed: 10,814 names appear
@@ -276,11 +291,12 @@ season for every player or club that has ever closed a season in the top 25,
 and a **Tournaments** browser over all 3,863 events. Club rankings can switch
 from the ranked list to a 25-club head-to-head results matrix; green cells are
 winning records, red cells are losing records, and stronger color marks a more
-decisive win-loss split. The **UFA** division includes current and historical
-teams from 2021 onward. Its season table reports each team's Elo after its
-latest game in that season; the team detail chart has one point per UFA game,
-and each point expands to the score and Elo change behind it. Season rosters
-and current linked player ratings remain available in the same detail panel.
+decisive win-loss split. The **UFA** division includes the available AUDL/UFA
+API history from the league's 2012 inaugural season onward. Its season table
+reports each team's Elo after its latest game in that season; the team detail
+chart has one point per UFA game, and each point expands to the score and Elo
+change behind it. Season rosters and current linked player ratings remain
+available in the same detail panel.
 The site reads the published rating and history artifacts plus the UFA roster
 database and identity links; it never replays the model, so the page cannot
 drift from the generated ratings.
@@ -888,14 +904,13 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   three parameters, each scoring well only while the ratings knew nothing.
   Print a candidate's PER-SEASON gain: helping only 2017-2019 and decaying
   toward zero is the signature of a cold-start artifact.
-- Selection scores the n-weighted VAL logloss across ALL FIVE divisions, not
-  club men's alone — club men's is 19,682 of 90,284 games, so tuning global
-  knobs on it would let 78% of the corpus be collateral. Per-division bases
-  and scales are still scored on their own division's games.
-  `python -m analysis.descent` is the harness: 21 axes, 3 passes, every
-  surviving move dropped one at a time and kept only if reverting costs
-  >0.0003 VAL. The last run converged in two passes and pruned twelve of
-  thirteen improving moves as VAL noise.
+- Selection scores tier-weighted VAL logloss across all 47 modeled divisions.
+  Club owns 50% of the objective, college 30%, school/youth 15%, and all
+  other divisions (including beach, masters, and UFA) 5%; each tier's share
+  is independent of its row count. Per-division bases and scales are still
+  scored on their own division's games. `python -m analysis.descent` is the
+  40-axis harness; `--division-k-only` runs the six competition-family update
+  speeds alone. Three passes are followed by cumulative 0.0003 VAL pruning.
 - **The provisional window is the most valuable mechanism in the model.**
   Swept at the selected config, weighted VAL against the published point:
   multiplier 1/2/3/4/[6]/8/12 gives +.0297/+.0154/+.0071/+.0025/—/+.0036/
