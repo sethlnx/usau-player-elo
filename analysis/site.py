@@ -123,6 +123,7 @@ def load_ufa_payload(con, player_rows):
             part for part in (first or "", last or "") if part
         ).strip()
         by_team[(year, team)].append({
+            "pid": str(pid) if pid is not None else "",
             "name": name or str(upid),
             "elo": float(row["elo"]) if row else None,
             "linked": row is not None,
@@ -132,11 +133,14 @@ def load_ufa_payload(con, player_rows):
     tau = float(PUBLISHED.get("tau", 500.0))
     for team, year, city, full_name, wins, losses in teams:
         roster = by_team[(year, team)]
-        rated = [p["elo"] for p in roster if p["elo"] is not None]
-        if rated:
-            peak = max(rated)
-            weights = [math.exp((rating - peak) / tau) for rating in rated]
-            rating = sum(w * r for w, r in zip(weights, rated)) / sum(weights)
+        rated = sorted(
+            (p["elo"] for p in roster if p["elo"] is not None), reverse=True
+        )
+        used = rated[:20]
+        if used:
+            peak = used[0]
+            weights = [math.exp((rating - peak) / tau) for rating in used]
+            rating = sum(w * r for w, r in zip(weights, used)) / sum(weights)
         else:
             rating = None
         roster.sort(key=lambda p: (
@@ -150,6 +154,7 @@ def load_ufa_payload(con, player_rows):
             "losses": losses or 0,
             "rating": round(rating, 1) if rating is not None else None,
             "rated": len(rated),
+            "used": len(used),
             "roster": roster,
         })
     for rows in out.values():
@@ -792,20 +797,7 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 #rpane{padding:0 13px 13px}
 .rsum{font-size:12px;color:var(--ink-3);margin:0 0 9px;line-height:1.6}
 
-/* UFA teams are season snapshots, so each row carries its listed roster and
-   the current Elo available for every linked player. */
 .ufatbl td:nth-child(2){min-width:300px}
-.ufaroster summary{cursor:pointer;display:flex;align-items:center;gap:7px;
-  list-style:none}
-.ufaroster summary::-webkit-details-marker{display:none}
-.ufaroster summary::before{content:'\25b8';font-size:10px;color:var(--ink-3)}
-.ufaroster[open] summary::before{content:'\25be'}
-.ufaroster summary:hover{color:var(--accent)}
-.ufaroster .muted{font-size:12px}
-.ufaroster table{margin:8px 0 2px;width:min(520px,calc(100vw - 80px));
-  border:1px solid var(--line);font-size:12.5px}
-.ufaroster td,.ufaroster th{padding:3px 7px;font-size:12.5px}
-.ufaroster th{font-size:10.5px}
 /* ---------- tournaments ---------- */
 .evtbl tr.ev{cursor:pointer}
 .evtbl tr.ev:hover td{background:var(--chip)}
@@ -1358,16 +1350,11 @@ function drawUfa() {
   $('#clubView').disabled = true;
   $('#h2hControl').hidden = true;
   $('#ufatb').innerHTML = rows.map(r => {
-    const roster = (r.roster || []).map(p =>
-      `<tr><td>${esc(p.name)}</td><td class="n">${p.elo === null
-        ? '<span class="muted">—</span>' : p.elo.toFixed(0)}</td></tr>`
-    ).join('');
-    const rosterLabel = `${r.roster.length} listed · ${r.rated} rated`;
+    const rosterLabel = `${r.roster.length} listed · ${r.rated} linked · ` +
+      `top ${r.used} used`;
     return `<tr><td class="rk">${ranks.get(r.id)}</td><td>` +
-      `<details class="ufaroster"><summary>${esc(r.name)} ` +
-      `<span class="muted">${esc(r.city)} · ${esc(rosterLabel)}</span></summary>` +
-      `<table><thead><tr><th>Player</th><th class="n">Current Elo</th></tr></thead>` +
-      `<tbody>${roster}</tbody></table></details></td>` +
+      `<span class="nmlink" data-club="${esc(ufaKey(r))}">${esc(r.name)}</span> ` +
+      `<span class="muted">${esc(r.city)}</span></td>` +
       `<td class="n">${r.year}</td>` +
       `<td class="n">${r.wins}–${r.losses}</td>` +
       `<td class="n">${r.rating === null ? '—' : r.rating.toFixed(0)}</td>` +
@@ -1381,9 +1368,9 @@ function drawUfa() {
   $('#ufanote').innerHTML =
     `UFA seasons ${years[years.length - 1]}–${latest}; ` +
     `${year === 'all' ? 'all seasons shown' : `showing ${year}`}. ` +
-    `Team Elo is the softmax-weighted current Elo of linked roster players ` +
-    `(roster coverage is shown as rated/total). Expand a team to see its listed ` +
-    `roster and each player's current Elo.`;
+    `Team Elo is the softmax-weighted current Elo of the highest 20 linked ` +
+    `players (or all linked players when a roster has fewer than 20). ` +
+    `Roster details and player ratings appear in the shared club detail panel.`;
 }
 function drawClubs() {
   const ufa = String(DIVCODE_UFA) === $('#rdiv').value;
@@ -1691,6 +1678,7 @@ let GSIDE = {};   // eventIdx -> Set(club index), from the core
 // so a club's history row can print the grade and a crown without any fault.
 let EMETA = {};
 let RBC = {};     // clubKey -> {b: roster bucket, evs: [eventIdx], has: Set}
+let UFA_BY_KEY = new Map();
 let SEASONS = [], SIX = new Map(), DEFYEAR = 0;
 let HREADY = false, HFAILED = false;
 
@@ -1753,6 +1741,63 @@ function applyHistory(h) {
   }
   for (const k in trendCache) delete trendCache[k];
   HREADY = true;
+}
+
+function ufaKey(row) {
+  return `ufa:${row.team || String(row.id).split(':').slice(1).join(':')}`;
+}
+function installUfaHistory() {
+  const all = D.ufa || {};
+  const byKey = new Map();
+  const personIx = new Map();
+  const years = Object.keys(all).sort((a, b) => +a - +b);
+  for (const year of years) {
+    for (const row of all[year]) {
+      const ckey = ufaKey(row);
+      let group = byKey.get(ckey);
+      if (!group) {
+        group = {rows: [], byYear: new Map()};
+        byKey.set(ckey, group);
+      }
+      group.rows.push(row);
+      group.byYear.set(+year, row);
+      TK[ckey] = ckey;
+      TN[ckey] = row.name;
+      const evIdx = HEV.length;
+      HEV.push([`${year}-09-01`, `${row.name} ${year}`, +year, DIVCODE_UFA]);
+      const ids = (row.roster || []).map(player => {
+        const person = player.pid
+          ? `pid:${player.pid}`
+          : `ufa:${row.id}:${player.name}`;
+        if (!personIx.has(person)) {
+          personIx.set(person, PEOPLE.length);
+          PEOPLE.push(player.name);
+          PPID.push(player.pid || '');
+        }
+        return personIx.get(person);
+      });
+      ROST[`${ckey}|${evIdx}`] = ids;
+      const rb = RBC[ckey] || {b: null, evs: [], has: new Set()};
+      rb.evs.push(evIdx); rb.has.add(evIdx); RBC[ckey] = rb;
+      const hist = H.teams[ckey] || [[], []];
+      const prev = hist[0].length ? evIdx - hist[0].reduce((a, d) => a + d, 0) : evIdx;
+      hist[0].push(prev);
+      hist[1].push([row.rating === null ? 0 : row.rating, row.roster.length]);
+      H.teams[ckey] = hist;
+    }
+  }
+  UFA_BY_KEY = byKey;
+  SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
+  SIX = new Map(SEASONS.map((s, i) => [s, i]));
+  DEFYEAR = SEASONS.length - 1;
+  const ryear = $('#ryear');
+  if (ryear) {
+    const selected = ryear.value;
+    ryear.innerHTML = '<option value="all">All years</option>' +
+      [...SEASONS].reverse().map(y =>
+        `<option value="${y}">${y}</option>`).join('');
+    ryear.value = SEASONS.includes(+selected) ? selected : 'all';
+  }
 }
 
 /* ---------- lazy tiers ---------- */
@@ -2256,7 +2301,29 @@ function rosterPlayerRating(pid, season, div) {
    club off — which may be registered for an event not yet played; the Ev
    column then says how many of the season's played events each person was
    actually listed for, 0 meaning registered only. */
+function ufaRosterPane(ckey, season) {
+  const group = UFA_BY_KEY.get(ckey);
+  const row = group && group.byYear.get(+season);
+  if (!row) return '';
+  const roster = (row.roster || []).slice().sort((a, b) =>
+    (a.elo === null) - (b.elo === null) ||
+    (b.elo || 0) - (a.elo || 0) ||
+    a.name.localeCompare(b.name));
+  const body = roster.map((player, i) =>
+    `<tr><td class="rk">${i + 1}</td><td>` +
+    (player.pid && PBY.has(player.pid)
+      ? `<span class="nmlink" data-pid="${esc(player.pid)}">${esc(player.name)}</span>`
+      : `<span class="muted">${esc(player.name)}</span>`) +
+    `</td><td class="n">${player.elo === null ? '—' : player.elo.toFixed(0)}</td>` +
+    `</tr>`).join('');
+  return `<p class="rsum">${roster.length} listed players · ${row.rated} linked ` +
+    `players, top ${row.used} used for the team Elo. Player ratings are current ` +
+    `linked Elo values for the ${season} UFA roster.</p>` +
+    `<table class="hist"><thead><tr><th class="n">#</th><th>Player</th>` +
+    `<th class="n">Elo</th></tr></thead><tbody>${body}</tbody></table>`;
+}
 function rosterPane(ckey, season) {
+  if (UFA_BY_KEY.has(ckey)) return ufaRosterPane(ckey, season);
   const grp = rosterSeasons(ckey).find(g => g.season === season) || {eis: []};
   const br = season === BSEASON ? BR[ckey] : null;
   const seen = new Map();
@@ -2354,7 +2421,9 @@ let pendingDetail = null;
    has no entry in the core index and so needs nothing faulted. */
 function detailDep(kind, key) {
   if (kind === 'p') return ['p', playerBucket(key)];
-  const rb = RBC[TK[key] || key];
+  const ckey = TK[key] || key;
+  if (UFA_BY_KEY.has(ckey)) return null;
+  const rb = RBC[ckey];
   return rb ? ['r', rb.b] : null;
 }
 
@@ -2403,16 +2472,24 @@ function openDetail(kind, key, opts) {
   } else {
     ckey = TK[key] || key;
     title = clubLabel(ckey);
-    // A college team, or a club inactive in 2026, is in no basis table at all;
-    // it still has a trajectory, so show that and omit the rank. Matched on
-    // the model KEY, never the printed name: three divisions share names, and
-    // matching "Phoenix" by name opens the men's row on the women's club.
-    const tbl = D.clubs[$('#basis').value] || [];
-    const row = tbl.find(r => r[6] === ckey);
-    if (row) {
-      const n = tbl.filter(r => r[5] === row[5]).length;
-      parts.push(`Elo <b>${row[2].toFixed(0)}</b>`, `roster ${row[3]}`,
-                 `#${row[0]} of ${n} ${DIVLABEL[row[5]]} clubs`);
+    if (UFA_BY_KEY.has(ckey)) {
+      const group = UFA_BY_KEY.get(ckey);
+      const row = group.rows[group.rows.length - 1];
+      parts.push(`Elo <b>${row.rating === null ? '—' : row.rating.toFixed(0)}</b>`,
+                 `roster ${row.roster.length}`,
+                 `${row.wins}–${row.losses} in ${row.year}`);
+    } else {
+      // A college team, or a club inactive in 2026, is in no basis table at all;
+      // it still has a trajectory, so show that and omit the rank. Matched on
+      // the model KEY, never the printed name: three divisions share names, and
+      // matching "Phoenix" by name opens the men's row on the women's club.
+      const tbl = D.clubs[$('#basis').value] || [];
+      const row = tbl.find(r => r[6] === ckey);
+      if (row) {
+        const n = tbl.filter(r => r[5] === row[5]).length;
+        parts.push(`Elo <b>${row[2].toFixed(0)}</b>`, `roster ${row[3]}`,
+                   `#${row[0]} of ${n} ${DIVLABEL[row[5]]} clubs`);
+      }
     }
   }
   const pts = decode(kind === 'p' ? PLAY[key] : H.teams[ckey]);
@@ -2498,6 +2575,10 @@ $('#ptb').addEventListener('click', e => {
 });
 $('#ctb').addEventListener('click', e => {
   const el = e.target.closest('[data-club]'); if (el) openDetail('c', el.dataset.club);
+});
+$('#ufatb').addEventListener('click', e => {
+  const el = e.target.closest('[data-club]');
+  if (el) openDetail('c', el.dataset.club);
 });
 /* Every link and disclosure inside the panel: roster-size cells, event rows,
    affiliation cells, and the people inside an expanded roster. */
@@ -3182,7 +3263,7 @@ $('#tvbody').addEventListener('click', ev => {
 // taken at face value; openDetail shows the waiting state and re-resolves it.
 const known = (kind, key) => !HREADY ? true : kind === 'p'
   ? PBY.has(String(key))
-  : !!H.teams[TK[key] || key];
+  : !!H.teams[TK[key] || key] || UFA_BY_KEY.has(TK[key] || key);
 function routeHash() {
   const m = /^#([pct])\/(.+)$/.exec(location.hash || '');
   // A tournament is a VIEW, not the overlay panel: it owns the tab, and any
@@ -3600,7 +3681,7 @@ function onHistoryReady() {
 /* A <script> tag rather than fetch(): a classic script loads from a file://
    page, XHR and fetch do not, and this page is meant to work from disk. */
 (function loadHistory() {
-  if (D.history) { applyHistory(D.history); onHistoryReady(); return; }
+  if (D.history) { applyHistory(D.history); installUfaHistory(); onHistoryReady(); return; }
   if (!D.historyJs) { HFAILED = true; return; }
   const s = document.createElement('script');
   s.src = D.historyJs;
@@ -3609,6 +3690,7 @@ function onHistoryReady() {
     const h = window.__USAU_HISTORY__;
     if (!h) { HFAILED = true; onHistoryReady(); return; }
     applyHistory(h);
+    installUfaHistory();
     delete window.__USAU_HISTORY__;   // the live bindings own it now
     onHistoryReady();
   };

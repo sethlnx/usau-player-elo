@@ -277,8 +277,10 @@ and a **Tournaments** browser over all 3,863 events. Club rankings can switch
 from the ranked list to a 25-club head-to-head results matrix; green cells are
 winning records, red cells are losing records, and stronger color marks a more
 decisive win-loss split. The **UFA** division includes current and historical
-teams from 2021 onward; expand a team to see its listed roster, linked player
-ratings, rating coverage, and W–L record.
+teams from 2021 onward; each team is rated from its highest 20 linked players
+(or all linked players when fewer than 20 are available). Clicking a UFA team
+opens the same club detail panel as other clubs, including season rosters and
+player ratings.
 It reads the published rating artifacts plus the UFA roster database and identity
 links; it never replays the model, so the page cannot drift from the generated
 ratings.

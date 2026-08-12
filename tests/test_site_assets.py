@@ -60,9 +60,16 @@ class SiteAssetContractTests(unittest.TestCase):
         self.assertTrue(team["name"])
         self.assertGreater(team["wins"] + team["losses"], 0)
         self.assertGreater(len(team["roster"]), 0)
-        self.assertGreater(team["rated"], 0)
-        self.assertTrue(math.isfinite(team["rating"]))
-        self.assertTrue(any(player["elo"] is not None for player in team["roster"]))
+        rated = sorted(
+            (player["elo"] for player in team["roster"]
+             if player["elo"] is not None), reverse=True
+        )
+        top = rated[:20]
+        self.assertEqual(team["used"], len(top))
+        peak = top[0]
+        weights = [math.exp((rating - peak) / 500) for rating in top]
+        expected = sum(w * r for w, r in zip(weights, top)) / sum(weights)
+        self.assertAlmostEqual(team["rating"], expected, places=1)
 
 if __name__ == "__main__":
     unittest.main()
