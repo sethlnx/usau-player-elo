@@ -1,8 +1,11 @@
+import math
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
 
-from analysis.site import bucket_urls, content_version
+from analysis.backtest import DB_PATH
+from analysis.site import bucket_urls, content_version, load_csv, load_ufa_payload
 
 
 class SiteAssetContractTests(unittest.TestCase):
@@ -38,6 +41,28 @@ class SiteAssetContractTests(unittest.TestCase):
             head_to_head_records(history),
             [[1, 2, 2026, 2, 0]],
         )
+
+    def test_ufa_payload_contains_current_and_historical_rosters(self):
+        con = sqlite3.connect(DB_PATH)
+        try:
+            players = {
+                int(row["player_id"]): row
+                for row in load_csv("player_elo.csv")
+            }
+            payload = load_ufa_payload(con, players)
+        finally:
+            con.close()
+
+        self.assertIn("2021", payload)
+        self.assertIn("2025", payload)
+        self.assertGreaterEqual(len(payload["2025"]), 20)
+        team = payload["2025"][0]
+        self.assertTrue(team["name"])
+        self.assertGreater(team["wins"] + team["losses"], 0)
+        self.assertGreater(len(team["roster"]), 0)
+        self.assertGreater(team["rated"], 0)
+        self.assertTrue(math.isfinite(team["rating"]))
+        self.assertTrue(any(player["elo"] is not None for player in team["roster"]))
 
 if __name__ == "__main__":
     unittest.main()

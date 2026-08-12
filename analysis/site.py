@@ -22,6 +22,7 @@ Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.
 
 import collections
 import hashlib
+import math
 import csv
 import json
 import re
@@ -40,6 +41,7 @@ from analysis.history_split import BUCKETS as HIST_BUCKETS
 from analysis.history_split import multi_division_clubs, trend_series_range
 from analysis.history_split import split as split_history
 from analysis.rankings import DIVCODE, PUBLISHED, TEAM_DIVISIONS
+from ufa.link import resolve_links
 from analysis.tournaments import build as build_tournaments
 
 # docs/ rather than site/: GitHub Pages can serve a branch's root or its
@@ -98,6 +100,62 @@ GAME_GLOBAL = "__USAU_GAME__"
 MIN_GAMES = 30
 
 
+def load_ufa_payload(con, player_rows):
+    """Return current and historical UFA teams with linked player ratings."""
+    try:
+        links = resolve_links(con)
+        teams = con.execute(
+            "SELECT team_id, year, city, full_name, wins, losses "
+            "FROM ufa_teams ORDER BY year DESC, full_name"
+        ).fetchall()
+        rosters = con.execute(
+            "SELECT player_id, year, team_id, first_name, last_name "
+            "FROM ufa_players ORDER BY last_name, first_name"
+        ).fetchall()
+    except sqlite3.OperationalError:
+        return {}
+
+    by_team = collections.defaultdict(list)
+    for upid, year, team, first, last in rosters:
+        pid = links.get(upid)
+        row = player_rows.get(pid)
+        name = row["player"] if row else " ".join(
+            part for part in (first or "", last or "") if part
+        ).strip()
+        by_team[(year, team)].append({
+            "name": name or str(upid),
+            "elo": float(row["elo"]) if row else None,
+            "linked": row is not None,
+        })
+
+    out = collections.defaultdict(list)
+    tau = float(PUBLISHED.get("tau", 500.0))
+    for team, year, city, full_name, wins, losses in teams:
+        roster = by_team[(year, team)]
+        rated = [p["elo"] for p in roster if p["elo"] is not None]
+        if rated:
+            peak = max(rated)
+            weights = [math.exp((rating - peak) / tau) for rating in rated]
+            rating = sum(w * r for w, r in zip(weights, rated)) / sum(weights)
+        else:
+            rating = None
+        roster.sort(key=lambda p: (
+            p["elo"] is None, -(p["elo"] or 0), p["name"].lower()))
+        out[str(year)].append({
+            "id": f"{year}:{team}",
+            "year": year,
+            "name": full_name or team,
+            "city": city or "",
+            "wins": wins or 0,
+            "losses": losses or 0,
+            "rating": round(rating, 1) if rating is not None else None,
+            "rated": len(rated),
+            "roster": roster,
+        })
+    for rows in out.values():
+        rows.sort(key=lambda r: (
+            r["rating"] is None, -(r["rating"] or 0), r["name"].lower()))
+    return dict(out)
 def load_csv(name):
     p = DATA_DIR / name
     with open(p, newline="") as f:
@@ -150,6 +208,9 @@ def build():
     all_players = load_csv("player_elo.csv")
     total_rated = len(all_players)
     players = [r for r in all_players if int(r["games"]) >= MIN_GAMES]
+    ufa = load_ufa_payload(
+        con, {int(r["player_id"]): r for r in all_players}
+    )
     clubs = {
         "completed": load_csv("team_elo.csv"),
         "best": load_csv("team_elo_best.csv"),
@@ -313,6 +374,7 @@ def build():
             {ev[3] for ev in tourneys["events"]}
             | {DIVCODE.get(r["division"], 0)
                for rows in clubs.values() for r in rows}
+            | ({DIVCODE["ufa"]} if ufa else set())
         ),
         "eventDivs": sorted({ev[3] for ev in tourneys["events"]}),
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
@@ -345,6 +407,7 @@ def build():
         "playJs": bucket_urls(PLAY_DIR, hplay, asset_version),
         "rostJs": bucket_urls(ROST_DIR, hrost, asset_version),
         "gameJs": bucket_urls(GAME_DIR, hgame, asset_version),
+        "ufa": ufa,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -729,6 +792,20 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 #rpane{padding:0 13px 13px}
 .rsum{font-size:12px;color:var(--ink-3);margin:0 0 9px;line-height:1.6}
 
+/* UFA teams are season snapshots, so each row carries its listed roster and
+   the current Elo available for every linked player. */
+.ufatbl td:nth-child(2){min-width:300px}
+.ufaroster summary{cursor:pointer;display:flex;align-items:center;gap:7px;
+  list-style:none}
+.ufaroster summary::-webkit-details-marker{display:none}
+.ufaroster summary::before{content:'\25b8';font-size:10px;color:var(--ink-3)}
+.ufaroster[open] summary::before{content:'\25be'}
+.ufaroster summary:hover{color:var(--accent)}
+.ufaroster .muted{font-size:12px}
+.ufaroster table{margin:8px 0 2px;width:min(520px,calc(100vw - 80px));
+  border:1px solid var(--line);font-size:12.5px}
+.ufaroster td,.ufaroster th{padding:3px 7px;font-size:12.5px}
+.ufaroster th{font-size:10.5px}
 /* ---------- tournaments ---------- */
 .evtbl tr.ev{cursor:pointer}
 .evtbl tr.ev:hover td{background:var(--chip)}
@@ -880,6 +957,13 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       <p class="note" id="h2hNote" hidden></p>
     </div>
     <div id="clubMatrix" hidden></div>
+    <div id="ufaRankings" hidden>
+      <table class="ufatbl"><thead><tr>
+        <th class="n">#</th><th>Team</th><th class="n">Season</th>
+        <th class="n">W–L</th><th class="n">Team Elo</th><th class="n">Roster</th>
+      </tr></thead><tbody id="ufatb"></tbody></table>
+      <p class="note" id="ufanote"></p>
+    </div>
     <p class="note" id="cnote"></p>
   </div>
 
@@ -1086,6 +1170,8 @@ document.querySelectorAll('nav button').forEach(
   b => b.onclick = () => showTab(b.dataset.t));
 function drawRankings() {
   const players = $('#rtype').value === 'player';
+  if (players && $('#rdiv').value === String(DIVCODE_UFA))
+    $('#rdiv').value = 'all';
   $('#clubRankings').hidden = players;
   $('#playerRankings').hidden = !players;
   if (players) drawPlayers(); else drawClubs();
@@ -1098,7 +1184,8 @@ const heldOut = D.metrics.held_out_2024_2025;
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
   `softmax-weighted mean of its event roster. Rankings and Trends span ` +
-  `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. The Tournaments browser is ` +
+  `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. UFA team seasons are also ` +
+  `available from the Rankings division picker. The Tournaments browser is ` +
   `USAU-only.` +
   (IS_GLICKO && PERIOD_LABEL ? ` Ratings update after ${PERIOD_LABEL}.` : '') +
   (heldOut?.n ? ` Held-out 2024–25: ${(heldOut.accuracy * 100).toFixed(1)}% ` +
@@ -1248,17 +1335,73 @@ function updateH2HControls(pop, historical, year) {
 function h2hTeamCell(row, historical, selected, year) {
   return h2hCell(h2hTeamKey(row, historical), selected, year);
 }
+const DIVCODE_UFA = 50;
+function drawUfa() {
+  const year = $('#ryear').value;
+  const q = $('#cq').value.trim().toLowerCase();
+  const all = D.ufa || {};
+  const years = Object.keys(all).sort((a, b) => +b - +a);
+  const selected = year === 'all' ? years : years.filter(y => y === year);
+  const rows = selected.flatMap(y => (all[y] || []).filter(r =>
+    !q || `${r.name} ${r.city}`.toLowerCase().includes(q)
+  ));
+  const ranks = new Map();
+  selected.forEach(y => {
+    (all[y] || []).forEach((r, i) => ranks.set(r.id, i + 1));
+  });
+  $('#clubTableWrap').hidden = true;
+  $('#clubMatrix').hidden = true;
+  $('#ufaRankings').hidden = false;
+  $('#cnote').hidden = true;
+  $('#ufanote').hidden = false;
+  $('#basis').disabled = true;
+  $('#clubView').disabled = true;
+  $('#h2hControl').hidden = true;
+  $('#ufatb').innerHTML = rows.map(r => {
+    const roster = (r.roster || []).map(p =>
+      `<tr><td>${esc(p.name)}</td><td class="n">${p.elo === null
+        ? '<span class="muted">—</span>' : p.elo.toFixed(0)}</td></tr>`
+    ).join('');
+    const rosterLabel = `${r.roster.length} listed · ${r.rated} rated`;
+    return `<tr><td class="rk">${ranks.get(r.id)}</td><td>` +
+      `<details class="ufaroster"><summary>${esc(r.name)} ` +
+      `<span class="muted">${esc(r.city)} · ${esc(rosterLabel)}</span></summary>` +
+      `<table><thead><tr><th>Player</th><th class="n">Current Elo</th></tr></thead>` +
+      `<tbody>${roster}</tbody></table></details></td>` +
+      `<td class="n">${r.year}</td>` +
+      `<td class="n">${r.wins}–${r.losses}</td>` +
+      `<td class="n">${r.rating === null ? '—' : r.rating.toFixed(0)}</td>` +
+      `<td class="n">${rosterLabel}</td></tr>`;
+  }).join('');
+  const latest = years[0];
+  $('#ccount').textContent = q
+    ? `${rows.length} of ${selected.reduce((n, y) => n + (all[y] || []).length, 0)} ` +
+      `UFA teams match`
+    : `${rows.length} UFA teams`;
+  $('#ufanote').innerHTML =
+    `UFA seasons ${years[years.length - 1]}–${latest}; ` +
+    `${year === 'all' ? 'all seasons shown' : `showing ${year}`}. ` +
+    `Team Elo is the softmax-weighted current Elo of linked roster players ` +
+    `(roster coverage is shown as rated/total). Expand a team to see its listed ` +
+    `roster and each player's current Elo.`;
+}
 function drawClubs() {
+  const ufa = String(DIVCODE_UFA) === $('#rdiv').value;
+  if (ufa) { drawUfa(); return; }
+  $('#clubTableWrap').hidden = false;
+  $('#clubMatrix').hidden = $('#clubView').value !== 'matrix';
+  $('#ufaRankings').hidden = true;
+  $('#cnote').hidden = false;
+  $('#ufanote').hidden = true;
+  $('#basis').disabled = false;
+  $('#clubView').disabled = false;
+  $('#h2hControl').hidden = $('#clubView').value === 'matrix';
   const basis = $('#basis').value;
   const year = $('#ryear').value;
   const historical = year !== 'all';
   const div = $('#rdiv').value;
   const q = $('#cq').value.trim().toLowerCase();
   const matrixView = $('#clubView').value === 'matrix';
-  $('#clubTableWrap').hidden = matrixView;
-  $('#clubMatrix').hidden = !matrixView;
-  $('#h2hControl').hidden = matrixView;
-  $('#basis').disabled = historical;
 
   if (historical && !HREADY) {
     $('#ccount').textContent = 'Loading club history…';
@@ -1708,7 +1851,7 @@ const DIVTAG = ["men's", "college men's", "college men's D-III", 'mixed',
                 'beach grand masters mixed',
                 "beach great grand masters men's", "beach great grand masters women's",
                 'beach great grand masters mixed', 'beach legends mixed',
-                "league men's", 'league mixed'];
+                "league men's", 'league mixed', 'UFA'];
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -2422,7 +2565,7 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                'Beach Grand Masters Mixed',
                "Beach Great Grand Masters Men's", "Beach Great Grand Masters Women's",
                'Beach Great Grand Masters Mixed', 'Beach Legends Mixed',
-               "League Men's", 'League Mixed'];
+               "League Men's", 'League Mixed', 'UFA'];
 
 /* Event geography is only city/state in the upstream record. Translate the
    venue state through USA Ultimate's division-specific region boundaries;
@@ -3100,7 +3243,7 @@ const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
                   44: "beach great grand masters men's",
                   45: "beach great grand masters women's",
                   46: 'beach great grand masters mixed', 47: 'beach legends mixed',
-                  48: "league men's", 49: 'league mixed'};
+                  48: "league men's", 49: 'league mixed', 50: 'UFA'};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};

@@ -633,7 +633,8 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                                 "beach-greatgrandmasters-women": 200.0,
                                 "beach-greatgrandmasters-mixed": 220.0,
                                 "beach-legends-mixed": 220.0,
-                                "league-men": 260.0, "league-mixed": 220.0},
+                                "league-men": 260.0, "league-mixed": 220.0,
+                                "ufa": 260.0},
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0,
@@ -742,7 +743,8 @@ DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "beach-greatgrandmasters-men": 44, "beach-greatgrandmasters-women": 45,
            "beach-greatgrandmasters-mixed": 46,
            "beach-legends-mixed": 47,
-           "league-men": 48, "league-mixed": 49}
+           "league-men": 48, "league-mixed": 49,
+           "ufa": 50}
 # Divisions the team tables cover, in display order. College is included so
 # the club tables reach as far as the player table and Trends do, but its
 # three roster bases carry less information than a club division's: a college
