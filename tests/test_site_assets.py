@@ -40,7 +40,7 @@ class SiteAssetContractTests(unittest.TestCase):
 
         self.assertEqual(
             head_to_head_records(history),
-            [[1, 2, 2026, 2, 0]],
+            [[1, 2, "2026-01-01", 2, 0]],
         )
 
     def test_ufa_payload_contains_current_and_historical_rosters(self):

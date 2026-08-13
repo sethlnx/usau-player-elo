@@ -218,16 +218,17 @@ def club_records(history):
 
 
 def head_to_head_records(history):
-    """[club A index, club B index, season, A wins, B wins] per matchup.
+    """[club A index, club B index, event date, A wins, B wins] per event.
 
     Club indices follow ``gameClubs`` and are ordered within each row. Draws
-    and self-fixtures follow ``club_records`` and contribute nothing.
+    and self-fixtures follow ``club_records`` and contribute nothing. Keeping
+    the event date preserves calendar-year filtering in the published page.
     """
     out = collections.defaultdict(lambda: [0, 0])
     events = history.get("events", [])
     for ev, rows in history.get("games", {}).items():
         try:
-            season = events[int(ev)][2]
+            event_date = events[int(ev)][0]
         except (IndexError, TypeError, ValueError):
             continue
         for r in rows:
@@ -235,9 +236,9 @@ def head_to_head_records(history):
                 continue
             first, second = sorted((r[0], r[1]))
             winner = r[0] if r[2] > r[3] else r[1]
-            out[(first, second, season)][winner == second] += 1
-    return [[first, second, season, *record]
-            for (first, second, season), record in sorted(out.items())]
+            out[(first, second, event_date)][winner == second] += 1
+    return [[first, second, event_date, *record]
+            for (first, second, event_date), record in sorted(out.items())]
 
 
 def with_records(history):
