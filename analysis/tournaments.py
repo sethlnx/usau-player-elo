@@ -588,11 +588,11 @@ def build(con):
     today = date.today().isoformat()
     for eid, name, season, division, start, end, city, state in meta:
         games = by_event.get(eid)
-        scheduled = not games and (start or "") >= today
-        if not games and not scheduled:
+        upcoming = (start or "") >= today
+        if not games and not upcoming:
             continue
         pools, brs, loose = decompose(games) if games else ([], [], [])
-        if games and not (pools or brs or loose):
+        if games and not (pools or brs or loose) and not upcoming:
             continue
 
         field = sorted({g[k] for _, gs, _ in pools for g in gs for k in ("home", "away")}

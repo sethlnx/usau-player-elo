@@ -1,35 +1,134 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
-1,Wretched Refuse,wretched refuse,club-men,1785.5,25,2026,Ski Town Classic 2026,2026-08-15
-2,Alamode,alamode,club-men,1781.5,22,2026,Ski Town Classic 2026,2026-08-15
-3,Texas BBQ,texas bbq,club-men,1736.0,19,2026,Ski Town Classic 2026,2026-08-15
-4,PowderHogs,powderhogs,club-men,1703.1,25,2026,Ski Town Classic 2026,2026-08-15
-5,Fungi,fungi,club-men,1700.7,21,2026,Ski Town Classic 2026,2026-08-15
-6,Sawtooth,sawtooth,club-men,1682.9,23,2026,Ski Town Classic 2026,2026-08-15
-7,Texas Tea-A,texas tea-a,club-men,1660.4,21,2026,Ski Town Classic 2026,2026-08-15
-8,Hazard,hazard,club-men,1650.0,21,2026,Ski Town Classic 2026,2026-08-15
-9,Lil’ Huckers,lil’ huckers,club-men,1598.2,26,2026,Ski Town Classic 2026,2026-08-15
-10,Riverside,riverside,club-men,1594.6,21,2026,Ski Town Classic 2026,2026-08-15
-11,Swordfish,swordfish,club-men,1547.0,25,2026,Ski Town Classic 2026,2026-08-15
-12,Tugboat,tugboat,club-men,1502.0,17,2026,Ski Town Classic 2026,2026-08-15
-13,El Niño,el niño,club-men,1485.8,13,2026,Ski Town Classic 2026,2026-08-15
-14,Arizona Frisbee Club,arizona frisbee club,club-men,1472.5,13,2026,Ski Town Classic 2026,2026-08-15
-15,Red Lotus,red lotus,club-men,1238.6,18,2026,Ski Town Classic 2026,2026-08-15
-1,Moontower,moontower (mixed),club-mixed,1770.6,24,2026,Ski Town Classic 2026,2026-08-15
-2,Minnesota Star Power,minnesota star power (mixed),club-mixed,1759.3,26,2026,Ski Town Classic 2026,2026-08-15
-3,Donuts,donuts (mixed),club-mixed,1742.8,21,2026,Ski Town Classic 2026,2026-08-15
-4,BW Ultimate,bw ultimate (mixed),club-mixed,1722.2,24,2026,Ski Town Classic 2026,2026-08-15
-5,Green Chiles,green chiles (mixed),club-mixed,1629.9,22,2026,Ski Town Classic 2026,2026-08-15
-6,Mango,mango (mixed),club-mixed,1608.4,25,2026,Ski Town Classic 2026,2026-08-15
-7,Space Ghosts,space ghosts (mixed),club-mixed,1604.3,24,2026,Ski Town Classic 2026,2026-08-15
-8,"All Jeeps, All Night. -A","all jeeps, all night. -a (mixed)",club-mixed,1556.2,17,2026,Ski Town Classic 2026,2026-08-15
-9,Utah Sundrift,utah sundrift (mixed),club-mixed,1505.4,21,2026,Ski Town Classic 2026,2026-08-15
-10,Cutthroat,cutthroat (mixed),club-mixed,1377.7,21,2026,Ski Town Classic 2026,2026-08-15
-1,Wildfire,wildfire (women's),club-women,1642.4,20,2026,Ski Town Classic 2026,2026-08-15
-2,Dark Sky,dark sky (women's),club-women,1636.0,24,2026,Ski Town Classic 2026,2026-08-15
-3,San Antonio Problems,san antonio problems (women's),club-women,1634.6,17,2026,Ski Town Classic 2026,2026-08-15
-4,Seven Devils,seven devils (women's),club-women,1601.2,18,2026,Ski Town Classic 2026,2026-08-15
-5,FAB,fab (women's),club-women,1589.6,19,2026,Ski Town Classic 2026,2026-08-15
-6,Trainwreck,trainwreck (women's),club-women,1527.6,16,2026,Ski Town Classic 2026,2026-08-15
-7,Crush City,crush city (women's),club-women,1471.5,16,2026,Ski Town Classic 2026,2026-08-15
-8,Swell,swell (women's),club-women,1343.0,13,2026,Ski Town Classic 2026,2026-08-15
-9,COSMOS,cosmos (women's),club-women,1306.9,13,2026,Ski Town Classic 2026,2026-08-15
+1,Sub Zero,sub zero,club-men,2134.8,24,2026,2026 Elite Select Challenge,2026-08-22
+2,Johnny Bravo,johnny bravo,club-men,2050.0,25,2026,2026 Elite Select Challenge,2026-08-22
+3,Doublewide,doublewide,club-men,2022.7,26,2026,2026 Elite Select Challenge,2026-08-22
+4,Chain Lightning,chain lightning,club-men,2022.6,20,2026,2026 Elite Select Challenge,2026-08-22
+5,Raleigh-Durham United,raleigh-durham united,club-men,1989.1,24,2026,2026 Elite Select Challenge,2026-08-22
+6,Haymaker,haymaker,club-men,1954.5,26,2026,2026 Elite Select Challenge,2026-08-22
+7,Vault,vault,club-men,1895.8,26,2026,2026 Elite Select Challenge,2026-08-22
+8,Nighthawk,nighthawk,club-men,1888.5,21,2026,2026 Elite Select Challenge,2026-08-22
+9,SoCal Condors,socal condors,club-men,1886.0,21,2026,2026 Elite Select Challenge,2026-08-22
+10,SOUF,souf,club-men,1876.8,26,2026,SOUF City Showdown,2026-08-22
+11,Wretched Refuse,wretched refuse,club-men,1785.5,25,2026,Ski Town Classic 2026,2026-08-15
+12,Alamode,alamode,club-men,1781.5,22,2026,Ski Town Classic 2026,2026-08-15
+13,Switchback,switchback,club-men,1762.9,20,2026,SOUF City Showdown,2026-08-22
+14,Texas BBQ,texas bbq,club-men,1736.0,19,2026,Ski Town Classic 2026,2026-08-15
+15,Grudge,grudge,club-men,1707.5,17,2026,SOUF City Showdown,2026-08-22
+16,PowderHogs,powderhogs,club-men,1703.1,25,2026,Ski Town Classic 2026,2026-08-15
+17,Fungi,fungi,club-men,1700.7,21,2026,Ski Town Classic 2026,2026-08-15
+18,Sawtooth,sawtooth,club-men,1682.9,23,2026,Ski Town Classic 2026,2026-08-15
+19,Texas Tea-A,texas tea-a,club-men,1660.4,21,2026,Ski Town Classic 2026,2026-08-15
+20,Hazard,hazard,club-men,1650.0,21,2026,Ski Town Classic 2026,2026-08-15
+21,Lil’ Huckers,lil’ huckers,club-men,1598.2,26,2026,Ski Town Classic 2026,2026-08-15
+22,Riverside,riverside,club-men,1594.6,21,2026,Ski Town Classic 2026,2026-08-15
+23,Blackfish,blackfish,club-men,1580.3,18,2026,SOUF City Showdown,2026-08-22
+24,Cookie Mon$terz,cookie mon$terz,club-men,1577.2,21,2026,Midas the III,2026-08-22
+25,Swordfish,swordfish,club-men,1547.0,25,2026,Ski Town Classic 2026,2026-08-15
+26,Battleship,battleship,club-men,1532.1,22,2026,Midas the III,2026-08-22
+27,Tugboat,tugboat,club-men,1502.0,17,2026,Ski Town Classic 2026,2026-08-15
+28,El Niño,el niño,club-men,1485.8,13,2026,Ski Town Classic 2026,2026-08-15
+29,Arizona Frisbee Club,arizona frisbee club,club-men,1472.5,13,2026,Ski Town Classic 2026,2026-08-15
+30,Alliance,alliance,club-men,1466.1,19,2026,Midas the III,2026-08-22
+31,Heartbreak,heartbreak,club-men,1413.7,24,2026,SOUF City Showdown,2026-08-22
+32,Red Lotus,red lotus,club-men,1238.6,18,2026,Ski Town Classic 2026,2026-08-15
+1,Toro,toro (mixed),club-mixed,2041.7,22,2026,2026 Elite Select Challenge,2026-08-22
+2,BFG,bfg (mixed),club-mixed,2032.6,26,2026,2026 Elite Select Challenge,2026-08-22
+3,AMP,amp (mixed),club-mixed,1998.1,26,2026,2026 Elite Select Challenge,2026-08-22
+4,Good Company,good company (mixed),club-mixed,1863.2,25,2026,2026 Elite Select Challenge,2026-08-22
+5,Space Force,space force (mixed),club-mixed,1834.2,21,2026,2026 Elite Select Challenge,2026-08-22
+6,Mile High Trash,mile high trash (mixed),club-mixed,1831.7,23,2026,2026 Elite Select Challenge,2026-08-22
+7,Revival,revival (mixed),club-mixed,1776.9,26,2026,Turnpike Throwdown,2026-08-15
+8,Spectre,spectre (mixed),club-mixed,1775.4,21,2026,Cooler Classic 37 (Mixed),2026-08-15
+9,Moontower,moontower (mixed),club-mixed,1770.6,24,2026,Ski Town Classic 2026,2026-08-15
+10,No Touching!,no touching! (mixed),club-mixed,1762.1,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+11,Minnesota Star Power,minnesota star power (mixed),club-mixed,1759.2,26,2026,Ski Town Classic 2026,2026-08-15
+12,Donuts,donuts (mixed),club-mixed,1742.8,21,2026,Ski Town Classic 2026,2026-08-15
+13,Conspiracy,conspiracy (mixed),club-mixed,1741.6,17,2026,2026 Elite Select Challenge,2026-08-22
+14,BW Ultimate,bw ultimate (mixed),club-mixed,1722.2,24,2026,Ski Town Classic 2026,2026-08-15
+15,Delabear,delabear (mixed),club-mixed,1718.7,25,2026,Turnpike Throwdown,2026-08-15
+16,Bird,bird (mixed),club-mixed,1715.0,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+17,Shipwreck,shipwreck (mixed),club-mixed,1696.6,23,2026,Spawnfest 2026,2026-08-22
+18,RAMP,ramp (mixed),club-mixed,1695.2,25,2026,Cooler Classic 37 (Mixed),2026-08-15
+19,Garbage Plates,garbage plates (mixed),club-mixed,1692.9,26,2026,Turnpike Throwdown,2026-08-15
+20,Jughandle,jughandle (mixed),club-mixed,1687.0,25,2026,Turnpike Throwdown,2026-08-15
+21,Pushovers,pushovers (mixed),club-mixed,1677.3,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+22,HVAC,hvac (mixed),club-mixed,1669.2,25,2026,Turnpike Throwdown,2026-08-15
+23,Dispatch,dispatch (mixed),club-mixed,1661.1,22,2026,Cooler Classic 37 (Mixed),2026-08-15
+24,Madison United Mixed Ultimate,madison united mixed ultimate (mixed),club-mixed,1655.3,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+25,Armory,armory (mixed),club-mixed,1652.6,20,2026,Cooler Classic 37 (Mixed),2026-08-15
+26,PS,ps (mixed),club-mixed,1651.3,25,2026,Turnpike Throwdown,2026-08-15
+27,Fatal Attraction,fatal attraction (mixed),club-mixed,1649.8,25,2026,Cooler Classic 37 (Mixed),2026-08-15
+28,Northern Comfort,northern comfort (mixed),club-mixed,1647.0,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+29,Green Chiles,green chiles (mixed),club-mixed,1629.9,22,2026,Ski Town Classic 2026,2026-08-15
+30,Prion,prion (mixed),club-mixed,1625.0,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+31,Smack!,smack! (mixed),club-mixed,1622.8,11,2026,Spawnfest 2026,2026-08-22
+32,CLX,clx (mixed),club-mixed,1618.9,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+33,Mango,mango (mixed),club-mixed,1608.4,25,2026,Ski Town Classic 2026,2026-08-15
+34,Space Ghosts,space ghosts (mixed),club-mixed,1604.3,24,2026,Ski Town Classic 2026,2026-08-15
+35,Wellman & the Terribles,wellman & the terribles (mixed),club-mixed,1601.8,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+36,Buffalo Lake Effect,buffalo lake effect (mixed),club-mixed,1599.7,20,2026,Turnpike Throwdown,2026-08-15
+37,Ant Madness,ant madness (mixed),club-mixed,1599.4,20,2026,Turnpike Throwdown,2026-08-15
+38,Stackcats,stackcats (mixed),club-mixed,1574.6,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+39,League of Shadows,league of shadows (mixed),club-mixed,1571.0,25,2026,Turnpike Throwdown,2026-08-15
+40,Heat Wave,heat wave (mixed),club-mixed,1570.4,24,2026,Turnpike Throwdown,2026-08-15
+41,"All Jeeps, All Night. -A","all jeeps, all night. -a (mixed)",club-mixed,1556.2,17,2026,Ski Town Classic 2026,2026-08-15
+42,Pandamonium,pandamonium (mixed),club-mixed,1551.4,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+43,Toast!,toast! (mixed),club-mixed,1536.5,22,2026,Cooler Classic 37 (Mixed),2026-08-15
+44,Heavy Flow,heavy flow (mixed),club-mixed,1511.7,20,2026,Turnpike Throwdown,2026-08-15
+45,Columbus Chaos,columbus chaos (mixed),club-mixed,1505.4,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+46,Utah Sundrift,utah sundrift (mixed),club-mixed,1505.4,21,2026,Ski Town Classic 2026,2026-08-15
+47,Mad Udderburn,mad udderburn (mixed),club-mixed,1503.3,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+48,ConSTLation,constlation (mixed),club-mixed,1501.5,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+49,Boomtown Pandas,boomtown pandas (mixed),club-mixed,1493.4,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+50,QCO,qco (mixed),club-mixed,1480.2,22,2026,Cooler Classic 37 (Mixed),2026-08-15
+51,The Force,the force (mixed),club-mixed,1479.7,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+52,Skyhawks,skyhawks (mixed),club-mixed,1467.0,21,2026,Cooler Classic 37 (Mixed),2026-08-15
+53,Obelisk,obelisk (mixed),club-mixed,1464.4,22,2026,Turnpike Throwdown,2026-08-15
+54,Great Minnesota Get Together,great minnesota get together (mixed),club-mixed,1451.1,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+55,Risky Business,risky business (mixed),club-mixed,1450.6,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+56,Mousetrap,mousetrap (mixed),club-mixed,1449.3,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+57,Frostbite,frostbite (mixed),club-mixed,1449.1,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+58,Jabba,jabba (mixed),club-mixed,1443.7,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+59,Pier Pressure,pier pressure (mixed),club-mixed,1439.5,22,2026,Turnpike Throwdown,2026-08-15
+60,BOP,bop (mixed),club-mixed,1435.7,21,2026,Spawnfest 2026,2026-08-22
+61,ELevate,elevate (mixed),club-mixed,1434.5,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+62,Limbo,limbo (mixed),club-mixed,1429.4,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+63,Squid Inc.,squid inc. (mixed),club-mixed,1419.0,1,2026,Spawnfest 2026,2026-08-22
+64,NEW Groove,new groove (mixed),club-mixed,1401.9,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+65,Moonlight Ultimate,moonlight ultimate (mixed),club-mixed,1386.4,15,2026,Spawnfest 2026,2026-08-22
+66,Lemonade Ultimate,lemonade ultimate (mixed),club-mixed,1378.9,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+67,Cutthroat,cutthroat (mixed),club-mixed,1377.7,21,2026,Ski Town Classic 2026,2026-08-15
+68,Melt,melt (mixed),club-mixed,1359.0,16,2026,Cooler Classic 37 (Mixed),2026-08-15
+69,District Cocktails,district cocktails (mixed),club-mixed,1350.9,25,2026,Turnpike Throwdown,2026-08-15
+70,Dinosaur Fancy,dinosaur fancy (mixed),club-mixed,1342.8,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+71,Ultraviolet,ultraviolet (mixed),club-mixed,1336.1,21,2026,Cooler Classic 37 (Mixed),2026-08-15
+72,Mastodon,mastodon (mixed),club-mixed,1328.7,21,2026,Cooler Classic 37 (Mixed),2026-08-15
+73,Arms Race,arms race (mixed),club-mixed,1291.9,25,2026,Cooler Classic 37 (Mixed),2026-08-15
+74,The Midwest Goodbye,the midwest goodbye (mixed),club-mixed,1279.5,22,2026,Cooler Classic 37 (Mixed),2026-08-15
+75,Lake Superior Disc,lake superior disc (mixed),club-mixed,1249.4,20,2026,Cooler Classic 37 (Mixed),2026-08-15
+76,Domino Effect,domino effect (mixed),club-mixed,1186.6,23,2026,Turnpike Throwdown,2026-08-15
+77,DEVYL U-20 Mixed,devyl u-20 mixed (mixed),club-mixed,1083.4,25,2026,Turnpike Throwdown,2026-08-15
+1,Dimes,dimes (women's),club-women,1863.2,25,2026,2026 Elite Select Challenge,2026-08-22
+2,Flight,flight (women's),club-women,1850.4,26,2026,2026 Elite Select Challenge,2026-08-22
+3,Starling,starling (women's),club-women,1843.8,1,2026,2026 Elite Select Challenge,2026-08-22
+4,Parcha,parcha (women's),club-women,1842.4,22,2026,2026 Elite Select Challenge,2026-08-22
+5,Pop,pop (women's),club-women,1825.6,24,2026,2026 Elite Select Challenge,2026-08-22
+6,LOL,lol (women's),club-women,1822.0,24,2026,2026 Elite Select Challenge,2026-08-22
+7,Heist,heist (women's),club-women,1786.8,24,2026,2026 Elite Select Challenge,2026-08-22
+8,Traffic,traffic (women's),club-women,1782.3,13,2026,2026 Elite Select Challenge,2026-08-22
+9,Nemesis,nemesis (women's),club-women,1780.6,15,2026,2026 Elite Select Challenge,2026-08-22
+10,Grit,grit (women's),club-women,1765.9,24,2026,2026 Elite Select Challenge,2026-08-22
+11,Colorado Kelp,colorado kelp (women's),club-women,1758.7,24,2026,2026 Elite Select Challenge,2026-08-22
+12,Vengeance,vengeance (women's),club-women,1718.8,22,2026,2026 Elite Select Challenge,2026-08-22
+13,Wildfire,wildfire (women's),club-women,1642.4,20,2026,Ski Town Classic 2026,2026-08-15
+14,Dark Sky,dark sky (women's),club-women,1635.9,24,2026,Ski Town Classic 2026,2026-08-15
+15,San Antonio Problems,san antonio problems (women's),club-women,1634.7,17,2026,Ski Town Classic 2026,2026-08-15
+16,Polar Vortex,polar vortex (women's),club-women,1606.7,7,2026,Up for Grabs 2026,2026-08-22
+17,Seven Devils,seven devils (women's),club-women,1601.1,18,2026,Ski Town Classic 2026,2026-08-15
+18,FAB,fab (women's),club-women,1589.6,19,2026,Ski Town Classic 2026,2026-08-15
+19,Trainwreck,trainwreck (women's),club-women,1527.4,16,2026,Ski Town Classic 2026,2026-08-15
+20,Crush City,crush city (women's),club-women,1471.5,16,2026,Ski Town Classic 2026,2026-08-15
+21,Virginia Rebellion,virginia rebellion (women's),club-women,1468.8,15,2026,Up for Grabs 2026,2026-08-22
+22,Sureshot,sureshot (women's),club-women,1445.2,16,2026,Up for Grabs 2026,2026-08-22
+23,Swell,swell (women's),club-women,1342.9,13,2026,Ski Town Classic 2026,2026-08-15
+24,COSMOS,cosmos (women's),club-women,1306.8,13,2026,Ski Town Classic 2026,2026-08-15
