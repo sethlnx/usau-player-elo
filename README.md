@@ -22,9 +22,11 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m scraper.euf_ranking data/raw/euf-ranking/rosters.json
 .venv/bin/python -m scraper.wfdf all --workers 12  # all completed WFDF events on the official index
 .venv/bin/python -m scraper.euf --audit       # must report publication_blocked: false
+.venv/bin/python -m scraper.ultimate_canada --list --base-url https://cuc2026.ultimatecentral.com
+.venv/bin/python -m scraper.ultimate_canada_database --all --year 2026
 .venv/bin/python -m analysis.euf_overlap      # review name candidates before replay
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
-.venv/bin/python -m analysis.rankings     # data/player_elo.csv, data/team_elo*.csv, data/history.json
+.venv/bin/python -m analysis.rankings     # player/team Elo, player_roles.csv, history.json
 .venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
 .venv/bin/python -m analysis.site         # docs/index.html + history.js + t,p,r,g/*.js — no server
 ```
@@ -70,6 +72,50 @@ The masters brackets carry 2020 rows too, and all 51 hold zero played games:
 USAU opened registration before cancelling, so they are shells. They cost
 nothing — the model only reads games with scores — and are left in rather than
 special-cased, exactly as the 463 other empty events already were.
+
+### Ingest women's professional league stats
+
+Pull every dataset advertised by the PUL Stats Hub manifest:
+
+```bash
+.venv/bin/python -m womens_pro.scrape pul
+```
+
+The WUL Stats Dashboard has no stable download API. In its Player Data or Team
+Data tab, select a view, click **Download**, then ingest the CSV with a stable
+dataset slug:
+
+```bash
+.venv/bin/python -m womens_pro.scrape wul 2026 player-standard-game ~/Downloads/wul-players.csv
+.venv/bin/python -m womens_pro.scrape wul 2026 team-standard-game ~/Downloads/wul-teams.csv
+```
+
+Repeat the WUL command for every exported view. Reusing a league, season, and
+dataset replaces that export, so refreshed downloads cannot leave stale rows.
+Both importers write `womens_pro_sources` and `womens_pro_records` in
+`data/usau.db`. Common team, player, opponent, date, and season fields are
+indexed; `payload_json` retains every source column, including metrics added
+after this importer was written.
+
+### Women's professional data coverage
+
+PUL ingestion follows `api/v1/index.json` rather than a hard-coded year list.
+It currently provides the all-season game results and team directory plus each
+manifest season's schedule, standings, and team statistics. The first-party
+manifest does not publish player rows.
+
+WUL dashboard CSVs provide player and team standard and advanced views. The
+importer is deliberately lossless and view-agnostic because the dashboard
+publishes CSV exports through a stateful Shiny session rather than versioned
+API endpoints.
+
+`analysis.rankings` replays PUL's canonical `games` rows and WUL's
+`team-standard-game` rows. WUL's `player-standard-game` rows provide each
+game roster; mirrored team score rows are deduplicated and checked for
+agreement. A unique WUL name reuses a USAU identity only when both sources
+roster it in the same season. The PUL manifest has no player endpoint, so its
+scores update explicit synthetic team-season identities without inventing
+player records.
 
 **An event scraped mid-tournament stays that way.** Nothing ever went back for
 the rest, so the 2026 U.S. Open sat at 26 of 36 games for two days after it
@@ -720,6 +766,10 @@ and there was no on-demand split to be had while that was true.
   lines for completed games), and name→identity linker with city/jersey/year
   corroboration (`link.py` → `data/ufa_links.csv` +
   `data/ufa_link_audit.csv` review queue).
+- `womens_pro/` — lossless WUL/PUL statistics ingestion. `api.py` caches the
+  public PUL JSON files; `scrape.py pul` follows every manifest endpoint, while
+  `scrape.py wul` imports dashboard CSV exports. Both sources share indexed
+  common fields and retain every source-specific metric as JSON.
 - `identity/` — name→player resolution. A name on 2+ clubs in one
   (division, season) collides, but only SPLITS per club if the shards also
   contradict physically: different teams in overlapping date windows, which
@@ -758,8 +808,14 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   stat quality. Published rankings config lives in `analysis/rankings.py`
   (`PUBLISHED`): plain roster mean + both stat mechanisms. Linked UFA
   seasons feed the same mechanisms (true points-played as usage; counting
-  stats scaled to tournament magnitude), ingested each Sept 1. Final UFA game
-  results also enter the authoritative replay as a third division through
+  stats scaled to tournament magnitude), ingested each Sept 1. The loader can
+  additionally use completion volume, completion percentage, throwing yards,
+  receiving yards, and hockey assists as within-team normalized features;
+  their published weights remain zero because the held-out stats-only descent
+  found no validation improvement. Total yards is represented by TY + RY, not
+  counted a third time.
+  Final UFA game results also enter the authoritative replay as a third
+  division through
   `load_ufa_games`; each game uses the linked players who recorded a point
   played in its per-game stats. Every scheduled API row remains in `ufa_games`;
   a Final 0–0 or forfeit-code score is retained there but is not treated as a
@@ -770,6 +826,11 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   the bridge spans, how far merging moved the rating against a replay with
   every cross-division link severed, geography); `--write-overrides`
   auto-blocks hard height conflicts.
+  `player_roles.py` classifies each player-season as handler, hybrid, cutter,
+  or unknown from roster position labels, UFA volume statistics, then USAU
+  goals/assists/turns. Low-confidence evidence remains unknown; prior-season
+  evidence decays, and `data/player_role_overrides.csv` supplies reviewed
+  corrections. Roles are descriptive and do not affect Elo.
   `usau_baseline.py` reimplements USA Ultimate's own iterative rankings
   algorithm (v2.0) from our game data and scores it walk-forward on the
   same holdout — the plan's "comparison model 4".

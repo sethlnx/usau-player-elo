@@ -102,6 +102,15 @@ class EloConfig:
     involvement_clamp: tuple = (0.25, 3.0)
     stat_transfer_beta: float = 0.0     # B: Elo per net-stat vs team mean (0 = off)
     stat_transfer_clamp: float = 60.0   # per-event cap on a B transfer
+    # UFA season-box-score features. These weights act before the generic
+    # involvement/transfer mechanisms: completion volume blends into usage,
+    # while the four quality weights multiply within-team standardized
+    # components. Zero preserves the pre-feature UFA mapping exactly.
+    ufa_completion_usage_weight: float = 0.0
+    ufa_completion_pct_weight: float = 0.0
+    ufa_throwing_yards_weight: float = 0.0
+    ufa_receiving_yards_weight: float = 0.0
+    ufa_hockey_assists_weight: float = 0.0
     # Fraction of the gap to base closed per game for a player carrying NO
     # softmax weight, scaled by how far below an equal share they sit.
     #

@@ -46,9 +46,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from analysis.backtest import DB_PATH, load_games, load_maps, load_stat_events, \
-    load_ufa_games, load_ufa_stat_events, metrics, replay
+from analysis.backtest import (
+    DB_PATH, build_ufa_stat_events, load_games, load_maps,
+    load_stat_events, load_ufa_games, load_ufa_stat_data,
+    load_ufa_stat_events, metrics, replay,
+)
 from analysis.rankings import PUBLISHED
+from womens_pro.ratings import load_womens_pro_inputs
 from elo.engine import EloConfig
 
 # FIT reaches back to 2014 with the corpus. It used to start at 2017 because
@@ -80,19 +84,18 @@ TEST = (2024, 2025)
 # played 12,000 games or 2,000. Shares are normalised over the tiers actually
 # present in the window, so a tier with no games costs nothing.
 #
-# PUBLISHED assigns a scale/base to 51 divisions total; euf-open/euf-mixed/
+# PUBLISHED assigns a scale/base to 53 divisions total; euf-open/euf-mixed/
 # euf-women are excluded on purpose (joined after tuning — see the note above
 # PUBLISHED in rankings.py), and greatgrandmasters-mixed has never been played.
 # Every other PUBLISHED division is covered below even where it currently has
-# zero rows in the corpus (league-men/league-mixed, several beach brackets,
-# ms-girls, ycc-u15-girls): league in particular is being actively ingested and
-# a division that is zero-weighted the day it gets its first game reproduces
-# the hs-* bug this comment describes. UFA is included because its game updates
-# feed the same player ratings and its K multiplier would otherwise be
-# unidentifiable.
+# zero rows in the corpus (league-men/league-mixed, PUL/WUL, several beach
+# brackets, ms-girls, ycc-u15-girls): a division that is zero-weighted the day
+# it gets its first game reproduces the hs-* bug this comment describes. UFA is
+# included because its game updates feed the same player ratings and its K
+# multiplier would otherwise be unidentifiable.
 TIER_SHARE = {"club": 0.50, "college": 0.30, "hs": 0.15, "other": 0.05}
 _TIERS = (
-    ("club", ("club-men", "club-mixed", "club-women")),
+    ("club", ("club-men", "club-mixed", "club-women", "pul", "wul")),
     ("college", ("college", "college-d3", "college-women",
                  "college-women-d3", "college-mixed")),
     ("hs", ("hs-boys", "hs-girls", "hs-mixed", "ms-boys", "ms-girls",
@@ -162,6 +165,14 @@ AXES = [
     ("mov_norm",               [5.0, 6.0, 7.0, 8.0, 10.0]),
     ("use_mov",                [True, False]),
     ("stat_transfer_beta",     [0.0, 2.0, 3.0, 5.0, 8.0, 12.0]),
+    # UFA-only feature weights. Y is represented by its TY and RY components
+    # rather than counted again as TY + RY + total Y. Completion percentage is
+    # already normalized within the team-season before these weights apply.
+    ("ufa_completion_usage_weight", [0.0, 0.25, 0.5, 1.0, 2.0]),
+    ("ufa_completion_pct_weight",   [0.0, 0.5, 1.0, 2.0, 4.0]),
+    ("ufa_throwing_yards_weight",   [0.0, 0.25, 0.5, 1.0, 2.0]),
+    ("ufa_receiving_yards_weight",  [0.0, 0.25, 0.5, 1.0, 2.0]),
+    ("ufa_hockey_assists_weight",   [0.0, 0.5, 1.0, 2.0, 4.0]),
     ("stat_transfer_clamp",    [40.0, 60.0, 90.0]),
     ("involvement_credit",     [False, True]),
     ("involvement_shrink",     [1.0, 4.0]),
@@ -209,6 +220,7 @@ AXES = [
     ("division_bases.grandmasters-men",      [1400.0, 1500.0, 1600.0]),
     ("division_bases.greatgrandmasters-men", [1350.0, 1450.0, 1550.0]),
 ]
+UFA_STAT_AXES = [item for item in AXES if item[0].startswith("ufa_")]
 # division_bases["club-men"] is the gauge: every other base is a rating
 # DIFFERENCE against it, and moving both is the same model twice.
 DIAGNOSTIC_AXES = [("home_advantage", [0.0, 15.0, 25.0, 35.0])]
@@ -231,12 +243,19 @@ def _init():
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
     games = load_games(con)
     rosters, clubs = load_maps(con)
+    womens_pro = load_womens_pro_inputs(con)
     ufa_games, ufa_rosters, ufa_clubs = load_ufa_games(con)
-    _G["games"] = sorted(games + ufa_games, key=lambda g: g["sort"])
-    _G["rosters"] = {**rosters, **ufa_rosters}
-    _G["clubs"] = {**clubs, **ufa_clubs}
-    _G["stats"] = sorted(load_stat_events(con) + load_ufa_stat_events(con),
-                         key=lambda e: e[0])
+    _G["games"] = sorted(
+        games + womens_pro.games + ufa_games, key=lambda g: g["sort"]
+    )
+    _G["rosters"] = {**rosters, **womens_pro.rosters, **ufa_rosters}
+    _G["clubs"] = {**clubs, **womens_pro.clubs, **ufa_clubs}
+    _G["stat_events"] = load_stat_events(con)
+    _G["ufa_data"] = load_ufa_stat_data(con)
+    _G["stats"] = sorted(
+        _G["stat_events"] + load_ufa_stat_events(con, as_config({})),
+        key=lambda e: e[0],
+    )
     con.close()
 
 
@@ -253,8 +272,6 @@ def as_config(overrides: dict) -> EloConfig:
         elif "." in key:
             group, sub = key.split(".", 1)
             cfg[group][sub] = value
-        else:
-            cfg[key] = value
     return EloConfig(**cfg)
 
 
@@ -263,8 +280,17 @@ def _score(args):
     overrides, divs = args
     if not _G:
         _init()
-    recs, _model = replay("player", _G["games"], _G["rosters"], _G["clubs"],
-                          as_config(overrides), _G["stats"])
+    cfg = as_config(overrides)
+    if "ufa_data" in _G:
+        stats = sorted(
+            _G["stat_events"] + build_ufa_stat_events(_G["ufa_data"], cfg),
+            key=lambda e: e[0],
+        )
+    else:
+        stats = _G["stats"]
+    recs, _model = replay(
+        "player", _G["games"], _G["rosters"], _G["clubs"], cfg, stats,
+    )
     out = {}
     for seasons, tag in ((VAL, "val"), (TEST, "test")):
         per_div = {}
@@ -384,8 +410,14 @@ def paired_ci(a, b, n_boot=2000, seed=0):
     return sum(d)/n, bs[int(.05*n_boot)], bs[int(.95*n_boot)]
 
 
-def main(passes=3, jobs=8, quick=False, division_k_only=False):
-    axes = K_SCALE_AXES if division_k_only else (AXES[:6] if quick else AXES)
+def main(
+    passes=3, jobs=8, quick=False, division_k_only=False, stats_only=False,
+):
+    axes = (
+        UFA_STAT_AXES if stats_only
+        else K_SCALE_AXES if division_k_only
+        else AXES[:6] if quick else AXES
+    )
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=jobs, initializer=_init) as pool:
         base, history = descend(pool, passes, axes)
@@ -420,4 +452,5 @@ if __name__ == "__main__":
     def opt(name, default):
         return int(argv[argv.index(name) + 1]) if name in argv else default
     main(passes=opt("--passes", 3), jobs=opt("--jobs", 8),
-         quick="--quick" in argv, division_k_only="--division-k-only" in argv)
+         quick="--quick" in argv, division_k_only="--division-k-only" in argv,
+         stats_only="--stats-only" in argv)

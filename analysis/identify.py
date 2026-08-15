@@ -58,9 +58,11 @@ def _init():
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
     _G["games"] = load_games(con)
     _G["rosters"], _G["clubs"] = load_maps(con)
-    _G["stats"] = sorted(load_stat_events(con) + load_ufa_stat_events(con),
-                         key=lambda e: e[0])
     _G["cfg"] = EloConfig(**PUBLISHED)
+    _G["stats"] = sorted(
+        load_stat_events(con) + load_ufa_stat_events(con, _G["cfg"]),
+        key=lambda e: e[0],
+    )
     con.close()
 
 

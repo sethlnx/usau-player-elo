@@ -21,6 +21,27 @@ class SiteAssetContractTests(unittest.TestCase):
 
             source.write_text("second")
             self.assertNotEqual(first, content_version((source,)))
+    def test_best_roster_without_played_roster_gets_a_lazy_bucket(self):
+        from analysis.history_split import split
+
+        history = {
+            "events": [["2026-01-01", "Test", 2026, 0]],
+            "players": {},
+            "teams": {},
+            "rosters": {},
+            "bestRosters": {"canada:test:club": [0, "2026-01-01", []]},
+            "people": [],
+            "peoplePid": [],
+        }
+        _, player_buckets, roster_buckets, _ = split(
+            history, {}, {}, player_roles={"9": [2026, 3, 80, 1]},
+        )
+        role_bucket = player_buckets[9 % 32]
+        self.assertEqual([2026, 3, 80, 1], role_bucket["@9"])
+        self.assertEqual(1, len(roster_buckets))
+        bucket = next(iter(roster_buckets.values()))
+        self.assertIn("canada:test:club", bucket["b"])
+
 
 
     def test_head_to_head_ignores_draws_and_self_fixtures(self):
@@ -52,6 +73,21 @@ class SiteAssetContractTests(unittest.TestCase):
             }
             history = json.loads((DB_PATH.parent / "history.json").read_text())
             payload = load_ufa_payload(con, players, history)
+            linked_year, linked_team, linked_player = next(
+                (int(year), team, player)
+                for year, teams in payload.items()
+                for team in teams
+                for player in team["roster"]
+                if player["linked"]
+            )
+            role_rows = {
+                (linked_player["pid"], linked_year): {
+                    "role": "handler", "confidence": "0.75",
+                }
+            }
+            payload_with_roles = load_ufa_payload(
+                con, players, history, role_rows,
+            )
         finally:
             con.close()
 
@@ -68,6 +104,15 @@ class SiteAssetContractTests(unittest.TestCase):
             ufa_game_ratings(history)[(2025, team_id)],
             team["rating"],
         )
+        role_player = next(
+            player
+            for candidate in payload_with_roles[str(linked_year)]
+            if candidate["id"] == linked_team["id"]
+            for player in candidate["roster"]
+            if player["pid"] == linked_player["pid"]
+        )
+        self.assertEqual("handler", role_player["role"])
+        self.assertEqual(0.75, role_player["roleConfidence"])
 
 if __name__ == "__main__":
     unittest.main()

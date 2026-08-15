@@ -2,6 +2,9 @@ import unittest
 from unittest.mock import Mock, patch
 
 from analysis import descent
+from analysis.backtest import replay
+from analysis.rankings import DIVCODE, PUBLISHED, TEAM_DIVISIONS
+from elo.engine import EloConfig
 
 
 class DivisionKDescentTests(unittest.TestCase):
@@ -21,8 +24,11 @@ class DivisionKDescentTests(unittest.TestCase):
         with patch("sqlite3.connect", return_value=connection), \
              patch.object(descent, "load_games", return_value=usau), \
              patch.object(descent, "load_maps", return_value=({"usau": [1]}, {"usau": "Club"})), \
+             patch.object(descent, "load_womens_pro_inputs",
+                          return_value=Mock(games=[], rosters={}, clubs={})), \
              patch.object(descent, "load_ufa_games", return_value=(ufa, {"ufa": [2]}, {"ufa": "UFA"})), \
              patch.object(descent, "load_stat_events", return_value=[]), \
+             patch.object(descent, "load_ufa_stat_data", return_value=({}, [])), \
              patch.object(descent, "load_ufa_stat_events", return_value=[]):
             descent._init()
 
@@ -63,6 +69,38 @@ class DivisionKDescentTests(unittest.TestCase):
              if division.startswith("beach-") and scale == 0.5},
         )
         self.assertEqual(1.0, config.k_scale.get("club-men", 1.0))
+
+    def test_pul_and_wul_fixtures_update_published_elo(self):
+        for division in ("pul", "wul"):
+            game = {
+                "event_id": f"{division}:1",
+                "game_key": "1",
+                "season": 2026,
+                "division": division,
+                "date": "2026-04-01",
+                "sort": ("2026-04-01", "12:00", 0, "1"),
+                "home_id": "home",
+                "away_id": "away",
+                "home_score": 15,
+                "away_score": 10,
+            }
+            records, model = replay(
+                "player",
+                [game],
+                {"home": ["winner"], "away": ["loser"]},
+                {"home": "Home", "away": "Away"},
+                EloConfig(**PUBLISHED),
+                [],
+            )
+
+            self.assertEqual(division, records[0][1])
+            self.assertGreater(model.players["winner"].rating, 1600.0)
+            self.assertLess(model.players["loser"].rating, 1600.0)
+            self.assertEqual("club", descent.DIVISION_TIER[division])
+            self.assertIn(division, TEAM_DIVISIONS)
+
+        self.assertEqual(84, DIVCODE["pul"])
+        self.assertEqual(85, DIVCODE["wul"])
 
 
 if __name__ == "__main__":

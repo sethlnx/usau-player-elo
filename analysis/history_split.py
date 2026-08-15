@@ -263,7 +263,7 @@ def with_records(history):
     return out
 
 
-def split(history, player_names, genders, event_meta=None):
+def split(history, player_names, genders, event_meta=None, player_roles=None):
     """-> (core, players, rosters, games), each tier keyed by its bucket."""
     events = history["events"]
     seasons = sorted({e[2] for e in events})
@@ -277,6 +277,11 @@ def split(history, player_names, genders, event_meta=None):
     players = collections.defaultdict(dict)
     for pid, entry in history["players"].items():
         players[int(pid) % BUCKETS][pid] = entry
+    # Historical role runs share the player's already-lazy bucket. Prefixing
+    # the key keeps the trajectory contract unchanged and cannot collide with
+    # numeric player IDs.
+    for pid, role_run in (player_roles or {}).items():
+        players[int(pid) % BUCKETS]["@" + str(pid)] = role_run
 
     # A club's bucket rides on its rostByClub entry rather than on a string
     # hash both languages have to agree about. Every best-roster club also has
@@ -284,7 +289,10 @@ def split(history, player_names, genders, event_meta=None):
     by_club = collections.defaultdict(list)
     for rk in rosters_in:
         by_club[rk[:rk.rindex("|")]].append(int(rk[rk.rindex("|") + 1:]))
-    club_bucket = {ck: i % BUCKETS for i, ck in enumerate(sorted(by_club))}
+    club_bucket = {
+        ck: i % BUCKETS
+        for i, ck in enumerate(sorted(set(by_club) | set(best)))
+    }
     rost_by_club = {ck: [club_bucket[ck]] + _delta(evs)
                     for ck, evs in by_club.items()}
 

@@ -24,6 +24,9 @@ from analysis.backtest import (DB_PATH, load_games, load_maps,
 from analysis.euf_ratings import (EUF_DB, Appearance, EuropeanInputs,
                                   load_european_inputs, merge_inputs)
 from analysis.international_ratings import load_international_inputs
+from analysis.canada_ratings import load_canadian_inputs
+from analysis.player_roles import build_player_roles, write_role_csv
+from womens_pro.ratings import load_womens_pro_inputs
 from elo.engine import EloConfig
 
 
@@ -577,6 +580,11 @@ def latest_rosters(con, season: int, basis: str = "completed",
 PUBLISHED = dict(tau=500.0, involvement_credit=True,
                  involvement_shrink=1.0, stat_transfer_beta=12.0,
                  stat_transfer_clamp=90.0,
+                 ufa_completion_usage_weight=0.0,
+                 ufa_completion_pct_weight=0.0,
+                 ufa_throwing_yards_weight=0.0,
+                 ufa_receiving_yards_weight=0.0,
+                 ufa_hockey_assists_weight=0.0,
                  provisional_shape="hyperbolic",
                  provisional_multiplier=6.0, provisional_games=10,
                  k=48.0, home_advantage=0.0, offseason_regression=0.0,
@@ -651,7 +659,10 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                                 "beach-greatgrandmasters-mixed": 220.0,
                                 "beach-legends-mixed": 220.0,
                                 "league-men": 260.0, "league-mixed": 220.0,
-                                "ufa": 260.0},
+                                "ufa": 260.0,
+                                # Professional women's leagues inherit the
+                                # established women's club calibration.
+                                "pul": 160.0, "wul": 160.0},
                  division_bases={"club-men": 1500.0, "college": 1250.0,
                                  "college-d3": 1250.0, "ufa": 1550.0,
                                  "club-mixed": 1500.0, "club-women": 1600.0,
@@ -731,7 +742,35 @@ PUBLISHED = dict(tau=500.0, involvement_credit=True,
                                 "beach-greatgrandmasters-women": 1600.0,
                                 "beach-greatgrandmasters-mixed": 1500.0,
                                 "beach-legends-mixed": 1500.0,
-                                "league-men": 1250.0, "league-mixed": 1250.0})
+                                "league-men": 1250.0, "league-mixed": 1250.0,
+                                "pul": 1600.0, "wul": 1600.0})
+
+# Canadian source divisions are appended so their event histories, player
+# masks, and team tables remain distinct from USAU/EUF divisions. Priors are
+# deliberately by-analogy until Canada has enough history for descent tuning.
+CANADA_DIVISIONS = [
+    "canada-grand-masters-mixed", "canada-grand-masters-open",
+    "canada-grand-masters-women", "canada-ouvert", "canada-feminin",
+    "canada-mixte", "canada-open", "canada-women", "canada-mixed",
+    "canada-junior-open", "canada-junior-women",
+    "canada-junior-open-regional", "canada-junior-women-regional",
+    "canada-masters-open", "canada-masters-mixed", "canada-masters-women",
+    "canada-all-star-game", "canada-open-a", "canada-open-b",
+    "canada-junior-open-a", "canada-junior-open-b",
+    "canada-junior-women-a", "canada-junior-women-b",
+    "canada-advanced-intermediate", "canada-beginner-intermediate",
+    "canada-advanced", "canada-intermediate", "canada-beginner",
+    "canada-senior", "canada-junior", "canada-junior-mixed",
+    "canada-mixed-masters", "canada-women-masters",
+]
+for _division in CANADA_DIVISIONS:
+    _women = "women" in _division or "feminin" in _division
+    _mixed = "mixed" in _division or "mixte" in _division
+    _junior = "junior" in _division
+    PUBLISHED["division_scale"][_division] = 200.0 if _women else 220.0 if _mixed else 260.0
+    PUBLISHED["division_bases"][_division] = (
+        1200.0 if _junior else 1600.0 if _women else 1500.0
+    )
 # Division as a small int, not an initial: "club"[:1] and "college"[:1] are
 # both "c", which silently labelled every club event as college. Sixteen
 # codes now. Codes are positional: history.json stores them per event,
@@ -762,6 +801,9 @@ DIVCODE = {"club-men": 0, "college": 1, "college-d3": 2,
            "beach-legends-mixed": 47,
            "league-men": 48, "league-mixed": 49,
            "ufa": 50}
+DIVCODE.update({division: index + 51
+                for index, division in enumerate(CANADA_DIVISIONS)})
+DIVCODE.update({"pul": 84, "wul": 85})
 # Divisions the team tables cover, in display order. College is included so
 # the club tables reach as far as the player table and Trends do, but its
 # three roster bases carry less information than a club division's: a college
@@ -797,6 +839,8 @@ TEAM_DIVISIONS = ["club-men", "club-mixed", "club-women",
                   "beach-greatgrandmasters-mixed",
                   "beach-legends-mixed",
                   "league-men", "league-mixed"]
+TEAM_DIVISIONS.extend(CANADA_DIVISIONS)
+TEAM_DIVISIONS.extend(["pul", "wul"])
 # A club's best roster must be at least this fraction of the largest squad it
 # fielded that season. Picking the max-rated roster with no floor selects the
 # SMALLEST one: a mean over an elite subset beats a mean over a full squad, and
@@ -1168,10 +1212,12 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     output_dir.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(DB_PATH)
     european = load_european_inputs(con, EUF_DB)
+    canadian = load_canadian_inputs(EUF_DB)
     international = load_international_inputs(con, european, EUF_DB)
     euf_bridge_rows = european.bridge_rows
     wfdf_identity_rows = international.identity_rows
-    external = merge_inputs(european, international)
+    womens_pro = load_womens_pro_inputs(con)
+    external = merge_inputs(european, international, canadian, womens_pro)
     ufa_games, ufa_rosters, ufa_clubs = load_ufa_games(con)
     games = sorted(
         [*load_games(con), *external.games, *ufa_games],
@@ -1182,16 +1228,18 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     rosters.update(ufa_rosters)
     clubs.update(external.clubs)
     clubs.update(ufa_clubs)
-    stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con),
+    stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con, cfg),
                          key=lambda e: e[0])
     print(
-        f"loaded {len(european.games):,} European games and "
-        f"{len(international.games):,} international games; "
+        f"loaded {len(european.games):,} European games, "
+        f"{len(canadian.games):,} Canadian games, "
+        f"{len(international.games):,} international games, and "
+        f"{len(womens_pro.games):,} PUL/WUL games; "
         f"{len(external.player_names):,} external roster-name identities, "
         f"{len(euf_bridge_rows):,} EU/USA bridges, and "
         f"{sum(row['match_method'] in ('usau-name', 'usau-alias', 'euf-name') for row in wfdf_identity_rows):,} "
         f"WFDF name bridges "
-        f"({external.ghost_scored_games} games touch an empty roster)"
+        f"({external.ghost_scored_games} games touch an empty or synthetic roster)"
         f"; {len(ufa_games):,} UFA games "
         f"({sum(side in ufa_rosters for game in ufa_games for side in (game['home_id'], game['away_id'])):,}/"
         f"{2 * len(ufa_games):,} sides have linked rosters)"
@@ -1340,38 +1388,46 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
         for d in keep:
             mask |= 1 << DIVCODE.get(d, 0)
         div_now[pid] = mask
+    # Published rating is the LAST value attributed to a real event
+    # (game or stat transfer with an event_team_id), not raw model state.
+    ranked = sorted(
+        ((last_rating.get(pid, st.rating), pid, st.games)
+         for pid, st in model.players.items()
+         if not str(pid).startswith("ghost:") and st.games >= 5),
+        reverse=True,
+    )
+    target_seasons = {}
+    for _rating, pid, _games in ranked:
+        appearance = latest_club.get(pid) or latest.get(pid)
+        target_seasons[pid] = appearance.season if appearance else 0
+    role_records, current_roles = build_player_roles(con, target_seasons)
+    role_out = output_dir / "player_roles.csv"
+    write_role_csv(role_out, role_records)
+    print(f"wrote {role_out} ({len(role_records):,} player-season roles)")
+
     out = output_dir / "player_elo.csv"
     with open(out, "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         # player_id is exported because display names are NOT unique: ambiguous
-        # names are split per-club into separate players, so several rows can
-        # read "Julian Kagi" with different ratings. Join on the id, never the name.
+        # names are split per-club into separate players. Join on id, never name.
         w.writerow(["rank", "player", "player_id", "elo", "sigma", "lo90", "hi90",
                     "games", "last_club", "last_season", "gender", "divisions",
-                    "divisions_now"])
-        # Published rating is the LAST value attributed to a real event
-        # (game or stat transfer with an event_team_id), not raw model
-        # state: model.players[pid].rating keeps moving on stat events with
-        # no rated event to book them against (a UFA season with no USAU
-        # game backing it), which used to publish a number above every
-        # point on the player's own trajectory. last_rating falls back to
-        # the model rating for anyone who never took a captured hook path.
-        ranked = sorted(
-            ((last_rating.get(pid, st.rating), pid, st.games)
-             for pid, st in model.players.items()
-             if not str(pid).startswith("ghost:") and st.games >= 5),
-            reverse=True)
+                    "divisions_now", "role", "role_confidence", "role_source",
+                    "role_season"])
         for i, (rating, pid, ngames) in enumerate(ranked, 1):
             appearance = latest.get(pid)
             name = appearance.name if appearance else "?"
             club_appearance = latest_club.get(pid) or appearance
             club = club_appearance.club if club_appearance else "?"
             season = club_appearance.season if club_appearance else "?"
+            role = current_roles[pid]
             s = getattr(model.players[pid], "rd", rating_sigma(ngames))
             w.writerow([i, name, pid, round(rating, 1), round(s, 1),
                         round(rating - Z90 * s, 1), round(rating + Z90 * s, 1),
                         ngames, club, season, gender.get(pid, ""),
-                        div_ever.get(pid, 0), div_now.get(pid, 0)])
+                        div_ever.get(pid, 0), div_now.get(pid, 0),
+                        role.role, round(role.confidence, 3), role.source,
+                        role.season])
     print(f"wrote {out} ({len(ranked)} players with 5+ games)")
     bridge_out = output_dir / "euf_bridge_audit.csv"
     with open(bridge_out, "w", newline="") as f:

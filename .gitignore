@@ -35,6 +35,10 @@ data/*
 !data/team_elo.csv
 !data/team_elo_best.csv
 !data/team_elo_upcoming.csv
+!data/player_roles.csv
+
+# Hand-reviewed corrections to inferred player roles
+!data/player_role_overrides.csv
 
 # Published outputs of `python -m identity.resolve`
 !data/ambiguities.csv

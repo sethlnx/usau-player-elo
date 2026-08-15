@@ -126,24 +126,29 @@ def load_stat_events(con) -> list[tuple]:
 UFA_QUALITY_SCALE = 1 / 3   # a UFA season is roughly three tournaments of exposure
 
 
-def load_ufa_stat_events(con) -> list[tuple]:
-    """UFA season stats as stat events for linked players, dated Sept 1.
+def _team_zscores(values: list[float | None]) -> list[float]:
+    """Within-team z-scores; missing or constant features contribute zero."""
+    present = [v for v in values if v is not None]
+    if len(present) < 2:
+        return [0.0] * len(values)
+    mean = sum(present) / len(present)
+    variance = sum((v - mean) ** 2 for v in present) / len(present)
+    if variance <= 0.0:
+        return [0.0] * len(values)
+    scale = variance ** 0.5
+    return [0.0 if v is None else (v - mean) / scale for v in values]
 
-    Usage index is true points-played share versus the full UFA team roster
-    (unlinked teammates stay in the denominator); quality uses the same
-    counting-stat form as USAU (G+A+blocks-throwaways-drops), scaled to
-    tournament magnitude. Sept 1 dating keeps ingestion after the UFA season
-    ends, so nothing leaks into predicting that summer's club games.
 
-    The event_team_id slot is None: a UFA season is not a rated event in this
-    corpus, so the movement it causes has no point to be booked against.
-    """
+def load_ufa_stat_data(con) -> tuple[dict, list[tuple]]:
+    """Load linked UFA stat rows once for repeated coefficient evaluations."""
     from ufa.link import resolve_links
     try:
         links = resolve_links(con)
         rows = con.execute("""
             SELECT s.player_id, p.team_id, s.year,
                    COALESCE(s.opointsplayed,0) + COALESCE(s.dpointsplayed,0),
+                   s.completions, s.throwattempts, s.yardsthrown,
+                   s.yardsreceived, s.hockeyassists,
                    COALESCE(s.goals,0) + COALESCE(s.assists,0)
                    + COALESCE(s.blocks,0) - COALESCE(s.throwaways,0)
                    - COALESCE(s.drops,0)
@@ -151,24 +156,86 @@ def load_ufa_stat_events(con) -> list[tuple]:
             JOIN ufa_players p ON p.player_id = s.player_id AND p.year = s.year
         """).fetchall()
     except sqlite3.OperationalError:     # DB predates the UFA tables
-        return []
+        return {}, []
+    return links, rows
+
+
+def build_ufa_stat_events(
+    data: tuple[dict, list[tuple]], cfg: EloConfig | None = None,
+) -> list[tuple]:
+    """Build stable stat-event tuples from cached UFA rows and a config."""
+    links, rows = data
+    cfg = cfg or EloConfig()
     if not links:
         return []
     by_team: dict[tuple, list] = {}
-    for upid, team, year, pp, q in rows:
-        by_team.setdefault((year, team), []).append((upid, pp, q))
+    for (upid, team, year, pp, completions, attempts, ty, ry, ha, q) in rows:
+        by_team.setdefault((year, team), []).append(
+            (upid, pp, completions, attempts, ty, ry, ha, q)
+        )
     events = []
     for (year, _team), lines in by_team.items():
-        total = sum(pp for _, pp, _ in lines)
+        total_pp = sum(pp for _, pp, *_ in lines)
         n = len(lines)
-        if total <= 0 or n < 2:
+        if total_pp <= 0 or n < 2:
             continue
-        entries = [(links[upid], pp * n / total, q * UFA_QUALITY_SCALE)
-                   for upid, pp, q in lines if upid in links]
+        completion_values = [c for _, _, c, *_ in lines]
+        total_completions = sum(
+            c for c in completion_values if c is not None
+        )
+        completion_index = (
+            [
+                c * n / total_completions if c is not None else 1.0
+                for c in completion_values
+            ]
+            if total_completions > 0 else [0.0] * n
+        )
+        usage = [
+            pp * n / total_pp
+            + cfg.ufa_completion_usage_weight * ci
+            for (_, pp, *_), ci in zip(lines, completion_index)
+        ]
+        pct = [
+            c / a if c is not None and a is not None and a > 0 else None
+            for _, _, c, a, *_ in lines
+        ]
+        pct_z = _team_zscores(pct)
+        ty_z = _team_zscores([
+            line[4] if line[4] is not None else None for line in lines
+        ])
+        ry_z = _team_zscores([
+            line[5] if line[5] is not None else None for line in lines
+        ])
+        ha_z = _team_zscores([
+            line[6] if line[6] is not None else None for line in lines
+        ])
+        entries = []
+        for i, (upid, _pp, _c, _a, _ty, _ry, _ha, q) in enumerate(lines):
+            quality = UFA_QUALITY_SCALE * (
+                q
+                + cfg.ufa_completion_pct_weight * pct_z[i]
+                + cfg.ufa_throwing_yards_weight * ty_z[i]
+                + cfg.ufa_receiving_yards_weight * ry_z[i]
+                + cfg.ufa_hockey_assists_weight * ha_z[i]
+            )
+            if upid in links:
+                entries.append((links[upid], usage[i], quality))
         if len(entries) >= 2:
             events.append((f"{year}-09-01", entries, None))
     events.sort(key=lambda e: e[0])
     return events
+
+
+def load_ufa_stat_events(con, cfg: EloConfig | None = None) -> list[tuple]:
+    """UFA season stats as stat events for linked players, dated Sept 1.
+
+    The returned tuple remains ``(date, [(pid, usage, quality), ...], etid)``.
+    Existing points-played and G/A/BLK/T/D values are unchanged when the new
+    UFA feature weights are zero. New features are normalized within each UFA
+    team-season, so no future or cross-team statistics are used to choose a
+    scale. Missing or constant features are neutral.
+    """
+    return build_ufa_stat_events(load_ufa_stat_data(con), cfg)
 
 
 def load_ufa_games(con) -> tuple[list, dict, dict]:
@@ -416,21 +483,30 @@ def compare(cfg: EloConfig | None = None,
     config nobody publishes (home_advantage=0, no division_scale), which is why
     its numbers never matched the ones quoted for the published rankings.
     """
+    if cfg is None:
+        from analysis.rankings import PUBLISHED
+        cfg = EloConfig(**PUBLISHED)
+    from womens_pro.ratings import load_womens_pro_inputs
+
     con = sqlite3.connect(DB_PATH)
-    games = load_games(con)
+    usau_games = load_games(con)
     rosters, clubs = load_maps(con)
+    womens_pro = load_womens_pro_inputs(con)
+    games = sorted(usau_games + womens_pro.games, key=lambda g: g["sort"])
+    rosters.update(womens_pro.rosters)
+    clubs.update(womens_pro.clubs)
     stat_events = load_stat_events(con)
-    ufa_events = load_ufa_stat_events(con)
+    ufa_events = load_ufa_stat_events(con, cfg)
     combined = sorted(stat_events + ufa_events, key=lambda e: e[0])
     ufa_games, r_add, c_add = load_ufa_games(con)
     all_games = sorted(games + ufa_games, key=lambda g: g["sort"])
     rosters_ufa = {**rosters, **r_add}
     clubs_ufa = {**clubs, **c_add}
-    if cfg is None:
-        from analysis.rankings import PUBLISHED
-        cfg = EloConfig(**PUBLISHED)
-    n_col = sum(1 for g in games if g["division"] == "college")
-    print(f"{len(games)} scored games ({n_col} college) + {len(ufa_games)} UFA, "
+    # cfg is resolved before UFA stat-event construction so coefficient
+    # sweeps and published replays consume the same feature mapping.
+    n_col = sum(1 for g in usau_games if g["division"] == "college")
+    print(f"{len(usau_games)} USAU games ({n_col} college) + "
+          f"{len(womens_pro.games)} PUL/WUL + {len(ufa_games)} UFA, "
           f"{len(stat_events)} stat team-events + {len(ufa_events)} UFA; "
           f"eval seasons {eval_seasons}, divisions {eval_divisions}")
     header = f"{'model':<26}{'n':>7}{'accuracy':>10}{'brier':>8}{'logloss':>9}"

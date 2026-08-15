@@ -31,8 +31,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from analysis.backtest import DB_PATH, load_games, load_maps, load_stat_events, metrics, replay
+from analysis.backtest import DB_PATH, metrics, replay
 from analysis.rankings import PUBLISHED
+from analysis.rating_corpus import load_corpus
 from elo.engine import EloConfig
 
 
@@ -74,12 +75,9 @@ def baseline_metrics(records, division: str) -> dict:
 
 def main(all_seasons: bool = False):
     con = sqlite3.connect(DB_PATH)
-    games = load_games(con)
-    rosters, clubs = load_maps(con)
-    stat_events = load_stat_events(con)
-    stat_counts = stat_event_counts(con)
-
     cfg = EloConfig(**PUBLISHED)
+    games, rosters, clubs, stat_events = load_corpus(cfg)
+    stat_counts = stat_event_counts(con)
     records, _ = replay("player", games, rosters, clubs, cfg, stat_events)
 
     divisions = sorted({d for _, d, _, _, _ in records})

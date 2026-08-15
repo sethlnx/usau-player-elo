@@ -723,6 +723,8 @@ def ingest_ultimate_central_event(
     con: sqlite3.Connection,
     client: UltimateCentralClient,
     provider_event_id: str | int,
+    source: str = UC_SOURCE,
+    event_url_base: str | None = None,
 ) -> list[dict[str, Any]]:
     provider_event_id = str(provider_event_id)
     event_result = client.list_events(id=provider_event_id)
@@ -737,8 +739,8 @@ def ingest_ultimate_central_event(
     for kind, result in (("events", event_result), ("teams", teams_result),
                          ("games", games_result), ("persons", persons_result)):
         for page in result.pages:
-            observe(con, UC_SOURCE, kind, provider_event_id, page)
-    observe(con, UC_SOURCE, "standings", provider_event_id, standings_response)
+            observe(con, source, kind, provider_event_id, page)
+    observe(con, source, "standings", provider_event_id, standings_response)
 
     standings = _flatten_standings(standings_response)
     divisions = sorted({str(x.get("division_name")) for x in teams_result.items
@@ -753,7 +755,7 @@ def ingest_ultimate_central_event(
         raise ValueError(f"Ultimate Central event {provider_event_id} has no source year")
     season = int(year_match.group(1))
     slug = event.get("slug") or provider_event_id
-    human_url = f"https://euf.ultimatecentral.com/e/{slug}"
+    human_url = f"{(event_url_base or client.base_url).rstrip('/')}/e/{slug}"
     roster_state = persons_result.state
     if roster_state == "ok":
         roster_state = "public"
@@ -840,11 +842,11 @@ def ingest_ultimate_central_event(
             } for row in selected_standings]
             event_id = upsert_event(
                 con, season, event.get("name") or f"Ultimate Central {provider_event_id}",
-                human_url, local_division, f"uc:{provider_event_id}", UC_SOURCE,
+                human_url, local_division, f"uc:{source}:{provider_event_id}", source,
                 provider_event_id, event.get("locality"), None, start, end,
             )
             replace_event(
-                con, event_id, UC_SOURCE,
+                con, event_id, source,
                 f"{provider_event_id}|{division}",
                 f"{provider_event_id}|{division}",
                 teams, games, standing_rows, roster_state,

@@ -97,6 +97,12 @@ GAME_GLOBAL = "__USAU_GAME__"
 # The player table's display floor, matching the ranking convention: below 30
 # games a rating still sits inside the engine's provisional window.
 MIN_GAMES = 30
+ROLE_CODE = {"unknown": 0, "cutter": 1, "hybrid": 2, "handler": 3}
+ROLE_SOURCE_CODE = {
+    "none": 0, "position": 1, "prior-position": 2, "ufa": 3,
+    "prior-ufa": 4, "usau-stats": 5, "prior-usau-stats": 6,
+    "override": 7, "prior-override": 8,
+}
 
 
 def ufa_game_ratings(history):
@@ -117,7 +123,7 @@ def ufa_game_ratings(history):
     return out
 
 
-def load_ufa_payload(con, player_rows, history):
+def load_ufa_payload(con, player_rows, history, role_rows=None):
     """Return UFA seasons rated after each team's latest game."""
     try:
         links = resolve_links(con)
@@ -132,6 +138,7 @@ def load_ufa_payload(con, player_rows, history):
     except sqlite3.OperationalError:
         return {}
     game_ratings = ufa_game_ratings(history)
+    role_rows = role_rows or {}
 
     by_team = collections.defaultdict(list)
     for upid, year, team, first, last in rosters:
@@ -140,11 +147,17 @@ def load_ufa_payload(con, player_rows, history):
         name = row["player"] if row else " ".join(
             part for part in (first or "", last or "") if part
         ).strip()
+        role = role_rows.get((str(pid), int(year))) if pid is not None else None
+        if role is None and row:
+            role = row
         by_team[(year, team)].append({
             "pid": str(pid) if pid is not None else "",
             "name": name or str(upid),
             "elo": float(row["elo"]) if row else None,
             "linked": row is not None,
+            "role": (role or {}).get("role", "unknown"),
+            "roleConfidence": float((role or {}).get("confidence",
+                                                     (role or {}).get("role_confidence", 0))),
         })
 
     out = collections.defaultdict(list)
@@ -235,10 +248,28 @@ def build():
     hist_path = DATA_DIR / "history.json"
     history = (json.loads(hist_path.read_text()) if hist_path.exists()
                else {"events": [], "players": {}, "teams": {}})
-    ufa = load_ufa_payload(
-        con, {int(r["player_id"]): r for r in all_players}, history
+    role_path = DATA_DIR / "player_roles.csv"
+    role_rows = (
+        {(r["player_id"], int(r["season"])): r
+         for r in load_csv("player_roles.csv")}
+        if role_path.exists() else {}
     )
-    asset_version = content_version((DB_PATH, hist_path))
+    role_history = collections.defaultdict(list)
+    for (pid, season), row in role_rows.items():
+        role_history[pid].append([
+            season,
+            ROLE_CODE.get(row.get("role", "unknown"), 0),
+            round(100 * float(row.get("confidence", 0))),
+            ROLE_SOURCE_CODE.get(row.get("source", "none"), 0),
+        ])
+    for pid, rows in role_history.items():
+        rows.sort(key=lambda row: row[0])
+        role_history[pid] = [value for row in rows for value in row]
+    ufa = load_ufa_payload(
+        con, {int(r["player_id"]): r for r in all_players}, history, role_rows,
+    )
+    version_inputs = (DB_PATH, hist_path) + ((role_path,) if role_path.exists() else ())
+    asset_version = content_version(version_inputs)
 
     # Gender-matching group, decided in identity.resolve and carried on
     # player_elo.csv: 1 = male-matching, 2 = female-matching, 0 = no evidence.
@@ -366,7 +397,7 @@ def build():
     # >= MIN_GAMES player), so the pool is only ever needed alongside a roster.
     hcore, hplay, hrost, hgame = split_history(
         history, {r["player_id"]: r["player"] for r in players}, genders,
-        event_meta)
+        event_meta, role_history)
     metrics_path = DATA_DIR / "metrics.json"
     model_metrics = json.loads(metrics_path.read_text()) if metrics_path.exists() else {}
 
@@ -388,14 +419,19 @@ def build():
             {ev[3] for ev in tourneys["events"]}
             | {DIVCODE.get(r["division"], 0)
                for rows in clubs.values() for r in rows}
+            | {DIVCODE["pul"], DIVCODE["wul"]}
             | ({DIVCODE["ufa"]} if ufa else set())
         ),
         "eventDivs": sorted({ev[3] for ev in tourneys["events"]}),
+        # Append compact role fields; indices 0-12 are a public payload
+        # contract used throughout the page and must never be reordered.
         "players": [[r["player"], float(r["elo"]), float(r["lo90"]), float(r["hi90"]),
                      int(r["games"]), r["last_club"], int(r["last_season"]),
                      int(r["rank"]), r["player_id"], genders.get(r["player_id"], 0),
-                     int(r["divisions"]), int(r["divisions_now"]),
-                     loo_code(r["player_id"])]
+                     str(int(r["divisions"])), str(int(r["divisions_now"])),
+                     loo_code(r["player_id"]),
+                     ROLE_CODE.get(r.get("role", "unknown"), 0),
+                     round(100 * float(r.get("role_confidence", 0)))]
                     for r in players],
         # `genders` used to ride here for Trends, which walked every
         # trajectory to find its own top 25. Trends is precomputed now, and
@@ -575,6 +611,11 @@ td.band.weaksup{color:var(--ink-2)}
 .unsup{color:var(--warn);font-weight:600;cursor:help}
 .muted{color:var(--ink-3)} .note{font-size:12.5px;color:var(--ink-3);margin-top:10px;
   line-height:1.6;max-width:820px}
+.role{display:inline-block;border:1px solid var(--line);border-radius:999px;
+  padding:1px 7px;font-size:11px;white-space:nowrap;background:var(--chip)}
+.role.r3{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.role.r1{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.role.r0{color:var(--ink-3);border-style:dashed}
 button.act.prim{border-color:var(--accent);color:var(--ink)}
 button.act:disabled{opacity:.42;cursor:default;border-color:var(--line)}
 button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
@@ -946,6 +987,17 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <select id="h2hTeam">
           <option value="">Off</option>
         </select>
+        <span id="h2hTimeframeControl" hidden>
+          <label for="h2hTimeframe">Time frame</label>
+          <select id="h2hTimeframe">
+            <option value="all">All time</option>
+            <option value="10">10 years</option>
+            <option value="5">5 years</option>
+            <option value="3">3 years</option>
+            <option value="2">2 years</option>
+            <option value="1">1 year</option>
+          </select>
+        </span>
       </span>
       <span class="count" id="ccount"></span>
     </div>
@@ -983,6 +1035,13 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="1">Male-matching</option>
         <option value="2">Female-matching</option>
       </select>
+      <select id="prole">
+        <option value="all">All roles</option>
+        <option value="3">Handlers</option>
+        <option value="2">Hybrids</option>
+        <option value="1">Cutters</option>
+        <option value="0">Unclassified</option>
+      </select>
       <span class="count" id="pcount"></span>
       <button class="act" id="pinToggle" title="Show or hide your pinned players list">
         &#128204; Pinned <span id="pinbadge">0</span></button>
@@ -992,7 +1051,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
     <table><thead><tr>
       <th class="pin"></th>
       <th class="n">#</th><th>Player</th><th class="n">Elo</th><th>90% band</th>
-      <th class="n">G</th><th>Last club</th><th class="n">Yr</th>
+      <th>Role</th><th class="n">G</th><th>Last club</th><th class="n">Yr</th>
     </tr></thead><tbody id="ptb"></tbody></table>
     <p class="note" id="pnote"></p>
     </div>
@@ -1185,9 +1244,9 @@ const heldOut = D.metrics.held_out_2024_2025;
 $('#sub').textContent =
   `Every player carries a personal Elo across seasons; a club's rating is the ` +
   `softmax-weighted mean of its event roster. Rankings and Trends span ` +
-  `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. UFA team seasons are also ` +
-  `available from the Rankings division picker. The Tournaments browser is ` +
-  `USAU-only.` +
+  `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. PUL, WUL, and UFA team ` +
+  `seasons are also available from the Rankings division picker; PUL and WUL ` +
+  `are available in Trends. The Tournaments browser is USAU-only.` +
   (IS_GLICKO && PERIOD_LABEL ? ` Ratings update after ${PERIOD_LABEL}.` : '') +
   (heldOut?.n ? ` Held-out 2024–25: ${(heldOut.accuracy * 100).toFixed(1)}% ` +
     `accuracy · ${heldOut.logloss.toFixed(3)} log loss over ` +
@@ -1219,27 +1278,50 @@ const COLLEGE_NOTE =
   'cross-continent order as provisional: EUF publishes no stable player IDs. ' +
   'College roster bases also mean less because a squad is often registered for ' +
   'the season rather than the event.';
-function h2hRecord(team, opponent, year) {
+function h2hReferenceDate(year) {
+  const maxYear = year === 'all' ? Infinity : +year;
+  let latest = '';
+  for (const records of H2H.values()) {
+    for (const record of records) {
+      const date = String(record[0]);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date) &&
+          +date.slice(0, 4) <= maxYear && date > latest) {
+        latest = date;
+      }
+    }
+  }
+  return latest;
+}
+function h2hCutoffDate(reference, timeFrame) {
+  if (timeFrame === 'all') return '';
+  const cutoff = new Date(`${reference}T00:00:00Z`);
+  cutoff.setUTCFullYear(cutoff.getUTCFullYear() - +timeFrame);
+  return cutoff.toISOString().slice(0, 10);
+}
+function h2hRecord(team, opponent, year, timeFrame = 'all') {
   if (!team || !opponent || team === opponent) return null;
   const a = GCIX.get(team), b = GCIX.get(opponent);
   if (a == null || b == null) return null;
   const lo = Math.min(a, b), hi = Math.max(a, b);
-  const seasons = year === 'all' ? SEASONS : [+year];
+  const through = h2hReferenceDate(year);
+  if (!through) return null;
+  const first = timeFrame === 'all'
+    ? (year === 'all' ? '' : `${year}-01-01`)
+    : h2hCutoffDate(through, timeFrame);
   let wins = 0, losses = 0, games = 0;
-  for (const season of seasons) {
-    const row = H2H.get(`${lo}|${hi}|${season}`);
-    if (!row) continue;
-    const first = a === lo ? row[0] : row[1];
-    const second = a === lo ? row[1] : row[0];
-    wins += first;
-    losses += second;
-    games += first + second;
+  for (const [eventDate, firstWins, secondWins] of H2H.get(`${lo}|${hi}`) || []) {
+    if (eventDate < first || eventDate > through) continue;
+    const aWins = a === lo ? firstWins : secondWins;
+    const bWins = a === lo ? secondWins : firstWins;
+    wins += aWins;
+    losses += bWins;
+    games += aWins + bWins;
   }
   return games ? [wins, losses, games] : null;
 }
-function h2hCell(team, opponent, year) {
+function h2hCell(team, opponent, year, timeFrame = 'all') {
   const loading = opponent && !HREADY && !HFAILED;
-  const record = loading ? null : h2hRecord(team, opponent, year);
+  const record = loading ? null : h2hRecord(team, opponent, year, timeFrame);
   const body = loading ? '…' : record ? `${record[0]}–${record[1]}` : '—';
   const title = loading ? 'Loading game results…' : record ? `${record[2]} games` :
     (team === opponent ? 'Selected team' : 'No recorded games');
@@ -1253,10 +1335,10 @@ function recordTone(record) {
   if (balance === 0) return 'even';
   return `${balance > 0 ? 'pos' : 'neg'} tone${Math.ceil(Math.abs(balance) * 5)}`;
 }
-function resultCell(team, opponent, year, rowName, opponentName) {
+function resultCell(team, opponent, year, timeFrame, rowName, opponentName) {
   if (team === opponent)
     return `<td class="mxresult mxself" title="${esc(rowName)}">—</td>`;
-  const record = h2hRecord(team, opponent, year);
+  const record = h2hRecord(team, opponent, year, timeFrame);
   if (!record)
     return `<td class="mxresult" title="No recorded games between ${esc(rowName)} and ` +
       `${esc(opponentName)}">—</td>`;
@@ -1265,7 +1347,7 @@ function resultCell(team, opponent, year, rowName, opponentName) {
     `vs ${esc(opponentName)}: ${body} over ${record[2]} game${record[2] === 1 ? '' : 's'}">` +
     `${body}</td>`;
 }
-function drawH2HMatrix(rows, rankOf, historical, year) {
+function drawH2HMatrix(rows, rankOf, historical, year, timeFrame) {
   const matrix = $('#clubMatrix');
   if (!HREADY) {
     matrix.innerHTML = `<p class="note">${HFAILED
@@ -1295,7 +1377,7 @@ function drawH2HMatrix(rows, rankOf, historical, year) {
     `<tr><td class="mxclub"><span class="rk">${x.rank}</span> ` +
     `<span class="nmlink" data-club="${esc(x.key)}">${esc(x.name)}</span> ` +
     `<span class="tag">${esc(EDIVL[x.div] || '')}</span></td>` +
-    shown.map(y => resultCell(x.key, y.key, year, x.name, y.name)).join('') +
+    shown.map(y => resultCell(x.key, y.key, year, timeFrame, x.name, y.name)).join('') +
     `</tr>`
   ).join('');
   matrix.innerHTML = `<div class="matrixwrap"><table class="h2hmatrix">` +
@@ -1305,6 +1387,13 @@ function drawH2HMatrix(rows, rankOf, historical, year) {
 }
 function h2hTeamKey(row, historical) {
   return historical ? row.key : row.row[6];
+}
+function h2hPeriodLabel(year, timeFrame) {
+  if (timeFrame === 'all')
+    return year === 'all' ? 'all available time' : `the ${year} season`;
+  const through = h2hReferenceDate(year);
+  return through ? `since ${h2hCutoffDate(through, timeFrame)}` :
+    `${timeFrame}-year window`;
 }
 function updateH2HControls(pop, historical, year) {
   const select = $('#h2hTeam'), before = select.value;
@@ -1316,6 +1405,8 @@ function updateH2HControls(pop, historical, year) {
   select.innerHTML = '<option value="">Off</option>' + options;
   select.value = pop.some(r => h2hTeamKey(r, historical) === before) ? before : '';
   const selected = select.value;
+  const timeFrame = $('#h2hTimeframe').value;
+  $('#h2hTimeframeControl').hidden = !selected;
   const name = selected
     ? (pop.find(r => h2hTeamKey(r, historical) === selected) || {}).name ||
       ((pop.find(r => h2hTeamKey(r, historical) === selected) || {}).row || [])[1]
@@ -1328,13 +1419,13 @@ function updateH2HControls(pop, historical, year) {
       ? `Loading game results…`
       : HFAILED
         ? `Game results could not be loaded.`
-        : `Head-to-head records for ${name}; ${year === 'all' ? 'all available seasons' : year}. ` +
+        : `Head-to-head records for ${name}; ${h2hPeriodLabel(year, timeFrame)}. ` +
           `Teams with no recorded games show —.`)
     : '';
   return selected;
 }
-function h2hTeamCell(row, historical, selected, year) {
-  return h2hCell(h2hTeamKey(row, historical), selected, year);
+function h2hTeamCell(row, historical, selected, year, timeFrame) {
+  return h2hCell(h2hTeamKey(row, historical), selected, year, timeFrame);
 }
 const DIVCODE_UFA = 50;
 function drawUfa() {
@@ -1426,6 +1517,7 @@ function drawClubs() {
       .slice().sort((a, b) => b[2] - a[2])
       .map(r => ({row: r}));
   }
+  const timeFrame = $('#h2hTimeframe').value;
   const selected = matrixView ? '' : updateH2HControls(pop, historical, year);
 
   const rankOf = new Map();
@@ -1437,7 +1529,7 @@ function drawClubs() {
       String(event).toLowerCase().includes(q);
   }) : pop;
   if (matrixView) {
-    const shown = drawH2HMatrix(rows, rankOf, historical, year);
+    const shown = drawH2HMatrix(rows, rankOf, historical, year, timeFrame);
     const what = div === 'all' ? 'clubs' : `${DIVLABEL[div]} clubs`;
     $('#ccount').textContent = HREADY
       ? `${shown} of ${rows.length.toLocaleString()} matching ${what} shown`
@@ -1459,7 +1551,7 @@ function drawClubs() {
         `<td><span class="tag">${esc(EDIVL[p.div] || '')}</span></td>` +
         `<td class="n">${p.elo.toFixed(0)}</td><td class="n">${p.n ?? '—'}</td>` +
         `<td class="muted" style="font-size:13px">${esc(p.event)}</td>` +
-        h2hTeamCell(r, historical, selected, year) + `</tr>`;
+        h2hTeamCell(r, historical, selected, year, timeFrame) + `</tr>`;
     }
     const p = r.row;
     const scope = div === 'all' ? 'the overall list' : `${DIVLABEL[p[5]]} clubs`;
@@ -1469,7 +1561,7 @@ function drawClubs() {
       `<td><span class="tag">${esc(EDIVL[p[5]] || '')}</span></td>` +
       `<td class="n">${p[2].toFixed(0)}</td><td class="n">${p[3]}</td>` +
       `<td class="muted" style="font-size:13px">${esc(p[4])}</td>` +
-      h2hTeamCell(r, historical, selected, year) + `</tr>`;
+      h2hTeamCell(r, historical, selected, year, timeFrame) + `</tr>`;
   }).join('');
   const what = div === 'all' ? 'clubs' : `${DIVLABEL[div]} clubs`;
   $('#ccount').textContent = q
@@ -1481,10 +1573,10 @@ function drawClubs() {
     : CNOTE[basis] + ' ' + COLLEGE_NOTE) + EU_ROSTER_NOTE;
 }
 $('#h2hTeam').onchange = drawClubs;
+$('#h2hTimeframe').onchange = drawClubs;
 $('#clubView').onchange = drawClubs;
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
-
 /* ---------- players ---------- */
 /* Leave-one-out verdict per rating, measured in analysis/identify.py for the
    top 1,000 only. It is a statement about IDENTIFIABILITY, not about the
@@ -1494,6 +1586,13 @@ $('#basis').onchange = drawClubs;
    than inventing a wider one — converting a logloss delta into an Elo
    interval is not something this corpus can calibrate. */
 const LOOCLASS = {0: 'unsupported', 1: '', 2: '', '-1': ''};
+const ROLECODE = {unknown: 0, cutter: 1, hybrid: 2, handler: 3};
+const ROLELABEL = {0: 'Unclassified', 1: 'Cutter', 2: 'Hybrid', 3: 'Handler'};
+const ROLESOURCE = {
+  0: 'none', 1: 'position', 2: 'prior position', 3: 'UFA stats',
+  4: 'prior UFA stats', 5: 'USAU stats', 6: 'prior USAU stats',
+  7: 'manual override', 8: 'prior manual override'
+};
 const LOOTIP = {
   0: 'Removing this player from every roster does NOT hurt the prediction of ' +
      'their own teams\u2019 games — the results are explained at least as well ' +
@@ -1504,6 +1603,13 @@ const LOOTIP = {
      'of their own teams\u2019 games, so the rating carries real information.',
   '-1': 'Not measured — leave-one-out covers the top 1,000 by rating.'
 };
+function roleTag(code, confidence, source) {
+  const label = ROLELABEL[code] || ROLELABEL[0];
+  const title = code === 0
+    ? 'Insufficient role evidence'
+    : `${confidence}% confidence · ${source || 'inferred'}`;
+  return `<span class="role r${code}" title="${esc(title)}">${label}</span>`;
+}
 const PYEARS = new Map();
 let ONLY26_BEFORE_YEAR = true;
 function loadAllPlayerHistory(done) {
@@ -1535,6 +1641,15 @@ function historicalPlayer(p, year, div) {
   return playerYearMap(p[8]).get(div === 'all'
     ? String(year) : `${year}|${div}`) || null;
 }
+function playerRole(p, season) {
+  if (season == null) return [p[13] || 0, p[14] || 0, 'inferred'];
+  const run = PLAY['@' + p[8]] || [];
+  for (let i = 0; i < run.length; i += 4) {
+    if (run[i] === season) return [run[i + 1], run[i + 2],
+                                   ROLESOURCE[run[i + 3]] || 'inferred'];
+  }
+  return [0, 0, 'none'];
+}
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
   const year = $('#ryear').value;
@@ -1550,7 +1665,7 @@ function drawPlayers() {
   }
   const only26 = !historical && only26Box.checked;
   const ming = +$('#ming').value;
-  const gen = $('#pgen').value, div = $('#rdiv').value;
+  const gen = $('#pgen').value, role = $('#prole').value, div = $('#rdiv').value;
 
   if (historical && !HREADY) {
     $('#pcount').textContent = 'Loading player history…';
@@ -1578,18 +1693,21 @@ function drawPlayers() {
 
   if (historical) {
     const y = +year;
-    pop = pop.map(p => ({p, snap: historicalPlayer(p, y, div)}))
-      .filter(r => r.snap);
+    pop = pop.map(p => ({
+      p, snap: historicalPlayer(p, y, div), role: playerRole(p, y),
+    })).filter(r => r.snap);
+    if (role !== 'all') pop = pop.filter(r => r.role[0] === +role);
     pop.sort((a, b) => b.snap.elo - a.snap.elo ||
       String(a.p[8]).localeCompare(String(b.p[8]), undefined, {numeric: true}));
   } else {
     // Division is a bitmask of where the player turned out, and WHICH mask
     // depends on the current-roster toggle.
     if (div !== 'all') {
-      const bit = 1 << +div;
-      pop = pop.filter(p => (only26 ? p[11] : p[10]) & bit);
+      const bit = 1n << BigInt(+div);
+      pop = pop.filter(p => (BigInt(only26 ? p[11] : p[10]) & bit) !== 0n);
     }
-    pop = pop.map(p => ({p, snap: null}));
+    if (role !== 'all') pop = pop.filter(p => p[13] === +role);
+    pop = pop.map(p => ({p, snap: null, role: playerRole(p, null)}));
   }
 
   const rankOf = new Map();
@@ -1617,6 +1735,7 @@ function drawPlayers() {
       (snap ? `<td class="band muted" title="Historical Elo; current uncertainty band not shown">—</td>` :
         `<td class="band ${LOOCLASS[p[12]] || ''}" title="${esc(LOOTIP[p[12]] || '')}">` +
         `[${p[2].toFixed(0)}, ${p[3].toFixed(0)}]${p[12] === 0 ? ' <span class="unsup">?</span>' : ''}</td>`) +
+      `<td>${roleTag(r.role[0], r.role[1], r.role[2])}</td>` +
       `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(club)}</td>` +
       `<td class="n">${yr}</td></tr>`;
   }).join('');
@@ -1637,6 +1756,7 @@ function drawPlayers() {
   $('#only26').addEventListener(e, drawPlayers);
   $('#ming').addEventListener(e, drawPlayers);
   $('#pgen').addEventListener(e, drawPlayers);
+  $('#prole').addEventListener(e, drawPlayers);
 });
 $('#pnote').textContent = IS_GLICKO
   ? `Searching does not renumber anything — a player keeps the rank they hold in ` +
@@ -1680,7 +1800,7 @@ let BSEASON = null;   // the season BR applies to (the current one)
 let HEV = [];     // [date, name, season, divisionCode]
 let GC = [], GST = [];
 let GCIX = new Map();
-let H2H = new Map(); // "lowerIndex|higherIndex|season" -> [lower wins, higher wins]
+let H2H = new Map(); // "lowerIndex|higherIndex" -> [[date, lower wins, higher wins]]
 let GSIDE = {};   // eventIdx -> Set(club index), from the core
 // eventIdx -> [field strength score, letter, champion club key]. Per event,
 // so a club's history row can print the grade and a crown without any fault.
@@ -1712,8 +1832,13 @@ function applyHistory(h) {
   HEV = H.events || [];
   GC = H.gameClubs || []; GST = H.gameStages || [];
   GCIX = new Map(GC.map((k, i) => [k, i]));
-  H2H = new Map((H.headToHead || []).map(r =>
-    [`${r[0]}|${r[1]}|${r[2]}`, [r[3], r[4]]]));
+  H2H = new Map();
+  for (const r of H.headToHead || []) {
+    const key = `${r[0]}|${r[1]}`;
+    const records = H2H.get(key) || [];
+    records.push([r[2], r[3], r[4]]);
+    H2H.set(key, records);
+  }
   // Who appears in an event's games. The event table marks a row expandable
   // only where the model scored games, and asking GMS for that would fault
   // every season of every panel just to draw the table.
@@ -1871,7 +1996,22 @@ const DIVTAG = ["men's", "college men's", "college men's D-III", 'mixed',
                 'beach grand masters mixed',
                 "beach great grand masters men's", "beach great grand masters women's",
                 'beach great grand masters mixed', 'beach legends mixed',
-                "league men's", 'league mixed', 'UFA'];
+                'UFA',
+                "Canada grand masters mixed", "Canada grand masters open",
+                "Canada grand masters women's", 'Canada ouvert', 'Canada féminin',
+                'Canada mixte', "Canada open", "Canada women's", 'Canada mixed',
+                "Canada junior open", "Canada junior women's",
+                "Canada junior open regional", "Canada junior women's regional",
+                "Canada masters open", "Canada masters mixed", "Canada masters women's",
+                "Canada all-star game", "Canada open A", "Canada open B",
+                "Canada junior open A", "Canada junior open B",
+                "Canada junior women's A", "Canada junior women's B",
+                "Canada advanced/intermediate", "Canada beginner/intermediate",
+                "Canada advanced", "Canada intermediate", "Canada beginner",
+                "Canada senior", "Canada junior", "Canada junior mixed",
+                "Canada mixed masters", "Canada women's masters"];
+DIVTAG[84] = 'PUL';
+DIVTAG[85] = 'WUL';
 /* One club's games at one event, from its own side of the net. Only the games
    the model scored are here, so an expanded event IS the Δ beside it. */
 function gamesAt(ckey, evIdx) {
@@ -2289,13 +2429,16 @@ function ufaRosterPane(ckey, season) {
     (player.pid && PBY.has(player.pid)
       ? `<span class="nmlink" data-pid="${esc(player.pid)}">${esc(player.name)}</span>`
       : `<span class="muted">${esc(player.name)}</span>`) +
-    `</td><td class="n">${player.elo === null ? '—' : player.elo.toFixed(0)}</td>` +
+    `</td><td>${roleTag(ROLECODE[player.role] || 0,
+                         Math.round(100 * (player.roleConfidence || 0)),
+                         'UFA season stats')}</td>` +
+    `<td class="n">${player.elo === null ? '—' : player.elo.toFixed(0)}</td>` +
     `</tr>`).join('');
   return `<p class="rsum">${roster.length} listed players · ${row.rated} linked ` +
     `players. Team Elo comes from game results; these are current linked player ` +
     `ratings for the ${season} UFA roster.</p>` +
     `<table class="hist"><thead><tr><th class="n">#</th><th>Player</th>` +
-    `<th class="n">Elo</th></tr></thead><tbody>${body}</tbody></table>`;
+    `<th>Role</th><th class="n">Elo</th></tr></thead><tbody>${body}</tbody></table>`;
 }
 function rosterPane(ckey, season) {
   if (UFA_BY_KEY.has(ckey)) return ufaRosterPane(ckey, season);
@@ -2424,7 +2567,6 @@ function openDetail(kind, key, opts) {
     cur = {kind, key};
     $('#detail').classList.add('on'); $('#scrim').classList.add('on');
     const h0 = '#' + kind + '/' + encodeURIComponent(key);
-    if (location.hash !== h0) location.hash = h0;
     // Re-open only if the panel is still the one that asked. Clicking through
     // three names while a bucket is in flight redraws the last, not all three.
     if (!dead && dep) faultTier(dep[0], dep[1], () => {
@@ -2439,6 +2581,8 @@ function openDetail(kind, key, opts) {
       title = row[0];
       parts.push(`Elo <b>${row[1].toFixed(0)}</b>`, `${row[4]} games`,
                  `#${row[7]} of ${D.totalRated.toLocaleString()} rated`);
+      const role = playerRole(row, row[6]);
+      parts.push(roleTag(role[0], role[1], role[2]));
     } else {
       // Every rated trajectory belongs to a player in the ranked table, so
       // this is a hand-typed pid rather than anything the page ever linked.
@@ -2625,6 +2769,8 @@ const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                "Beach Great Grand Masters Men's", "Beach Great Grand Masters Women's",
                'Beach Great Grand Masters Mixed', 'Beach Legends Mixed',
                "League Men's", 'League Mixed', 'UFA'];
+EDIVL[84] = 'PUL';
+EDIVL[85] = 'WUL';
 
 /* Event geography is only city/state in the upstream record. Translate the
    venue state through USA Ultimate's division-specific region boundaries;
@@ -3302,7 +3448,26 @@ const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
                   44: "beach great grand masters men's",
                   45: "beach great grand masters women's",
                   46: 'beach great grand masters mixed', 47: 'beach legends mixed',
-                  48: "league men's", 49: 'league mixed', 50: 'UFA'};
+                  48: "league men's", 49: 'league mixed', 50: 'UFA',
+                  51: 'Canada grand masters mixed', 52: 'Canada grand masters open',
+                  53: "Canada grand masters women's", 54: 'Canada ouvert',
+                  55: 'Canada féminin', 56: 'Canada mixte', 57: 'Canada open',
+                  58: "Canada women's", 59: 'Canada mixed',
+                  60: 'Canada junior open', 61: "Canada junior women's",
+                  62: 'Canada junior open regional',
+                  63: "Canada junior women's regional",
+                  64: 'Canada masters open', 65: 'Canada masters mixed',
+                  66: "Canada masters women's", 67: 'Canada all-star game',
+                  68: 'Canada open A', 69: 'Canada open B',
+                  70: 'Canada junior open A', 71: 'Canada junior open B',
+                  72: "Canada junior women's A", 73: "Canada junior women's B",
+                  74: 'Canada advanced/intermediate',
+                  75: 'Canada beginner/intermediate',
+                  76: 'Canada advanced', 77: 'Canada intermediate',
+                  78: 'Canada beginner', 79: 'Canada senior',
+                  80: 'Canada junior', 81: 'Canada junior mixed',
+                  82: 'Canada mixed masters', 83: "Canada women's masters",
+                  84: 'PUL', 85: 'WUL'};
 // Codes match the payload's gender map: 1 male-matching, 2 female-matching.
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};
