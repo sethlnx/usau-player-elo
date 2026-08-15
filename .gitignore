@@ -40,6 +40,10 @@ data/*
 # Hand-reviewed corrections to inferred player roles
 !data/player_role_overrides.csv
 
+# Offline UFA-linked player metric pilot
+!data/player_metric_reference.json
+!data/player_metrics.csv
+
 # Published outputs of `python -m identity.resolve`
 !data/ambiguities.csv
 !data/cross_division_links.csv

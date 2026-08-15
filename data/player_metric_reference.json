@@ -1,0 +1,289 @@
+{
+  "components": {
+    "all": {
+      "blocks": {
+        "mean": 0.05851045615751498,
+        "prior_exposure": 1.0,
+        "sample_size": 3137,
+        "spread": 0.2737612684384589
+      },
+      "completion": {
+        "mean": 0.9321866193139152,
+        "prior_exposure": 13.816751221640962,
+        "sample_size": 3236,
+        "spread": 0.037729487042365735
+      },
+      "d_point_success": {
+        "mean": 0.28265623089152503,
+        "prior_exposure": 37.78238825711549,
+        "sample_size": 3137,
+        "spread": 0.04946280331388177
+      },
+      "d_stops": {
+        "mean": 0.5068244408005381,
+        "prior_exposure": 58.79408722844186,
+        "sample_size": 3286,
+        "spread": 0.045754032844081916
+      },
+      "hucks": {
+        "mean": 0.6073787444125692,
+        "prior_exposure": 48.06113000293455,
+        "sample_size": 2164,
+        "spread": 0.022704313383773694
+      },
+      "o_conversion": {
+        "mean": 0.5054948887875291,
+        "prior_exposure": 34.372277624558095,
+        "sample_size": 3285,
+        "spread": 0.06274980469172889
+      },
+      "o_point_success": {
+        "mean": 0.639898731712067,
+        "prior_exposure": 10.840762794281545,
+        "sample_size": 2760,
+        "spread": 0.08893329666596042
+      },
+      "offensive_actions": {
+        "mean": 0.17657996193450784,
+        "prior_exposure": 27.486600715143975,
+        "sample_size": 3287,
+        "spread": 0.07001348677575053
+      },
+      "possession": {
+        "mean": 0.9411683290191678,
+        "prior_exposure": 15.163736837434925,
+        "sample_size": 3236,
+        "spread": 0.033417678351372736
+      },
+      "receiving_yards": {
+        "mean": 5.224070457363938,
+        "prior_exposure": 1.0,
+        "sample_size": 3196,
+        "spread": 3.155545556453749
+      },
+      "throwing_yards": {
+        "mean": 6.237286331734948,
+        "prior_exposure": 1.0,
+        "sample_size": 3112,
+        "spread": 2.5314083965734238
+      }
+    },
+    "cutter": {
+      "blocks": {
+        "mean": 0.05934255420625894,
+        "prior_exposure": 1.0,
+        "sample_size": 770,
+        "spread": 0.26261316661656253
+      },
+      "completion": {
+        "mean": 0.9305953114243269,
+        "prior_exposure": 9.286151815780881,
+        "sample_size": 778,
+        "spread": 0.04638625176017608
+      },
+      "d_point_success": {
+        "mean": 0.2815056682687016,
+        "prior_exposure": 55.872359715120446,
+        "sample_size": 770,
+        "spread": 0.041482416041370804
+      },
+      "d_stops": {
+        "mean": 0.5080965923998026,
+        "prior_exposure": 63.355189397158384,
+        "sample_size": 792,
+        "spread": 0.043524315350410146
+      },
+      "hucks": {
+        "mean": 0.599621391386654,
+        "prior_exposure": 16.429048692649346,
+        "sample_size": 453,
+        "spread": 0.04803394739946555
+      },
+      "o_conversion": {
+        "mean": 0.504170335016913,
+        "prior_exposure": 48.419885978957204,
+        "sample_size": 792,
+        "spread": 0.05564518410384761
+      },
+      "o_point_success": {
+        "mean": 0.6367043720262142,
+        "prior_exposure": 8.874548344753897,
+        "sample_size": 661,
+        "spread": 0.09547246730847969
+      },
+      "offensive_actions": {
+        "mean": 0.1639244978298173,
+        "prior_exposure": 30.0986319730829,
+        "sample_size": 792,
+        "spread": 0.06531434410441941
+      },
+      "possession": {
+        "mean": 0.9392731620710896,
+        "prior_exposure": 10.04645268848704,
+        "sample_size": 778,
+        "spread": 0.04101754377106645
+      },
+      "receiving_yards": {
+        "mean": 5.835920581270619,
+        "prior_exposure": 1.0,
+        "sample_size": 782,
+        "spread": 3.3737593511725623
+      },
+      "throwing_yards": {
+        "mean": 5.369017909571345,
+        "prior_exposure": 1.0,
+        "sample_size": 728,
+        "spread": 2.59365321738338
+      }
+    },
+    "handler": {
+      "blocks": {
+        "mean": 0.051543168520255485,
+        "prior_exposure": 1.0,
+        "sample_size": 710,
+        "spread": 0.3057457387092845
+      },
+      "completion": {
+        "mean": 0.936288307941311,
+        "prior_exposure": 24.234213152714474,
+        "sample_size": 765,
+        "spread": 0.030315021075780803
+      },
+      "d_point_success": {
+        "mean": 0.28775291437759615,
+        "prior_exposure": 75.38115681720241,
+        "sample_size": 710,
+        "spread": 0.03642524913153332
+      },
+      "d_stops": {
+        "mean": 0.5062512763495269,
+        "prior_exposure": 58.706591000295674,
+        "sample_size": 769,
+        "spread": 0.04602388089807179
+      },
+      "hucks": {
+        "mean": 0.6181854357341823,
+        "prior_exposure": 83.88222654519478,
+        "sample_size": 592,
+        "spread": 0.01606598360762598
+      },
+      "o_conversion": {
+        "mean": 0.5101945845328023,
+        "prior_exposure": 36.72822003964516,
+        "sample_size": 770,
+        "spread": 0.06101056802872559
+      },
+      "o_point_success": {
+        "mean": 0.6469627265045536,
+        "prior_exposure": 16.456474767475548,
+        "sample_size": 673,
+        "spread": 0.07665205454856382
+      },
+      "offensive_actions": {
+        "mean": 0.18722266991727277,
+        "prior_exposure": 31.57676471210527,
+        "sample_size": 770,
+        "spread": 0.06821127859808523
+      },
+      "possession": {
+        "mean": 0.9454012877801625,
+        "prior_exposure": 59.22270845138944,
+        "sample_size": 765,
+        "spread": 0.020157913261980926
+      },
+      "receiving_yards": {
+        "mean": 3.916942715476316,
+        "prior_exposure": 1.0,
+        "sample_size": 733,
+        "spread": 2.5937163917436004
+      },
+      "throwing_yards": {
+        "mean": 6.878985264862771,
+        "prior_exposure": 1.1075891316763862,
+        "sample_size": 752,
+        "spread": 2.3062804972829234
+      }
+    },
+    "hybrid": {
+      "blocks": {
+        "mean": 0.06181409493587201,
+        "prior_exposure": 1.0,
+        "sample_size": 955,
+        "spread": 0.27921021296288107
+      },
+      "completion": {
+        "mean": 0.9308181377484431,
+        "prior_exposure": 17.520375724176354,
+        "sample_size": 987,
+        "spread": 0.0347109752772716
+      },
+      "d_point_success": {
+        "mean": 0.2809235753008066,
+        "prior_exposure": 27.65711955332212,
+        "sample_size": 955,
+        "spread": 0.05664314243126609
+      },
+      "d_stops": {
+        "mean": 0.5065633468834688,
+        "prior_exposure": 55.45184077195903,
+        "sample_size": 998,
+        "spread": 0.04828356176964351
+      },
+      "hucks": {
+        "mean": 0.6045751633986928,
+        "prior_exposure": 92.25116873862885,
+        "sample_size": 703,
+        "spread": 0.01285528368329403
+      },
+      "o_conversion": {
+        "mean": 0.5039383053752101,
+        "prior_exposure": 33.333973361983475,
+        "sample_size": 998,
+        "spread": 0.06518466390774443
+      },
+      "o_point_success": {
+        "mean": 0.6382131927182861,
+        "prior_exposure": 11.222812563389919,
+        "sample_size": 855,
+        "spread": 0.08696979162122256
+      },
+      "offensive_actions": {
+        "mean": 0.1844692282268664,
+        "prior_exposure": 22.85413770005656,
+        "sample_size": 998,
+        "spread": 0.07735867991643068
+      },
+      "possession": {
+        "mean": 0.9398422642353731,
+        "prior_exposure": 18.547203293309895,
+        "sample_size": 987,
+        "spread": 0.031089472029259192
+      },
+      "receiving_yards": {
+        "mean": 5.850550607099465,
+        "prior_exposure": 1.0,
+        "sample_size": 982,
+        "spread": 3.2687413399754575
+      },
+      "throwing_yards": {
+        "mean": 5.983042305574481,
+        "prior_exposure": 1.0,
+        "sample_size": 968,
+        "spread": 2.345139313405718
+      }
+    }
+  },
+  "fitted_at": "2026-08-14",
+  "model_version": "ufa-eb-v1",
+  "ovr": {
+    "center": 1904.2,
+    "sample_size": 1401,
+    "scale": 226.39302000000006
+  },
+  "reference_seasons": [
+    2022,
+    2023,
+    2024,
+    2025
+  ]
+}

@@ -27,6 +27,7 @@ Full plan: `USAU_by_player_elo.md`.
 .venv/bin/python -m analysis.euf_overlap      # review name candidates before replay
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
 .venv/bin/python -m analysis.rankings     # player/team Elo, player_roles.csv, history.json
+.venv/bin/python -m analysis.player_metrics # offline UFA scorecard; add --refit-reference only to recalibrate
 .venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
 .venv/bin/python -m analysis.site         # docs/index.html + history.js + t,p,r,g/*.js — no server
 ```
@@ -831,6 +832,16 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   goals/assists/turns. Low-confidence evidence remains unknown; prior-season
   evidence decays, and `data/player_role_overrides.csv` supplies reviewed
   corrections. Roles are descriptive and do not affect Elo.
+  `player_metrics.py` writes the offline UFA-linked scorecard to
+  `data/player_metrics.csv`. OVR is a fixed 1–99 presentation mapping of Elo;
+  THR/OFF/DEF are role-adjusted empirical-Bayes attributes fitted on the
+  frozen 2022–2025 reference in `data/player_metric_reference.json`. Attribute
+  reliability, raw counts, source date, and missing values remain explicit,
+  and none of these descriptive attributes feed Elo. UFA publishes rich stats
+  only as cumulative season rows, so `stats_through` uses that season's latest
+  dated Final (September 1 only when game dates are absent); an `--as-of`
+  cutoff before it excludes the whole row rather than leaking later games.
+  The pilot is intentionally absent from the generated site.
   `usau_baseline.py` reimplements USA Ultimate's own iterative rankings
   algorithm (v2.0) from our game data and scores it walk-forward on the
   same holdout — the plan's "comparison model 4".
