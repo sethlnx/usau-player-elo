@@ -15,7 +15,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 14,Doublewide,doublewide,club-men,2010.0,26,2026,2026 Elite Select Challenge,2026-08-22
 15,Furious George,furious george,club-men,1988.6,25,2026,2026 Pro Elite Challenge West,2026-07-11
 16,Raleigh-Durham United,raleigh-durham united,club-men,1981.3,24,2026,2026 Elite Select Challenge,2026-08-22
-17,Dark Star,dark star,club-men,1971.6,25,2026,Eugene Summer Solstice 2026,2026-06-27
+17,Dark Star,dark star,club-men,1972.3,25,2026,Eugene Summer Solstice 2026,2026-06-27
 18,Haymaker,haymaker,club-men,1963.0,25,2026,Lehigh Valley Invite 2026,2026-08-01
 19,Mad Men,mad men,club-men,1962.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
 20,Red Tide,red tide,club-men,1962.9,25,2026,Vacationland 2026,2026-08-08
@@ -38,7 +38,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 37,Tanasi,tanasi,club-men,1804.1,24,2026,HoDown Showdown 2026,2026-08-08
 38,I-69,i-69,club-men,1802.3,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
 39,Red Circus,red circus,club-men,1793.6,21,2026,Vacationland 2026,2026-08-08
-40,Trident,trident,club-men,1786.8,21,2026,2026 Select Flight Invite - West,2026-07-25
+40,Trident,trident,club-men,1786.9,21,2026,2026 Select Flight Invite - West,2026-07-25
 41,Kansas City Smokestack,kansas city smokestack,club-men,1785.7,26,2026,Heavyweights 2026,2026-07-11
 42,Grudge,grudge,club-men,1785.1,22,2026,Eugene Summer Solstice 2026,2026-06-27
 43,Wretched Refuse,wretched refuse,club-men,1783.5,25,2026,2nd Annual Deseret Invite,2026-07-11
@@ -79,7 +79,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 78,Sawtooth,sawtooth,club-men,1681.2,23,2026,Ski Town Classic 2026,2026-08-15
 79,ZOO,zoo,club-men,1679.5,26,2026,Texas 2 Finger 2026,2026-06-27
 80,Knights of Ni,knights of ni,club-men,1677.2,21,2026,Heavyweights 2026,2026-07-11
-81,OAT,oat,club-men,1674.1,26,2026,2026 Select Flight Invite - West,2026-07-25
+81,OAT,oat,club-men,1674.2,26,2026,2026 Select Flight Invite - West,2026-07-25
 82,Lantern,lantern,club-men,1671.3,26,2026,Vacationland 2026,2026-08-08
 83,Big Wrench,big wrench,club-men,1667.7,26,2026,Boston Invite 2026,2026-07-11
 84,Fuse,fuse,club-men,1665.8,20,2026,SCINNY 2026,2026-06-20
@@ -111,13 +111,13 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 110,Sebastopol Orchard,sebastopol orchard,club-men,1591.8,21,2026,Summer Bash 2026,2026-06-27
 111,Gang Of Disc,gang of disc,club-men,1591.6,21,2026,RagnaRock 2026,2026-07-11
 112,Odyssey,odyssey,club-men,1581.8,24,2026,Vacationland 2026,2026-08-08
-113,DeMo,demo,club-men,1579.5,22,2026,Heavyweights 2026,2026-07-11
+113,DeMo,demo,club-men,1579.6,22,2026,Heavyweights 2026,2026-07-11
 114,Rebels,rebels,club-men,1570.0,23,2026,Philly Invite 2026,2026-06-20
 115,Resurgam Ultimate,resurgam ultimate,club-men,1564.3,26,2026,Vacationland 2026,2026-08-08
 116,Dreadnought,dreadnought,club-men,1563.1,24,2026,Texas 2 Finger 2026,2026-06-27
 117,Psychedelic,psychedelic,club-men,1560.2,24,2026,Club Terminus 2026,2026-06-27
 118,Colorado Cutthroat U-20 Boys,colorado cutthroat u-20 boys,club-men,1559.7,26,2026,Cutthroat Club Round Robin 2026,2026-05-30
-119,Cache Valley High Ground,cache valley high ground,club-men,1556.3,15,2026,2nd Annual Deseret Invite,2026-07-11
+119,Cache Valley High Ground,cache valley high ground,club-men,1556.4,15,2026,2nd Annual Deseret Invite,2026-07-11
 120,BANG,bang,club-men,1552.5,18,2026,2026 Antlerlock,2026-06-27
 121,DINGWOP,dingwop,club-men,1551.6,16,2026,Cooler Classic 37 (Men & Women),2026-08-08
 122,Magma Bears,magma bears,club-men,1549.6,26,2026,Boston Invite 2026,2026-07-11
@@ -135,11 +135,11 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 134,Beef Depot,beef depot,club-men,1520.3,23,2026,MOB Invite 2026,2026-07-18
 135,NOx,nox,club-men,1518.9,23,2026,Texas 2 Finger 2026,2026-06-27
 136,Cozy Boys,cozy boys,club-men,1516.2,22,2026,Riverside Classic 2026,2026-07-11
-137,ODOT,odot,club-men,1512.6,10,2026,Eugene Summer Solstice 2026,2026-06-27
+137,ODOT,odot,club-men,1512.5,10,2026,Eugene Summer Solstice 2026,2026-06-27
 138,Romulus,romulus,club-men,1510.8,24,2026,HoDown Showdown 2026,2026-08-08
 139,DAP LAB,dap lab,club-men,1504.1,15,2026,Flickel City Classic,2026-07-11
 140,Lil Heroes,lil heroes,club-men,1496.5,26,2026,Riverside Classic 2026,2026-07-11
-141,Oregon Trainwreck,oregon trainwreck,club-men,1496.1,21,2026,Eugene Summer Solstice 2026,2026-06-27
+141,Oregon Trainwreck,oregon trainwreck,club-men,1496.0,21,2026,Eugene Summer Solstice 2026,2026-06-27
 142,Rice Box,rice box,club-men,1495.4,22,2026,Texas 2 Finger 2026,2026-06-27
 143,Zodiac,zodiac,club-men,1487.4,25,2026,Heavyweights 2026,2026-07-11
 144,El Niño,el niño,club-men,1482.1,20,2026,Witching Hour 2026,2026-06-27
@@ -578,7 +578,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 4,Colorado (Mamabird),colorado (mamabird),college,2056.7,30,2026,Presidents' Day Invite 2026,2026-02-14
 5,Middlebury (Pranksters),middlebury (pranksters),college,1984.9,24,2026,Florida Warm Up 2026,2026-01-30
 6,Cal Poly-SLO (SLOCORE),cal poly-slo (slocore),college,1966.5,24,2026,Santa Barbara Invite 2026,2026-01-23
-7,Oregon State (Beavers),oregon state (beavers),college,1937.6,26,2026,Pac Con (men) 2026,2026-01-17
+7,Oregon State (Beavers),oregon state (beavers),college,1937.7,26,2026,Pac Con (men) 2026,2026-01-17
 8,North Carolina (Darkside),north carolina (darkside),college,1937.1,27,2026,2026 D-I College Championships,2026-05-22
 9,Pittsburgh (En Sabah Nur),pittsburgh (en sabah nur),college,1931.8,27,2026,Florida Warm Up 2026,2026-01-30
 10,Davenport (Panthers),davenport (panthers),college,1872.1,19,2026,Queen City Tune Up 2026,2026-02-14
@@ -626,7 +626,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 52,Franciscan (Fatal),franciscan (fatal),college,1642.7,21,2026,Needle in a Ho-Stack 2026,2026-03-28
 53,Macalester (Flat Earth),macalester (flat earth),college,1639.8,23,2026,UMN B Duck Dome,2026-02-07
 54,Colorado State (Hibida),colorado state (hibida),college,1630.4,25,2026,Stanford Invite 2026,2026-03-14
-55,Cincinnati (Bearcats),cincinnati (bearcats),college,1628.3,19,2026,Easterns Qualifier 2026,2026-02-21
+55,Cincinnati (Bearcats),cincinnati (bearcats),college,1628.4,19,2026,Easterns Qualifier 2026,2026-02-21
 56,California-San Diego (Air Squids),california-san diego (air squids),college,1625.9,25,2026,Southwest D-I College Men's Regionals,2026-04-25
 57,Tulane (Tucks),tulane (tucks),college,1624.2,32,2026,Gulf Coast D-I Men's Conferences,2026-04-11
 58,Temple (Alert),temple (alert),college,1612.1,29,2026,East Coast Invite 2026,2026-03-28
@@ -686,7 +686,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 112,Rochester (Piggies),rochester (piggies),college,1491.5,23,2026,East Coast Invite 2026,2026-03-28
 113,East Carolina (Irates),east carolina (irates),college,1491.3,17,2026,Carolina Kickoff 2026,2026-01-30
 114,Rhode Island (RIUT),rhode island (riut),college,1490.4,19,2026,The Grand Northeast Kickoff,2026-03-07
-115,Oregon -B (Bucks),oregon -b (bucks),college,1487.6,20,2026,Cascadia D-I Men's Conferences,2026-04-11
+115,Oregon -B (Bucks),oregon -b (bucks),college,1487.7,20,2026,Cascadia D-I Men's Conferences,2026-04-11
 116,Missouri (Missouri),missouri (missouri),college,1483.3,24,2026,Centex 2026,2026-03-13
 117,Portland (Uprise),portland (uprise),college,1483.0,15,2026,Pac Con (men) 2026,2026-01-17
 118,Iowa (IHUC),iowa (ihuc),college,1480.3,21,2026,Midwest Throwdown 2026,2026-02-28
@@ -775,7 +775,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 201,Christopher Newport (Skymaul),christopher newport (skymaul),college,1322.3,22,2026,Easterns 2026,2026-03-28
 202,Arkansas (Ludicrous Speed ),arkansas (ludicrous speed ),college,1322.3,16,2026,Centex 2026,2026-03-13
 203,Grinnell (Grinnellephants),grinnell (grinnellephants),college,1321.5,19,2026,Snow Melt 2026,2026-02-28
-204,Gonzaga (GURU ),gonzaga (guru ),college,1316.9,30,2026,Swing By Spring,2026-03-28
+204,Gonzaga (GURU ),gonzaga (guru ),college,1317.0,30,2026,Swing By Spring,2026-03-28
 205,Colorado-C (Rooster Tussle),colorado-c (rooster tussle),college,1315.7,30,2026,Cutthroat Spring Round Robin,2026-03-22
 206,Villanova (Main Line Ultimate),villanova (main line ultimate),college,1313.7,22,2026,Northeast Classic 2026,2026-03-28
 207,Washington-C (UW C),washington-c (uw c),college,1311.2,17,2026,Cascadia D-I Men's Conferences,2026-04-11
@@ -1020,7 +1020,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 52,Bryant (Bryant Craze),bryant (bryant craze),college-d3,1330.6,13,2026,South New England D-III Men's Conferences,2026-04-11
 53,Harding (Harding Apocalypse),harding (harding apocalypse),college-d3,1329.2,19,2026,Ozarks D-III Men's Conferences,2026-04-11
 54,Christopher Newport (Skymaul),christopher newport (skymaul),college-d3,1318.8,23,2026,Atlantic Coast D-III Men's Conferences,2026-04-11
-55,Gonzaga (GURU ),gonzaga (guru ),college-d3,1316.9,30,2026,Northwest D-III Men's Conferences,2026-04-11
+55,Gonzaga (GURU ),gonzaga (guru ),college-d3,1317.0,30,2026,Northwest D-III Men's Conferences,2026-04-11
 56,Occidental (Detox),occidental (detox),college-d3,1310.4,25,2026,Southwest D-III Men's Conferences,2026-04-11
 57,Scranton (Electric City Scranton Ultimate),scranton (electric city scranton ultimate),college-d3,1309.8,18,2026,East Penn D-III Men's Conferences,2026-04-11
 58,Stevens Tech (Stevens Tech),stevens tech (stevens tech),college-d3,1299.9,22,2026,Metro NY D-III Men's Conferences,2026-04-11
@@ -1726,14 +1726,14 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 27,Catchup,euf:euf-women:catchup,euf-women,1512.0,31,2026,EUCS Ranking 2026 season roster,2026-08-07
 28,SYC,euf:euf-women:syc,euf-women,1489.2,27,2026,EUCS Ranking 2026 season roster,2026-08-07
 29,LMU,euf:euf-women:lmu,euf-women,1483.8,21,2026,EUCS Ranking 2026 season roster,2026-08-07
-1,South Eugene (AXE),south eugene (axe) (HS),hs-boys,1726.9,13,2026,2026 Oregon High School State Championships,2026-05-30
+1,South Eugene (AXE),south eugene (axe) (HS),hs-boys,1727.0,13,2026,2026 Oregon High School State Championships,2026-05-30
 2,Albany High School (Albany Cougars),albany high school (albany cougars) (HS),hs-boys,1660.8,18,2026,2026 California High School State Championships,2026-05-16
 3,Green Canyon-A (Green Canyon A),green canyon-a (green canyon a) (HS),hs-boys,1614.3,20,2026,2026 Utah Middle & High School State Championships,2026-05-08
 4,Middleton (Middleton Ultimate),middleton (middleton ultimate) (HS),hs-boys,1549.3,19,2026,2026 Wisconsin High School State Championships,2026-05-23
 5,Lakeside-Varsity (Vikings),lakeside-varsity (vikings) (HS),hs-boys,1534.7,16,2026,2026 Georgia High School State Championships,2026-04-25
 6,Santa Cruz (Santa Cruz Ultimate),santa cruz (santa cruz ultimate) (HS),hs-boys,1495.5,19,2026,2026 California High School State Championships,2026-05-16
 7,Berkeley (HC-R) (Berkeley High Coup - Red),berkeley (hc-r) (berkeley high coup - red) (HS),hs-boys,1483.2,23,2026,2026 California High School State Championships,2026-05-16
-8,Grant (Grant Ultimate),grant (grant ultimate) (HS),hs-boys,1466.4,19,2026,2026 Oregon High School State Championships,2026-05-30
+8,Grant (Grant Ultimate),grant (grant ultimate) (HS),hs-boys,1466.5,19,2026,2026 Oregon High School State Championships,2026-05-30
 9,Santa Barbara (Flow),santa barbara (flow) (HS),hs-boys,1461.4,17,2026,2026 California High School State Championships,2026-05-16
 10,El Cerrito (EC HUC),el cerrito (ec huc) (HS),hs-boys,1448.5,25,2026,2026 California High School State Championships,2026-05-16
 11,Liberal Arts and Science Academy  (Vertikills A ),liberal arts and science academy (vertikills a ) (HS),hs-boys,1445.7,21,2026,2026 Texas High School Boys State Championships,2026-05-16
@@ -1772,16 +1772,16 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 44,East (Denver East Varsity),east (denver east varsity) (HS),hs-boys,1241.0,18,2026,2026 Colorado High School State Championships,2026-05-09
 45,Montclair Varsity (Montclair Geese Varsity),montclair varsity (montclair geese varsity) (HS),hs-boys,1238.1,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 46,Newton (NSHS Ultimate),newton (nshs ultimate) (HS),hs-boys,1234.6,16,2026,2026 Massachusetts High School State Championships,2026-06-06
-47,Monarch (Monarch Boys A),monarch (monarch boys a) (HS),hs-boys,1232.7,14,2026,2026 Colorado High School State Championships,2026-05-09
+47,Monarch (Monarch Boys A),monarch (monarch boys a) (HS),hs-boys,1232.6,14,2026,2026 Colorado High School State Championships,2026-05-09
 48,Independence (FLIGHT),independence (flight) (HS),hs-boys,1227.5,15,2026,Indy Invite High School 2026,2026-04-10
 49,Madison West (Madison West Ultimate),madison west (madison west ultimate) (HS),hs-boys,1226.5,21,2026,Indy Invite High School 2026,2026-04-10
 50,Falmouth - Waynflete (Falmouth Boys Varsity),falmouth - waynflete (falmouth boys varsity) (HS),hs-boys,1221.9,19,2026,2026 Maine High School Boys State Championships,2026-05-30
 51,Fresh Coast Ultimate,fresh coast ultimate (HS),hs-boys,1221.9,17,2026,Neuqua Knockout 2026,2026-05-09
 52,De Smet Jesuit-JV (DUC (De Smet Jesuit) JV),de smet jesuit-jv (duc (de smet jesuit) jv) (HS),hs-boys,1220.1,10,2026,2026 Missouri High School State Championships,2026-05-02
 53,Lyons Township (LT Ultimate),lyons township (lt ultimate) (HS),hs-boys,1217.3,12,2026,2026 Illinois High School State Championships,2026-05-29
-54,South Eugene-JV (AXE JV),south eugene-jv (axe jv) (HS),hs-boys,1216.3,13,2026,2026 Oregon High School State Championships,2026-05-30
+54,South Eugene-JV (AXE JV),south eugene-jv (axe jv) (HS),hs-boys,1216.4,13,2026,2026 Oregon High School State Championships,2026-05-30
 55,Verona Area (Verona Area Ultimate),verona area (verona area ultimate) (HS),hs-boys,1208.9,28,2026,2026 Wisconsin High School State Championships,2026-05-23
-56,Portland Waldorf (Waldorf Wolfpack),portland waldorf (waldorf wolfpack) (HS),hs-boys,1207.2,16,2026,2026 Oregon High School State Championships,2026-05-30
+56,Portland Waldorf (Waldorf Wolfpack),portland waldorf (waldorf wolfpack) (HS),hs-boys,1207.3,16,2026,2026 Oregon High School State Championships,2026-05-30
 57,Ridgeline (Ridgeline),ridgeline (ridgeline) (HS),hs-boys,1205.7,18,2026,2026 Utah Middle & High School State Championships,2026-05-08
 58,Arapahoe High School  (Arapahoe Warriors),arapahoe high school (arapahoe warriors) (HS),hs-boys,1203.3,17,2026,2026 Colorado High School State Championships,2026-05-09
 59,Round Table-Senior,round table-senior (HS),hs-boys,1201.4,19,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
@@ -1806,7 +1806,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 78,Bronx Science-A (Lone Wolves),bronx science-a (lone wolves) (HS),hs-boys,1140.7,21,2026,2026 New York High School Boys State Championships,2026-05-23
 79,Greely (Cumberland Ultimate),greely (cumberland ultimate) (HS),hs-boys,1138.6,14,2026,2026 Maine High School Boys State Championships,2026-05-30
 80,De Smet Jesuit (DUC (De Smet Jesuit) Varsity),de smet jesuit (duc (de smet jesuit) varsity) (HS),hs-boys,1137.1,11,2026,2026 Missouri High School State Championships,2026-05-02
-81,Bethesda-Chevy Chase (B-CC Barons),bethesda-chevy chase (b-cc barons) (HS),hs-boys,1131.7,21,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+81,Bethesda-Chevy Chase (B-CC Barons),bethesda-chevy chase (b-cc barons) (HS),hs-boys,1131.6,21,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
 82,School Without Walls Y (Flightless Bird Squad),school without walls y (flightless bird squad) (HS),hs-boys,1126.0,22,2026,2026 Virginia High School State Championships,2026-05-16
 83,Pueblo  (EC Burns),pueblo (ec burns) (HS),hs-boys,1124.1,23,2026,2026 Colorado High School State Championships,2026-05-09
 84,Mountain Crest (Mountain Crest Boys ),mountain crest (mountain crest boys ) (HS),hs-boys,1122.8,7,2026,2026 Utah Middle & High School State Championships,2026-05-08
@@ -1818,7 +1818,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 90,West (Krakens.),west (krakens.) (HS),hs-boys,1112.1,20,2026,2026 Utah Middle & High School State Championships,2026-05-08
 91,Walt Whitman (Poets),walt whitman (poets) (HS),hs-boys,1109.7,19,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
 92,Regis (Regis A),regis (regis a) (HS),hs-boys,1108.3,18,2026,2026 New York High School Boys State Championships,2026-05-23
-93,Northfield-JV (Northfield HS JV),northfield-jv (northfield hs jv) (HS),hs-boys,1106.1,12,2026,2026 Colorado High School State Championships,2026-05-09
+93,Northfield-JV (Northfield HS JV),northfield-jv (northfield hs jv) (HS),hs-boys,1106.0,12,2026,2026 Colorado High School State Championships,2026-05-09
 94,Lake Travis High School (Lake Travis),lake travis high school (lake travis) (HS),hs-boys,1102.4,12,2026,2026 Texas High School Boys State Championships,2026-05-16
 95,Forsyth Central (Eclipse Ultimate),forsyth central (eclipse ultimate) (HS),hs-boys,1098.2,17,2026,ATL High School Terminus,2026-02-28
 96,Druid Hills-JV (Druid Hills JV),druid hills-jv (druid hills jv) (HS),hs-boys,1093.0,18,2026,AFDC Round Robin #1,2026-03-28
@@ -1832,7 +1832,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 104,Maynard Jackson-Varsity (Maynard Jackson Varsity),maynard jackson-varsity (maynard jackson varsity) (HS),hs-boys,1069.1,24,2026,ATL High School Terminus,2026-02-28
 105,Dwight-Englewood (Bulldogs),dwight-englewood (bulldogs) (HS),hs-boys,1065.3,17,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 106,Stewarts Creek (SCUF),stewarts creek (scuf) (HS),hs-boys,1064.6,19,2026,2026 Tennessee High School State Championships,2026-05-09
-107,Oakland Technical (Disc-O-Tech),oakland technical (disc-o-tech) (HS),hs-boys,1062.3,22,2026,2026 California High School State Championships,2026-05-16
+107,Oakland Technical (Disc-O-Tech),oakland technical (disc-o-tech) (HS),hs-boys,1062.2,22,2026,2026 California High School State Championships,2026-05-16
 108,Edward R. Murrow-A (Murrow Magic),edward r. murrow-a (murrow magic) (HS),hs-boys,1057.2,14,2026,2026 New York High School Boys State Championships,2026-05-23
 109,Lindbergh (Lindbergh Flyers),lindbergh (lindbergh flyers) (HS),hs-boys,1055.5,22,2026,2026 Missouri High School State Championships,2026-05-02
 110,Amherst Regional (Hurricanes),amherst regional (hurricanes) (HS),hs-boys,1055.4,20,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
@@ -2189,13 +2189,13 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 12,DEVYL U-20 Mixed,devyl u-20 mixed (YCC-U20 mixed),ycc-u20-mixed,1070.6,24,2026,Edgely YCC Warm Up,2026-07-11
 13,LA Sky,la sky (YCC-U20 mixed),ycc-u20-mixed,1001.9,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 14,NWA White Tails,nwa white tails (YCC-U20 mixed),ycc-u20-mixed,863.1,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-1,Oregon Eclipse,oregon eclipse (YCC-U17),ycc-u17-boys,1583.8,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Oregon Eclipse,oregon eclipse (YCC-U17),ycc-u17-boys,1583.7,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 2,SoCal Air Show,socal air show (YCC-U17),ycc-u17-boys,1507.3,16,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-3,OAK Sparks,oak sparks (YCC-U17),ycc-u17-boys,1488.1,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+3,OAK Sparks,oak sparks (YCC-U17),ycc-u17-boys,1488.2,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 4,Philadelphia PADAwans,philadelphia padawans (YCC-U17),ycc-u17-boys,1402.4,22,2026,Edgely YCC Warm Up,2026-07-11
 5,Minnesota Superior U17B,minnesota superior u17b (YCC-U17),ycc-u17-boys,1366.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 6,Seven Hills U17 Bx,seven hills u17 bx (YCC-U17),ycc-u17-boys,1343.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-7,Capitol Heights,capitol heights (YCC-U17),ycc-u17-boys,1264.3,20,2026,James River Jam 2026,2026-06-13
+7,Capitol Heights,capitol heights (YCC-U17),ycc-u17-boys,1264.2,20,2026,James River Jam 2026,2026-06-13
 8,Aftershock,aftershock (YCC-U17),ycc-u17-boys,1200.3,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 9,Richmond Spinners (Richmond Spinners),richmond spinners (richmond spinners) (YCC-U17),ycc-u17-boys,1198.6,15,2026,James River Jam 2026,2026-06-13
 10,NC Hammer,nc hammer (YCC-U17),ycc-u17-boys,1191.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
