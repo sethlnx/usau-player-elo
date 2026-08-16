@@ -3,15 +3,27 @@
     "all": {
       "blocks": {
         "mean": 0.05851045615751498,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 3137,
-        "spread": 0.2737612684384589
+        "spread": 0.04991923022591569
+      },
+      "catch_security": {
+        "mean": 0.9892827339186313,
+        "prior_exposure": 25.0,
+        "sample_size": 3246,
+        "spread": 0.013348130084475772
       },
       "completion": {
         "mean": 0.9321866193139152,
-        "prior_exposure": 13.816751221640962,
+        "prior_exposure": 25.0,
         "sample_size": 3236,
-        "spread": 0.037729487042365735
+        "spread": 0.030698824984916964
+      },
+      "creation": {
+        "mean": 0.1401647333904629,
+        "prior_exposure": 36.090342202753604,
+        "sample_size": 3236,
+        "spread": 0.03674564301622304
       },
       "d_point_success": {
         "mean": 0.28265623089152503,
@@ -25,11 +37,17 @@
         "sample_size": 3286,
         "spread": 0.045754032844081916
       },
-      "hucks": {
+      "huck_accuracy": {
         "mean": 0.6073787444125692,
         "prior_exposure": 48.06113000293455,
         "sample_size": 2164,
         "spread": 0.022704313383773694
+      },
+      "huck_rate": {
+        "mean": 0.04413994976132211,
+        "prior_exposure": 51.03696908614478,
+        "sample_size": 3236,
+        "spread": 0.020833096052499916
       },
       "o_conversion": {
         "mean": 0.5054948887875291,
@@ -39,9 +57,9 @@
       },
       "o_point_success": {
         "mean": 0.639898731712067,
-        "prior_exposure": 10.840762794281545,
+        "prior_exposure": 25.0,
         "sample_size": 2760,
-        "spread": 0.08893329666596042
+        "spread": 0.06748213138519485
       },
       "offensive_actions": {
         "mean": 0.17657996193450784,
@@ -49,37 +67,49 @@
         "sample_size": 3287,
         "spread": 0.07001348677575053
       },
-      "possession": {
-        "mean": 0.9411683290191678,
-        "prior_exposure": 15.163736837434925,
-        "sample_size": 3236,
-        "spread": 0.033417678351372736
-      },
       "receiving_yards": {
         "mean": 5.224070457363938,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 3196,
-        "spread": 3.155545556453749
+        "spread": 2.526780461374631
+      },
+      "throw_security": {
+        "mean": 0.9411683290191678,
+        "prior_exposure": 25.0,
+        "sample_size": 3236,
+        "spread": 0.028029893964982264
       },
       "throwing_yards": {
         "mean": 6.237286331734948,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 3112,
-        "spread": 2.5314083965734238
+        "spread": 1.44625160482891
       }
     },
     "cutter": {
       "blocks": {
         "mean": 0.05934255420625894,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 770,
-        "spread": 0.26261316661656253
+        "spread": 0.04952819369683468
+      },
+      "catch_security": {
+        "mean": 0.985520269926584,
+        "prior_exposure": 25.0,
+        "sample_size": 781,
+        "spread": 0.015423470869498983
       },
       "completion": {
         "mean": 0.9305953114243269,
-        "prior_exposure": 9.286151815780881,
+        "prior_exposure": 25.0,
         "sample_size": 778,
-        "spread": 0.04638625176017608
+        "spread": 0.031993595494760094
+      },
+      "creation": {
+        "mean": 0.15813978767346643,
+        "prior_exposure": 96.23522093435209,
+        "sample_size": 778,
+        "spread": 0.021468836906857167
       },
       "d_point_success": {
         "mean": 0.2815056682687016,
@@ -93,11 +123,17 @@
         "sample_size": 792,
         "spread": 0.043524315350410146
       },
-      "hucks": {
+      "huck_accuracy": {
         "mean": 0.599621391386654,
-        "prior_exposure": 16.429048692649346,
+        "prior_exposure": 25.0,
         "sample_size": 453,
-        "spread": 0.04803394739946555
+        "spread": 0.035237819526839874
+      },
+      "huck_rate": {
+        "mean": 0.038280372477263666,
+        "prior_exposure": 83.16561666229788,
+        "sample_size": 778,
+        "spread": 0.014900823479566328
       },
       "o_conversion": {
         "mean": 0.504170335016913,
@@ -107,9 +143,9 @@
       },
       "o_point_success": {
         "mean": 0.6367043720262142,
-        "prior_exposure": 8.874548344753897,
+        "prior_exposure": 25.0,
         "sample_size": 661,
-        "spread": 0.09547246730847969
+        "spread": 0.06669301541539532
       },
       "offensive_actions": {
         "mean": 0.1639244978298173,
@@ -117,37 +153,49 @@
         "sample_size": 792,
         "spread": 0.06531434410441941
       },
-      "possession": {
-        "mean": 0.9392731620710896,
-        "prior_exposure": 10.04645268848704,
-        "sample_size": 778,
-        "spread": 0.04101754377106645
-      },
       "receiving_yards": {
         "mean": 5.835920581270619,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 782,
-        "spread": 3.3737593511725623
+        "spread": 2.7071474404856266
+      },
+      "throw_security": {
+        "mean": 0.9392731620710896,
+        "prior_exposure": 25.0,
+        "sample_size": 778,
+        "spread": 0.029160187515619815
       },
       "throwing_yards": {
         "mean": 5.369017909571345,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 728,
-        "spread": 2.59365321738338
+        "spread": 1.4278605432168956
       }
     },
     "handler": {
       "blocks": {
         "mean": 0.051543168520255485,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 710,
-        "spread": 0.3057457387092845
+        "spread": 0.0449040429587773
+      },
+      "catch_security": {
+        "mean": 0.9924486918376939,
+        "prior_exposure": 25.0,
+        "sample_size": 767,
+        "spread": 0.010044655831641288
       },
       "completion": {
         "mean": 0.936288307941311,
-        "prior_exposure": 24.234213152714474,
+        "prior_exposure": 25.0,
         "sample_size": 765,
-        "spread": 0.030315021075780803
+        "spread": 0.030034272521073234
+      },
+      "creation": {
+        "mean": 0.12455578621441891,
+        "prior_exposure": 37.70384836255799,
+        "sample_size": 765,
+        "spread": 0.035170800328937976
       },
       "d_point_success": {
         "mean": 0.28775291437759615,
@@ -161,11 +209,17 @@
         "sample_size": 769,
         "spread": 0.04602388089807179
       },
-      "hucks": {
+      "huck_accuracy": {
         "mean": 0.6181854357341823,
         "prior_exposure": 83.88222654519478,
         "sample_size": 592,
         "spread": 0.01606598360762598
+      },
+      "huck_rate": {
+        "mean": 0.04421026705605011,
+        "prior_exposure": 47.354805701140776,
+        "sample_size": 765,
+        "spread": 0.022139904235500395
       },
       "o_conversion": {
         "mean": 0.5101945845328023,
@@ -175,9 +229,9 @@
       },
       "o_point_success": {
         "mean": 0.6469627265045536,
-        "prior_exposure": 16.456474767475548,
+        "prior_exposure": 25.0,
         "sample_size": 673,
-        "spread": 0.07665205454856382
+        "spread": 0.06685856383851672
       },
       "offensive_actions": {
         "mean": 0.18722266991727277,
@@ -185,37 +239,49 @@
         "sample_size": 770,
         "spread": 0.06821127859808523
       },
-      "possession": {
+      "receiving_yards": {
+        "mean": 3.916942715476316,
+        "prior_exposure": 25.0,
+        "sample_size": 733,
+        "spread": 2.0893772684134975
+      },
+      "throw_security": {
         "mean": 0.9454012877801625,
         "prior_exposure": 59.22270845138944,
         "sample_size": 765,
         "spread": 0.020157913261980926
       },
-      "receiving_yards": {
-        "mean": 3.916942715476316,
-        "prior_exposure": 1.0,
-        "sample_size": 733,
-        "spread": 2.5937163917436004
-      },
       "throwing_yards": {
         "mean": 6.878985264862771,
-        "prior_exposure": 1.1075891316763862,
+        "prior_exposure": 25.0,
         "sample_size": 752,
-        "spread": 2.3062804972829234
+        "spread": 1.4010281416909056
       }
     },
     "hybrid": {
       "blocks": {
         "mean": 0.06181409493587201,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 955,
-        "spread": 0.27921021296288107
+        "spread": 0.05380839155566273
+      },
+      "catch_security": {
+        "mean": 0.9888280352718954,
+        "prior_exposure": 25.0,
+        "sample_size": 990,
+        "spread": 0.012707607347230669
       },
       "completion": {
         "mean": 0.9308181377484431,
-        "prior_exposure": 17.520375724176354,
+        "prior_exposure": 25.0,
         "sample_size": 987,
-        "spread": 0.0347109752772716
+        "spread": 0.030573257682340194
+      },
+      "creation": {
+        "mean": 0.14713614498266026,
+        "prior_exposure": 25.202069069873158,
+        "sample_size": 987,
+        "spread": 0.04114256354498413
       },
       "d_point_success": {
         "mean": 0.2809235753008066,
@@ -229,11 +295,17 @@
         "sample_size": 998,
         "spread": 0.04828356176964351
       },
-      "hucks": {
+      "huck_accuracy": {
         "mean": 0.6045751633986928,
         "prior_exposure": 92.25116873862885,
         "sample_size": 703,
         "spread": 0.01285528368329403
+      },
+      "huck_rate": {
+        "mean": 0.04564268933885222,
+        "prior_exposure": 25.0,
+        "sample_size": 987,
+        "spread": 0.026913534369499177
       },
       "o_conversion": {
         "mean": 0.5039383053752101,
@@ -243,42 +315,52 @@
       },
       "o_point_success": {
         "mean": 0.6382131927182861,
-        "prior_exposure": 11.222812563389919,
+        "prior_exposure": 25.0,
         "sample_size": 855,
-        "spread": 0.08696979162122256
+        "spread": 0.06775826244958956
       },
       "offensive_actions": {
         "mean": 0.1844692282268664,
-        "prior_exposure": 22.85413770005656,
+        "prior_exposure": 25.0,
         "sample_size": 998,
-        "spread": 0.07735867991643068
-      },
-      "possession": {
-        "mean": 0.9398422642353731,
-        "prior_exposure": 18.547203293309895,
-        "sample_size": 987,
-        "spread": 0.031089472029259192
+        "spread": 0.07615852388739909
       },
       "receiving_yards": {
         "mean": 5.850550607099465,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 982,
-        "spread": 3.2687413399754575
+        "spread": 2.6258885665391016
+      },
+      "throw_security": {
+        "mean": 0.9398422642353731,
+        "prior_exposure": 25.0,
+        "sample_size": 987,
+        "spread": 0.02790694335685978
       },
       "throwing_yards": {
         "mean": 5.983042305574481,
-        "prior_exposure": 1.0,
+        "prior_exposure": 25.0,
         "sample_size": 968,
-        "spread": 2.345139313405718
+        "spread": 1.3276941244775564
       }
     }
   },
   "fitted_at": "2026-08-14",
-  "model_version": "ufa-eb-v1",
+  "history": {
+    "decay_per_season": 0.5,
+    "maximum_history_prior_multiplier": 4.0,
+    "minimum_prior_exposure": 25.0
+  },
+  "model_version": "ufa-eb-v4",
   "ovr": {
     "center": 1904.2,
     "sample_size": 1401,
     "scale": 226.39302000000006
+  },
+  "presentation": {
+    "attribute_center": 70.0,
+    "ovr_center": 60.0,
+    "points_per_z": 10.0
   },
   "reference_seasons": [
     2022,

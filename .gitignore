@@ -44,6 +44,10 @@ data/*
 !data/player_metric_reference.json
 !data/player_metrics.csv
 
+# Published source-aware USAU box scores and frozen E± calibration
+!data/box_score_reference.json
+!data/player_box_scores.csv
+
 # Published outputs of `python -m identity.resolve`
 !data/ambiguities.csv
 !data/cross_division_links.csv

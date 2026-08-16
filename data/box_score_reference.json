@@ -1,0 +1,31 @@
+{
+  "model_version": "source-aware-edge-v2",
+  "fitted_at": "2026-08-15",
+  "target": "reconstructed-yardage-aware-edge",
+  "training_source": "ufa-season",
+  "training_seasons": [
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "coefficients": {
+    "goals": 0.5815,
+    "assists": 0.6926,
+    "blocks": 0.3715,
+    "turnovers": -0.1302
+  },
+  "observed_ufa": {
+    "yard_coefficient": 0.00663,
+    "score_action_coefficient": 0.223,
+    "rating_scale": 0.2,
+    "possession_value": "game_scoring_efficiency"
+  },
+  "validation": {
+    "leave_one_season_out_mean_r2": 0.942,
+    "leave_one_season_out_mean_correlation": 0.971,
+    "ordinary_plus_minus_mean_r2": 0.805,
+    "ordinary_plus_minus_mean_correlation": 0.906
+  },
+  "notes": "UFA follows the supplied EDGE formula with observed per-game yards and scoring environment, then applies a 0.2 rating scale to normalize five game-level updates to one USAU event-level transfer. Other complete GABT sources use an independently fitted proxy that is not claimed as Ultiworld's published coefficient set."
+}

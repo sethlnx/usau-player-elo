@@ -12,6 +12,8 @@ when an event is opened. Inputs are the published artifacts only - this script
 never replays the model, so the page can never disagree with the CSVs:
 
     data/player_elo.csv          player table (>= MIN_GAMES shown)
+    data/player_metrics.csv      optional UFA-linked OVR/THR/POS/OFF/DEF scorecard
+    data/player_box_scores.csv   optional USAU event-level G/A/B/T and E± proxy
     data/team_elo.csv            clubs, most recent COMPLETED event roster
     data/team_elo_best.csv       clubs, best full-strength roster of 2026
     data/usau.db                 USAU schedules for the Tournaments browser
@@ -34,6 +36,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import DB_PATH
+from analysis.box_scores import STAT_FIELDS as BOX_STAT_FIELDS
 from analysis.field_strength import TIER_NAMES as FIELD_TIER_NAMES
 from analysis.field_strength import classify as classify_strength
 from analysis.history_split import BUCKETS as HIST_BUCKETS
@@ -77,6 +80,8 @@ RATING_NAME = os.environ.get("RATING_NAME", "Elo")
 # need the whole player corpus, and both are precomputed there now.
 HIST_OUT = OUT.parent / "history.js"
 HIST_GLOBAL = "__USAU_HISTORY__"
+BOX_OUT = OUT.parent / "box_scores.js"
+BOX_GLOBAL = "__USAU_BOX_SCORES__"
 
 # Bucketed by SEASON, not by event. Per-event files would be 3,810 of them at
 # ~170 bytes gzipped each, where request overhead costs more than the body and
@@ -188,6 +193,112 @@ def load_csv(name):
         return list(csv.DictReader(f))
 
 
+def load_player_metric_payload(path):
+    """Return the optional scorecard in the compact browser payload contract.
+
+    Player arrays are [OVR, THR, POS, OFF, DEF, G, A, B, T, season,
+    THR reliability, POS reliability, OFF reliability, DEF reliability,
+    stats-through date, history seasons, recency-weighted prior throws].
+    Missing attribute scores remain null; they are never rendered as zero.
+    """
+    if not path.exists():
+        return {}, {}
+    with path.open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    if not rows:
+        return {}, {}
+
+    def integer(row, field):
+        value = row.get(field)
+        return int(float(value)) if value not in (None, "") else None
+
+    def reliability(row, field):
+        value = row.get(field)
+        return round(100 * float(value)) if value not in (None, "") else None
+
+    payload = {
+        row["player_id"]: [
+            integer(row, "ovr"), integer(row, "thr"), integer(row, "pos"),
+            integer(row, "off"), integer(row, "def"), integer(row, "goals"),
+            integer(row, "assists"), integer(row, "blocks"),
+            integer(row, "turnovers"), integer(row, "season"),
+            reliability(row, "thr_reliability"),
+            reliability(row, "pos_reliability"),
+            reliability(row, "off_reliability"),
+            reliability(row, "def_reliability"), row.get("stats_through", ""),
+            integer(row, "history_seasons"),
+            integer(row, "weighted_prior_throw_attempts"),
+        ]
+        for row in rows if row.get("player_id")
+    }
+    return payload, {
+        "modelVersion": rows[0].get("model_version", ""),
+        "season": max(integer(row, "season") or 0 for row in rows),
+        "statsThrough": max(row.get("stats_through", "") for row in rows),
+    }
+
+
+def load_player_box_score_payload(path):
+    """Return compact complete-GABT player-season-division rows and provenance.
+
+    Each array is [season, division code (-1 means all), G, A, B, T, +/-,
+    E±, E±/team game, team games, events, stats-through date].
+    """
+    if not path.exists():
+        return {}, {}
+    with path.open(newline="") as handle:
+        rows = [
+            row for row in csv.DictReader(handle)
+            if row.get("player_id") and row.get("coverage_flags") == "gabt-complete"
+        ]
+    if not rows:
+        return {}, {}
+
+    grouped = {}
+    stats_through = {}
+    for row in rows:
+        division = DIVCODE.get(row.get("division"), 0)
+        for division_code in (-1, division):
+            coverage_key = f"{int(row['season'])}|{division_code}"
+            stats_through[coverage_key] = max(
+                stats_through.get(coverage_key, ""), row.get("event_end_date", ""),
+            )
+            key = (row["player_id"], int(row["season"]), division_code)
+            aggregate = grouped.setdefault(key, {
+                **{field: 0 for field in BOX_STAT_FIELDS},
+                "plus_minus": 0, "edge_proxy": 0.0, "team_games": 0,
+                "events": 0, "stats_through": "",
+            })
+            for field in BOX_STAT_FIELDS:
+                aggregate[field] += int(float(row[field]))
+            aggregate["plus_minus"] += int(float(row["plus_minus"]))
+            aggregate["edge_proxy"] += float(row["edge_proxy"])
+            aggregate["team_games"] += int(float(row.get("team_games") or 0))
+            aggregate["events"] += 1
+            aggregate["stats_through"] = max(
+                aggregate["stats_through"], row.get("event_end_date", ""),
+            )
+
+    payload = collections.defaultdict(list)
+    for (player_id, season, division), row in sorted(grouped.items()):
+        per_game = (
+            round(row["edge_proxy"] / row["team_games"], 2)
+            if row["team_games"] else None
+        )
+        payload[player_id].append([
+            season, division, row["goals"], row["assists"], row["blocks"],
+            row["turnovers"], row["plus_minus"], round(row["edge_proxy"], 2),
+            per_game, row["team_games"], row["events"], row["stats_through"],
+        ])
+    latest = max(int(row["season"]) for row in rows)
+    return dict(payload), {
+        "modelVersion": rows[0].get("model_version", ""),
+        "latestSeason": latest,
+        "statsThrough": max(row.get("event_end_date", "") for row in rows),
+        "statsThroughBySeasonDivision": stats_through,
+    }
+
+
 def bucket_urls(directory, buckets, version):
     """Bucket key -> cache-busted URL, relative to the page."""
     return {
@@ -234,6 +345,19 @@ def build():
     all_players = load_csv("player_elo.csv")
     total_rated = len(all_players)
     players = [r for r in all_players if int(r["games"]) >= MIN_GAMES]
+    player_stats, player_stats_meta = load_player_metric_payload(
+        DATA_DIR / "player_metrics.csv"
+    )
+    box_score_path = DATA_DIR / "player_box_scores.csv"
+    player_box_scores, player_box_score_meta = load_player_box_score_payload(
+        box_score_path
+    )
+    shown_player_ids = {row["player_id"] for row in players}
+    player_box_scores = {
+        player_id: rows for player_id, rows in player_box_scores.items()
+        if player_id in shown_player_ids
+    }
+    box_score_version = content_version((box_score_path,))
     ufa = None
     clubs = {
         "completed": load_csv("team_elo.csv"),
@@ -433,6 +557,12 @@ def build():
                      ROLE_CODE.get(r.get("role", "unknown"), 0),
                      round(100 * float(r.get("role_confidence", 0)))]
                     for r in players],
+        "playerStats": player_stats,
+        "playerStatsMeta": player_stats_meta,
+        "playerBoxScoreMeta": player_box_score_meta,
+        "boxScoreJs": (
+            f"{BOX_OUT.name}?v={box_score_version}" if player_box_scores else None
+        ),
         # `genders` used to ride here for Trends, which walked every
         # trajectory to find its own top 25. Trends is precomputed now, and
         # the table's own filter reads the code off each player row, so the
@@ -463,6 +593,13 @@ def build():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     HIST_OUT.write_text(
         f"window.{HIST_GLOBAL}=" + json.dumps(hcore, separators=(",", ":")) + ";\n")
+    if player_box_scores:
+        BOX_OUT.write_text(
+            f"window.{BOX_GLOBAL}="
+            + json.dumps(player_box_scores, separators=(",", ":")) + ";\n"
+        )
+    elif BOX_OUT.exists():
+        BOX_OUT.unlink()
     write_buckets(TDET_DIR, TDET_GLOBAL, tbuckets)
     write_buckets(PLAY_DIR, PLAY_GLOBAL, hplay)
     write_buckets(ROST_DIR, ROST_GLOBAL, hrost)
@@ -482,8 +619,10 @@ def build():
                    .replace("Elo", RATING_NAME))
     (OUT.parent / ".nojekyll").write_text("")
     kb, hkb = OUT.stat().st_size / 1024, HIST_OUT.stat().st_size / 1024
+    bkb = BOX_OUT.stat().st_size / 1024 if BOX_OUT.exists() else 0
     print(f"wrote {OUT} ({kb:,.0f} KB) + {HIST_OUT.name} ({hkb:,.0f} KB) + .nojekyll")
     print(f"  first paint needs {kb:,.0f} KB, then {hkb:,.0f} KB of core; "
+          f"{BOX_OUT.name} ({bkb:,.0f} KB) loads only when box scores open; "
           f"the rest is faulted in per panel:")
     for d in (TDET_DIR, PLAY_DIR, ROST_DIR, GAME_DIR):
         files = sorted(d.glob("*.js"))
@@ -622,8 +761,13 @@ button.act:disabled:hover{border-color:var(--line);color:var(--ink-2)}
 /* Pinned players: a shortlist built from the players table, shown as a
    sticky sidebar and carried in the URL so the exact list can be shared. */
 .pwrap{display:flex;gap:16px;align-items:flex-start}
-.ptblwrap{flex:1;min-width:0}
+.ptblwrap{flex:1;min-width:0;overflow-x:auto}
 th.pin,td.pin{width:24px;padding:7px 2px;text-align:center}
+#playerTable.stats{min-width:880px}
+.ovr-pill{display:inline-block;min-width:27px;padding:2px 6px;text-align:center;
+  border-radius:6px;background:color-mix(in srgb,var(--accent) 18%,var(--chip));
+  color:var(--accent);font-weight:700}
+td.stat-missing{color:var(--ink-3)}
 button.pinbtn{background:none;border:0;cursor:pointer;font-size:14px;opacity:.32;
   padding:0;line-height:1}
 button.pinbtn:hover{opacity:.75}
@@ -1042,13 +1186,19 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="1">Cutters</option>
         <option value="0">Unclassified</option>
       </select>
+      <label class="chk" id="pstatsControl" hidden>
+        <input type="checkbox" id="pstats"> UFA attributes
+      </label>
+      <label class="chk" id="pboxControl" hidden>
+        <input type="checkbox" id="pbox"> Box scores
+      </label>
       <span class="count" id="pcount"></span>
       <button class="act" id="pinToggle" title="Show or hide your pinned players list">
         &#128204; Pinned <span id="pinbadge">0</span></button>
     </div>
     <div class="pwrap">
     <div class="ptblwrap">
-    <table><thead><tr>
+    <table id="playerTable"><thead><tr id="phead">
       <th class="pin"></th>
       <th class="n">#</th><th>Player</th><th class="n">Elo</th><th>90% band</th>
       <th>Role</th><th class="n">G</th><th>Last club</th><th class="n">Yr</th>
@@ -1650,10 +1800,84 @@ function playerRole(p, season) {
   }
   return [0, 0, 'none'];
 }
+const PLAYER_STATS = D.playerStats || {};
+const PLAYER_STATS_META = D.playerStatsMeta || {};
+const HAS_PLAYER_STATS = Object.keys(PLAYER_STATS).length > 0;
+$('#pstatsControl').hidden = !HAS_PLAYER_STATS;
+let PLAYER_BOX = null;
+const PLAYER_BOX_META = D.playerBoxScoreMeta || {};
+const HAS_PLAYER_BOX = !!D.boxScoreJs;
+let BOX_LOADING = false;
+$('#pboxControl').hidden = !HAS_PLAYER_BOX;
+function playerBoxScore(pid, season, division) {
+  const rows = (PLAYER_BOX && PLAYER_BOX[String(pid)]) || [];
+  return rows.find(row => row[0] === season && row[1] === division) || null;
+}
+function loadBoxScores(done) {
+  if (PLAYER_BOX) { done(true); return; }
+  if (BOX_LOADING || !D.boxScoreJs) { done(false); return; }
+  BOX_LOADING = true;
+  $('#pbox').disabled = true;
+  const script = document.createElement('script');
+  script.src = D.boxScoreJs;
+  script.async = true;
+  script.onload = () => {
+    PLAYER_BOX = window.__USAU_BOX_SCORES__ || null;
+    delete window.__USAU_BOX_SCORES__;
+    BOX_LOADING = false;
+    $('#pbox').disabled = false;
+    done(!!PLAYER_BOX);
+  };
+  script.onerror = () => {
+    BOX_LOADING = false;
+    $('#pbox').disabled = false;
+    done(false);
+  };
+  document.head.appendChild(script);
+}
+const PLAYER_STAT_DESC = {
+  THR: 'Huck rate and accuracy, throwing yards per attempt, and assists plus hockey assists per attempt.',
+  POS: 'Completion rate, throwaway and stall avoidance, and catch security.',
+};
+function playerStatCell(stats, valueIndex, reliabilityIndex, label) {
+  const value = stats[valueIndex];
+  if (value == null) return `<td class="n stat-missing" title="No supported ${label} estimate">—</td>`;
+  const reliability = stats[reliabilityIndex];
+  const rel = reliability == null ? '' : ` Reliability ${reliability}%.`;
+  const description = PLAYER_STAT_DESC[label] ? ` ${PLAYER_STAT_DESC[label]}` : '';
+  const prior = stats[15]
+    ? ` Prior: ${stats[15]} earlier season${stats[15] === 1 ? '' : 's'}, ${stats[16]} recency-weighted throws.`
+    : ' Prior: role average.';
+  return `<td class="n" title="${label} ${value}.${description}${rel}${prior} UFA stats through ${esc(stats[14])}.">${value}</td>`;
+}
 function drawPlayers() {
   const q = $('#q').value.trim().toLowerCase();
   const year = $('#ryear').value;
   const historical = year !== 'all';
+  const statsBox = $('#pstats');
+  const boxCheck = $('#pbox');
+  statsBox.disabled = historical || !HAS_PLAYER_STATS;
+  boxCheck.disabled = !HAS_PLAYER_BOX || BOX_LOADING;
+  const boxOn = HAS_PLAYER_BOX && !!PLAYER_BOX && boxCheck.checked;
+  const statsOn = !boxOn && !historical && HAS_PLAYER_STATS && statsBox.checked;
+  const div = $('#rdiv').value;
+  const boxSeason = historical ? +year : (PLAYER_BOX_META.latestSeason || 2026);
+  const boxDivision = div === 'all' ? -1 : +div;
+  $('#playerTable').classList.toggle('stats', statsOn || boxOn);
+  $('#phead').innerHTML = boxOn
+    ? `<th class="pin"></th><th class="n">#</th><th>Player</th>` +
+      `<th class="n">G</th><th class="n">A</th><th class="n">B</th>` +
+      `<th class="n">T</th><th class="n">+/-</th><th class="n">E±</th>` +
+      `<th class="n">E±/G</th><th>Role</th><th class="n">Yr</th>`
+    : statsOn
+      ? `<th class="pin"></th><th class="n">#</th><th>Player</th>` +
+        `<th class="n">OVR</th><th class="n">THR</th><th class="n">POS</th>` +
+        `<th class="n">OFF</th><th class="n">DEF</th><th class="n">G</th>` +
+        `<th class="n">A</th><th class="n">B</th><th class="n">T</th>` +
+        `<th>Role</th><th class="n">Yr</th>`
+      : `<th class="pin"></th><th class="n">#</th><th>Player</th>` +
+        `<th class="n">Elo</th><th>90% band</th><th>Role</th>` +
+        `<th class="n">G</th><th>Last club</th><th class="n">Yr</th>`;
   const only26Box = $('#only26');
   if (historical) {
     if (!only26Box.disabled) ONLY26_BEFORE_YEAR = only26Box.checked;
@@ -1665,7 +1889,7 @@ function drawPlayers() {
   }
   const only26 = !historical && only26Box.checked;
   const ming = +$('#ming').value;
-  const gen = $('#pgen').value, role = $('#prole').value, div = $('#rdiv').value;
+  const gen = $('#pgen').value, role = $('#prole').value;
 
   if (historical && !HREADY) {
     $('#pcount').textContent = 'Loading player history…';
@@ -1684,10 +1908,12 @@ function drawPlayers() {
     return;
   }
 
-  // Rank is a property of the player within the POPULATION the toggles
-  // define, so it is assigned before the search runs. Searching is a lookup,
-  // not a re-ranking: results come back sparse.
+  // Rank is a property of the player within the population the toggles define.
   let pop = D.players.filter(p => p[4] >= ming);
+  if (statsOn) pop = pop.filter(p => PLAYER_STATS[String(p[8])]);
+  if (boxOn) {
+    pop = pop.filter(p => playerBoxScore(p[8], boxSeason, boxDivision));
+  }
   if (only26) pop = pop.filter(p => p[6] === 2026);
   if (gen !== 'all') pop = pop.filter(p => p[9] === +gen);
 
@@ -1709,6 +1935,14 @@ function drawPlayers() {
     if (role !== 'all') pop = pop.filter(p => p[13] === +role);
     pop = pop.map(p => ({p, snap: null, role: playerRole(p, null)}));
   }
+  if (boxOn) {
+    pop.sort((a, b) => {
+      const av = playerBoxScore(a.p[8], boxSeason, boxDivision)[7];
+      const bv = playerBoxScore(b.p[8], boxSeason, boxDivision)[7];
+      return bv - av ||
+        String(a.p[8]).localeCompare(String(b.p[8]), undefined, {numeric: true});
+    });
+  }
 
   const rankOf = new Map();
   pop.forEach((r, i) => rankOf.set(r, i + 1));
@@ -1723,14 +1957,48 @@ function drawPlayers() {
     const club = snap ? clubLabel(snap.club) : p[5];
     const yr = snap ? snap.season : p[6];
     const rank = rankOf.get(r);
-    const rankTitle = snap
-      ? `#${rank} of ${pop.length.toLocaleString()} players in ${year}`
-      : `#${p[7]} of all ${D.totalRated.toLocaleString()} rated players`;
-    return `<tr><td class="pin"><button class="pinbtn${PINNED.has(String(p[8])) ? ' on' : ''}" ` +
+    const rankTitle = boxOn
+      ? `#${rank} of ${pop.length.toLocaleString()} players with complete G/A/B/T`
+      : statsOn
+        ? `#${rank} of ${pop.length.toLocaleString()} players with UFA stats`
+        : snap
+          ? `#${rank} of ${pop.length.toLocaleString()} players in ${year}`
+          : `#${p[7]} of all ${D.totalRated.toLocaleString()} rated players`;
+    const prefix = `<tr><td class="pin"><button class="pinbtn${PINNED.has(String(p[8])) ? ' on' : ''}" ` +
       `data-pinid="${p[8]}" title="${PINNED.has(String(p[8])) ? 'Remove from pinned list' : 'Pin to sidebar list'}">` +
       `&#128204;</button></td>` +
       `<td class="rk" title="${rankTitle}">${rank}</td>` +
-      `<td><span class="nmlink" data-pid="${p[8]}">${esc(p[0])}</span></td>` +
+      `<td><span class="nmlink" data-pid="${p[8]}">${esc(p[0])}</span></td>`;
+    if (boxOn) {
+      const box = playerBoxScore(p[8], boxSeason, boxDivision);
+      const provenance = `${box[10]} complete event${box[10] === 1 ? '' : 's'}, ` +
+        `${box[9]} team games, through ${box[11]}. Player appearances are unavailable.`;
+      const formula = `${PLAYER_BOX_META.modelVersion || 'GABT proxy'}: ` +
+        `0.5815G + 0.6926A + 0.3715B - 0.1302T. ${provenance}`;
+      return prefix +
+        `<td class="n">${box[2]}</td><td class="n">${box[3]}</td>` +
+        `<td class="n">${box[4]}</td><td class="n">${box[5]}</td>` +
+        `<td class="n">${box[6]}</td>` +
+        `<td class="n" title="${esc(formula)}">${box[7].toFixed(2)}</td>` +
+        `<td class="n" title="E± per team game. ${esc(provenance)}">` +
+        `${box[8] == null ? '—' : box[8].toFixed(2)}</td>` +
+        `<td>${roleTag(r.role[0], r.role[1], r.role[2])}</td>` +
+        `<td class="n">${box[0]}</td></tr>`;
+    }
+    if (statsOn) {
+      const stats = PLAYER_STATS[String(p[8])];
+      return prefix +
+        `<td class="n"><span class="ovr-pill" title="Game-style 1–99 OVR: reference midpoint 60, plus 10 per Elo standard deviation">${stats[0]}</span></td>` +
+        playerStatCell(stats, 1, 10, 'THR') +
+        playerStatCell(stats, 2, 11, 'POS') +
+        playerStatCell(stats, 3, 12, 'OFF') +
+        playerStatCell(stats, 4, 13, 'DEF') +
+        `<td class="n">${stats[5]}</td><td class="n">${stats[6]}</td>` +
+        `<td class="n">${stats[7]}</td><td class="n">${stats[8]}</td>` +
+        `<td>${roleTag(r.role[0], r.role[1], r.role[2])}</td>` +
+        `<td class="n">${stats[9]}</td></tr>`;
+    }
+    return prefix +
       `<td class="n">${elo.toFixed(0)}</td>` +
       (snap ? `<td class="band muted" title="Historical Elo; current uncertainty band not shown">—</td>` :
         `<td class="band ${LOOCLASS[p[12]] || ''}" title="${esc(LOOTIP[p[12]] || '')}">` +
@@ -1739,16 +2007,41 @@ function drawPlayers() {
       `<td class="n">${p[4]}</td><td class="muted" style="font-size:13px">${esc(club)}</td>` +
       `<td class="n">${yr}</td></tr>`;
   }).join('');
+  const populationLabel = boxOn ? ' players with complete G/A/B/T'
+    : statsOn ? ' players with UFA stats' : ' players';
   $('#pcount').textContent = q
     ? `${rows.length.toLocaleString()} of ${pop.length.toLocaleString()} match` +
       (!historical && rows.length > 300 ? ' — showing first 300' : '')
-    : `${pop.length.toLocaleString()} players` +
+    : `${pop.length.toLocaleString()}${populationLabel}` +
       (!historical && pop.length > 300 ? ' — showing first 300' : '');
-  if (historical) {
+  if (boxOn) {
+    const division = div === 'all' ? 'all divisions' : EDIVL[div];
+    const through = (PLAYER_BOX_META.statsThroughBySeasonDivision || {})[
+      `${boxSeason}|${boxDivision}`
+    ];
+    $('#pnote').textContent =
+      `${boxSeason} complete USAU G/A/B/T in ${division}, through ` +
+      `${through || 'the latest reported event'}. E± is the ` +
+      `${PLAYER_BOX_META.modelVersion || 'versioned'} yardage-trained proxy; E±/G ` +
+      `uses team games because player appearances are unavailable. Complete-event ` +
+      `E± feeds Elo only after the event ends; partial-stat events are excluded.`;
+  } else if (historical) {
     const division = div === 'all' ? 'all divisions' : EDIVL[div];
     $('#pnote').textContent =
       `Showing each player's Elo after their last ${year} event in ${division}. ` +
       `Historical uncertainty bands are not available.`;
+  } else if (statsOn) {
+    $('#pnote').textContent =
+      `${PLAYER_STATS_META.season || 2026} cumulative UFA player statistics through ` +
+      `${PLAYER_STATS_META.statsThrough || 'the latest Final'}. Game-style 1–99 ` +
+      `scores anchor the OVR reference midpoint at 60 and an average role-adjusted ` +
+      `attribute at 70. THR measures throwing pressure and creation; POS measures ` +
+      `possession security. Earlier seasons lose half their weight each year, while ` +
+      `small samples shrink toward the role average. These presentation attributes ` +
+      `do not feed Elo directly; source per-game E± does. Hover one for its ` +
+      `components, prior, and reliability.`;
+  } else {
+    $('#pnote').textContent = PLAYER_NOTE;
   }
 }
 ['input','change'].forEach(e => {
@@ -1758,7 +2051,19 @@ function drawPlayers() {
   $('#pgen').addEventListener(e, drawPlayers);
   $('#prole').addEventListener(e, drawPlayers);
 });
-$('#pnote').textContent = IS_GLICKO
+$('#pstats').addEventListener('change', () => {
+  if ($('#pstats').checked) $('#pbox').checked = false;
+  drawPlayers();
+});
+$('#pbox').addEventListener('change', () => {
+  if (!$('#pbox').checked) { drawPlayers(); return; }
+  $('#pstats').checked = false;
+  loadBoxScores(ok => {
+    if (!ok) $('#pbox').checked = false;
+    drawPlayers();
+  });
+});
+const PLAYER_NOTE = IS_GLICKO
   ? `Searching does not renumber anything — a player keeps the rank they hold in ` +
     `the current list. The toggles do change the population and therefore the rank; ` +
     `hover one to see its denominator. Ratings update after ${PERIOD_LABEL}; ` +
@@ -1783,6 +2088,7 @@ $('#pnote').textContent = IS_GLICKO
     `never decay, so \"2026 rosters only\" is on by default. A player carries one ` +
     `rating across every division; filters describe where they played. All ` +
     `${NDIV} divisions share one scale, bridged by the ${GENDER_NOTE}`;
+$('#pnote').textContent = PLAYER_NOTE;
 
 /* ---------- drill-down: play history + rating curve ---------- */
 /* The core arrives in a second file once the page is already usable, and the

@@ -25,6 +25,33 @@ STAT_COLUMNS = [
     "hucksAttempted", "hucksCompleted",
 ]
 
+GAME_STAT_COLUMNS = [
+    ("oPointsPlayed", "o_points_played"),
+    ("dPointsPlayed", "d_points_played"),
+    ("secondsPlayed", "seconds_played"),
+    ("goals", "goals"),
+    ("assists", "assists"),
+    ("blocks", "blocks"),
+    ("throwaways", "throwaways"),
+    ("drops", "drops"),
+    ("hockeyAssists", "hockey_assists"),
+    ("completions", "completions"),
+    ("throwAttempts", "throw_attempts"),
+    ("stalls", "stalls"),
+    ("catches", "catches"),
+    ("callahans", "callahans"),
+    ("yardsReceived", "yards_received"),
+    ("yardsThrown", "yards_thrown"),
+    ("hucksAttempted", "hucks_attempted"),
+    ("hucksCompleted", "hucks_completed"),
+    ("oPointsScored", "o_points_scored"),
+    ("dPointsScored", "d_points_scored"),
+    ("oOpportunities", "o_opportunities"),
+    ("oOpportunityScores", "o_opportunity_scores"),
+    ("dOpportunities", "d_opportunities"),
+    ("dOpportunityStops", "d_opportunity_stops"),
+]
+
 SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS ufa_teams (
     team_id TEXT NOT NULL, year INTEGER NOT NULL,
@@ -49,42 +76,65 @@ CREATE TABLE IF NOT EXISTS ufa_games (
 );
 CREATE TABLE IF NOT EXISTS ufa_game_stats (
     game_id TEXT NOT NULL, player_id TEXT NOT NULL, team_id TEXT,
-    o_points_played INTEGER, d_points_played INTEGER, seconds_played INTEGER,
-    goals INTEGER, assists INTEGER, blocks INTEGER,
-    throwaways INTEGER, drops INTEGER,
+    {", ".join(column + " INTEGER" for _, column in GAME_STAT_COLUMNS)},
     PRIMARY KEY (game_id, player_id)
 );
 """
 
 
+def ensure_game_stat_columns(con) -> None:
+    """Migrate the old narrow game table before cached rows are backfilled."""
+    existing = {row[1] for row in con.execute("PRAGMA table_info(ufa_game_stats)")}
+    for _api_name, column in GAME_STAT_COLUMNS:
+        if column not in existing:
+            con.execute(f"ALTER TABLE ufa_game_stats ADD COLUMN {column} INTEGER")
+
+
 def scrape_game_stats(con, session, refresh_years=()) -> int:
-    """Per-game player lines (real game rosters) for every final game."""
+    """Per-game rich player lines for every final game.
+
+    Existing narrow rows are rebuilt from the disk cache without forcing live
+    requests. ``refresh_years`` still bypasses the cache for genuinely mutable
+    seasons.
+    """
+    ensure_game_stat_columns(con)
     refresh_years = set(refresh_years)
     done = {r[0] for r in con.execute(
         "SELECT DISTINCT game_id FROM ufa_game_stats")}
+    rich_done = {r[0] for r in con.execute("""
+        SELECT DISTINCT game_id FROM ufa_game_stats
+        WHERE yards_thrown IS NOT NULL AND yards_received IS NOT NULL
+          AND stalls IS NOT NULL AND callahans IS NOT NULL
+    """)}
     games = con.execute(
         "SELECT game_id, year FROM ufa_games "
         "WHERE status='Final' ORDER BY year, game_id"
     ).fetchall()
+    columns = ["game_id", "player_id", "team_id",
+               *[column for _, column in GAME_STAT_COLUMNS]]
+    placeholders = ",".join("?" for _ in columns)
+    insert = (
+        f"INSERT OR REPLACE INTO ufa_game_stats ({','.join(columns)}) "
+        f"VALUES ({placeholders})"
+    )
     n = 0
     for gid, year in games:
         refresh = year in refresh_years
-        if gid in done and not refresh:
+        backfill = gid not in rich_done
+        if gid in done and not refresh and not backfill:
             continue
         rows = api.get(
             "playerGameStats", {"gameID": gid}, session, refresh=refresh
         )
         if not rows:
             continue
-        if refresh:
-            con.execute("DELETE FROM ufa_game_stats WHERE game_id=?", (gid,))
-        for r in rows:
+        con.execute("DELETE FROM ufa_game_stats WHERE game_id=?", (gid,))
+        for row in rows:
             con.execute(
-                "INSERT OR REPLACE INTO ufa_game_stats VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                (gid, r["player"]["playerID"], r.get("teamID"),
-                 r.get("oPointsPlayed"), r.get("dPointsPlayed"),
-                 r.get("secondsPlayed"), r.get("goals"), r.get("assists"),
-                 r.get("blocks"), r.get("throwaways"), r.get("drops")))
+                insert,
+                (gid, row["player"]["playerID"], row.get("teamID"),
+                 *[row.get(api_name) for api_name, _ in GAME_STAT_COLUMNS]),
+            )
             n += 1
         con.commit()
     return n
@@ -141,6 +191,7 @@ def scrape_season(con, session, year: int, refresh: bool = False) -> str:
 def main(seasons: list[int]):
     con = connect(DB_PATH)
     con.executescript(SCHEMA)
+    ensure_game_stat_columns(con)
     current_year = date.today().year
     with requests.Session() as session:
         for year in seasons:

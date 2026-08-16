@@ -27,9 +27,7 @@ class DivisionKDescentTests(unittest.TestCase):
              patch.object(descent, "load_womens_pro_inputs",
                           return_value=Mock(games=[], rosters={}, clubs={})), \
              patch.object(descent, "load_ufa_games", return_value=(ufa, {"ufa": [2]}, {"ufa": "UFA"})), \
-             patch.object(descent, "load_stat_events", return_value=[]), \
-             patch.object(descent, "load_ufa_stat_data", return_value=({}, [])), \
-             patch.object(descent, "load_ufa_stat_events", return_value=[]):
+             patch.object(descent, "load_stat_events", return_value=[]):
             descent._init()
 
         self.assertEqual(["club-men", "ufa"], [g["division"] for g in descent._G["games"]])
@@ -59,6 +57,12 @@ class DivisionKDescentTests(unittest.TestCase):
 
         self.assertNotEqual(low["val.ufa"], high["val.ufa"])
         self.assertEqual(0.25, descent.as_config({"k_scale_group.ufa": 0.25}).k_scale["ufa"])
+    def test_scalar_override_reaches_elo_config(self):
+        self.assertEqual(
+            1.5,
+            descent.as_config({"stat_transfer_beta": 1.5}).stat_transfer_beta,
+        )
+
 
     def test_beach_group_covers_every_published_beach_bracket(self):
         config = descent.as_config({"k_scale_group.beach": 0.5})

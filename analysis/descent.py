@@ -47,9 +47,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (
-    DB_PATH, build_ufa_stat_events, load_games, load_maps,
-    load_stat_events, load_ufa_games, load_ufa_stat_data,
-    load_ufa_stat_events, metrics, replay,
+    DB_PATH, load_games, load_maps, load_stat_events, load_ufa_games,
+    metrics, replay,
 )
 from analysis.rankings import PUBLISHED
 from womens_pro.ratings import load_womens_pro_inputs
@@ -165,14 +164,6 @@ AXES = [
     ("mov_norm",               [5.0, 6.0, 7.0, 8.0, 10.0]),
     ("use_mov",                [True, False]),
     ("stat_transfer_beta",     [0.0, 2.0, 3.0, 5.0, 8.0, 12.0]),
-    # UFA-only feature weights. Y is represented by its TY and RY components
-    # rather than counted again as TY + RY + total Y. Completion percentage is
-    # already normalized within the team-season before these weights apply.
-    ("ufa_completion_usage_weight", [0.0, 0.25, 0.5, 1.0, 2.0]),
-    ("ufa_completion_pct_weight",   [0.0, 0.5, 1.0, 2.0, 4.0]),
-    ("ufa_throwing_yards_weight",   [0.0, 0.25, 0.5, 1.0, 2.0]),
-    ("ufa_receiving_yards_weight",  [0.0, 0.25, 0.5, 1.0, 2.0]),
-    ("ufa_hockey_assists_weight",   [0.0, 0.5, 1.0, 2.0, 4.0]),
     ("stat_transfer_clamp",    [40.0, 60.0, 90.0]),
     ("involvement_credit",     [False, True]),
     ("involvement_shrink",     [1.0, 4.0]),
@@ -250,12 +241,7 @@ def _init():
     )
     _G["rosters"] = {**rosters, **womens_pro.rosters, **ufa_rosters}
     _G["clubs"] = {**clubs, **womens_pro.clubs, **ufa_clubs}
-    _G["stat_events"] = load_stat_events(con)
-    _G["ufa_data"] = load_ufa_stat_data(con)
-    _G["stats"] = sorted(
-        _G["stat_events"] + load_ufa_stat_events(con, as_config({})),
-        key=lambda e: e[0],
-    )
+    _G["stats"] = load_stat_events(con)
     con.close()
 
 
@@ -272,6 +258,8 @@ def as_config(overrides: dict) -> EloConfig:
         elif "." in key:
             group, sub = key.split(".", 1)
             cfg[group][sub] = value
+        else:
+            cfg[key] = value
     return EloConfig(**cfg)
 
 
@@ -281,13 +269,7 @@ def _score(args):
     if not _G:
         _init()
     cfg = as_config(overrides)
-    if "ufa_data" in _G:
-        stats = sorted(
-            _G["stat_events"] + build_ufa_stat_events(_G["ufa_data"], cfg),
-            key=lambda e: e[0],
-        )
-    else:
-        stats = _G["stats"]
+    stats = _G["stats"]
     recs, _model = replay(
         "player", _G["games"], _G["rosters"], _G["clubs"], cfg, stats,
     )

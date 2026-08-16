@@ -1,7 +1,7 @@
 """Build the offline UFA-linked player metric pilot.
 
-OVR is a presentation mapping of the existing player Elo. THR, OFF, and DEF
-are empirical-Bayes scorecards built from UFA season box scores. Attribute
+OVR is a presentation mapping of the existing player Elo. THR, POS, OFF, and
+DEF are empirical-Bayes scorecards built from UFA season box scores. Attribute
 scores are descriptive and deliberately do not feed the authoritative Elo.
 """
 
@@ -26,8 +26,14 @@ DEFAULT_PLAYERS = ROOT / "data" / "player_elo.csv"
 DEFAULT_ROLES = ROOT / "data" / "player_roles.csv"
 DEFAULT_REFERENCE = ROOT / "data" / "player_metric_reference.json"
 DEFAULT_OUTPUT = ROOT / "data" / "player_metrics.csv"
-MODEL_VERSION = "ufa-eb-v1"
+OVR_DISPLAY_CENTER = 60.0
+ATTRIBUTE_DISPLAY_CENTER = 70.0
+DISPLAY_POINTS_PER_Z = 10.0
+MODEL_VERSION = "ufa-eb-v4"
 REFERENCE_SEASONS = (2022, 2023, 2024, 2025)
+HISTORY_DECAY_PER_SEASON = 0.5
+MIN_PRIOR_EXPOSURE = 25.0
+MAX_HISTORY_PRIOR_MULTIPLIER = 4.0
 ROLE_GROUPS = ("handler", "hybrid", "cutter")
 MIN_REFERENCE_ROWS = 20
 
@@ -52,16 +58,27 @@ class ComponentSpec:
 
 
 COMPONENTS = (
-    ComponentSpec("completion", "thr", (("completions", 1.0),),
+    # THR measures field-stretching and chance creation. Possession safety is
+    # separate below, so aggressive high-value throwers are not graded mainly
+    # on the completion profile of their harder attempts.
+    ComponentSpec("huck_rate", "thr", (("hucksattempted", 1.0),),
                   (("throwattempts", 1.0),), "binomial"),
-    ComponentSpec("possession", "thr",
-                  (("throwattempts", 1.0), ("throwaways", -1.0),
-                   ("stalls", -1.0)),
-                  (("throwattempts", 1.0),), "binomial"),
-    ComponentSpec("hucks", "thr", (("huckscompleted", 1.0),),
+    ComponentSpec("huck_accuracy", "thr", (("huckscompleted", 1.0),),
                   (("hucksattempted", 1.0),), "binomial"),
     ComponentSpec("throwing_yards", "thr", (("yardsthrown", 1.0),),
                   (("throwattempts", 1.0),), "count"),
+    ComponentSpec("creation", "thr",
+                  (("assists", 1.0), ("hockeyassists", 1.0)),
+                  (("throwattempts", 1.0),), "count"),
+    # POS measures possession security with the disc and as a receiver.
+    ComponentSpec("completion", "pos", (("completions", 1.0),),
+                  (("throwattempts", 1.0),), "binomial"),
+    ComponentSpec("throw_security", "pos",
+                  (("throwattempts", 1.0), ("throwaways", -1.0),
+                   ("stalls", -1.0)),
+                  (("throwattempts", 1.0),), "binomial"),
+    ComponentSpec("catch_security", "pos", (("catches", 1.0),),
+                  (("catches", 1.0), ("drops", 1.0)), "binomial"),
     ComponentSpec("offensive_actions", "off",
                   (("goals", 1.0), ("assists", 1.0),
                    ("hockeyassists", 1.0)),
@@ -80,14 +97,16 @@ COMPONENTS = (
     ComponentSpec("d_point_success", "def", (("dpointsscored", 1.0),),
                   (("dpointsplayed", 1.0),), "binomial"),
 )
-MIN_COMPONENTS = {"thr": 2, "off": 2, "def": 2}
+MIN_COMPONENTS = {"thr": 2, "pos": 2, "off": 2, "def": 2}
 
 OUTPUT_FIELDS = (
     "rank", "player", "player_id", "ufa_player_ids", "season", "as_of_date",
     "stats_through", "model_version", "reference_fitted_at", "ovr", "elo", "elo_sigma",
-    "elo_lo90", "elo_hi90", "thr", "thr_z", "thr_reliability", "off",
-    "off_z", "off_reliability", "def", "def_z", "def_reliability", "role",
-    "role_confidence", "role_source", "goals", "assists", "blocks",
+    "elo_lo90", "elo_hi90", "thr", "thr_z", "thr_reliability", "pos",
+    "pos_z", "pos_reliability", "off", "off_z", "off_reliability", "def",
+    "def_z", "def_reliability", "role", "role_confidence", "role_source",
+    "history_seasons", "weighted_prior_throw_attempts", "goals", "assists",
+    "blocks",
     "turnovers", "completions", "throw_attempts", "huck_attempts",
     "huck_completions", "throwing_yards", "receiving_yards", "o_points",
     "d_points", "seconds_played", "stat_source", "coverage_flags",
@@ -124,14 +143,17 @@ def _observation(spec: ComponentSpec, row: dict) -> tuple[float, float] | None:
     return value, exposure
 
 
-def _normal_score(z: float) -> int:
-    z = min(max(z, -4.0), 4.0)
-    percentile = 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
-    return min(99, max(1, round(1.0 + 98.0 * percentile)))
+def _display_score(z: float, center: float) -> int:
+    """Map model z-scores onto a stable game-style 1–99 presentation scale."""
+    return min(99, max(1, round(center + DISPLAY_POINTS_PER_Z * z)))
+
+
+def _attribute_display_score(z: float) -> int:
+    return _display_score(z, ATTRIBUTE_DISPLAY_CENTER)
+
 
 def _ovr_score(z: float) -> int:
-    """Keep Elo presentation linear so the elite tail does not collapse at 99."""
-    return min(99, max(1, round(50.0 + 10.0 * z)))
+    return _display_score(z, OVR_DISPLAY_CENTER)
 
 
 def _robust_location_scale(values: list[float]) -> tuple[float, float]:
@@ -160,7 +182,7 @@ def _fit_component(samples: list[tuple[float, float]], family: str) -> dict:
         sampling_variance = fmean(max(mean, 1e-9) / exposure for _, exposure in samples)
         latent_variance = max(observed_variance - sampling_variance, 1e-8)
         prior_exposure = max(mean, 1e-9) / latent_variance
-    prior_exposure = min(max(prior_exposure, 1.0), 1000.0)
+    prior_exposure = min(max(prior_exposure, MIN_PRIOR_EXPOSURE), 1000.0)
     posteriors = [
         (value + prior_exposure * mean) / (exposure + prior_exposure)
         for value, exposure in samples
@@ -303,6 +325,16 @@ def fit_reference(
         "fitted_at": fitted_at or date.today().isoformat(),
         "reference_seasons": list(seasons),
         "ovr": {"center": center, "scale": scale, "sample_size": len(elo_values)},
+        "presentation": {
+            "ovr_center": OVR_DISPLAY_CENTER,
+            "attribute_center": ATTRIBUTE_DISPLAY_CENTER,
+            "points_per_z": DISPLAY_POINTS_PER_Z,
+        },
+        "history": {
+            "decay_per_season": HISTORY_DECAY_PER_SEASON,
+            "minimum_prior_exposure": MIN_PRIOR_EXPOSURE,
+            "maximum_history_prior_multiplier": MAX_HISTORY_PRIOR_MULTIPLIER,
+        },
         "components": components,
     }
 
@@ -326,7 +358,50 @@ def _component_reference(reference: dict, role: str, name: str) -> dict | None:
     return role_components.get(name) or reference["components"]["all"].get(name)
 
 
-def _attribute_score(attribute: str, row: dict, role: str, reference: dict):
+def _prior_rows_by_player(
+    rows: list[dict], season: int, as_of_date: str,
+) -> dict:
+    """Aggregate available pre-season rows by linked player and season."""
+    grouped = {}
+    for row in rows:
+        pid = row.get("player_id")
+        row_season = row["season"]
+        if (
+            pid is None or row_season >= season
+            or row.get("stats_through", f"{row_season}-09-01") > as_of_date
+        ):
+            continue
+        key = (pid, row_season)
+        aggregate = grouped.setdefault(key, {
+            "player_id": pid, "season": row_season,
+            **{field: 0.0 for field in STAT_FIELDS},
+        })
+        for field in STAT_FIELDS:
+            aggregate[field] += _number(row.get(field))
+    by_player = defaultdict(list)
+    for (pid, _), row in grouped.items():
+        by_player[pid].append(row)
+    return by_player
+
+
+def _decayed_observation(
+    spec: ComponentSpec, history: list[dict], season: int,
+) -> tuple[float, float] | None:
+    value = exposure = 0.0
+    for row in history:
+        observation = _observation(spec, row)
+        if observation is None:
+            continue
+        row_value, row_exposure = observation
+        weight = HISTORY_DECAY_PER_SEASON ** (season - row["season"])
+        value += weight * row_value
+        exposure += weight * row_exposure
+    return (value, exposure) if exposure > 0 else None
+
+def _attribute_score(
+    attribute: str, row: dict, role: str, reference: dict,
+    history: list[dict], season: int,
+):
     values = []
     for spec in COMPONENTS:
         if spec.attribute != attribute:
@@ -337,17 +412,37 @@ def _attribute_score(attribute: str, row: dict, role: str, reference: dict):
             continue
         value, exposure = observation
         prior_exposure = fitted["prior_exposure"]
+        historical = _decayed_observation(spec, history, season)
+        if historical is None:
+            prior_mean = fitted["mean"]
+            historical_exposure = 0.0
+        else:
+            historical_value, historical_exposure = historical
+            maximum_history_exposure = (
+                MAX_HISTORY_PRIOR_MULTIPLIER * prior_exposure
+            )
+            if historical_exposure > maximum_history_exposure:
+                scale = maximum_history_exposure / historical_exposure
+                historical_value *= scale
+                historical_exposure = maximum_history_exposure
+            prior_mean = (
+                historical_value + prior_exposure * fitted["mean"]
+            ) / (historical_exposure + prior_exposure)
         posterior = (
-            value + prior_exposure * fitted["mean"]
+            value + prior_exposure * prior_mean
         ) / (exposure + prior_exposure)
         z = spec.direction * (posterior - fitted["mean"]) / fitted["spread"]
-        reliability = exposure / (exposure + prior_exposure)
+        evidence = exposure + historical_exposure
+        reliability = evidence / (evidence + prior_exposure)
         values.append((min(max(z, -4.0), 4.0), reliability))
     if len(values) < MIN_COMPONENTS[attribute]:
         return None
-    z = fmean(value for value, _ in values)
+    # Uncertain component estimates contribute only in proportion to their
+    # evidence, pulling sparse player cards back toward the role average.
+    z = fmean(value * component_reliability
+              for value, component_reliability in values)
     reliability = fmean(value for _, value in values)
-    return _normal_score(z), z, reliability
+    return _attribute_display_score(z), z, reliability
 
 
 def build_snapshot(
@@ -358,6 +453,7 @@ def build_snapshot(
     if reference.get("model_version") != MODEL_VERSION:
         raise ValueError("metric reference and generator versions differ")
     output = []
+    prior_rows = _prior_rows_by_player(rows, season, as_of_date)
     for row in _aggregate_linked(rows, season, as_of_date):
         pid = row["player_id"]
         player = players.get(pid)
@@ -365,14 +461,21 @@ def build_snapshot(
             continue
         role_row = _role_for(roles, pid, season)
         role = role_row.get("role", "unknown")
+        history = prior_rows.get(pid, [])
         scores = {
-            attribute: _attribute_score(attribute, row, role, reference)
-            for attribute in ("thr", "off", "def")
+            attribute: _attribute_score(
+                attribute, row, role, reference, history, season,
+            )
+            for attribute in ("thr", "pos", "off", "def")
         }
         elo = _number(player.get("elo"))
         ovr_z = (elo - reference["ovr"]["center"]) / reference["ovr"]["scale"]
         attributes = [name for name, value in scores.items() if value is not None]
         flags = ["linked-ufa", *[f"attribute:{name}" for name in attributes]]
+        flags.append(
+            f"history-prior:{len(history)}-seasons" if history
+            else "role-average-prior"
+        )
         flags.append("current-season-cumulative" if season == int(as_of_date[:4])
                      else "complete-season")
         metric = {
@@ -386,6 +489,12 @@ def build_snapshot(
             "elo_lo90": player.get("lo90", ""), "elo_hi90": player.get("hi90", ""),
             "role": role, "role_confidence": role_row.get("confidence", "0"),
             "role_source": role_row.get("source", "none"),
+            "history_seasons": len(history),
+            "weighted_prior_throw_attempts": round(sum(
+                _number(prior.get("throwattempts"))
+                * HISTORY_DECAY_PER_SEASON ** (season - prior["season"])
+                for prior in history
+            ), 1),
             "goals": round(row["goals"]), "assists": round(row["assists"]),
             "blocks": round(row["blocks"]),
             "turnovers": round(row["throwaways"] + row["stalls"] + row["drops"]),

@@ -16,12 +16,14 @@ import math
 import re
 import sqlite3
 import sys
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from elo.engine import EloConfig, PlayerElo, TeamElo
+from analysis.box_scores import load_reference as load_edge_reference
 from identity.resolve import norm_club
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "usau.db"
@@ -77,49 +79,72 @@ def load_games(con) -> list[dict]:
     return games
 
 
-def load_stat_events(con) -> list[tuple]:
-    """Per-player stat lines grouped by team-event, sorted by event end date.
+def load_stat_events(con, edge_reference: dict | None = None) -> list[tuple]:
+    """USAU player-event E±, deferred until the event has ended.
 
-    Returns [(end_date, [(player_id, usage_index, quality), ...], event_team_id)]
-    where usage_index is the player's share of team G+A+D+T scaled by roster
-    count (1.0 = average teammate) and quality is G+A+D-T. Keyed on end_date so
-    replay ingests an event's stats only after it has finished.
-
-    The event_team_id rides along because ingestion is deferred for leakage
-    safety, NOT because the rating movement happens later: a caller recording
-    trajectories has to book the transfer against the event that earned it.
+    Complete G/A/B/T events use the frozen yardage-trained proxy. Partial
+    events still inform involvement, but every quality is neutral so missing
+    blocks or turnovers cannot be manufactured as zero.
     """
+    reference = edge_reference or load_edge_reference()
+    coefficients = reference["coefficients"]
     rows = con.execute("""
+        WITH coverage AS (
+            SELECT et.event_id,
+                   MAX(re.points != '') AS has_goals,
+                   MAX(re.assists != '') AS has_assists,
+                   MAX(re.ds != '') AS has_blocks,
+                   MAX(re.turns != '') AS has_turnovers
+            FROM roster_entries re
+            JOIN event_teams et USING(event_team_id)
+            GROUP BY et.event_id
+        )
         SELECT re.event_team_id, rp.player_id, ev.end_date,
-               re.points, re.assists, re.ds, re.turns
+               re.points, re.assists, re.ds, re.turns,
+               coverage.has_goals, coverage.has_assists,
+               coverage.has_blocks, coverage.has_turnovers
         FROM roster_entries re
         JOIN roster_players rp ON rp.event_team_id = re.event_team_id
              AND rp.name = re.name
         JOIN event_teams et ON et.event_team_id = re.event_team_id
         JOIN events ev ON ev.event_id = et.event_id
+        JOIN coverage ON coverage.event_id = ev.event_id
         WHERE ev.end_date IS NOT NULL
-          AND (re.points != '' OR re.assists != '' OR re.ds != '' OR re.turns != '')
     """).fetchall()
 
-    def num(x):
+    def num(value):
         try:
-            return int(x)
+            return int(value)
         except (TypeError, ValueError):
             return 0
 
     by_team: dict[tuple, list] = {}
-    for etid, pid, end, p, a, d, t in rows:
-        g, a, d, t = num(p), num(a), num(d), num(t)
-        by_team.setdefault((end, etid), []).append((pid, g + a + d + t, g + a + d - t))
+    for etid, pid, end, raw_g, raw_a, raw_b, raw_t, *availability in rows:
+        stats = {
+            "goals": num(raw_g), "assists": num(raw_a),
+            "blocks": num(raw_b), "turnovers": num(raw_t),
+        }
+        involvement = sum(stats.values())
+        quality = (
+            sum(coefficients[field] * value for field, value in stats.items())
+            if all(availability) else 0.0
+        )
+        by_team.setdefault((end, etid), []).append(
+            (pid, involvement, quality)
+        )
     events = []
     for (end, etid), lines in by_team.items():
-        total = sum(inv for _, inv, _ in lines)
+        total = sum(involvement for _, involvement, _ in lines)
         if total <= 0 or len(lines) < 2:
             continue
         n = len(lines)
-        events.append((end, [(pid, inv * n / total, q) for pid, inv, q in lines],
-                       etid))
-    events.sort(key=lambda e: e[0])
+        events.append((
+            end,
+            [(pid, involvement * n / total, quality)
+             for pid, involvement, quality in lines],
+            etid,
+        ))
+    events.sort(key=lambda event: event[0])
     return events
 
 
@@ -238,16 +263,22 @@ def load_ufa_stat_events(con, cfg: EloConfig | None = None) -> list[tuple]:
     return build_ufa_stat_events(load_ufa_stat_data(con), cfg)
 
 
-def load_ufa_games(con) -> tuple[list, dict, dict]:
-    """UFA games as replay entries, with per-game rosters of linked players.
+def load_ufa_games(
+    con, edge_reference: dict | None = None,
+) -> tuple[list, dict, dict]:
+    """UFA finals with real rosters and post-game observed E±.
 
-    Every final game is a one-game synthetic event so the authoritative replay
-    can emit a team Elo point and the underlying score after each game. Rosters
-    are players who took the field (points played > 0), mapped through accepted
-    links. A team with fewer than seven linked players gets no roster entry, so
-    replay's existing ghost fallback absorbs it while preserving the result.
+    Rich game lines use yards plus that game's scoring environment. A legacy
+    narrow row falls back to the frozen G/A/B/T proxy. The entries ride on the
+    game and are applied only after its prediction and result, so later stats
+    cannot leak into an earlier game.
     """
     from ufa.link import resolve_links
+
+    reference = edge_reference or load_edge_reference()
+    proxy_coefficients = reference["coefficients"]
+    observed = reference["observed_ufa"]
+    rating_scale = float(observed.get("rating_scale", 1.0))
     try:
         links = resolve_links(con)
         game_rows = con.execute("""
@@ -266,24 +297,86 @@ def load_ufa_games(con) -> tuple[list, dict, dict]:
               AND g.home_score + g.away_score >= 4
         """).fetchall()
         stat_rows = con.execute("""
-            SELECT game_id, team_id, player_id FROM ufa_game_stats
+            SELECT game_id, team_id, player_id,
+                   COALESCE(o_points_played,0) + COALESCE(d_points_played,0),
+                   goals, assists, blocks, callahans,
+                   throwaways, stalls, drops, yards_thrown, yards_received
+            FROM ufa_game_stats
             WHERE COALESCE(o_points_played,0) + COALESCE(d_points_played,0) > 0
         """).fetchall()
-    except sqlite3.OperationalError:     # DB predates the UFA tables
+    except sqlite3.OperationalError:     # DB predates the rich UFA tables
         return [], {}, {}
-    fielded: dict[tuple, list] = {}
-    for gid, team, upid in stat_rows:
-        if upid in links:
-            fielded.setdefault((gid, team), []).append(links[upid])
+
+    def number(value):
+        return 0.0 if value is None else float(value)
+
+    game_totals = defaultdict(lambda: [0.0, 0.0])
+    linked_lines = defaultdict(list)
+    for (gid, team, upid, points, raw_g, raw_a, raw_b, raw_c,
+         raw_throw, raw_stall, raw_drop, raw_ty, raw_ry) in stat_rows:
+        goals = number(raw_g)
+        turnovers = number(raw_throw) + number(raw_stall) + number(raw_drop)
+        game_totals[gid][0] += goals
+        game_totals[gid][1] += turnovers
+        pid = links.get(upid)
+        if pid is None:
+            continue
+        rich = all(value is not None for value in (
+            raw_g, raw_a, raw_b, raw_c, raw_throw, raw_stall, raw_drop,
+            raw_ty, raw_ry,
+        ))
+        linked_lines[(gid, team)].append({
+            "pid": pid, "points": number(points), "goals": goals,
+            "assists": number(raw_a),
+            "blocks": number(raw_b) + number(raw_c),
+            "turnovers": turnovers,
+            "yards": number(raw_ty) + number(raw_ry),
+            "rich": rich,
+        })
+
+    stat_entries = {}
+    for (gid, team), lines in linked_lines.items():
+        total_points = sum(line["points"] for line in lines)
+        if total_points <= 0 or len(lines) < 2:
+            continue
+        goals, turns = game_totals[gid]
+        scoring_efficiency = goals / (goals + turns) if goals + turns else 0.0
+        n = len(lines)
+        entries = []
+        for line in lines:
+            if line["rich"]:
+                quality = (
+                    observed["yard_coefficient"] * line["yards"]
+                    + observed["score_action_coefficient"]
+                    * (line["goals"] + line["assists"])
+                    + scoring_efficiency
+                    * (line["blocks"] - line["turnovers"])
+                )
+            else:
+                quality = sum(
+                    proxy_coefficients[field] * line[field]
+                    for field in ("goals", "assists", "blocks", "turnovers")
+                )
+            entries.append((
+                line["pid"], line["points"] * n / total_points,
+                quality * rating_scale,
+            ))
+        stat_entries[(gid, team)] = entries
+
     games, rosters_add, clubs_add = [], {}, {}
     for gid, year, date, home, away, hs, as_, week, home_name, away_name in game_rows:
         event_id = f"ufa:{gid}"
         hkey, akey = f"{event_id}:{home}", f"{event_id}:{away}"
+        post_game_stats = []
         for key, team in ((hkey, home), (akey, away)):
             clubs_add[key] = f"ufa:{team}"
-            pids = sorted(set(fielded.get((gid, team), [])))
+            lines = linked_lines.get((gid, team), [])
+            pids = sorted({line["pid"] for line in lines})
             if len(pids) >= 7:
                 rosters_add[key] = pids
+            entries = stat_entries.get((gid, team))
+            if entries:
+                post_game_stats.append((entries, key))
         games.append({
             "sort": (date or f"{year}-06-01", "12:00", 0, gid),
             "date": date, "season": year, "division": "ufa",
@@ -292,6 +385,7 @@ def load_ufa_games(con) -> tuple[list, dict, dict]:
             "home_name": home_name, "away_name": away_name,
             "home_id": hkey, "away_id": akey,
             "home_score": hs, "away_score": as_,
+            "post_game_stats": post_game_stats,
         })
     games.sort(key=lambda game: game["sort"])
     return games, rosters_add, clubs_add
@@ -434,6 +528,11 @@ def replay(model_kind: str, games, rosters, clubs, cfg: EloConfig,
             exp = model.play_game(
                 home, away, g["home_score"], g["away_score"], division,
             )
+        if model_kind == "player":
+            for entries, event_team_id in g.get("post_game_stats", ()):
+                model.observe_stats(entries)
+                if on_stats is not None:
+                    on_stats(gdate, entries, event_team_id, model)
         outcome = (1.0 if g["home_score"] > g["away_score"]
                    else 0.0 if g["home_score"] < g["away_score"] else 0.5)
         records.append((season, division, g.get("date"), exp, outcome))
@@ -496,18 +595,14 @@ def compare(cfg: EloConfig | None = None,
     rosters.update(womens_pro.rosters)
     clubs.update(womens_pro.clubs)
     stat_events = load_stat_events(con)
-    ufa_events = load_ufa_stat_events(con, cfg)
-    combined = sorted(stat_events + ufa_events, key=lambda e: e[0])
     ufa_games, r_add, c_add = load_ufa_games(con)
     all_games = sorted(games + ufa_games, key=lambda g: g["sort"])
     rosters_ufa = {**rosters, **r_add}
     clubs_ufa = {**clubs, **c_add}
-    # cfg is resolved before UFA stat-event construction so coefficient
-    # sweeps and published replays consume the same feature mapping.
     n_col = sum(1 for g in usau_games if g["division"] == "college")
     print(f"{len(usau_games)} USAU games ({n_col} college) + "
-          f"{len(womens_pro.games)} PUL/WUL + {len(ufa_games)} UFA, "
-          f"{len(stat_events)} stat team-events + {len(ufa_events)} UFA; "
+          f"{len(womens_pro.games)} PUL/WUL + {len(ufa_games)} UFA with "
+          f"post-game E±, {len(stat_events)} USAU stat team-events; "
           f"eval seasons {eval_seasons}, divisions {eval_divisions}")
     header = f"{'model':<26}{'n':>7}{'accuracy':>10}{'brier':>8}{'logloss':>9}"
     print(header + "\n" + "-" * len(header))
@@ -527,8 +622,7 @@ def compare(cfg: EloConfig | None = None,
          EloConfig(**{**plain.__dict__, "stat_transfer_beta": 1.0}),
          stat_events, base),
         ("plain + both", "player", both, stat_events, base),
-        ("plain + both + UFA", "player", both, combined, base),
-        ("plain + both + UFA + games", "player", both, combined, withufa),
+        ("plain + both + UFA games", "player", both, stat_events, withufa),
         ("team reset", "reset", cfg, stat_events, base),
         ("team carryover", "carry", cfg, stat_events, base),
     ]

@@ -19,8 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (DB_PATH, load_games, load_maps,
-                               load_stat_events, load_ufa_games,
-                               load_ufa_stat_events, replay)
+                               load_stat_events, load_ufa_games, replay)
 from analysis.euf_ratings import (EUF_DB, Appearance, EuropeanInputs,
                                   load_european_inputs, merge_inputs)
 from analysis.international_ratings import load_international_inputs
@@ -1228,8 +1227,7 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     rosters.update(ufa_rosters)
     clubs.update(external.clubs)
     clubs.update(ufa_clubs)
-    stat_events = sorted(load_stat_events(con) + load_ufa_stat_events(con, cfg),
-                         key=lambda e: e[0])
+    stat_events = load_stat_events(con)
     print(
         f"loaded {len(european.games):,} European games, "
         f"{len(canadian.games):,} Canadian games, "

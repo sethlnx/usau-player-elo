@@ -42,8 +42,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from analysis.backtest import DB_PATH, load_games, load_maps, load_stat_events, \
-    load_ufa_stat_events, replay
+from analysis.backtest import (DB_PATH, load_games, load_maps, load_stat_events,
+                               load_ufa_games, replay)
 from analysis.rankings import PUBLISHED
 from elo.engine import EloConfig
 
@@ -56,13 +56,14 @@ _G = {}
 def _init():
     import sqlite3
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    _G["games"] = load_games(con)
-    _G["rosters"], _G["clubs"] = load_maps(con)
+    games = load_games(con)
+    rosters, clubs = load_maps(con)
+    ufa_games, ufa_rosters, ufa_clubs = load_ufa_games(con)
+    _G["games"] = sorted(games + ufa_games, key=lambda game: game["sort"])
+    _G["rosters"] = {**rosters, **ufa_rosters}
+    _G["clubs"] = {**clubs, **ufa_clubs}
     _G["cfg"] = EloConfig(**PUBLISHED)
-    _G["stats"] = sorted(
-        load_stat_events(con) + load_ufa_stat_events(con, _G["cfg"]),
-        key=lambda e: e[0],
-    )
+    _G["stats"] = load_stat_events(con)
     con.close()
 
 

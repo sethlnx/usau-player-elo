@@ -2,8 +2,9 @@ import sqlite3
 import unittest
 from unittest.mock import patch
 
-from analysis.backtest import load_ufa_games
+from analysis.backtest import load_ufa_games, replay
 from analysis.site import ufa_game_ratings
+from elo.engine import EloConfig
 from ufa.scrape import SCHEMA, scrape_season
 
 
@@ -83,7 +84,11 @@ class UFAIngestionTests(unittest.TestCase):
                 links[upid] = offset + number
                 stats.append(("real", upid, team, 1, 0, 60, 0, 0, 0, 0, 0))
         self.con.executemany(
-            "INSERT INTO ufa_game_stats VALUES (?,?,?,?,?,?,?,?,?,?,?)", stats
+            "INSERT INTO ufa_game_stats "
+            "(game_id,player_id,team_id,o_points_played,d_points_played,"
+            "seconds_played,goals,assists,blocks,throwaways,drops) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            stats,
         )
 
         with patch("ufa.link.resolve_links", return_value=links):
@@ -98,6 +103,98 @@ class UFAIngestionTests(unittest.TestCase):
         self.assertEqual("ufa:b", clubs[game["away_id"]])
         self.assertEqual(7, len(rosters[game["home_id"]]))
         self.assertEqual(7, len(rosters[game["away_id"]]))
+        self.assertEqual(2, len(game["post_game_stats"]))
+
+    def test_replay_adapter_uses_observed_yards_and_game_environment(self):
+        self.con.executemany(
+            "INSERT INTO ufa_teams "
+            "(team_id,year,full_name) VALUES (?,?,?)",
+            [("a", 2026, "Alpha"), ("b", 2026, "Beta")],
+        )
+        self.con.execute(
+            "INSERT INTO ufa_games VALUES (?,?,?,?,?,?,?,?,?)",
+            ("rich", 2026, "2026-05-01", "a", "b", 3, 3, "Final", "week-2"),
+        )
+        rows = [
+            ("rich", "u1", "a", 10, 2, 2, 1, 0, 1, 0, 0, 100, 50),
+            ("rich", "u2", "a", 10, 1, 1, 0, 0, 0, 0, 0, 50, 25),
+            ("rich", "u3", "b", 10, 2, 2, 0, 0, 1, 0, 0, 75, 50),
+            ("rich", "u4", "b", 10, 1, 1, 0, 0, 0, 0, 0, 25, 25),
+        ]
+        self.con.executemany(
+            "INSERT INTO ufa_game_stats "
+            "(game_id,player_id,team_id,o_points_played,goals,assists,"
+            "blocks,callahans,throwaways,stalls,drops,"
+            "yards_thrown,yards_received) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            rows,
+        )
+        reference = {
+            "coefficients": {
+                "goals": 0.5815, "assists": 0.6926,
+                "blocks": 0.3715, "turnovers": -0.1302,
+            },
+            "observed_ufa": {
+                "yard_coefficient": 0.00663,
+                "score_action_coefficient": 0.223,
+                "rating_scale": 0.2,
+                "possession_value": "game-scoring-efficiency",
+            },
+        }
+
+        with patch(
+            "ufa.link.resolve_links",
+            return_value={"u1": 1, "u2": 2, "u3": 3, "u4": 4},
+        ):
+            games, _, _ = load_ufa_games(self.con, reference)
+
+        self.assertEqual(1, len(games))
+        home_entries, home_id = games[0]["post_game_stats"][0]
+        self.assertEqual(games[0]["home_id"], home_id)
+        quality = {pid: value for pid, _, value in home_entries}
+        # Raw E± uses GameSE = 6 / (6 + 2) = 0.75; the rating input is
+        # normalized because UFA supplies one update per game, not per event.
+        raw_e_plus = 150 * 0.00663 + 4 * 0.223 + (1 - 1) * 0.75
+        self.assertAlmostEqual(raw_e_plus * 0.2, quality[1])
+
+    def test_post_game_stats_cannot_change_an_earlier_prediction(self):
+        base = {
+            "season": 2026, "division": "ufa", "date": "2026-05-01",
+            "home_id": "home", "away_id": "away",
+            "home_score": 10, "away_score": 10,
+        }
+        games = [
+            {**base, "sort": ("2026-05-01", "12:00", 0, "g1")},
+            {
+                **base,
+                "date": "2026-05-08",
+                "sort": ("2026-05-08", "12:00", 0, "g2"),
+                "post_game_stats": [
+                    ([("p1", 1.0, 5.0), ("p2", 1.0, -5.0)], "home:g2"),
+                ],
+            },
+        ]
+        rosters = {"home": ["p1", "p2"], "away": ["p3", "p4"]}
+        clubs = {"home": "home", "away": "away"}
+        cfg = EloConfig(k=0.0, stat_transfer_beta=1.0)
+        ratings = []
+
+        records, _ = replay(
+            "player", games, rosters, clubs, cfg,
+            on_game=lambda _g, _h, _a, model, _pre:
+                ratings.append((model.players["p1"].rating,
+                                model.players["p2"].rating)),
+        )
+        no_stats = [{key: value for key, value in game.items()
+                     if key != "post_game_stats"} for game in games]
+        control, _ = replay("player", no_stats, rosters, clubs, cfg)
+
+        self.assertEqual(
+            [record[3] for record in control],
+            [record[3] for record in records],
+        )
+        self.assertEqual(ratings[0][0], ratings[0][1])
+        self.assertGreater(ratings[1][0], ratings[1][1])
 
     def test_season_rating_is_the_last_game_point_in_that_season(self):
         history = {

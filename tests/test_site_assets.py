@@ -6,7 +6,9 @@ from pathlib import Path
 
 from analysis.backtest import DB_PATH
 from analysis.site import (bucket_urls, content_version, load_csv,
-                           load_ufa_payload, ufa_game_ratings)
+                           load_player_box_score_payload,
+                           load_player_metric_payload, load_ufa_payload,
+                           ufa_game_ratings)
 
 
 class SiteAssetContractTests(unittest.TestCase):
@@ -21,6 +23,73 @@ class SiteAssetContractTests(unittest.TestCase):
 
             source.write_text("second")
             self.assertNotEqual(first, content_version((source,)))
+
+    def test_player_metric_payload_preserves_missing_scores_and_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "player_metrics.csv"
+            path.write_text(
+                "player_id,ovr,thr,pos,off,def,goals,assists,blocks,turnovers,"
+                "season,thr_reliability,pos_reliability,off_reliability,"
+                "def_reliability,stats_through,history_seasons,"
+                "weighted_prior_throw_attempts,model_version\n"
+                "7,88,67,74,,68,26,29,4,12,2026,0.7309,0.8,,0.618,"
+                "2026-08-08,3,145.5,ufa-eb-v4\n"
+            )
+            payload, meta = load_player_metric_payload(path)
+            missing, missing_meta = load_player_metric_payload(
+                Path(tmp) / "absent.csv"
+            )
+        self.assertEqual(
+            [88, 67, 74, None, 68, 26, 29, 4, 12, 2026, 73, 80, None,
+             62, "2026-08-08", 3, 145],
+            payload["7"],
+        )
+        self.assertEqual(
+            {"modelVersion": "ufa-eb-v4", "season": 2026,
+             "statsThrough": "2026-08-08"},
+            meta,
+        )
+        self.assertEqual(({}, {}), (missing, missing_meta))
+
+    def test_box_score_payload_aggregates_complete_events_by_division(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "player_box_scores.csv"
+            path.write_text(
+                "player_id,season,division,goals,assists,blocks,turnovers,"
+                "plus_minus,edge_proxy,team_games,event_end_date,coverage_flags,"
+                "model_version\n"
+                "7,2025,club-women,3,21,2,17,9,14.82,6,2025-10-26,"
+                "gabt-complete,source-aware-edge-v2\n"
+                "7,2025,club-mixed,1,2,0,1,2,1.50,6,2025-09-14,"
+                "gabt-complete,source-aware-edge-v2\n"
+                "9,2025,club-women,4,3,,,7,,6,2025-09-14,"
+                "\"missing:blocks,turnovers\",source-aware-edge-v2\n"
+            )
+            payload, meta = load_player_box_score_payload(path)
+            missing, missing_meta = load_player_box_score_payload(
+                Path(tmp) / "absent.csv"
+            )
+        self.assertEqual(3, len(payload["7"]))
+        self.assertEqual(
+            [2025, -1, 4, 23, 2, 18, 11, 16.32, 1.36, 12, 2, "2025-10-26"],
+            payload["7"][0],
+        )
+        self.assertEqual(
+            [2025, 4, 3, 21, 2, 17, 9, 14.82, 2.47, 6, 1, "2025-10-26"],
+            payload["7"][2],
+        )
+        self.assertNotIn("9", payload)
+        self.assertEqual({
+            "modelVersion": "source-aware-edge-v2",
+            "latestSeason": 2025,
+            "statsThrough": "2025-10-26",
+            "statsThroughBySeasonDivision": {
+                "2025|-1": "2025-10-26",
+                "2025|3": "2025-09-14",
+                "2025|4": "2025-10-26",
+            },
+        }, meta)
+        self.assertEqual(({}, {}), (missing, missing_meta))
     def test_best_roster_without_played_roster_gets_a_lazy_bucket(self):
         from analysis.history_split import split
 

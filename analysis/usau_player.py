@@ -112,10 +112,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from analysis.backtest import (DB_PATH, load_games, load_maps, load_stat_events,
-                               load_ufa_stat_events, metrics)
-from analysis.rankings import PUBLISHED
-from elo.engine import EloConfig
+from analysis.backtest import DB_PATH, load_games, load_maps, load_stat_events, metrics
 from analysis.usau_baseline import (BASE, BLOWOUT_GAP, MIN_KEPT_RESULTS,
                                     TRAIN_SEASONS, _prob, fit_scale, game_x,
                                     score_weight)
@@ -209,11 +206,9 @@ class Corpus:
         self.n_te = len(te_rosters)
         self.n_clubs = len(club_index)
 
-        # Use the published UFA feature mapping for the usage prior; quality
-        # remains unused by this USAU fixed-point comparison model.
-        ufa_cfg = EloConfig(**PUBLISHED)
-        raw = sorted(load_stat_events(con) + load_ufa_stat_events(con, ufa_cfg),
-                     key=lambda e: e[0])
+        # This fixed-point comparison replays USAU games only, so only USAU
+        # event-level involvement belongs in its usage prior.
+        raw = load_stat_events(con)
         self.stat_events = []
         for end, entries, _etid in raw:
             try:

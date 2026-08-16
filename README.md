@@ -333,9 +333,10 @@ deferred core and four on-demand tiers, no server and no network needed; see
 as it does on Pages.
 
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
-searchable player table over all seven divisions, a **Trends** tab drawing one line per
-season for every player or club that has ever closed a season in the top 25,
-and a **Tournaments** browser over all 3,863 events. Club rankings can switch
+searchable player table over all seven divisions, a current UFA player-stats
+view toggled from that same table, a **Trends** tab drawing one line per season
+for every player or club that has ever closed a season in the top 25, and a
+**Tournaments** browser over all 3,863 events. Club rankings can switch
 from the ranked list to a 25-club head-to-head results matrix; green cells are
 winning records, red cells are losing records, and stronger color marks a more
 decisive win-loss split. The **UFA** division includes the available AUDL/UFA
@@ -802,19 +803,19 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   replay. Use `pregame_ratings`, which materializes first; it exists because
   the per-game deltas in the site's drill-down needed a before-picture and the
   obvious `team_rating` call moved Truck Stop 123 Elo.
-  Per-player stats (G/A/D/T, reported at Nationals-level events) feed two
-  mechanisms, ingested only after an event ends: `involvement_credit` splits
-  each game delta by a shrunk usage index (roster-mean preserved), and
-  `stat_transfer_beta` transfers rating zero-sum between teammates by net
-  stat quality. Published rankings config lives in `analysis/rankings.py`
-  (`PUBLISHED`): plain roster mean + both stat mechanisms. Linked UFA
-  seasons feed the same mechanisms (true points-played as usage; counting
-  stats scaled to tournament magnitude), ingested each Sept 1. The loader can
-  additionally use completion volume, completion percentage, throwing yards,
-  receiving yards, and hockey assists as within-team normalized features;
-  their published weights remain zero because the held-out stats-only descent
-  found no validation improvement. Total yards is represented by TY + RY, not
-  counted a third time.
+  Player box scores feed two mechanisms only after the source event is final:
+  `involvement_credit` splits each game delta by a shrunk usage index
+  (roster-mean preserved), and `stat_transfer_beta` transfers rating zero-sum
+  between teammates by E± relative to that team-event mean. Complete USAU
+  G/A/B/T events use the frozen yardage-trained proxy in
+  `data/box_score_reference.json`; partial events inform involvement only and
+  never manufacture a missing block or turnover as zero. UFA uses observed
+  per-game yards and that game's scoring efficiency,
+  `0.00663*yards + 0.223*(goals+assists) + GameSE*(blocks-turnovers)`, after
+  the game prediction and result. Its rating input is scaled by `0.2` because
+  UFA supplies roughly five game-level updates for each USAU event-level
+  update. Published settings in `analysis/rankings.py` are
+  `stat_transfer_beta=12` and `stat_transfer_clamp=90`.
   Final UFA game results also enter the authoritative replay as a third
   division through
   `load_ufa_games`; each game uses the linked players who recorded a point
@@ -832,16 +833,29 @@ writes `players.gender` / `players.gender_source`; see Gender-matching above.
   goals/assists/turns. Low-confidence evidence remains unknown; prior-season
   evidence decays, and `data/player_role_overrides.csv` supplies reviewed
   corrections. Roles are descriptive and do not affect Elo.
-  `player_metrics.py` writes the offline UFA-linked scorecard to
-  `data/player_metrics.csv`. OVR is a fixed 1–99 presentation mapping of Elo;
-  THR/OFF/DEF are role-adjusted empirical-Bayes attributes fitted on the
-  frozen 2022–2025 reference in `data/player_metric_reference.json`. Attribute
-  reliability, raw counts, source date, and missing values remain explicit,
-  and none of these descriptive attributes feed Elo. UFA publishes rich stats
-  only as cumulative season rows, so `stats_through` uses that season's latest
+  `player_metrics.py` writes the UFA-linked scorecard to
+  `data/player_metrics.csv`. Version `ufa-eb-v4` uses a stable game-style
+  1–99 presentation: the UFA reference midpoint is 60 OVR, an average
+  role-adjusted attribute is 70, and each model standard deviation adds ten
+  points. THR combines huck rate and accuracy, yards per throw, and assists
+  plus hockey assists per throw. POS separately combines completion rate,
+  throwaway and stall avoidance, and catch security. Current-season evidence
+  has full weight; each earlier season retains half the weight of the following
+  season. Sparse current samples use that recency-weighted player history, then
+  shrink toward the role average; historical evidence is capped at four times
+  the fitted group-prior exposure. THR/POS/OFF/DEF use the frozen 2022–2025
+  reference in `data/player_metric_reference.json`. Attribute reliability,
+  history seasons, weighted prior throws, raw counts, source date, and missing
+  values remain explicit. These presentation attributes do not feed Elo
+  directly; the source per-game E± described above does.
+  UFA publishes the scorecard's rich stats only as cumulative season rows, so
+  `stats_through` uses that season's latest
   dated Final (September 1 only when game dates are absent); an `--as-of`
   cutoff before it excludes the whole row rather than leaking later games.
-  The pilot is intentionally absent from the generated site.
+  The Players table's **Player stats** checkbox switches between the rating
+  columns and the current OVR/THR/POS/OFF/DEF plus G/A/B/T scorecard;
+  historical seasons disable the switch because no historical scorecard is
+  published.
   `usau_baseline.py` reimplements USA Ultimate's own iterative rankings
   algorithm (v2.0) from our game data and scores it walk-forward on the
   same holdout — the plan's "comparison model 4".

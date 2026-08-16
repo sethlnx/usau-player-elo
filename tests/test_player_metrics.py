@@ -4,10 +4,14 @@ import unittest
 from pathlib import Path
 
 from analysis.player_metrics import (
+    ATTRIBUTE_DISPLAY_CENTER,
     MODEL_VERSION,
     OUTPUT_FIELDS,
+    OVR_DISPLAY_CENTER,
     REFERENCE_SEASONS,
     STAT_FIELDS,
+    _attribute_display_score,
+    _ovr_score,
     build_snapshot,
     fit_reference,
     write_snapshot,
@@ -135,30 +139,113 @@ class PlayerMetricTests(unittest.TestCase):
         )
         self.assertEqual(["Bad", "Good"], [row["player"] for row in rows])
         by_name = {row["player"]: row for row in rows}
-        for attribute in ("thr", "off", "def"):
+        for attribute in ("thr", "pos", "off", "def"):
             self.assertGreater(by_name["Good"][attribute], by_name["Bad"][attribute])
         self.assertEqual(MODEL_VERSION, by_name["Good"]["model_version"])
         self.assertIn("current-season-cumulative", by_name["Good"]["coverage_flags"])
 
-    def test_small_samples_shrink_more_toward_average(self):
+    def test_equal_huck_rate_rewards_supported_volume_through_shrinkage(self):
         self.add_current_player(103, "High exposure", 1800)
         self.add_current_player(104, "Low exposure", 1800)
+        high = self.current_row(103, "good", 2.0)
+        low = self.current_row(104, "good", 0.05)
+        self.assertEqual(
+            high["hucksattempted"] / high["throwattempts"],
+            low["hucksattempted"] / low["throwattempts"],
+        )
+        self.assertGreater(high["hucksattempted"], low["hucksattempted"])
         rows = build_snapshot(
-            self.reference_rows + [
-                self.current_row(103, "good", 2.0),
-                self.current_row(104, "good", 0.05),
-            ],
+            self.reference_rows + [high, low],
             self.players, self.roles, self.reference, 2026, "2026-08-14",
         )
         by_name = {row["player"]: row for row in rows}
         self.assertGreater(
-            abs(by_name["High exposure"]["thr"] - 50),
-            abs(by_name["Low exposure"]["thr"] - 50),
+            by_name["High exposure"]["thr"], by_name["Low exposure"]["thr"],
         )
         self.assertGreater(
             by_name["High exposure"]["thr_reliability"],
             by_name["Low exposure"]["thr_reliability"],
         )
+        self.assertLess(
+            abs(by_name["Low exposure"]["thr"] - ATTRIBUTE_DISPLAY_CENTER),
+            abs(by_name["High exposure"]["thr"] - ATTRIBUTE_DISPLAY_CENTER),
+        )
+        self.assertEqual(0, by_name["Low exposure"]["history_seasons"])
+        self.assertIn("role-average-prior", by_name["Low exposure"]["coverage_flags"])
+
+    def test_recent_history_outweighs_older_history_for_sparse_current_stats(self):
+        self.add_current_player(110, "Recently good", 1800)
+        self.add_current_player(111, "Formerly good", 1800)
+        current_recent = self.current_row(110, "bad", 0.05)
+        current_former = self.current_row(111, "bad", 0.05)
+
+        def history(pid, quality, season, exposure=1.0):
+            row = self.current_row(pid, quality, exposure)
+            row.update({"season": season, "stats_through": f"{season}-08-08"})
+            return row
+
+        rows = build_snapshot(
+            self.reference_rows + [
+                history(110, "good", 2025), history(110, "bad", 2022),
+                history(111, "bad", 2025), history(111, "good", 2022),
+                current_recent, current_former,
+            ],
+            self.players, self.roles, self.reference, 2026, "2026-08-14",
+        )
+        by_name = {row["player"]: row for row in rows}
+        self.assertGreater(
+            by_name["Recently good"]["thr"], by_name["Formerly good"]["thr"],
+        )
+        self.assertEqual(2, by_name["Recently good"]["history_seasons"])
+        self.assertEqual(
+            56.2, by_name["Recently good"]["weighted_prior_throw_attempts"],
+        )
+        self.assertIn(
+            "history-prior:2-seasons",
+            by_name["Recently good"]["coverage_flags"],
+        )
+
+    def test_historical_evidence_is_capped_before_dominating_current_stats(self):
+        self.add_current_player(112, "Large history", 1800)
+        self.add_current_player(113, "Huge history", 1800)
+        large = self.current_row(112, "good", 100.0)
+        huge = self.current_row(113, "good", 1000.0)
+        for row in (large, huge):
+            row.update({"season": 2025, "stats_through": "2025-08-08"})
+        rows = build_snapshot(
+            self.reference_rows + [
+                large, huge,
+                self.current_row(112, "bad"), self.current_row(113, "bad"),
+            ],
+            self.players, self.roles, self.reference, 2026, "2026-08-14",
+        )
+        by_name = {row["player"]: row for row in rows}
+        self.assertEqual(
+            by_name["Large history"]["thr"], by_name["Huge history"]["thr"],
+        )
+
+    def test_pos_separates_security_from_throwing_pressure(self):
+        self.add_current_player(108, "Secure", 1800)
+        self.add_current_player(109, "Careless", 1800)
+        secure = self.current_row(108, "good")
+        careless = self.current_row(109, "good")
+        secure.update({"catches": 100, "drops": 0})
+        careless.update({
+            "completions": 70, "throwaways": 25, "catches": 90, "drops": 10,
+        })
+        rows = build_snapshot(
+            self.reference_rows + [secure, careless],
+            self.players, self.roles, self.reference, 2026, "2026-08-14",
+        )
+        by_name = {row["player"]: row for row in rows}
+        self.assertEqual(by_name["Secure"]["thr"], by_name["Careless"]["thr"])
+        self.assertGreater(by_name["Secure"]["pos"], by_name["Careless"]["pos"])
+
+    def test_game_style_scale_anchors_pros_and_elites(self):
+        self.assertEqual(70, _attribute_display_score(0.0))
+        self.assertEqual(90, _attribute_display_score(2.0))
+        self.assertEqual(60, _ovr_score(0.0))
+        self.assertEqual(90, _ovr_score(3.0))
 
     def test_post_cutoff_season_total_cannot_enter_snapshot(self):
         self.add_current_player(107, "Future", 1800)
