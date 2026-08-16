@@ -27,12 +27,14 @@ report at data/ambiguities.csv, and cross-division links at
 data/cross_division_links.csv.
 
 Manual review verdicts live in data/link_overrides.csv (norm_name, action,
-note, scope, clubs): action "block" splits that name's college and club
-identities (the name match was two different people); an unscoped "merge" is
-its inverse and forces one identity for a name the (division, season) rule
-called ambiguous. A scoped "merge" joins only the listed divisions and/or
-canonical clubs for a name that the gender or collision split would otherwise
-separate. Use `|` between scope divisions or clubs. "confirm" marks the bridge
+note, scope, clubs, target, event_ids): action "block" splits that name's
+college and club identities (the name match was two different people); an
+unscoped "merge" is its inverse and forces one identity for a name the
+(division, season) rule called ambiguous. A row with `target` is a scoped
+roster spelling correction; `event_ids` limits it to the listed events.
+A scoped "merge" joins only the listed divisions and/or canonical clubs for a
+name that the gender or collision split would otherwise separate. Use `|`
+between scope divisions, clubs, and event IDs. "confirm" marks the bridge
 reviewed-OK so audits skip it. See analysis/bridge_audit.py for the review
 queue.
 """
@@ -237,6 +239,37 @@ def load_overrides(path: Path) -> dict[str, str]:
                 for r in csv.DictReader(f) if r.get("norm_name")}
 
 
+
+def load_scoped_aliases(
+        path: Path,
+) -> dict[str, tuple[str, set[int], set[str], set[str]]]:
+    """Return reviewed raw-name -> canonical-name roster corrections.
+
+    Each correction may be limited by event ID, division, and canonical club.
+    The scope is intentionally explicit so a nickname correction cannot merge
+    a separate same-named player elsewhere in the corpus.
+    """
+    if not path.exists():
+        return {}
+    aliases = {}
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            if (row.get("action") or "").strip().lower() != "merge":
+                continue
+            target = norm_name(row.get("target") or "")
+            if not target:
+                continue
+            source = norm_name(row.get("norm_name") or "")
+            events = {int(v) for v in (row.get("event_ids") or "").split("|")
+                      if v.strip().isdigit()}
+            divisions = {v.strip() for v in (row.get("scope") or "").split("|")
+                         if v.strip()}
+            clubs = {norm_club(v, v) for v in (row.get("clubs") or "").split("|")
+                     if v.strip()}
+            if source:
+                aliases[source] = (target, events, divisions, clubs)
+    return aliases
+
 def load_merge_scopes(path: Path) -> dict[str, dict[str, dict[str, tuple]]]:
     """Return scoped merge groups indexed by normalized division or club."""
     if not path.exists():
@@ -295,6 +328,7 @@ def has_date_conflict(windows: list[tuple[str, str, str, int]]) -> bool:
 def main():
     con = sqlite3.connect(DB_PATH)
     overrides = load_overrides(AMBIGUITY_REPORT.parent / "link_overrides.csv")
+    aliases = load_scoped_aliases(AMBIGUITY_REPORT.parent / "link_overrides.csv")
     merge_scopes = load_merge_scopes(AMBIGUITY_REPORT.parent / "link_overrides.csv")
     blocked = {n for n, a in overrides.items() if a == "block"}
     scoped_names = set(merge_scopes)
@@ -325,10 +359,20 @@ def main():
     adult_mens = set()
     for (etid, raw_name, full_name, disp, season, division,
          start_date, end_date, event_id, pronouns) in rows:
-        nname = norm_name(raw_name)
-        if not nname:
-            continue
+        raw_nname = norm_name(raw_name)
         club = norm_club(full_name, disp)
+        if not raw_nname:
+            continue
+        alias = aliases.get(raw_nname)
+        if alias is not None:
+            target, event_ids, divisions, clubs = alias
+            if ((event_ids and event_id not in event_ids)
+                    or (divisions and division not in divisions)
+                    or (clubs and club not in clubs)):
+                alias = None
+        nname = alias[0] if alias is not None else raw_nname
+        canonical_display = (nname.title() if alias is not None else
+                             re.sub(r"\s+", " ", raw_name).strip())
         appearances[nname][(division, season)].add(club)
         divisions_of[nname].add(division)
         dg = division_gender(division)
@@ -344,7 +388,7 @@ def main():
             windows[nname].append((club, start_date, end_date, event_id))
         roster_rows.append((etid, raw_name, nname, club, season, division,
                             pronoun_gender(pronouns)))
-        display_for.setdefault(nname, re.sub(r"\s+", " ", raw_name).strip())
+        display_for.setdefault(nname, canonical_display)
 
     # A name played in BOTH a men's division and the women's division is two
     # people, not a bridge — no body is eligible for both series. Their shards

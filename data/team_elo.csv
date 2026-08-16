@@ -14,10 +14,10 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 13,Chain Lightning,chain lightning,club-men,2017.2,19,2026,2026 Pro Elite Challenge East,2026-06-27
 14,Furious George,furious george,club-men,1988.6,25,2026,2026 Pro Elite Challenge West,2026-07-11
 15,Doublewide,doublewide,club-men,1981.1,21,2026,2026 Pro Elite Challenge East,2026-06-27
-16,Dark Star,dark star,club-men,1963.3,22,2026,2026 Select Flight Invite - West,2026-07-25
-17,Haymaker,haymaker,club-men,1963.0,25,2026,Lehigh Valley Invite 2026,2026-08-01
-18,Mad Men,mad men,club-men,1962.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
-19,Red Tide,red tide,club-men,1962.9,25,2026,Vacationland 2026,2026-08-08
+16,Haymaker,haymaker,club-men,1963.0,25,2026,Lehigh Valley Invite 2026,2026-08-01
+17,Mad Men,mad men,club-men,1962.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
+18,Red Tide,red tide,club-men,1962.9,25,2026,Vacationland 2026,2026-08-08
+19,Dark Star,dark star,club-men,1961.2,22,2026,2026 Select Flight Invite - West,2026-07-25
 20,Magnitude (Quake)-Senior,magnitude (quake)-senior,club-men,1959.2,20,2026,Boston Invite 2026,2026-07-11
 21,Raleigh-Durham United,raleigh-durham united,club-men,1957.2,26,2026,2026 Pro Elite Challenge East,2026-06-27
 22,Blueprint,blueprint,club-men,1943.4,26,2026,2026 Select Flight Invite East,2026-07-25
@@ -33,198 +33,193 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 32,Oak Grove Boys,oak grove boys,club-men,1840.3,26,2026,Lehigh Valley Invite 2026,2026-08-01
 33,baNC,banc,club-men,1836.5,26,2026,HoDown Showdown 2026,2026-08-08
 34,Nighthawk,nighthawk,club-men,1825.4,20,2026,2026 Select Flight Invite East,2026-07-25
-35,Wavestorms,wavestorms,club-men,1809.1,24,2026,2026 Select Flight Invite - West,2026-07-25
+35,Wavestorms,wavestorms,club-men,1809.0,24,2026,2026 Select Flight Invite - West,2026-07-25
 36,Tanasi,tanasi,club-men,1804.1,24,2026,HoDown Showdown 2026,2026-08-08
 37,I-69,i-69,club-men,1802.3,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
 38,Red Circus,red circus,club-men,1793.6,21,2026,Vacationland 2026,2026-08-08
 39,Kansas City Smokestack,kansas city smokestack,club-men,1785.7,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
 40,Grudge,grudge,club-men,1785.1,22,2026,Eugene Summer Solstice 2026,2026-06-27
-41,Wretched Refuse,wretched refuse,club-men,1783.5,25,2026,2nd Annual Deseret Invite,2026-07-11
+41,Wretched Refuse,wretched refuse,club-men,1779.5,25,2026,Ski Town Classic 2026,2026-08-15
 42,Flying Dutchmen,flying dutchmen,club-men,1774.0,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
-43,Cash Crop 2,cash crop 2,club-men,1766.0,20,2026,HoDown Showdown 2026,2026-08-08
-44,Mint,mint,club-men,1760.9,25,2026,HoDown Showdown 2026,2026-08-08
-45,Switchback,switchback,club-men,1759.4,17,2026,2026 Select Flight Invite - West,2026-07-25
-46,Alamode,alamode,club-men,1756.9,24,2026,Heavyweights 2026,2026-07-11
+43,Alamode,alamode,club-men,1772.6,22,2026,Ski Town Classic 2026,2026-08-15
+44,Cash Crop 2,cash crop 2,club-men,1766.0,20,2026,HoDown Showdown 2026,2026-08-08
+45,Mint,mint,club-men,1760.9,25,2026,HoDown Showdown 2026,2026-08-08
+46,Switchback,switchback,club-men,1759.3,17,2026,2026 Select Flight Invite - West,2026-07-25
 47,UPDOG,updog,club-men,1756.6,23,2026,Lehigh Valley Invite 2026,2026-08-01
 48,General Strike,general strike,club-men,1755.4,16,2026,2026 Select Flight Invite East,2026-07-25
 49,Zodiac,zodiac,club-men,1755.1,17,2026,Lehigh Valley Invite 2026,2026-08-01
-50,Trident,trident,club-men,1753.8,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
+50,Trident,trident,club-men,1753.7,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
 51,Colt,colt,club-men,1753.6,26,2026,Vacationland 2026,2026-08-08
 52,Mallard,mallard,club-men,1747.8,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
 53,(washed),(washed),club-men,1746.1,20,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
 54,Rumspringa,rumspringa,club-men,1744.2,21,2026,Lehigh Valley Invite 2026,2026-08-01
 55,H.I.P,h.i.p,club-men,1740.9,16,2026,PB&J 2026,2026-08-01
 56,WOMP,womp,club-men,1740.7,25,2026,Kentucky Fried Classic 2026,2026-08-08
-57,Warao,warao,club-men,1733.2,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-58,Iditarod,iditarod,club-men,1726.3,26,2026,Vacationland 2026,2026-08-08
-59,Town Hall Stars,town hall stars,club-men,1724.1,15,2026,Battle For the Beltway 2026,2026-07-19
-60,ISO Atmo,iso atmo,club-men,1723.6,25,2026,2026 Select Flight Invite - West,2026-07-25
-61,Texas BBQ,texas bbq,club-men,1722.4,22,2026,Riverside Classic 2026,2026-07-11
-62,Portland TremOR,portland tremor,club-men,1721.6,24,2026,Eugene Summer Solstice 2026,2026-06-27
-63,Apollo,apollo,club-men,1716.8,25,2026,Kentucky Fried Classic 2026,2026-08-08
-64,Fungi,fungi,club-men,1716.3,26,2026,2026 Pro Elite Challenge West,2026-07-11
-65,ELDL,eldl,club-men,1704.7,19,2026,Cooler Classic 37 (Men & Women),2026-08-08
-66,Zoboomafoo,zoboomafoo,club-men,1704.0,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
-67,PowderHogs,powderhogs,club-men,1703.2,24,2026,2nd Annual Deseret Invite,2026-07-11
-68,EVOLUTION,evolution,club-men,1703.2,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-69,EtobiCoke,etobicoke,club-men,1700.2,23,2026,Lehigh Valley Invite 2026,2026-08-01
-70,Garden State Ultimate,garden state ultimate,club-men,1698.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
-71,Shade,shade,club-men,1695.5,26,2026,Vacationland 2026,2026-08-08
-72,ZOO,zoo,club-men,1687.6,20,2026,PB&J 2026,2026-08-01
-73,Utah Swarm U20 Boys,utah swarm u20 boys,club-men,1687.3,14,2026,2nd Annual Deseret Invite,2026-07-11
-74,BUDA U20B,buda u20b,club-men,1684.7,22,2026,Boston Invite 2026,2026-07-11
-75,Texas Tea-A,texas tea-a,club-men,1682.9,23,2026,PB&J 2026,2026-08-01
-76,CITYWIDE Special,citywide special,club-men,1681.9,23,2026,Lehigh Valley Invite 2026,2026-08-01
-77,Black Lung,black lung,club-men,1678.6,21,2026,Kentucky Fried Classic 2026,2026-08-08
-78,Gummy Bear Hitmen,gummy bear hitmen,club-men,1677.5,26,2026,Lehigh Valley Invite 2026,2026-08-01
-79,Knights of Ni,knights of ni,club-men,1674.8,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
-80,OAT,oat,club-men,1674.2,26,2026,2026 Select Flight Invite - West,2026-07-25
-81,Lantern,lantern,club-men,1671.3,26,2026,Vacationland 2026,2026-08-08
-82,Sawtooth,sawtooth,club-men,1670.8,21,2026,2nd Annual Deseret Invite,2026-07-11
-83,Big Wrench,big wrench,club-men,1667.5,26,2026,Vacationland 2026,2026-08-08
-84,Riverside,riverside,club-men,1663.6,26,2026,Riverside Classic 2026,2026-07-11
-85,Fuse,fuse,club-men,1659.4,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
-86,Club M - Manic,club m - manic,club-men,1657.8,19,2026,Lehigh Valley Invite 2026,2026-08-01
-87,Skipjack,skipjack,club-men,1654.3,22,2026,San Diego Round Robin,2026-06-27
-88,Tugboat,tugboat,club-men,1637.2,26,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
-89,X Wives-A,x wives-a,club-men,1634.5,17,2026,2nd Annual Deseret Invite,2026-07-11
-90,Atlanta Arson,atlanta arson,club-men,1633.9,23,2026,HoDown Showdown 2026,2026-08-08
-91,Dynasty,dynasty,club-men,1624.3,22,2026,HoDown Showdown 2026,2026-08-08
-92,Triumph,triumph,club-men,1621.0,26,2026,Lehigh Valley Invite 2026,2026-08-01
-93,Blackfish,blackfish,club-men,1616.7,17,2026,2026 Select Flight Invite - West,2026-07-25
-94,MOB Ultimate,mob ultimate,club-men,1610.8,25,2026,Lehigh Valley Invite 2026,2026-08-01
-95,Skeleton Squad,skeleton squad,club-men,1608.7,24,2026,Vacationland 2026,2026-08-08
-96,Colonels,colonels,club-men,1608.1,26,2026,Kentucky Fried Classic 2026,2026-08-08
-97,Harvest Moon,harvest moon,club-men,1607.7,24,2026,HoDown Showdown 2026,2026-08-08
-98,Forest City,forest city,club-men,1604.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
-99,Endgame,endgame,club-men,1604.8,19,2026,Kentucky Fried Classic 2026,2026-08-08
-100,John Doe,john doe,club-men,1602.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
-101,Queen City Kings,queen city kings,club-men,1599.2,26,2026,HoDown Showdown 2026,2026-08-08
-102,BAG,bag,club-men,1598.6,26,2026,Vacationland 2026,2026-08-08
-103,Touch of Grey,touch of grey,club-men,1597.9,22,2026,HoDown Showdown 2026,2026-08-08
-104,DAPPER,dapper,club-men,1597.0,22,2026,Vacationland 2026,2026-08-08
-105,Swordfish,swordfish,club-men,1596.7,26,2026,2026 Select Flight Invite - West,2026-07-25
-106,Ascension,ascension,club-men,1592.0,18,2026,Vacationland 2026,2026-08-08
-107,Sebastopol Orchard,sebastopol orchard,club-men,1591.8,21,2026,Summer Bash 2026,2026-06-27
-108,Gang Of Disc,gang of disc,club-men,1591.6,21,2026,RagnaRock 2026,2026-07-11
-109,Odyssey,odyssey,club-men,1581.8,24,2026,Vacationland 2026,2026-08-08
-110,Lil’ Huckers,lil’ huckers,club-men,1577.1,26,2026,2026 Select Flight Invite - West,2026-07-25
-111,DeMo,demo,club-men,1574.8,23,2026,Cooler Classic 37 (Men & Women),2026-08-08
-112,Rebels,rebels,club-men,1564.7,25,2026,Lehigh Valley Invite 2026,2026-08-01
-113,Resurgam Ultimate,resurgam ultimate,club-men,1564.3,26,2026,Vacationland 2026,2026-08-08
-114,Cookie Mon$terz,cookie mon$terz,club-men,1563.9,17,2026,RagnaRock 2026,2026-07-11
-115,Colorado Cutthroat U-20 Boys,colorado cutthroat u-20 boys,club-men,1555.8,25,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
-116,BANG,bang,club-men,1552.5,18,2026,2026 Antlerlock,2026-06-27
-117,DINGWOP,dingwop,club-men,1551.6,16,2026,Cooler Classic 37 (Men & Women),2026-08-08
-118,Crypt,crypt,club-men,1550.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
-119,Dreadnought,dreadnought,club-men,1544.2,26,2026,Heavyweights 2026,2026-07-11
-120,Pittsburgh Stealers,pittsburgh stealers,club-men,1543.9,23,2026,Kentucky Fried Classic 2026,2026-08-08
-121,UpRoar,uproar,club-men,1542.8,24,2026,HoDown Showdown 2026,2026-08-08
-122,ATLiens,atliens,club-men,1538.7,18,2026,Club Terminus 2026,2026-06-27
-123,Delirium,delirium,club-men,1538.1,18,2026,Club Terminus 2026,2026-06-27
-124,Magma Bears,magma bears,club-men,1535.3,24,2026,Vacationland 2026,2026-08-08
-125,Psychedelic,psychedelic,club-men,1534.8,26,2026,HoDown Showdown 2026,2026-08-08
-126,Charleston Heat Stroke,charleston heat stroke,club-men,1532.9,18,2026,HoDown Showdown 2026,2026-08-08
-127,Atlanta Outlaws,atlanta outlaws,club-men,1532.3,25,2026,Filling the Void 2026,2026-07-18
-128,Battleship,battleship,club-men,1527.0,18,2026,Heatstroke,2026-06-06
-129,Seven Gills,seven gills,club-men,1524.8,21,2026,Eugene Summer Solstice 2026,2026-06-27
-130,Roundhouse,roundhouse,club-men,1522.4,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
-131,OPE,ope,club-men,1522.4,21,2026,Cooler Classic 37 (Men & Women),2026-08-08
-132,Cozy Boys,cozy boys,club-men,1516.2,22,2026,Riverside Classic 2026,2026-07-11
-133,Junco,junco,club-men,1515.0,20,2026,2026 Select Flight Invite - West,2026-07-25
-134,ODOT,odot,club-men,1512.4,10,2026,Eugene Summer Solstice 2026,2026-06-27
-135,Romulus,romulus,club-men,1510.8,24,2026,HoDown Showdown 2026,2026-08-08
-136,DAP LAB,dap lab,club-men,1504.1,15,2026,Flickel City Classic,2026-07-11
-137,Beef Depot,beef depot,club-men,1503.9,23,2026,Lehigh Valley Invite 2026,2026-08-01
-138,Hazard,hazard,club-men,1498.7,21,2026,Lehigh Valley Invite 2026,2026-08-01
-139,Cache Valley High Ground,cache valley high ground,club-men,1497.9,10,2026,2026 Select Flight Invite - West,2026-07-25
-140,Lil Heroes,lil heroes,club-men,1496.5,26,2026,Riverside Classic 2026,2026-07-11
-141,Oregon Trainwreck,oregon trainwreck,club-men,1495.2,21,2026,Eugene Summer Solstice 2026,2026-06-27
-142,NOx,nox,club-men,1486.4,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
-143,El Niño,el niño,club-men,1482.1,20,2026,Witching Hour 2026,2026-06-27
-144,Scythe,scythe,club-men,1480.1,18,2026,Heavyweights 2026,2026-07-11
-145,Rawhide,rawhide,club-men,1477.3,18,2026,Texas 2 Finger 2026,2026-06-27
-146,Alliance,alliance,club-men,1477.0,23,2026,Club Terminus 2026,2026-06-27
-147,Battery,battery,club-men,1470.4,26,2026,Summer Bash 2026,2026-06-27
-148,Alibi,alibi,club-men,1469.6,22,2026,Lehigh Valley Invite 2026,2026-08-01
-149,OC Crows,oc crows,club-men,1469.6,10,2026,San Diego Round Robin,2026-06-27
-150,Rice Box,rice box,club-men,1466.1,23,2026,PB&J 2026,2026-08-01
-151,Winc City Fog,winc city fog,club-men,1463.4,25,2026,Lehigh Valley Invite 2026,2026-08-01
-152,Minnesota Superior U20B,minnesota superior u20b,club-men,1462.8,24,2026,Heavyweights 2026,2026-07-11
-153,Make it Rain,make it rain,club-men,1458.0,16,2026,Eugene Summer Solstice 2026,2026-06-27
-154,The Incline,the incline,club-men,1452.7,15,2026,Texas 2 Finger 2026,2026-06-27
-155,M.Y.T.H.O.S.,m.y.t.h.o.s.,club-men,1451.2,23,2026,Cooler Classic 37 (Men & Women),2026-08-08
-156,Firefall,firefall,club-men,1450.4,24,2026,Summer Bash 2026,2026-06-27
-157,Rubicon Rapids,rubicon rapids,club-men,1445.9,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
-158,Florida Flo,florida flo,club-men,1444.0,24,2026,HoDown Showdown 2026,2026-08-08
-159,Nocturnal,nocturnal,club-men,1438.1,26,2026,Kentucky Fried Classic 2026,2026-08-08
-160,Dub Club,dub club,club-men,1437.1,25,2026,Lehigh Valley Invite 2026,2026-08-01
-161,Timber,timber,club-men,1434.8,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
-162,Arizona Frisbee Club,arizona frisbee club,club-men,1433.4,19,2026,San Diego Round Robin,2026-06-27
-163,Green Mountain Boys,green mountain boys,club-men,1428.5,10,2026,2026 Antlerlock,2026-06-27
-164,Connecticut 9 to 5,connecticut 9 to 5,club-men,1420.6,20,2026,Vacationland 2026,2026-08-08
-165,STL Moonar,stl moonar,club-men,1418.7,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
-166,Heartbreak,heartbreak,club-men,1409.9,25,2026,Eugene Summer Solstice 2026,2026-06-27
-167,Texas Duffy,texas duffy,club-men,1409.0,22,2026,PB&J 2026,2026-08-01
-168,Forge,forge,club-men,1408.1,23,2026,PB&J 2026,2026-08-01
-169,L.U.T $ack,l.u.t $ack,club-men,1400.8,20,2026,HoDown Showdown 2026,2026-08-08
-170,Red Lotus,red lotus,club-men,1399.5,22,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
-171,Give Me Death,give me death,club-men,1398.6,26,2026,Battle For the Beltway 2026,2026-07-19
-172,New Jersey Gemini,new jersey gemini,club-men,1398.2,26,2026,Lehigh Valley Invite 2026,2026-08-01
-173,EZ,ez,club-men,1396.2,21,2026,Lehigh Valley Invite 2026,2026-08-01
-174,F-Words,f-words,club-men,1396.0,19,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
-175,NC Brickhouse-Upper,nc brickhouse-upper,club-men,1395.4,25,2026,HoDown Showdown 2026,2026-08-08
-176,Friendly Fire-C,friendly fire-c,club-men,1387.6,16,2026,Cooler Classic 37 (Men & Women),2026-08-08
-177,On Ramp,on ramp,club-men,1387.1,23,2026,Kentucky Fried Classic 2026,2026-08-08
-178,Buoyancy,buoyancy,club-men,1379.8,17,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
-179,Buffalo Frostbite,buffalo frostbite,club-men,1379.2,25,2026,Flickel City Classic,2026-07-11
-180,Space Cowboys,space cowboys,club-men,1377.8,23,2026,HoDown Showdown 2026,2026-08-08
-181,Enigma,enigma,club-men,1376.3,17,2026,Kentucky Fried Classic 2026,2026-08-08
-182,Digit,digit,club-men,1374.2,16,2026,Summer Bash 2026,2026-06-27
-183,Tennessee Folklore,tennessee folklore,club-men,1370.1,18,2026,HoDown Showdown 2026,2026-08-08
-184,ElecTriCity,electricity,club-men,1368.8,17,2026,HoDown Showdown 2026,2026-08-08
-185,Minnesota Superior U17B,minnesota superior u17b,club-men,1366.5,24,2026,Heavyweights 2026,2026-07-11
-186,Mischief,mischief,club-men,1361.1,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
-187,Smogborn,smogborn,club-men,1348.2,18,2026,Flickel City Classic,2026-07-11
-188,Nomads,nomads,club-men,1346.1,21,2026,Cooler Classic 37 (Men & Women),2026-08-08
-189,Whittz Boyz,whittz boyz,club-men,1338.8,15,2026,HoDown Showdown 2026,2026-08-08
-190,Wave,wave,club-men,1334.3,26,2026,Vacationland 2026,2026-08-08
-191,Barefoot,barefoot,club-men,1329.9,13,2026,Kentucky Fried Classic 2026,2026-08-08
-192,Shift,shift,club-men,1312.0,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
-193,Long Island Riff Raff,long island riff raff,club-men,1303.3,22,2026,Lehigh Valley Invite 2026,2026-08-01
-194,MBTA,mbta,club-men,1302.3,26,2026,Vacationland 2026,2026-08-08
-195,BUDA Regional Select,buda regional select,club-men,1302.0,21,2026,Boston Invite 2026,2026-07-11
-196,San Antonio Warhawks,san antonio warhawks,club-men,1301.0,21,2026,PB&J 2026,2026-08-01
-197,Southern Hospitality,southern hospitality,club-men,1299.8,19,2026,RagnaRock 2026,2026-07-11
-198,Journeymen,journeymen,club-men,1294.5,17,2026,Summer Bash 2026,2026-06-27
-199,Hydra,hydra,club-men,1292.4,15,2026,HoDown Showdown 2026,2026-08-08
-200,Tofu Junction,tofu junction,club-men,1265.6,17,2026,Battle For the Beltway 2026,2026-07-19
-201,Conspiracy Theory,conspiracy theory,club-men,1264.6,21,2026,Cooler Classic 37 (Men & Women),2026-08-08
-202,Savannah Wild,savannah wild,club-men,1261.0,16,2026,HoDown Showdown 2026,2026-08-08
-203,Anchor,anchor,club-men,1257.3,16,2026,Summer Bash 2026,2026-06-27
-204,Chemical X,chemical x,club-men,1249.1,14,2026,Lehigh Valley Invite 2026,2026-08-01
-205,Bodega Cats,bodega cats,club-men,1248.1,17,2026,Lehigh Valley Invite 2026,2026-08-01
-206,Red Dawn,red dawn,club-men,1247.3,19,2026,Summer Bash 2026,2026-06-27
-207,Burning River,burning river,club-men,1246.2,23,2026,Heavyweights 2026,2026-07-11
-208,Supercell,supercell,club-men,1240.8,13,2026,RagnaRock 2026,2026-07-11
-209,Gambit,gambit,club-men,1240.4,21,2026,HoDown Showdown 2026,2026-08-08
-210,Motive,motive,club-men,1233.1,22,2026,Lehigh Valley Invite 2026,2026-08-01
-211,Original Recipe,original recipe,club-men,1228.0,22,2026,Kentucky Fried Classic 2026,2026-08-08
-212,Kansas City Northern Lines,kansas city northern lines,club-men,1227.7,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
-213,Maumee Boys,maumee boys,club-men,1220.9,21,2026,Kentucky Fried Classic 2026,2026-08-08
-214,Spring Break '93,spring break '93,club-men,1216.9,17,2026,2026 Antlerlock,2026-06-27
-215,Players Into Serious Sports,players into serious sports,club-men,1213.8,21,2026,Club Terminus 2026,2026-06-27
-216,Black Gold,black gold,club-men,1209.9,17,2026,PB&J 2026,2026-08-01
-217,Colorado Cutthroat U-17 Boys,colorado cutthroat u-17 boys,club-men,1191.3,24,2026,Cutthroat Club Round Robin 2026,2026-05-30
-218,Sky-90,sky-90,club-men,1167.0,13,2026,Eugene Summer Solstice 2026,2026-06-27
-219,Inferno Ultimate,inferno ultimate,club-men,1165.8,11,2026,Lehigh Valley Invite 2026,2026-08-01
-220,Frostchomp,frostchomp,club-men,1160.7,11,2026,Flickel City Classic,2026-07-11
-221,Milwaukee Breaker,milwaukee breaker,club-men,1147.6,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
-222,Mayhem-Dev,mayhem-dev,club-men,1100.5,12,2026,SCINNY 2026,2026-06-20
-223,Deaf Fruit,deaf fruit,club-men,1076.4,15,2026,PB&J 2026,2026-08-01
-224,Virginia Vortex,virginia vortex,club-men,1064.1,25,2026,Battle For the Beltway 2026,2026-07-19
-225,Flux,flux,club-men,1059.5,16,2026,HoDown Showdown 2026,2026-08-08
-226,Colorado Cutthroat U-20 Boys TWO,colorado cutthroat u-20 boys two,club-men,970.0,26,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
+57,Texas BBQ,texas bbq,club-men,1736.6,19,2026,Ski Town Classic 2026,2026-08-15
+58,Warao,warao,club-men,1733.2,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+59,Iditarod,iditarod,club-men,1726.3,26,2026,Vacationland 2026,2026-08-08
+60,Town Hall Stars,town hall stars,club-men,1724.1,15,2026,Battle For the Beltway 2026,2026-07-19
+61,Portland TremOR,portland tremor,club-men,1721.6,24,2026,Eugene Summer Solstice 2026,2026-06-27
+62,Apollo,apollo,club-men,1716.8,25,2026,Kentucky Fried Classic 2026,2026-08-08
+63,ELDL,eldl,club-men,1704.7,19,2026,Cooler Classic 37 (Men & Women),2026-08-08
+64,Zoboomafoo,zoboomafoo,club-men,1704.0,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
+65,PowderHogs,powderhogs,club-men,1703.4,25,2026,Ski Town Classic 2026,2026-08-15
+66,EVOLUTION,evolution,club-men,1703.2,24,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+67,Fungi,fungi,club-men,1701.1,21,2026,Ski Town Classic 2026,2026-08-15
+68,EtobiCoke,etobicoke,club-men,1700.2,23,2026,Lehigh Valley Invite 2026,2026-08-01
+69,Garden State Ultimate,garden state ultimate,club-men,1698.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
+70,Shade,shade,club-men,1695.5,26,2026,Vacationland 2026,2026-08-08
+71,ZOO,zoo,club-men,1687.6,20,2026,PB&J 2026,2026-08-01
+72,Utah Swarm U20 Boys,utah swarm u20 boys,club-men,1687.3,14,2026,2nd Annual Deseret Invite,2026-07-11
+73,BUDA U20B,buda u20b,club-men,1684.7,22,2026,Boston Invite 2026,2026-07-11
+74,CITYWIDE Special,citywide special,club-men,1681.9,23,2026,Lehigh Valley Invite 2026,2026-08-01
+75,Sawtooth,sawtooth,club-men,1681.2,23,2026,Ski Town Classic 2026,2026-08-15
+76,Black Lung,black lung,club-men,1678.6,21,2026,Kentucky Fried Classic 2026,2026-08-08
+77,Gummy Bear Hitmen,gummy bear hitmen,club-men,1677.5,26,2026,Lehigh Valley Invite 2026,2026-08-01
+78,Knights of Ni,knights of ni,club-men,1674.8,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
+79,OAT,oat,club-men,1674.1,26,2026,2026 Select Flight Invite - West,2026-07-25
+80,Lantern,lantern,club-men,1671.3,26,2026,Vacationland 2026,2026-08-08
+81,Big Wrench,big wrench,club-men,1667.5,26,2026,Vacationland 2026,2026-08-08
+82,Fuse,fuse,club-men,1659.4,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
+83,Club M - Manic,club m - manic,club-men,1657.8,19,2026,Lehigh Valley Invite 2026,2026-08-01
+84,Hazard,hazard,club-men,1652.2,21,2026,Ski Town Classic 2026,2026-08-15
+85,Texas Tea-A,texas tea-a,club-men,1652.1,21,2026,Ski Town Classic 2026,2026-08-15
+86,Atlanta Arson,atlanta arson,club-men,1633.9,23,2026,HoDown Showdown 2026,2026-08-08
+87,Dynasty,dynasty,club-men,1624.3,22,2026,HoDown Showdown 2026,2026-08-08
+88,Triumph,triumph,club-men,1621.0,26,2026,Lehigh Valley Invite 2026,2026-08-01
+89,Blackfish,blackfish,club-men,1616.7,17,2026,2026 Select Flight Invite - West,2026-07-25
+90,MOB Ultimate,mob ultimate,club-men,1610.8,25,2026,Lehigh Valley Invite 2026,2026-08-01
+91,Skeleton Squad,skeleton squad,club-men,1608.7,24,2026,Vacationland 2026,2026-08-08
+92,Colonels,colonels,club-men,1608.1,26,2026,Kentucky Fried Classic 2026,2026-08-08
+93,Harvest Moon,harvest moon,club-men,1607.7,24,2026,HoDown Showdown 2026,2026-08-08
+94,Forest City,forest city,club-men,1604.9,25,2026,Lehigh Valley Invite 2026,2026-08-01
+95,Endgame,endgame,club-men,1604.8,19,2026,Kentucky Fried Classic 2026,2026-08-08
+96,John Doe,john doe,club-men,1602.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
+97,Queen City Kings,queen city kings,club-men,1599.2,26,2026,HoDown Showdown 2026,2026-08-08
+98,BAG,bag,club-men,1598.6,26,2026,Vacationland 2026,2026-08-08
+99,Touch of Grey,touch of grey,club-men,1597.9,22,2026,HoDown Showdown 2026,2026-08-08
+100,DAPPER,dapper,club-men,1597.0,22,2026,Vacationland 2026,2026-08-08
+101,Lil’ Huckers,lil’ huckers,club-men,1595.9,26,2026,Ski Town Classic 2026,2026-08-15
+102,Riverside,riverside,club-men,1593.9,21,2026,Ski Town Classic 2026,2026-08-15
+103,Ascension,ascension,club-men,1592.0,18,2026,Vacationland 2026,2026-08-08
+104,Sebastopol Orchard,sebastopol orchard,club-men,1591.8,21,2026,Summer Bash 2026,2026-06-27
+105,Gang Of Disc,gang of disc,club-men,1591.6,21,2026,RagnaRock 2026,2026-07-11
+106,Odyssey,odyssey,club-men,1581.8,24,2026,Vacationland 2026,2026-08-08
+107,DeMo,demo,club-men,1574.8,23,2026,Cooler Classic 37 (Men & Women),2026-08-08
+108,Rebels,rebels,club-men,1564.7,25,2026,Lehigh Valley Invite 2026,2026-08-01
+109,Resurgam Ultimate,resurgam ultimate,club-men,1564.3,26,2026,Vacationland 2026,2026-08-08
+110,Cookie Mon$terz,cookie mon$terz,club-men,1563.9,17,2026,RagnaRock 2026,2026-07-11
+111,Colorado Cutthroat U-20 Boys,colorado cutthroat u-20 boys,club-men,1555.8,25,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
+112,BANG,bang,club-men,1552.5,18,2026,2026 Antlerlock,2026-06-27
+113,DINGWOP,dingwop,club-men,1551.6,16,2026,Cooler Classic 37 (Men & Women),2026-08-08
+114,Crypt,crypt,club-men,1550.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
+115,Dreadnought,dreadnought,club-men,1544.2,26,2026,Heavyweights 2026,2026-07-11
+116,Pittsburgh Stealers,pittsburgh stealers,club-men,1543.9,23,2026,Kentucky Fried Classic 2026,2026-08-08
+117,Swordfish,swordfish,club-men,1543.2,25,2026,Ski Town Classic 2026,2026-08-15
+118,UpRoar,uproar,club-men,1542.8,24,2026,HoDown Showdown 2026,2026-08-08
+119,ATLiens,atliens,club-men,1538.7,18,2026,Club Terminus 2026,2026-06-27
+120,Delirium,delirium,club-men,1538.1,18,2026,Club Terminus 2026,2026-06-27
+121,Magma Bears,magma bears,club-men,1535.3,24,2026,Vacationland 2026,2026-08-08
+122,Psychedelic,psychedelic,club-men,1534.8,26,2026,HoDown Showdown 2026,2026-08-08
+123,Charleston Heat Stroke,charleston heat stroke,club-men,1532.9,18,2026,HoDown Showdown 2026,2026-08-08
+124,Atlanta Outlaws,atlanta outlaws,club-men,1532.3,25,2026,Filling the Void 2026,2026-07-18
+125,Battleship,battleship,club-men,1527.0,18,2026,Heatstroke,2026-06-06
+126,Seven Gills,seven gills,club-men,1524.8,21,2026,Eugene Summer Solstice 2026,2026-06-27
+127,Roundhouse,roundhouse,club-men,1522.4,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
+128,OPE,ope,club-men,1522.4,21,2026,Cooler Classic 37 (Men & Women),2026-08-08
+129,Cozy Boys,cozy boys,club-men,1516.2,22,2026,Riverside Classic 2026,2026-07-11
+130,Junco,junco,club-men,1515.0,20,2026,2026 Select Flight Invite - West,2026-07-25
+131,ODOT,odot,club-men,1512.6,10,2026,Eugene Summer Solstice 2026,2026-06-27
+132,Romulus,romulus,club-men,1510.8,24,2026,HoDown Showdown 2026,2026-08-08
+133,DAP LAB,dap lab,club-men,1504.1,15,2026,Flickel City Classic,2026-07-11
+134,Beef Depot,beef depot,club-men,1503.9,23,2026,Lehigh Valley Invite 2026,2026-08-01
+135,Cache Valley High Ground,cache valley high ground,club-men,1497.9,10,2026,2026 Select Flight Invite - West,2026-07-25
+136,Lil Heroes,lil heroes,club-men,1496.5,26,2026,Riverside Classic 2026,2026-07-11
+137,Oregon Trainwreck,oregon trainwreck,club-men,1496.1,21,2026,Eugene Summer Solstice 2026,2026-06-27
+138,Tugboat,tugboat,club-men,1494.9,17,2026,Ski Town Classic 2026,2026-08-15
+139,NOx,nox,club-men,1486.4,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
+140,El Niño,el niño,club-men,1484.2,13,2026,Ski Town Classic 2026,2026-08-15
+141,Scythe,scythe,club-men,1480.1,18,2026,Heavyweights 2026,2026-07-11
+142,Rawhide,rawhide,club-men,1477.3,18,2026,Texas 2 Finger 2026,2026-06-27
+143,Alliance,alliance,club-men,1477.0,23,2026,Club Terminus 2026,2026-06-27
+144,Arizona Frisbee Club,arizona frisbee club,club-men,1470.7,13,2026,Ski Town Classic 2026,2026-08-15
+145,Alibi,alibi,club-men,1469.6,22,2026,Lehigh Valley Invite 2026,2026-08-01
+146,Rice Box,rice box,club-men,1466.1,23,2026,PB&J 2026,2026-08-01
+147,Winc City Fog,winc city fog,club-men,1463.4,25,2026,Lehigh Valley Invite 2026,2026-08-01
+148,Minnesota Superior U20B,minnesota superior u20b,club-men,1462.8,24,2026,Heavyweights 2026,2026-07-11
+149,Make it Rain,make it rain,club-men,1458.0,16,2026,Eugene Summer Solstice 2026,2026-06-27
+150,The Incline,the incline,club-men,1452.7,15,2026,Texas 2 Finger 2026,2026-06-27
+151,M.Y.T.H.O.S.,m.y.t.h.o.s.,club-men,1451.2,23,2026,Cooler Classic 37 (Men & Women),2026-08-08
+152,Firefall,firefall,club-men,1450.4,24,2026,Summer Bash 2026,2026-06-27
+153,Rubicon Rapids,rubicon rapids,club-men,1445.9,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
+154,Florida Flo,florida flo,club-men,1444.0,24,2026,HoDown Showdown 2026,2026-08-08
+155,Nocturnal,nocturnal,club-men,1438.1,26,2026,Kentucky Fried Classic 2026,2026-08-08
+156,Dub Club,dub club,club-men,1437.1,25,2026,Lehigh Valley Invite 2026,2026-08-01
+157,Timber,timber,club-men,1434.8,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
+158,Green Mountain Boys,green mountain boys,club-men,1428.5,10,2026,2026 Antlerlock,2026-06-27
+159,Connecticut 9 to 5,connecticut 9 to 5,club-men,1420.6,20,2026,Vacationland 2026,2026-08-08
+160,STL Moonar,stl moonar,club-men,1418.7,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
+161,Heartbreak,heartbreak,club-men,1409.9,25,2026,Eugene Summer Solstice 2026,2026-06-27
+162,Texas Duffy,texas duffy,club-men,1409.0,22,2026,PB&J 2026,2026-08-01
+163,Forge,forge,club-men,1408.1,23,2026,PB&J 2026,2026-08-01
+164,L.U.T $ack,l.u.t $ack,club-men,1400.8,20,2026,HoDown Showdown 2026,2026-08-08
+165,Give Me Death,give me death,club-men,1398.6,26,2026,Battle For the Beltway 2026,2026-07-19
+166,New Jersey Gemini,new jersey gemini,club-men,1398.2,26,2026,Lehigh Valley Invite 2026,2026-08-01
+167,EZ,ez,club-men,1396.2,21,2026,Lehigh Valley Invite 2026,2026-08-01
+168,F-Words,f-words,club-men,1396.0,19,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
+169,NC Brickhouse-Upper,nc brickhouse-upper,club-men,1395.4,25,2026,HoDown Showdown 2026,2026-08-08
+170,Friendly Fire-C,friendly fire-c,club-men,1387.6,16,2026,Cooler Classic 37 (Men & Women),2026-08-08
+171,On Ramp,on ramp,club-men,1387.1,23,2026,Kentucky Fried Classic 2026,2026-08-08
+172,Buoyancy,buoyancy,club-men,1379.8,17,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
+173,Buffalo Frostbite,buffalo frostbite,club-men,1379.2,25,2026,Flickel City Classic,2026-07-11
+174,Space Cowboys,space cowboys,club-men,1377.8,23,2026,HoDown Showdown 2026,2026-08-08
+175,Enigma,enigma,club-men,1376.3,17,2026,Kentucky Fried Classic 2026,2026-08-08
+176,Digit,digit,club-men,1374.2,16,2026,Summer Bash 2026,2026-06-27
+177,Tennessee Folklore,tennessee folklore,club-men,1370.1,18,2026,HoDown Showdown 2026,2026-08-08
+178,ElecTriCity,electricity,club-men,1368.8,17,2026,HoDown Showdown 2026,2026-08-08
+179,Minnesota Superior U17B,minnesota superior u17b,club-men,1366.5,24,2026,Heavyweights 2026,2026-07-11
+180,Mischief,mischief,club-men,1361.1,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
+181,Smogborn,smogborn,club-men,1348.2,18,2026,Flickel City Classic,2026-07-11
+182,Nomads,nomads,club-men,1346.1,21,2026,Cooler Classic 37 (Men & Women),2026-08-08
+183,Whittz Boyz,whittz boyz,club-men,1338.8,15,2026,HoDown Showdown 2026,2026-08-08
+184,Wave,wave,club-men,1334.3,26,2026,Vacationland 2026,2026-08-08
+185,Barefoot,barefoot,club-men,1329.9,13,2026,Kentucky Fried Classic 2026,2026-08-08
+186,Shift,shift,club-men,1312.0,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
+187,Long Island Riff Raff,long island riff raff,club-men,1303.3,22,2026,Lehigh Valley Invite 2026,2026-08-01
+188,MBTA,mbta,club-men,1302.3,26,2026,Vacationland 2026,2026-08-08
+189,BUDA Regional Select,buda regional select,club-men,1302.0,21,2026,Boston Invite 2026,2026-07-11
+190,San Antonio Warhawks,san antonio warhawks,club-men,1301.0,21,2026,PB&J 2026,2026-08-01
+191,Southern Hospitality,southern hospitality,club-men,1299.8,19,2026,RagnaRock 2026,2026-07-11
+192,Journeymen,journeymen,club-men,1294.5,17,2026,Summer Bash 2026,2026-06-27
+193,Hydra,hydra,club-men,1292.4,15,2026,HoDown Showdown 2026,2026-08-08
+194,Tofu Junction,tofu junction,club-men,1265.6,17,2026,Battle For the Beltway 2026,2026-07-19
+195,Conspiracy Theory,conspiracy theory,club-men,1264.6,21,2026,Cooler Classic 37 (Men & Women),2026-08-08
+196,Savannah Wild,savannah wild,club-men,1261.0,16,2026,HoDown Showdown 2026,2026-08-08
+197,Anchor,anchor,club-men,1257.3,16,2026,Summer Bash 2026,2026-06-27
+198,Chemical X,chemical x,club-men,1249.1,14,2026,Lehigh Valley Invite 2026,2026-08-01
+199,Bodega Cats,bodega cats,club-men,1248.1,17,2026,Lehigh Valley Invite 2026,2026-08-01
+200,Red Dawn,red dawn,club-men,1247.3,19,2026,Summer Bash 2026,2026-06-27
+201,Burning River,burning river,club-men,1246.2,23,2026,Heavyweights 2026,2026-07-11
+202,Red Lotus,red lotus,club-men,1243.1,18,2026,Ski Town Classic 2026,2026-08-15
+203,Supercell,supercell,club-men,1240.8,13,2026,RagnaRock 2026,2026-07-11
+204,Gambit,gambit,club-men,1240.4,21,2026,HoDown Showdown 2026,2026-08-08
+205,Motive,motive,club-men,1233.1,22,2026,Lehigh Valley Invite 2026,2026-08-01
+206,Original Recipe,original recipe,club-men,1228.0,22,2026,Kentucky Fried Classic 2026,2026-08-08
+207,Kansas City Northern Lines,kansas city northern lines,club-men,1227.7,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
+208,Maumee Boys,maumee boys,club-men,1220.9,21,2026,Kentucky Fried Classic 2026,2026-08-08
+209,Spring Break '93,spring break '93,club-men,1216.9,17,2026,2026 Antlerlock,2026-06-27
+210,Players Into Serious Sports,players into serious sports,club-men,1213.8,21,2026,Club Terminus 2026,2026-06-27
+211,Black Gold,black gold,club-men,1209.9,17,2026,PB&J 2026,2026-08-01
+212,Colorado Cutthroat U-17 Boys,colorado cutthroat u-17 boys,club-men,1191.4,24,2026,Cutthroat Club Round Robin 2026,2026-05-30
+213,Sky-90,sky-90,club-men,1167.0,13,2026,Eugene Summer Solstice 2026,2026-06-27
+214,Inferno Ultimate,inferno ultimate,club-men,1165.8,11,2026,Lehigh Valley Invite 2026,2026-08-01
+215,Frostchomp,frostchomp,club-men,1160.7,11,2026,Flickel City Classic,2026-07-11
+216,Milwaukee Breaker,milwaukee breaker,club-men,1147.6,25,2026,Cooler Classic 37 (Men & Women),2026-08-08
+217,Mayhem-Dev,mayhem-dev,club-men,1100.5,12,2026,SCINNY 2026,2026-06-20
+218,Deaf Fruit,deaf fruit,club-men,1076.4,15,2026,PB&J 2026,2026-08-01
+219,Virginia Vortex,virginia vortex,club-men,1064.1,25,2026,Battle For the Beltway 2026,2026-07-19
+220,Flux,flux,club-men,1059.5,16,2026,HoDown Showdown 2026,2026-08-08
+221,Colorado Cutthroat U-20 Boys TWO,colorado cutthroat u-20 boys two,club-men,970.0,26,2026,Colorado Summer Solstice 2026 Part 1,2026-06-13
 1,Hybrid,hybrid (mixed),club-mixed,2244.3,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
 2,XIST,xist (mixed),club-mixed,2216.8,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
 3,Slow,slow (mixed),club-mixed,2151.4,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
@@ -247,216 +242,216 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 20,Odyssée-Senior,odyssée-senior (mixed),club-mixed,1904.2,24,2026,Boston Invite 2026,2026-07-11
 21,Oregon Scorch,oregon scorch (mixed),club-mixed,1892.2,26,2026,2026 Pro Elite Challenge West,2026-07-11
 22,Wild Card,wild card (mixed),club-mixed,1881.9,26,2026,2026 Select Flight Invite East,2026-07-25
-23,Sego,sego (mixed),club-mixed,1878.6,26,2026,2026 Pro Elite Challenge West,2026-07-11
-24,Grand Army,grand army (mixed),club-mixed,1877.3,26,2026,Boston Invite 2026,2026-07-11
-25,Big Rig,big rig (mixed),club-mixed,1874.8,25,2026,Vacationland 2026,2026-08-08
-26,Spice,spice (mixed),club-mixed,1865.9,22,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
-27,Pittsburgh Port Authority,pittsburgh port authority (mixed),club-mixed,1854.0,26,2026,2026 Select Flight Invite East,2026-07-25
-28,Royals,royals (mixed),club-mixed,1850.2,18,2026,Eugene Summer Solstice 2026,2026-06-27
-29,Bar None,bar none (mixed),club-mixed,1845.8,22,2026,HoDown Showdown 2026,2026-08-08
-30,Mile High Trash,mile high trash (mixed),club-mixed,1840.4,21,2026,2026 Pro Elite Challenge West,2026-07-11
-31,Roma Ultima,roma ultima (mixed),club-mixed,1834.9,25,2026,HoDown Showdown 2026,2026-08-08
-32,Murmur,murmur (mixed),club-mixed,1834.6,23,2026,HoDown Showdown 2026,2026-08-08
-33,Good Company,good company (mixed),club-mixed,1832.1,22,2026,Shake The Dust,2026-06-06
-34,Asheville Parliament,asheville parliament (mixed),club-mixed,1825.8,24,2026,HoDown Showdown 2026,2026-08-08
-35,Space Force,space force (mixed),club-mixed,1823.5,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-36,Zero Strategy,zero strategy (mixed),club-mixed,1822.9,26,2026,Vacationland 2026,2026-08-08
-37,'Shine,'shine (mixed),club-mixed,1820.4,22,2026,2026 Select Flight Invite East,2026-07-25
-38,Fireball,fireball (mixed),club-mixed,1815.5,18,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
-39,Porch Bears,porch bears (mixed),club-mixed,1804.6,23,2026,Portland Kleinman 2026,2026-08-08
-40,Townies,townies (mixed),club-mixed,1797.0,24,2026,Lehigh Valley Invite 2026,2026-08-01
-41,Spoke,spoke (mixed),club-mixed,1796.6,20,2026,2026 Pro Elite Challenge West,2026-07-11
-42,Revival,revival (mixed),club-mixed,1790.1,24,2026,Lehigh Valley Invite 2026,2026-08-01
-43,Flight Club,flight club (mixed),club-mixed,1785.9,25,2026,2026 Select Flight Invite - West,2026-07-25
+23,Grand Army,grand army (mixed),club-mixed,1877.3,26,2026,Boston Invite 2026,2026-07-11
+24,Big Rig,big rig (mixed),club-mixed,1874.8,25,2026,Vacationland 2026,2026-08-08
+25,Spice,spice (mixed),club-mixed,1865.9,22,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
+26,Pittsburgh Port Authority,pittsburgh port authority (mixed),club-mixed,1854.0,26,2026,2026 Select Flight Invite East,2026-07-25
+27,Royals,royals (mixed),club-mixed,1850.2,18,2026,Eugene Summer Solstice 2026,2026-06-27
+28,Bar None,bar none (mixed),club-mixed,1845.8,22,2026,HoDown Showdown 2026,2026-08-08
+29,Mile High Trash,mile high trash (mixed),club-mixed,1840.4,21,2026,2026 Pro Elite Challenge West,2026-07-11
+30,Roma Ultima,roma ultima (mixed),club-mixed,1834.9,25,2026,HoDown Showdown 2026,2026-08-08
+31,Murmur,murmur (mixed),club-mixed,1834.6,23,2026,HoDown Showdown 2026,2026-08-08
+32,Good Company,good company (mixed),club-mixed,1832.1,22,2026,Shake The Dust,2026-06-06
+33,Asheville Parliament,asheville parliament (mixed),club-mixed,1825.8,24,2026,HoDown Showdown 2026,2026-08-08
+34,Space Force,space force (mixed),club-mixed,1823.5,22,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+35,Zero Strategy,zero strategy (mixed),club-mixed,1822.9,26,2026,Vacationland 2026,2026-08-08
+36,'Shine,'shine (mixed),club-mixed,1820.4,22,2026,2026 Select Flight Invite East,2026-07-25
+37,Fireball,fireball (mixed),club-mixed,1815.5,18,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
+38,Porch Bears,porch bears (mixed),club-mixed,1804.6,23,2026,Portland Kleinman 2026,2026-08-08
+39,Townies,townies (mixed),club-mixed,1797.0,24,2026,Lehigh Valley Invite 2026,2026-08-01
+40,Spoke,spoke (mixed),club-mixed,1796.6,20,2026,2026 Pro Elite Challenge West,2026-07-11
+41,Flight Club,flight club (mixed),club-mixed,1785.9,25,2026,2026 Select Flight Invite - West,2026-07-25
+42,Revival,revival (mixed),club-mixed,1778.7,26,2026,Turnpike Throwdown,2026-08-15
+43,Spectre,spectre (mixed),club-mixed,1775.1,21,2026,Cooler Classic 37 (Mixed),2026-08-15
 44,Landsharks,landsharks (mixed),club-mixed,1774.5,24,2026,Flower Power 2026,2026-08-08
 45,The Buoy Association,the buoy association (mixed),club-mixed,1772.6,26,2026,Vacationland 2026,2026-08-08
 46,FlyTrap,flytrap (mixed),club-mixed,1770.9,25,2026,HoDown Showdown 2026,2026-08-08
-47,Donuts,donuts (mixed),club-mixed,1768.5,26,2026,2026 Select Flight Invite - West,2026-07-25
+47,Moontower,moontower (mixed),club-mixed,1768.5,24,2026,Ski Town Classic 2026,2026-08-15
 48,Lights Out,lights out (mixed),club-mixed,1766.5,25,2026,Portland Kleinman 2026,2026-08-08
-49,Moontower,moontower (mixed),club-mixed,1765.3,24,2026,2026 Select Flight Invite - West,2026-07-25
-50,No Touching!,no touching! (mixed),club-mixed,1758.1,25,2026,Twin Cities Rollaround 2026,2026-08-02
+49,No Touching!,no touching! (mixed),club-mixed,1765.5,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+50,Minnesota Star Power,minnesota star power (mixed),club-mixed,1759.3,26,2026,Ski Town Classic 2026,2026-08-15
 51,BUMS,bums (mixed),club-mixed,1757.3,25,2026,HoDown Showdown 2026,2026-08-08
-52,Minnesota Star Power,minnesota star power (mixed),club-mixed,1753.0,23,2026,2026 Select Flight Invite East,2026-07-25
-53,Darkwing,darkwing (mixed),club-mixed,1745.2,26,2026,Vacationland 2026,2026-08-08
+52,Darkwing,darkwing (mixed),club-mixed,1745.2,26,2026,Vacationland 2026,2026-08-08
+53,Donuts,donuts (mixed),club-mixed,1742.0,21,2026,Ski Town Classic 2026,2026-08-15
 54,Conspiracy,conspiracy (mixed),club-mixed,1740.9,23,2026,HoDown Showdown 2026,2026-08-08
-55,Classy,classy (mixed),club-mixed,1738.8,25,2026,2026 Select Flight Invite - West,2026-07-25
-56,Zero Turn Lawnmower,zero turn lawnmower (mixed),club-mixed,1738.1,24,2026,2026 Select Flight Invite East,2026-07-25
-57,Amber,amber (mixed),club-mixed,1737.9,25,2026,RagnaRock 2026,2026-07-11
-58,Bird,bird (mixed),club-mixed,1737.5,25,2026,Heavyweights 2026,2026-07-11
-59,LIT Ultimate,lit ultimate (mixed),club-mixed,1735.7,24,2026,2026 Select Flight Invite - West,2026-07-25
-60,MOONDOG,moondog (mixed),club-mixed,1732.8,24,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
-61,Bench,bench (mixed),club-mixed,1729.6,22,2026,Heavyweights 2026,2026-07-11
-62,BW Ultimate,bw ultimate (mixed),club-mixed,1725.9,23,2026,2026 Select Flight Invite - West,2026-07-25
-63,Catalyst,catalyst (mixed),club-mixed,1725.4,26,2026,HoDown Showdown 2026,2026-08-08
+55,Zero Turn Lawnmower,zero turn lawnmower (mixed),club-mixed,1738.1,24,2026,2026 Select Flight Invite East,2026-07-25
+56,Amber,amber (mixed),club-mixed,1737.9,25,2026,RagnaRock 2026,2026-07-11
+57,LIT Ultimate,lit ultimate (mixed),club-mixed,1735.7,24,2026,2026 Select Flight Invite - West,2026-07-25
+58,MOONDOG,moondog (mixed),club-mixed,1732.8,24,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
+59,Bench,bench (mixed),club-mixed,1729.6,22,2026,Heavyweights 2026,2026-07-11
+60,Bird,bird (mixed),club-mixed,1725.8,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+61,Catalyst,catalyst (mixed),club-mixed,1725.4,26,2026,HoDown Showdown 2026,2026-08-08
+62,BW Ultimate,bw ultimate (mixed),club-mixed,1723.7,24,2026,Ski Town Classic 2026,2026-08-15
+63,Delabear,delabear (mixed),club-mixed,1718.3,25,2026,Turnpike Throwdown,2026-08-15
 64,Anthem,anthem (mixed),club-mixed,1711.2,23,2026,2026 Select Flight Invite East,2026-07-25
-65,Delabear,delabear (mixed),club-mixed,1706.4,26,2026,PADA Flagship Tournament 2026,2026-06-20
-66,Lawless,lawless (mixed),club-mixed,1705.7,25,2026,2026 Pro Elite Challenge West,2026-07-11
-67,Party Wave,party wave (mixed),club-mixed,1705.3,22,2026,Portland Kleinman 2026,2026-08-08
-68,Impact,impact (mixed),club-mixed,1705.2,26,2026,RagnaRock 2026,2026-07-11
-69,Spectre,spectre (mixed),club-mixed,1703.6,16,2026,HoDown Showdown 2026,2026-08-08
-70,Molasses Disaster,molasses disaster (mixed),club-mixed,1702.6,30,2026,Mixed Easterns 2026,2026-06-06
-71,Garbage Plates,garbage plates (mixed),club-mixed,1700.3,22,2026,Boston Invite 2026,2026-07-11
-72,RAMP,ramp (mixed),club-mixed,1695.8,26,2026,2026 Select Flight Invite East,2026-07-25
-73,Pushovers,pushovers (mixed),club-mixed,1695.7,24,2026,Twin Cities Rollaround 2026,2026-08-02
-74,Shipwreck,shipwreck (mixed),club-mixed,1694.2,26,2026,Flower Power 2026,2026-08-08
-75,Gene Parmesan,gene parmesan (mixed),club-mixed,1689.6,20,2026,2026 Wisconsin Swiss,2026-06-20
-76,Funk,funk (mixed),club-mixed,1684.7,24,2026,Lehigh Valley Invite 2026,2026-08-01
-77,Akron Nimb,akron nimb (mixed),club-mixed,1682.3,20,2026,Kentucky Fried Classic 2026,2026-08-08
-78,Temu Fitness Number One,temu fitness number one (mixed),club-mixed,1680.7,21,2026,Vacationland 2026,2026-08-08
-79,Obscure,obscure (mixed),club-mixed,1677.4,26,2026,Boston Invite 2026,2026-07-11
-80,Octonauts,octonauts (mixed),club-mixed,1676.4,24,2026,Flower Power 2026,2026-08-08
-81,Madison United Mixed Ultimate,madison united mixed ultimate (mixed),club-mixed,1674.0,25,2026,Bid in the Bend 2026,2026-08-01
-82,Dispatch,dispatch (mixed),club-mixed,1673.6,22,2026,Heavyweights 2026,2026-07-11
-83,Jughandle,jughandle (mixed),club-mixed,1673.6,23,2026,Boston Invite 2026,2026-07-11
-84,Steamboat,steamboat (mixed),club-mixed,1673.2,21,2026,2026 Select Flight Invite East,2026-07-25
-85,Quahogs,quahogs (mixed),club-mixed,1668.7,26,2026,Boston Invite 2026,2026-07-11
-86,CLX,clx (mixed),club-mixed,1665.4,22,2026,2026 Select Flight Invite East,2026-07-25
-87,American Barbecue,american barbecue (mixed),club-mixed,1662.1,25,2026,2026 Select Flight Invite - West,2026-07-25
-88,PS,ps (mixed),club-mixed,1658.4,25,2026,Lehigh Valley Invite 2026,2026-08-01
-89,Cupcakes,cupcakes (mixed),club-mixed,1655.6,22,2026,2026 Pro Elite Challenge East,2026-06-27
-90,HVAC,hvac (mixed),club-mixed,1655.1,21,2026,2026 Capital Mixed Pre-Sectional Event,2026-08-09
-91,Green Chiles,green chiles (mixed),club-mixed,1653.2,25,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
-92,Fatal Attraction,fatal attraction (mixed),club-mixed,1647.4,25,2026,2026 Select Flight Invite East,2026-07-25
-93,Armory,armory (mixed),club-mixed,1644.7,20,2026,RagnaRock 2026,2026-07-11
-94,Twist,twist (mixed),club-mixed,1639.1,23,2026,Lehigh Valley Invite 2026,2026-08-01
-95,Seattle Soft Serve,seattle soft serve (mixed),club-mixed,1638.5,24,2026,Portland Kleinman 2026,2026-08-08
-96,Indiana Pterodactyl Attack (IPA),indiana pterodactyl attack (ipa) (mixed),club-mixed,1633.7,26,2026,Kentucky Fried Classic 2026,2026-08-08
-97,Northern Comfort,northern comfort (mixed),club-mixed,1633.0,25,2026,Heavyweights 2026,2026-07-11
-98,Sailboat,sailboat (mixed),club-mixed,1632.4,21,2026,Motown Throwdown 2026,2026-06-27
-99,Viking Blood,viking blood (mixed),club-mixed,1629.3,14,2026,Portland Kleinman 2026,2026-08-08
-100,Bullet Train,bullet train (mixed),club-mixed,1629.3,21,2026,2026 Select Flight Invite - West,2026-07-25
-101,Robot,robot (mixed),club-mixed,1620.5,21,2026,Flower Power 2026,2026-08-08
-102,Mango,mango (mixed),club-mixed,1610.5,26,2026,Revolution 2026,2026-07-11
-103,Hive,hive (mixed),club-mixed,1607.1,26,2026,Portland Kleinman 2026,2026-08-08
-104,Voltaje U.C,voltaje u.c (mixed),club-mixed,1603.8,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
-105,Ant Madness,ant madness (mixed),club-mixed,1602.3,25,2026,Lehigh Valley Invite 2026,2026-08-01
-106,Buffalo Lake Effect,buffalo lake effect (mixed),club-mixed,1602.0,25,2026,Boston Invite 2026,2026-07-11
+65,Lawless,lawless (mixed),club-mixed,1705.7,25,2026,2026 Pro Elite Challenge West,2026-07-11
+66,Party Wave,party wave (mixed),club-mixed,1705.3,22,2026,Portland Kleinman 2026,2026-08-08
+67,Impact,impact (mixed),club-mixed,1705.2,26,2026,RagnaRock 2026,2026-07-11
+68,Molasses Disaster,molasses disaster (mixed),club-mixed,1702.6,30,2026,Mixed Easterns 2026,2026-06-06
+69,Garbage Plates,garbage plates (mixed),club-mixed,1697.6,26,2026,Turnpike Throwdown,2026-08-15
+70,RAMP,ramp (mixed),club-mixed,1694.6,25,2026,Cooler Classic 37 (Mixed),2026-08-15
+71,Shipwreck,shipwreck (mixed),club-mixed,1694.2,26,2026,Flower Power 2026,2026-08-08
+72,Gene Parmesan,gene parmesan (mixed),club-mixed,1689.6,20,2026,2026 Wisconsin Swiss,2026-06-20
+73,Jughandle,jughandle (mixed),club-mixed,1688.7,25,2026,Turnpike Throwdown,2026-08-15
+74,Funk,funk (mixed),club-mixed,1684.7,24,2026,Lehigh Valley Invite 2026,2026-08-01
+75,Akron Nimb,akron nimb (mixed),club-mixed,1682.3,20,2026,Kentucky Fried Classic 2026,2026-08-08
+76,Pushovers,pushovers (mixed),club-mixed,1681.1,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+77,Temu Fitness Number One,temu fitness number one (mixed),club-mixed,1680.7,21,2026,Vacationland 2026,2026-08-08
+78,Obscure,obscure (mixed),club-mixed,1677.4,26,2026,Boston Invite 2026,2026-07-11
+79,Octonauts,octonauts (mixed),club-mixed,1676.4,24,2026,Flower Power 2026,2026-08-08
+80,Steamboat,steamboat (mixed),club-mixed,1673.2,21,2026,2026 Select Flight Invite East,2026-07-25
+81,HVAC,hvac (mixed),club-mixed,1671.7,25,2026,Turnpike Throwdown,2026-08-15
+82,Quahogs,quahogs (mixed),club-mixed,1668.7,26,2026,Boston Invite 2026,2026-07-11
+83,Dispatch,dispatch (mixed),club-mixed,1663.4,22,2026,Cooler Classic 37 (Mixed),2026-08-15
+84,Madison United Mixed Ultimate,madison united mixed ultimate (mixed),club-mixed,1659.4,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+85,Cupcakes,cupcakes (mixed),club-mixed,1655.6,22,2026,2026 Pro Elite Challenge East,2026-06-27
+86,PS,ps (mixed),club-mixed,1652.8,25,2026,Turnpike Throwdown,2026-08-15
+87,Fatal Attraction,fatal attraction (mixed),club-mixed,1650.8,25,2026,Cooler Classic 37 (Mixed),2026-08-15
+88,Northern Comfort,northern comfort (mixed),club-mixed,1645.8,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+89,Armory,armory (mixed),club-mixed,1644.7,20,2026,Cooler Classic 37 (Mixed),2026-08-15
+90,Twist,twist (mixed),club-mixed,1639.1,23,2026,Lehigh Valley Invite 2026,2026-08-01
+91,Seattle Soft Serve,seattle soft serve (mixed),club-mixed,1638.5,24,2026,Portland Kleinman 2026,2026-08-08
+92,Indiana Pterodactyl Attack (IPA),indiana pterodactyl attack (ipa) (mixed),club-mixed,1633.7,26,2026,Kentucky Fried Classic 2026,2026-08-08
+93,Sailboat,sailboat (mixed),club-mixed,1632.4,21,2026,Motown Throwdown 2026,2026-06-27
+94,Viking Blood,viking blood (mixed),club-mixed,1629.3,14,2026,Portland Kleinman 2026,2026-08-08
+95,Bullet Train,bullet train (mixed),club-mixed,1629.3,21,2026,2026 Select Flight Invite - West,2026-07-25
+96,Green Chiles,green chiles (mixed),club-mixed,1629.0,22,2026,Ski Town Classic 2026,2026-08-15
+97,Prion,prion (mixed),club-mixed,1628.0,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+98,CLX,clx (mixed),club-mixed,1623.3,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+99,Robot,robot (mixed),club-mixed,1620.5,21,2026,Flower Power 2026,2026-08-08
+100,Mango,mango (mixed),club-mixed,1607.3,25,2026,Ski Town Classic 2026,2026-08-15
+101,Space Ghosts,space ghosts (mixed),club-mixed,1607.2,24,2026,Ski Town Classic 2026,2026-08-15
+102,Hive,hive (mixed),club-mixed,1607.1,26,2026,Portland Kleinman 2026,2026-08-08
+103,Voltaje U.C,voltaje u.c (mixed),club-mixed,1603.8,23,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
+104,Wellman & the Terribles,wellman & the terribles (mixed),club-mixed,1603.5,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+105,Buffalo Lake Effect,buffalo lake effect (mixed),club-mixed,1601.2,20,2026,Turnpike Throwdown,2026-08-15
+106,Ant Madness,ant madness (mixed),club-mixed,1598.9,20,2026,Turnpike Throwdown,2026-08-15
 107,Pegasus,pegasus (mixed),club-mixed,1595.6,22,2026,Portland Kleinman 2026,2026-08-08
-108,Prion,prion (mixed),club-mixed,1594.6,26,2026,Heavyweights 2026,2026-07-11
-109,Chicago Parlay,chicago parlay (mixed),club-mixed,1593.7,25,2026,2026 Select Flight Invite East,2026-07-25
-110,MN Superior,mn superior (mixed),club-mixed,1592.5,25,2026,Cheep Thrills 2026,2026-07-18
-111,Stackcats,stackcats (mixed),club-mixed,1592.2,26,2026,Bid in the Bend 2026,2026-08-01
-112,Harfang ultimate,harfang ultimate (mixed),club-mixed,1589.2,12,2026,2026 Vermont Invite,2026-06-20
-113,Family Style,family style (mixed),club-mixed,1588.5,24,2026,Flower Power 2026,2026-08-08
-114,Space Ghosts,space ghosts (mixed),club-mixed,1586.6,23,2026,2026 Select Flight Invite - West,2026-07-25
-115,Grit City,grit city (mixed),club-mixed,1581.3,24,2026,Portland Kleinman 2026,2026-08-08
-116,Farm Show,farm show (mixed),club-mixed,1580.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
-117,Nova,nova (mixed),club-mixed,1577.6,24,2026,Portland Kleinman 2026,2026-08-08
-118,Blue Ridge Sasquatch,blue ridge sasquatch (mixed),club-mixed,1576.1,25,2026,HoDown Showdown 2026,2026-08-08
+108,Chicago Parlay,chicago parlay (mixed),club-mixed,1593.7,25,2026,2026 Select Flight Invite East,2026-07-25
+109,MN Superior,mn superior (mixed),club-mixed,1592.5,25,2026,Cheep Thrills 2026,2026-07-18
+110,Harfang ultimate,harfang ultimate (mixed),club-mixed,1589.2,12,2026,2026 Vermont Invite,2026-06-20
+111,Family Style,family style (mixed),club-mixed,1588.5,24,2026,Flower Power 2026,2026-08-08
+112,Grit City,grit city (mixed),club-mixed,1581.3,24,2026,Portland Kleinman 2026,2026-08-08
+113,Farm Show,farm show (mixed),club-mixed,1580.9,26,2026,Lehigh Valley Invite 2026,2026-08-01
+114,Nova,nova (mixed),club-mixed,1577.6,24,2026,Portland Kleinman 2026,2026-08-08
+115,Stackcats,stackcats (mixed),club-mixed,1577.0,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+116,Blue Ridge Sasquatch,blue ridge sasquatch (mixed),club-mixed,1576.1,25,2026,HoDown Showdown 2026,2026-08-08
+117,Heat Wave,heat wave (mixed),club-mixed,1574.7,24,2026,Turnpike Throwdown,2026-08-15
+118,League of Shadows,league of shadows (mixed),club-mixed,1572.8,25,2026,Turnpike Throwdown,2026-08-15
 119,Taproot,taproot (mixed),club-mixed,1572.3,23,2026,Vacationland 2026,2026-08-08
 120,Malice in Wonderland,malice in wonderland (mixed),club-mixed,1569.7,22,2026,HoDown Showdown 2026,2026-08-08
-121,Toast!,toast! (mixed),club-mixed,1566.9,23,2026,Bid in the Bend 2026,2026-08-01
-122,Good Grief,good grief (mixed),club-mixed,1565.2,32,2026,Minnesota Mix-Up 2026,2026-06-20
-123,Sin Nombre,sin nombre (mixed),club-mixed,1556.9,26,2026,Flower Power 2026,2026-08-08
-124,NY Swipes,ny swipes (mixed),club-mixed,1556.4,23,2026,Lehigh Valley Invite 2026,2026-08-01
+121,Good Grief,good grief (mixed),club-mixed,1565.2,32,2026,Minnesota Mix-Up 2026,2026-06-20
+122,Sin Nombre,sin nombre (mixed),club-mixed,1556.9,26,2026,Flower Power 2026,2026-08-08
+123,NY Swipes,ny swipes (mixed),club-mixed,1556.4,23,2026,Lehigh Valley Invite 2026,2026-08-01
+124,"All Jeeps, All Night. -A","all jeeps, all night. -a (mixed)",club-mixed,1555.9,17,2026,Ski Town Classic 2026,2026-08-15
 125,Tempo,tempo (mixed),club-mixed,1555.0,23,2026,Kentucky Fried Classic 2026,2026-08-08
 126,MCO,mco (mixed),club-mixed,1554.9,20,2026,HoDown Showdown 2026,2026-08-08
 127,FLI,fli (mixed),club-mixed,1550.7,22,2026,Lehigh Valley Invite 2026,2026-08-01
 128,Sugar High,sugar high (mixed),club-mixed,1550.6,22,2026,RagnaRock 2026,2026-07-11
 129,Lampshade,lampshade (mixed),club-mixed,1549.9,26,2026,Vacationland 2026,2026-08-08
-130,League of Shadows,league of shadows (mixed),club-mixed,1547.4,26,2026,Boston Invite 2026,2026-07-11
+130,Pandamonium,pandamonium (mixed),club-mixed,1548.1,26,2026,Cooler Classic 37 (Mixed),2026-08-15
 131,Madison MUFAbots U20X,madison mufabots u20x (mixed),club-mixed,1546.9,25,2026,2026 Wisconsin Swiss,2026-06-20
 132,Cowpoke,cowpoke (mixed),club-mixed,1546.4,22,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
 133,Aged Cheddar,aged cheddar (mixed),club-mixed,1543.8,22,2026,Vacationland 2026,2026-08-08
 134,Karma,karma (mixed),club-mixed,1542.5,24,2026,Flower Power 2026,2026-08-08
 135,KOI,koi (mixed),club-mixed,1539.7,25,2026,Bourbon Bash 2026,2026-07-18
 136,Young and the Restless,young and the restless (mixed),club-mixed,1534.8,23,2026,Vacationland 2026,2026-08-08
-137,Pandamonium,pandamonium (mixed),club-mixed,1534.4,24,2026,Twin Cities Rollaround 2026,2026-08-02
-138,Queen City Gambit,queen city gambit (mixed),club-mixed,1532.0,20,2026,HoDown Showdown 2026,2026-08-08
-139,T Party,t party (mixed),club-mixed,1525.9,23,2026,Vacationland 2026,2026-08-08
+137,Queen City Gambit,queen city gambit (mixed),club-mixed,1532.0,20,2026,HoDown Showdown 2026,2026-08-08
+138,T Party,t party (mixed),club-mixed,1525.9,23,2026,Vacationland 2026,2026-08-08
+139,Toast!,toast! (mixed),club-mixed,1525.8,22,2026,Cooler Classic 37 (Mixed),2026-08-15
 140,Choco Ghost House,choco ghost house (mixed),club-mixed,1525.7,23,2026,Portland Kleinman 2026,2026-08-08
 141,Drip,drip (mixed),club-mixed,1523.3,26,2026,Portland Kleinman 2026,2026-08-08
 142,Legion,legion (mixed),club-mixed,1517.8,20,2026,HoDown Showdown 2026,2026-08-08
 143,Axolotls,axolotls (mixed),club-mixed,1517.1,23,2026,Lehigh Valley Invite 2026,2026-08-01
 144,Squid Inc.,squid inc. (mixed),club-mixed,1515.0,23,2026,Portland Kleinman 2026,2026-08-08
-145,ConSTLation,constlation (mixed),club-mixed,1512.7,24,2026,Heavyweights 2026,2026-07-11
+145,Heavy Flow,heavy flow (mixed),club-mixed,1510.2,20,2026,Turnpike Throwdown,2026-08-15
 146,Dreamcatcher,dreamcatcher (mixed),club-mixed,1509.9,11,2026,Tulsa Summer Solstice 2026,2026-06-20
 147,Spoiler Alert,spoiler alert (mixed),club-mixed,1506.4,23,2026,Flower Power 2026,2026-08-08
-148,Utah Sundrift,utah sundrift (mixed),club-mixed,1501.2,16,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
-149,Rainbow,rainbow (mixed),club-mixed,1499.9,25,2026,Vacationland 2026,2026-08-08
-150,Mad Udderburn,mad udderburn (mixed),club-mixed,1498.1,25,2026,Heavyweights 2026,2026-07-11
-151,Heat Wave,heat wave (mixed),club-mixed,1491.9,23,2026,Portland Kleinman 2026,2026-08-08
-152,B-Unit,b-unit (mixed),club-mixed,1490.4,23,2026,Club Terminus 2026,2026-06-27
-153,MoonPi,moonpi (mixed),club-mixed,1488.9,23,2026,HoDown Showdown 2026,2026-08-08
-154,Beached Whales,beached whales (mixed),club-mixed,1486.6,27,2026,Mixed Easterns 2026,2026-06-06
-155,Equinox,equinox (mixed),club-mixed,1481.3,15,2026,2026 Antlerlock,2026-06-27
-156,The Force,the force (mixed),club-mixed,1480.8,26,2026,Twin Cities Rollaround 2026,2026-08-02
-157,Skyhawks,skyhawks (mixed),club-mixed,1478.7,25,2026,Bid in the Bend 2026,2026-08-01
-158,solAR,solar (mixed),club-mixed,1475.9,26,2026,Kentucky Fried Classic 2026,2026-08-08
-159,ELevate,elevate (mixed),club-mixed,1474.1,26,2026,Bid in the Bend 2026,2026-08-01
-160,Boomtown Pandas,boomtown pandas (mixed),club-mixed,1473.6,26,2026,Heavyweights 2026,2026-07-11
-161,Frostbite,frostbite (mixed),club-mixed,1473.3,26,2026,Heavyweights 2026,2026-07-11
-162,Heavy Flow,heavy flow (mixed),club-mixed,1470.0,25,2026,Battle For the Beltway 2026,2026-07-19
+148,ConSTLation,constlation (mixed),club-mixed,1506.1,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+149,Mad Udderburn,mad udderburn (mixed),club-mixed,1505.1,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+150,Utah Sundrift,utah sundrift (mixed),club-mixed,1503.6,21,2026,Ski Town Classic 2026,2026-08-15
+151,Columbus Chaos,columbus chaos (mixed),club-mixed,1502.0,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+152,Rainbow,rainbow (mixed),club-mixed,1499.9,25,2026,Vacationland 2026,2026-08-08
+153,Boomtown Pandas,boomtown pandas (mixed),club-mixed,1495.4,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+154,B-Unit,b-unit (mixed),club-mixed,1490.4,23,2026,Club Terminus 2026,2026-06-27
+155,MoonPi,moonpi (mixed),club-mixed,1488.9,23,2026,HoDown Showdown 2026,2026-08-08
+156,Beached Whales,beached whales (mixed),club-mixed,1486.6,27,2026,Mixed Easterns 2026,2026-06-06
+157,Equinox,equinox (mixed),club-mixed,1481.3,15,2026,2026 Antlerlock,2026-06-27
+158,QCO,qco (mixed),club-mixed,1480.3,22,2026,Cooler Classic 37 (Mixed),2026-08-15
+159,The Force,the force (mixed),club-mixed,1477.3,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+160,solAR,solar (mixed),club-mixed,1475.9,26,2026,Kentucky Fried Classic 2026,2026-08-08
+161,Skyhawks,skyhawks (mixed),club-mixed,1469.6,21,2026,Cooler Classic 37 (Mixed),2026-08-15
+162,Obelisk,obelisk (mixed),club-mixed,1466.2,22,2026,Turnpike Throwdown,2026-08-15
 163,Jumbo Slice,jumbo slice (mixed),club-mixed,1461.2,24,2026,Lehigh Valley Invite 2026,2026-08-01
 164,Philadelphia Forge,philadelphia forge (mixed),club-mixed,1460.7,15,2026,PADA Flagship Tournament 2026,2026-06-20
 165,Duck Parade,duck parade (mixed),club-mixed,1460.6,25,2026,Bid in the Bend 2026,2026-08-01
-166,"All Jeeps, All Night. -A","all jeeps, all night. -a (mixed)",club-mixed,1457.5,25,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
-167,Mousetrap,mousetrap (mixed),club-mixed,1454.9,25,2026,Heavyweights 2026,2026-07-11
+166,Great Minnesota Get Together,great minnesota get together (mixed),club-mixed,1454.6,23,2026,Cooler Classic 37 (Mixed),2026-08-15
+167,Risky Business,risky business (mixed),club-mixed,1454.2,24,2026,Cooler Classic 37 (Mixed),2026-08-15
 168,Goose Run,goose run (mixed),club-mixed,1453.9,26,2026,Portland Kleinman 2026,2026-08-08
 169,S.O.S,s.o.s (mixed),club-mixed,1452.3,13,2026,Kentucky Fried Classic 2026,2026-08-08
-170,Jabba,jabba (mixed),club-mixed,1452.2,26,2026,Bid in the Bend 2026,2026-08-01
-171,Limbo,limbo (mixed),club-mixed,1447.2,24,2026,Cheep Thrills 2026,2026-07-18
-172,Discosauriscus,discosauriscus (mixed),club-mixed,1445.9,13,2026,Battle For the Beltway 2026,2026-07-19
-173,Columbus Chaos,columbus chaos (mixed),club-mixed,1444.5,21,2026,Bourbon Bash 2026,2026-07-18
-174,Risky Business,risky business (mixed),club-mixed,1444.4,26,2026,RagnaRock 2026,2026-07-11
+170,Frostbite,frostbite (mixed),club-mixed,1451.2,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+171,Mousetrap,mousetrap (mixed),club-mixed,1450.3,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+172,Jabba,jabba (mixed),club-mixed,1447.4,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+173,Discosauriscus,discosauriscus (mixed),club-mixed,1445.9,13,2026,Battle For the Beltway 2026,2026-07-19
+174,Pier Pressure,pier pressure (mixed),club-mixed,1443.8,22,2026,Turnpike Throwdown,2026-08-15
 175,Crucible,crucible (mixed),club-mixed,1442.2,26,2026,Bid in the Bend 2026,2026-08-01
 176,Virginia Vanguard,virginia vanguard (mixed),club-mixed,1441.6,19,2026,Battle For the Beltway 2026,2026-07-19
 177,Erosion,erosion (mixed),club-mixed,1439.3,24,2026,Flower Power 2026,2026-08-08
-178,Damfast and Friends,damfast and friends (mixed),club-mixed,1434.2,15,2026,Vacationland 2026,2026-08-08
-179,QCO,qco (mixed),club-mixed,1425.9,22,2026,RagnaRock 2026,2026-07-11
-180,Igneous Ultimate,igneous ultimate (mixed),club-mixed,1422.1,20,2026,Portland Kleinman 2026,2026-08-08
-181,Obelisk,obelisk (mixed),club-mixed,1420.0,23,2026,Battle For the Beltway 2026,2026-07-19
+178,ELevate,elevate (mixed),club-mixed,1437.9,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+179,Damfast and Friends,damfast and friends (mixed),club-mixed,1434.2,15,2026,Vacationland 2026,2026-08-08
+180,Limbo,limbo (mixed),club-mixed,1430.9,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+181,Igneous Ultimate,igneous ultimate (mixed),club-mixed,1422.1,20,2026,Portland Kleinman 2026,2026-08-08
 182,Boxcar,boxcar (mixed),club-mixed,1414.2,23,2026,Flower Power 2026,2026-08-08
 183,Goose Chase,goose chase (mixed),club-mixed,1413.0,24,2026,Flower Power 2026,2026-08-08
 184,BOP,bop (mixed),club-mixed,1412.4,23,2026,Portland Kleinman 2026,2026-08-08
 185,Skooks,skooks (mixed),club-mixed,1410.5,15,2026,Lehigh Valley Invite 2026,2026-08-01
-186,The Strangers,the strangers (mixed),club-mixed,1409.8,25,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
-187,Swing Vote,swing vote (mixed),club-mixed,1408.8,24,2026,Battle For the Beltway 2026,2026-07-19
-188,Phlagstaff Ultimate,phlagstaff ultimate (mixed),club-mixed,1404.5,22,2026,Flower Power 2026,2026-08-08
-189,Pier Pressure,pier pressure (mixed),club-mixed,1400.0,26,2026,Seven Cities Showdown 2026,2026-06-20
-190,Rampage,rampage (mixed),club-mixed,1397.8,25,2026,Filling the Void 2026,2026-07-18
-191,UFO Ultimate,ufo ultimate (mixed),club-mixed,1395.1,19,2026,Flickel City Classic,2026-07-11
-192,Magnanimouse,magnanimouse (mixed),club-mixed,1393.2,23,2026,HoDown Showdown 2026,2026-08-08
-193,Brooklyn Hive,brooklyn hive (mixed),club-mixed,1392.5,23,2026,Lehigh Valley Invite 2026,2026-08-01
-194,UV Rays,uv rays (mixed),club-mixed,1391.7,16,2026,Vacationland 2026,2026-08-08
-195,Scarecrow,scarecrow (mixed),club-mixed,1391.6,25,2026,Vacationland 2026,2026-08-08
-196,Thunderpants the Magic Dragon,thunderpants the magic dragon (mixed),club-mixed,1384.8,24,2026,Bid in the Bend 2026,2026-08-01
-197,Great Minnesota Get Together,great minnesota get together (mixed),club-mixed,1384.5,25,2026,Twin Cities Rollaround 2026,2026-08-02
-198,Y'all,y'all (mixed),club-mixed,1381.0,18,2026,Flower Power 2026,2026-08-08
-199,Melt,melt (mixed),club-mixed,1373.1,25,2026,Twin Cities Rollaround 2026,2026-08-02
-200,Bald Eagles,bald eagles (mixed),club-mixed,1359.3,16,2026,RagnaRock 2026,2026-07-11
-201,Cutthroat,cutthroat (mixed),club-mixed,1359.0,25,2026,Eugene Summer Solstice 2026,2026-06-27
-202,JAWN,jawn (mixed),club-mixed,1356.8,25,2026,PADA Flagship Tournament 2026,2026-06-20
-203,Lightning,lightning (mixed),club-mixed,1355.3,22,2026,Kentucky Fried Classic 2026,2026-08-08
-204,Mashed,mashed (mixed),club-mixed,1354.4,24,2026,Lehigh Valley Invite 2026,2026-08-01
-205,District Cocktails,district cocktails (mixed),club-mixed,1354.4,24,2026,Battle For the Beltway 2026,2026-07-19
-206,Philly Twist,philly twist (mixed),club-mixed,1351.9,15,2026,Lehigh Valley Invite 2026,2026-08-01
-207,VU,vu (mixed),club-mixed,1345.2,25,2026,Portland Kleinman 2026,2026-08-08
-208,STL CELESTIAL,stl celestial (mixed),club-mixed,1344.7,22,2026,Bid in the Bend 2026,2026-08-01
-209,Lemonade Ultimate,lemonade ultimate (mixed),club-mixed,1337.5,26,2026,Cheep Thrills 2026,2026-07-18
+186,Swing Vote,swing vote (mixed),club-mixed,1408.8,24,2026,Battle For the Beltway 2026,2026-07-19
+187,Phlagstaff Ultimate,phlagstaff ultimate (mixed),club-mixed,1404.5,22,2026,Flower Power 2026,2026-08-08
+188,NEW Groove,new groove (mixed),club-mixed,1402.4,24,2026,Cooler Classic 37 (Mixed),2026-08-15
+189,Rampage,rampage (mixed),club-mixed,1397.8,25,2026,Filling the Void 2026,2026-07-18
+190,UFO Ultimate,ufo ultimate (mixed),club-mixed,1395.1,19,2026,Flickel City Classic,2026-07-11
+191,Magnanimouse,magnanimouse (mixed),club-mixed,1393.2,23,2026,HoDown Showdown 2026,2026-08-08
+192,Brooklyn Hive,brooklyn hive (mixed),club-mixed,1392.5,23,2026,Lehigh Valley Invite 2026,2026-08-01
+193,UV Rays,uv rays (mixed),club-mixed,1391.7,16,2026,Vacationland 2026,2026-08-08
+194,Scarecrow,scarecrow (mixed),club-mixed,1391.6,25,2026,Vacationland 2026,2026-08-08
+195,Thunderpants the Magic Dragon,thunderpants the magic dragon (mixed),club-mixed,1384.8,24,2026,Bid in the Bend 2026,2026-08-01
+196,Y'all,y'all (mixed),club-mixed,1381.0,18,2026,Flower Power 2026,2026-08-08
+197,Lemonade Ultimate,lemonade ultimate (mixed),club-mixed,1378.5,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+198,Cutthroat,cutthroat (mixed),club-mixed,1366.8,21,2026,Ski Town Classic 2026,2026-08-15
+199,Bald Eagles,bald eagles (mixed),club-mixed,1359.3,16,2026,RagnaRock 2026,2026-07-11
+200,Melt,melt (mixed),club-mixed,1358.3,16,2026,Cooler Classic 37 (Mixed),2026-08-15
+201,JAWN,jawn (mixed),club-mixed,1356.8,25,2026,PADA Flagship Tournament 2026,2026-06-20
+202,Lightning,lightning (mixed),club-mixed,1355.3,22,2026,Kentucky Fried Classic 2026,2026-08-08
+203,Mashed,mashed (mixed),club-mixed,1354.4,24,2026,Lehigh Valley Invite 2026,2026-08-01
+204,District Cocktails,district cocktails (mixed),club-mixed,1352.6,25,2026,Turnpike Throwdown,2026-08-15
+205,Philly Twist,philly twist (mixed),club-mixed,1351.9,15,2026,Lehigh Valley Invite 2026,2026-08-01
+206,VU,vu (mixed),club-mixed,1345.2,25,2026,Portland Kleinman 2026,2026-08-08
+207,STL CELESTIAL,stl celestial (mixed),club-mixed,1344.7,22,2026,Bid in the Bend 2026,2026-08-01
+208,Dinosaur Fancy,dinosaur fancy (mixed),club-mixed,1341.8,26,2026,Cooler Classic 37 (Mixed),2026-08-15
+209,Ultraviolet,ultraviolet (mixed),club-mixed,1336.0,21,2026,Cooler Classic 37 (Mixed),2026-08-15
 210,Birds of Paradise,birds of paradise (mixed),club-mixed,1328.8,25,2026,Flower Power 2026,2026-08-08
-211,Verdant,verdant (mixed),club-mixed,1322.0,23,2026,HoDown Showdown 2026,2026-08-08
-212,Mastodon,mastodon (mixed),club-mixed,1316.6,21,2026,Heavyweights 2026,2026-07-11
-213,Fault Line,fault line (mixed),club-mixed,1315.4,24,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
-214,Buffalo Brain Freeze,buffalo brain freeze (mixed),club-mixed,1312.2,25,2026,Flickel City Classic,2026-07-11
-215,Pixel,pixel (mixed),club-mixed,1305.1,19,2026,Bid in the Bend 2026,2026-08-01
-216,The Midwest Goodbye,the midwest goodbye (mixed),club-mixed,1292.1,22,2026,Cheep Thrills 2026,2026-07-18
-217,PterodaCTyl,pterodactyl (mixed),club-mixed,1290.3,17,2026,Pioneer Valley Pool Party,2026-07-11
+211,Mastodon,mastodon (mixed),club-mixed,1328.8,21,2026,Cooler Classic 37 (Mixed),2026-08-15
+212,Verdant,verdant (mixed),club-mixed,1322.0,23,2026,HoDown Showdown 2026,2026-08-08
+213,Buffalo Brain Freeze,buffalo brain freeze (mixed),club-mixed,1312.2,25,2026,Flickel City Classic,2026-07-11
+214,Pixel,pixel (mixed),club-mixed,1305.1,19,2026,Bid in the Bend 2026,2026-08-01
+215,Arms Race,arms race (mixed),club-mixed,1293.5,25,2026,Cooler Classic 37 (Mixed),2026-08-15
+216,PterodaCTyl,pterodactyl (mixed),club-mixed,1290.3,17,2026,Pioneer Valley Pool Party,2026-07-11
+217,The Midwest Goodbye,the midwest goodbye (mixed),club-mixed,1281.0,22,2026,Cooler Classic 37 (Mixed),2026-08-15
 218,Moonlight Ultimate,moonlight ultimate (mixed),club-mixed,1280.0,23,2026,Revolution 2026,2026-07-11
-219,Arms Race,arms race (mixed),club-mixed,1272.8,20,2026,Heavyweights 2026,2026-07-11
-220,New South Soul,new south soul (mixed),club-mixed,1259.8,19,2026,RagnaRock 2026,2026-07-11
-221,Voltage,voltage (mixed),club-mixed,1252.4,26,2026,Battle For the Beltway 2026,2026-07-19
+219,New South Soul,new south soul (mixed),club-mixed,1259.8,19,2026,RagnaRock 2026,2026-07-11
+220,Voltage,voltage (mixed),club-mixed,1252.4,26,2026,Battle For the Beltway 2026,2026-07-19
+221,Lake Superior Disc,lake superior disc (mixed),club-mixed,1251.6,20,2026,Cooler Classic 37 (Mixed),2026-08-15
 222,Sugar Shack,sugar shack (mixed),club-mixed,1247.7,21,2026,2026 Antlerlock,2026-06-27
 223,Hartford Current,hartford current (mixed),club-mixed,1216.4,20,2026,Vacationland 2026,2026-08-08
 224,Lobster Disque,lobster disque (mixed),club-mixed,1214.7,17,2026,Vacationland 2026,2026-08-08
-225,Domino Effect,domino effect (mixed),club-mixed,1211.0,24,2026,Boston Invite 2026,2026-07-11
-226,Compost Plates,compost plates (mixed),club-mixed,1210.1,23,2026,Flickel City Classic,2026-07-11
-227,SkyLab,skylab (mixed),club-mixed,1208.2,26,2026,Portland Kleinman 2026,2026-08-08
-228,Takeout,takeout (mixed),club-mixed,1201.0,23,2026,Revolution 2026,2026-07-11
-229,Columbus Cohesion,columbus cohesion (mixed),club-mixed,1200.2,17,2026,Bid in the Bend 2026,2026-08-01
-230,Lake Superior Disc,lake superior disc (mixed),club-mixed,1197.9,22,2026,Cheep Thrills 2026,2026-07-18
-231,flATLine,flatline (mixed),club-mixed,1179.7,11,2026,Club Terminus 2026,2026-06-27
-232,Geri-Mander,geri-mander (mixed),club-mixed,1135.7,18,2026,Cheep Thrills 2026,2026-07-18
+225,Compost Plates,compost plates (mixed),club-mixed,1210.1,23,2026,Flickel City Classic,2026-07-11
+226,SkyLab,skylab (mixed),club-mixed,1208.2,26,2026,Portland Kleinman 2026,2026-08-08
+227,Takeout,takeout (mixed),club-mixed,1201.0,23,2026,Revolution 2026,2026-07-11
+228,Columbus Cohesion,columbus cohesion (mixed),club-mixed,1200.2,17,2026,Bid in the Bend 2026,2026-08-01
+229,Domino Effect,domino effect (mixed),club-mixed,1186.3,23,2026,Turnpike Throwdown,2026-08-15
+230,flATLine,flatline (mixed),club-mixed,1179.7,11,2026,Club Terminus 2026,2026-06-27
+231,Geri-Mander,geri-mander (mixed),club-mixed,1135.7,18,2026,Cheep Thrills 2026,2026-07-18
+232,DEVYL U-20 Mixed,devyl u-20 mixed (mixed),club-mixed,1085.2,25,2026,Turnpike Throwdown,2026-08-15
 1,Scandal,scandal (women's),club-women,2225.1,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
 2,Fury,fury (women's),club-women,2197.7,25,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
 3,Molly Brown,molly brown (women's),club-women,2147.9,26,2026,2026 U.S. Open International Club Championships (ICC),2026-07-31
@@ -489,28 +484,28 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 30,Agency,agency (women's),club-women,1680.6,25,2026,2026 Select Flight Invite East,2026-07-25
 31,Takedown,takedown (women's),club-women,1678.1,20,2026,HoDown Showdown 2026,2026-08-08
 32,Siege,siege (women's),club-women,1672.8,25,2026,2026 Select Flight Invite East,2026-07-25
-33,San Antonio Problems,san antonio problems (women's),club-women,1670.2,18,2026,Heavyweights 2026,2026-07-11
+33,Wildfire,wildfire (women's),club-women,1654.6,20,2026,Ski Town Classic 2026,2026-08-15
 34,Pizza Rat,pizza rat (women's),club-women,1652.4,21,2026,2026 Select Flight Invite East,2026-07-25
 35,Calypso,calypso (women's),club-women,1651.9,20,2026,Lehigh Valley Invite 2026,2026-08-01
-36,Dark Sky,dark sky (women's),club-women,1645.5,15,2026,2026 Select Flight Invite - West,2026-07-25
-37,Wicked,wicked (women's),club-women,1644.0,22,2026,2026 Select Flight Invite East,2026-07-25
-38,Zephyr,zephyr (women's),club-women,1635.6,26,2026,Lehigh Valley Invite 2026,2026-08-01
-39,Loose Cannon,loose cannon (women's),club-women,1630.4,20,2026,Zephyr Round Robin 2026,2026-06-13
-40,Wildfire,wildfire (women's),club-women,1628.8,17,2026,2026 Select Flight Invite - West,2026-07-25
+36,Wicked,wicked (women's),club-women,1644.0,22,2026,2026 Select Flight Invite East,2026-07-25
+37,Dark Sky,dark sky (women's),club-women,1637.5,24,2026,Ski Town Classic 2026,2026-08-15
+38,San Antonio Problems,san antonio problems (women's),club-women,1635.7,17,2026,Ski Town Classic 2026,2026-08-15
+39,Zephyr,zephyr (women's),club-women,1635.6,26,2026,Lehigh Valley Invite 2026,2026-08-01
+40,Loose Cannon,loose cannon (women's),club-women,1630.4,20,2026,Zephyr Round Robin 2026,2026-06-13
 41,Omega Continuum,omega continuum (women's),club-women,1623.7,10,2026,SCINNY 2026,2026-06-20
 42,Dolly For President,dolly for president (women's),club-women,1610.0,25,2026,HoDown Showdown 2026,2026-08-08
-43,Seven Devils,seven devils (women's),club-women,1602.3,17,2026,Eugene Summer Solstice 2026,2026-06-27
+43,Seven Devils,seven devils (women's),club-women,1604.1,18,2026,Ski Town Classic 2026,2026-08-15
 44,Brooklyn Book Club,brooklyn book club (women's),club-women,1602.2,22,2026,2026 Select Flight Invite East,2026-07-25
 45,Iguana Play Frisbee,iguana play frisbee (women's),club-women,1602.2,8,2026,2026 Lounge of Lizards,2026-01-18
 46,Shiver,shiver (women's),club-women,1599.8,20,2026,HoDown Showdown 2026,2026-08-08
-47,River Monsters,river monsters (women's),club-women,1590.7,17,2026,Heavyweights 2026,2026-07-11
-48,FAB,fab (women's),club-women,1587.8,21,2026,2026 Select Flight Invite - West,2026-07-25
+47,FAB,fab (women's),club-women,1592.2,19,2026,Ski Town Classic 2026,2026-08-15
+48,River Monsters,river monsters (women's),club-women,1590.7,17,2026,Heavyweights 2026,2026-07-11
 49,Indy Rogue,indy rogue (women's),club-women,1572.9,21,2026,2026 Select Flight Invite East,2026-07-25
 50,Gila Monster,gila monster (women's),club-women,1564.6,14,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
 51,Compact Disc,compact disc (women's),club-women,1554.0,19,2026,Cooler Classic 37 (Men & Women),2026-08-08
 52,Vice,vice (women's),club-women,1552.7,23,2026,Lehigh Valley Invite 2026,2026-08-01
 53,Pine Baroness,pine baroness (women's),club-women,1533.6,26,2026,Lehigh Valley Invite 2026,2026-08-01
-54,Trainwreck,trainwreck (women's),club-women,1528.8,15,2026,Heavyweights 2026,2026-07-11
+54,Trainwreck,trainwreck (women's),club-women,1521.2,16,2026,Ski Town Classic 2026,2026-08-15
 55,Rampage,rampage (women's),club-women,1501.9,17,2026,2026 Select Flight Invite - West,2026-07-25
 56,California Current,california current (women's),club-women,1500.1,13,2026,Summer Bash 2026,2026-06-27
 57,Solstice,solstice (women's),club-women,1499.6,24,2026,Heavyweights 2026,2026-07-11
@@ -521,18 +516,18 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 62,Scuffletownies,scuffletownies (women's),club-women,1480.8,22,2026,Scuffletown Throwdown 2026,2026-06-13
 63,Seattle Soul,seattle soul (women's),club-women,1480.6,22,2026,Eugene Summer Solstice 2026,2026-06-27
 64,Dish,dish (women's),club-women,1477.8,22,2026,Cooler Classic 37 (Men & Women),2026-08-08
-65,Portland Rain Check,portland rain check (women's),club-women,1468.3,19,2026,Eugene Summer Solstice 2026,2026-06-27
-66,Geezers,geezers (women's),club-women,1466.8,7,2026,2026 Lounge of Lizards,2026-01-18
-67,Sureshot,sureshot (women's),club-women,1466.4,17,2026,2026 Select Flight Invite East,2026-07-25
-68,Haboob,haboob (women's),club-women,1464.1,13,2026,2026 Select Flight Invite - West,2026-07-25
-69,Middleton-Varsity (Middleton Ultimate),middleton-varsity (middleton ultimate) (women's),club-women,1463.0,9,2026,2026 Lounge of Lizards,2026-01-18
-70,Marquette (Moxie),marquette (moxie) (women's),club-women,1460.7,16,2026,2026 Lounge of Lizards,2026-01-18
-71,Sacramento Delta,sacramento delta (women's),club-women,1459.2,21,2026,2026 Select Flight Invite - West,2026-07-25
-72,Medusa,medusa (women's),club-women,1457.4,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
-73,CHAOS,chaos (women's),club-women,1456.4,21,2026,HoDown Showdown 2026,2026-08-08
-74,Wave,wave (women's),club-women,1451.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
-75,Incline,incline (women's),club-women,1450.5,20,2026,Lehigh Valley Invite 2026,2026-08-01
-76,Crush City,crush city (women's),club-women,1449.8,15,2026,Heavyweights 2026,2026-07-11
+65,Crush City,crush city (women's),club-women,1474.1,16,2026,Ski Town Classic 2026,2026-08-15
+66,Portland Rain Check,portland rain check (women's),club-women,1468.3,19,2026,Eugene Summer Solstice 2026,2026-06-27
+67,Geezers,geezers (women's),club-women,1466.8,7,2026,2026 Lounge of Lizards,2026-01-18
+68,Sureshot,sureshot (women's),club-women,1466.4,17,2026,2026 Select Flight Invite East,2026-07-25
+69,Haboob,haboob (women's),club-women,1464.1,13,2026,2026 Select Flight Invite - West,2026-07-25
+70,Middleton-Varsity (Middleton Ultimate),middleton-varsity (middleton ultimate) (women's),club-women,1463.0,9,2026,2026 Lounge of Lizards,2026-01-18
+71,Marquette (Moxie),marquette (moxie) (women's),club-women,1460.7,16,2026,2026 Lounge of Lizards,2026-01-18
+72,Sacramento Delta,sacramento delta (women's),club-women,1459.2,21,2026,2026 Select Flight Invite - West,2026-07-25
+73,Medusa,medusa (women's),club-women,1457.4,26,2026,Cooler Classic 37 (Men & Women),2026-08-08
+74,CHAOS,chaos (women's),club-women,1456.4,21,2026,HoDown Showdown 2026,2026-08-08
+75,Wave,wave (women's),club-women,1451.4,26,2026,Lehigh Valley Invite 2026,2026-08-01
+76,Incline,incline (women's),club-women,1450.5,20,2026,Lehigh Valley Invite 2026,2026-08-01
 77,Virginia Rebellion,virginia rebellion (women's),club-women,1448.1,16,2026,HoDown Showdown 2026,2026-08-08
 78,Boomers,boomers (women's),club-women,1437.4,8,2026,2026 Lounge of Lizards,2026-01-18
 79,Valley Ultimate,valley ultimate (women's),club-women,1430.9,20,2026,Boston Invite 2026,2026-07-11
@@ -544,29 +539,30 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 85,Madison West (Nemea),madison west (nemea) (women's),club-women,1358.0,14,2026,2026 Lounge of Lizards,2026-01-18
 86,Versa,versa (women's),club-women,1357.1,23,2026,Lehigh Valley Invite 2026,2026-08-01
 87,Chicago (Supernova),chicago (supernova) (women's),club-women,1356.3,15,2026,2026 Lounge of Lizards,2026-01-18
-88,COSMOS,cosmos (women's),club-women,1343.9,18,2026,Colorado Summer Solstice 2026 Part 2,2026-06-20
+88,Swell,swell (women's),club-women,1352.2,13,2026,Ski Town Classic 2026,2026-08-15
 89,Frosted,frosted (women's),club-women,1333.5,13,2026,Cooler Classic 37 (Men & Women),2026-08-08
-90,Minnesota Superior U17G,minnesota superior u17g (women's),club-women,1305.6,25,2026,Heavyweights 2026,2026-07-11
-91,Just Add Water,just add water (women's),club-women,1294.6,16,2026,Summer Bash 2026,2026-06-27
-92,Frolic,frolic (women's),club-women,1284.5,21,2026,Boston Invite 2026,2026-07-11
-93,BUDA U20G,buda u20g (women's),club-women,1280.3,22,2026,Boston Invite 2026,2026-07-11
-94,cATLanta,catlanta (women's),club-women,1273.2,12,2026,Club Terminus 2026,2026-06-27
-95,Tempo,tempo (women's),club-women,1270.8,18,2026,2026 Select Flight Invite - West,2026-07-25
-96,Goat Farm,goat farm (women's),club-women,1256.7,18,2026,HoDown Showdown 2026,2026-08-08
-97,Michigan-B (Michigan B),michigan-b (michigan b) (women's),club-women,1251.9,18,2026,2026 Lounge of Lizards,2026-01-18
-98,SMISKI,smiski (women's),club-women,1239.7,14,2026,Lehigh Valley Invite 2026,2026-08-01
-99,Syrup!,syrup! (women's),club-women,1233.9,12,2026,Lehigh Valley Invite 2026,2026-08-01
-100,Ultraviolet,ultraviolet (women's),club-women,1225.8,18,2026,2026 Select Flight Invite - West,2026-07-25
-101,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1217.6,17,2026,Cooler Classic 37 (Men & Women),2026-08-08
-102,Wisconsin-Milwaukee (BlackCat ),wisconsin-milwaukee (blackcat ) (women's),club-women,1201.1,16,2026,2026 Lounge of Lizards,2026-01-18
-103,Lakeshore Drive,lakeshore drive (women's),club-women,1191.3,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
-104,Wauwatosa East  (Tosa East Non-Binary & Girls Ultimate),wauwatosa east (tosa east non-binary & girls ultimate) (women's),club-women,1169.6,14,2026,2026 Lounge of Lizards,2026-01-18
-105,DC Force,dc force (women's),club-women,1032.9,15,2026,Battle For the Beltway 2026,2026-07-19
-106,Madison Area Schools (Madison Area Schools),madison area schools (madison area schools) (women's),club-women,968.1,10,2026,2026 Lounge of Lizards,2026-01-18
-107,Virginia Valkyrie,virginia valkyrie (women's),club-women,937.5,14,2026,Battle For the Beltway 2026,2026-07-19
+90,COSMOS,cosmos (women's),club-women,1305.7,13,2026,Ski Town Classic 2026,2026-08-15
+91,Minnesota Superior U17G,minnesota superior u17g (women's),club-women,1305.6,25,2026,Heavyweights 2026,2026-07-11
+92,Just Add Water,just add water (women's),club-women,1294.6,16,2026,Summer Bash 2026,2026-06-27
+93,Frolic,frolic (women's),club-women,1284.5,21,2026,Boston Invite 2026,2026-07-11
+94,BUDA U20G,buda u20g (women's),club-women,1280.3,22,2026,Boston Invite 2026,2026-07-11
+95,cATLanta,catlanta (women's),club-women,1273.2,12,2026,Club Terminus 2026,2026-06-27
+96,Tempo,tempo (women's),club-women,1270.8,18,2026,2026 Select Flight Invite - West,2026-07-25
+97,Goat Farm,goat farm (women's),club-women,1256.7,18,2026,HoDown Showdown 2026,2026-08-08
+98,Michigan-B (Michigan B),michigan-b (michigan b) (women's),club-women,1251.9,18,2026,2026 Lounge of Lizards,2026-01-18
+99,SMISKI,smiski (women's),club-women,1239.7,14,2026,Lehigh Valley Invite 2026,2026-08-01
+100,Syrup!,syrup! (women's),club-women,1233.9,12,2026,Lehigh Valley Invite 2026,2026-08-01
+101,Ultraviolet,ultraviolet (women's),club-women,1225.8,18,2026,2026 Select Flight Invite - West,2026-07-25
+102,Central Wisconsin Phoenix,central wisconsin phoenix (women's),club-women,1217.6,17,2026,Cooler Classic 37 (Men & Women),2026-08-08
+103,Wisconsin-Milwaukee (BlackCat ),wisconsin-milwaukee (blackcat ) (women's),club-women,1201.1,16,2026,2026 Lounge of Lizards,2026-01-18
+104,Lakeshore Drive,lakeshore drive (women's),club-women,1191.3,24,2026,Cooler Classic 37 (Men & Women),2026-08-08
+105,Wauwatosa East  (Tosa East Non-Binary & Girls Ultimate),wauwatosa east (tosa east non-binary & girls ultimate) (women's),club-women,1169.6,14,2026,2026 Lounge of Lizards,2026-01-18
+106,DC Force,dc force (women's),club-women,1032.9,15,2026,Battle For the Beltway 2026,2026-07-19
+107,Madison Area Schools (Madison Area Schools),madison area schools (madison area schools) (women's),club-women,968.1,10,2026,2026 Lounge of Lizards,2026-01-18
+108,Virginia Valkyrie,virginia valkyrie (women's),club-women,937.5,14,2026,Battle For the Beltway 2026,2026-07-19
 1,Massachusetts (Zoodisc),massachusetts (zoodisc),college,2129.0,25,2026,2026 D-I College Championships,2026-05-22
 2,Carleton College (CUT),carleton college (cut),college,2119.8,31,2026,2026 D-I College Championships,2026-05-22
-3,Oregon (Ego),oregon (ego),college,2114.5,26,2026,2026 D-I College Championships,2026-05-22
+3,Oregon (Ego),oregon (ego),college,2114.6,26,2026,2026 D-I College Championships,2026-05-22
 4,Colorado (Mamabird),colorado (mamabird),college,2039.5,33,2026,2026 D-I College Championships,2026-05-22
 5,Middlebury (Pranksters),middlebury (pranksters),college,1974.9,26,2026,Easterns 2026,2026-03-28
 6,Cal Poly-SLO (SLOCORE),cal poly-slo (slocore),college,1960.7,25,2026,2026 D-I College Championships,2026-05-22
@@ -582,7 +578,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 16,Michigan (MagnUM),michigan (magnum),college,1813.8,28,2026,2026 D-I College Championships,2026-05-22
 17,Georgia Tech (Tribe),georgia tech (tribe),college,1812.8,25,2026,2026 D-I College Championships,2026-05-22
 18,Texas (TUFF),texas (tuff),college,1812.5,29,2026,2026 D-I College Championships,2026-05-22
-19,Carleton College-CHOP (Carleton House of Pancakes),carleton college-chop (carleton house of pancakes),college,1806.3,26,2026,Atlantic Coast Open 2026,2026-03-21
+19,Carleton College-CHOP (Carleton House of Pancakes),carleton college-chop (carleton house of pancakes),college,1806.4,26,2026,Atlantic Coast Open 2026,2026-03-21
 20,Utah (Zion Curtain),utah (zion curtain),college,1788.2,26,2026,2026 D-I College Championships,2026-05-22
 21,Wisconsin (Hodags),wisconsin (hodags),college,1782.0,26,2026,North Central D-I College Men's Regionals,2026-04-25
 22,Maryland (Maryland Ultimate),maryland (maryland ultimate),college,1780.4,32,2026,2026 D-I College Championships,2026-05-22
@@ -594,7 +590,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 28,British Columbia (Thunderbirds),british columbia (thunderbirds),college,1747.8,25,2026,Northwest D-I College Men's Regionals,2026-05-02
 29,Claremont (Braineaters),claremont (braineaters),college,1739.0,25,2026,Easterns 2026,2026-03-28
 30,Williams (WUFO),williams (wufo),college,1732.7,34,2026,Easterns 2026,2026-03-28
-31,Lewis & Clark (Bacchus ),lewis & clark (bacchus ),college,1726.3,23,2026,Stanford Invite 2026,2026-03-14
+31,Lewis & Clark (Bacchus ),lewis & clark (bacchus ),college,1726.4,23,2026,Stanford Invite 2026,2026-03-14
 32,Elon (Big Fat Bomb),elon (big fat bomb),college,1723.0,27,2026,Easterns 2026,2026-03-28
 33,Oklahoma Christian (Eagles),oklahoma christian (eagles),college,1721.9,22,2026,Snow Melt 2026,2026-02-28
 34,Illinois (Rise),illinois (rise),college,1719.9,27,2026,Great Lakes D-I College Men's Regionals,2026-04-25
@@ -646,7 +642,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 80,Colorado College (Wasabi),colorado college (wasabi),college,1550.8,27,2026,Centex 2026,2026-03-13
 81,Southern Illinois-Edwardsville (SIEGE),southern illinois-edwardsville (siege),college,1549.2,17,2026,Great Lakes D-I College Men's Regionals,2026-04-25
 82,Carnegie Mellon (Mr. Yuk),carnegie mellon (mr. yuk),college,1547.6,25,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
-83,Utah State (Scotsmen),utah state (scotsmen),college,1546.0,19,2026,Northwest D-I College Men's Regionals,2026-05-02
+83,Utah State (Scotsmen),utah state (scotsmen),college,1545.9,19,2026,Northwest D-I College Men's Regionals,2026-05-02
 84,Whitman (Whitman Sweets),whitman (whitman sweets),college,1545.5,22,2026,Stanford Invite 2026,2026-03-14
 85,SUNY-Buffalo (Green Eggs and Ham),suny-buffalo (green eggs and ham),college,1529.8,25,2026,Metro East D-I College Men's Regionals,2026-04-25
 86,West Chester (West Chester),west chester (west chester),college,1527.8,26,2026,Ohio Valley D-I College Men's Regionals,2026-05-02
@@ -674,7 +670,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 108,Georgia State (Underground),georgia state (underground),college,1495.2,29,2026,Southeast D-I College Men's Regionals,2026-04-25
 109,Rochester (Piggies),rochester (piggies),college,1491.5,23,2026,East Coast Invite 2026,2026-03-28
 110,Rhode Island (RIUT),rhode island (riut),college,1490.4,19,2026,New England D-I College Men's Regionals,2026-05-02
-111,Oregon -B (Bucks),oregon -b (bucks),college,1487.0,20,2026,Cascadia D-I Men's Conferences,2026-04-11
+111,Oregon -B (Bucks),oregon -b (bucks),college,1487.6,20,2026,Cascadia D-I Men's Conferences,2026-04-11
 112,East Carolina (Irates),east carolina (irates),college,1485.6,20,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
 113,Arizona State (Prime),arizona state (prime),college,1484.6,26,2026,Southwest D-I College Men's Regionals,2026-04-25
 114,North Carolina-B (BatCH),north carolina-b (batch),college,1480.2,27,2026,Atlantic Coast D-I College Men's Regionals,2026-05-02
@@ -849,7 +845,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 283,Florida-B (Florida B),florida-b (florida b),college,1177.2,26,2026,Florida D-I Men's Conferences,2026-04-11
 284,Loyola Marymount (Lions),loyola marymount (lions),college,1176.2,17,2026,SoCal D-I Men's Conferences,2026-04-18
 285,Arizona (Sunburn),arizona (sunburn),college,1176.1,18,2026,Desert D-I Men's Conferences,2026-04-11
-286,Colorado Cutthroat U-17 Boys,colorado cutthroat u-17 boys,college,1174.5,11,2026,Cutthroat Spring Round Robin,2026-03-22
+286,Colorado Cutthroat U-17 Boys,colorado cutthroat u-17 boys,college,1174.6,11,2026,Cutthroat Spring Round Robin,2026-03-22
 287,Cincinnati -B (Bearcats B),cincinnati -b (bearcats b),college,1173.9,25,2026,Spring Spook 2026,2026-03-07
 288,Tennessee Tech (Tech Talons),tennessee tech (tech talons),college,1173.0,11,2026,Southern Appalachian D-I Men's Conferences,2026-04-11
 289,Kent State (Klockwork),kent state (klockwork),college,1170.5,17,2026,Ohio D-I Men's Conferences,2026-04-11
@@ -959,12 +955,12 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 393,North Park (Vikings),north park (vikings),college,797.7,11,2026,Rockford Meltdown 26,2026-03-21
 1,Middlebury (Pranksters),middlebury (pranksters),college-d3,1974.9,26,2026,2026 D-III College Championships,2026-05-16
 2,Davenport (Panthers),davenport (panthers),college-d3,1862.2,20,2026,Eastern Great Lakes D-III Men's Conferences,2026-04-11
-3,Carleton College-CHOP (Carleton House of Pancakes),carleton college-chop (carleton house of pancakes),college-d3,1811.3,25,2026,2026 D-III College Championships,2026-05-16
+3,Carleton College-CHOP (Carleton House of Pancakes),carleton college-chop (carleton house of pancakes),college-d3,1811.4,25,2026,2026 D-III College Championships,2026-05-16
 4,Elon (Big Fat Bomb),elon (big fat bomb),college-d3,1755.0,22,2026,2026 D-III College Championships,2026-05-16
 5,Williams (WUFO),williams (wufo),college-d3,1732.7,34,2026,2026 D-III College Championships,2026-05-16
 6,Claremont (Braineaters),claremont (braineaters),college-d3,1730.9,26,2026,2026 D-III College Championships,2026-05-16
 7,Oklahoma Christian (Eagles),oklahoma christian (eagles),college-d3,1721.9,22,2026,2026 D-III College Championships,2026-05-16
-8,Lewis & Clark (Bacchus ),lewis & clark (bacchus ),college-d3,1703.1,28,2026,2026 D-III College Championships,2026-05-16
+8,Lewis & Clark (Bacchus ),lewis & clark (bacchus ),college-d3,1703.2,28,2026,2026 D-III College Championships,2026-05-16
 9,St Olaf (Berzerkers),st olaf (berzerkers),college-d3,1657.0,29,2026,2026 D-III College Championships,2026-05-16
 10,Macalester (Flat Earth),macalester (flat earth),college-d3,1644.9,21,2026,2026 D-III College Championships,2026-05-16
 11,Franciscan (Fatal),franciscan (fatal),college-d3,1639.2,22,2026,2026 D-III College Championships,2026-05-16
@@ -1717,14 +1713,14 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 27,Catchup,euf:euf-women:catchup,euf-women,1512.0,31,2026,EUCS Ranking 2026 season roster,2026-08-07
 28,SYC,euf:euf-women:syc,euf-women,1489.2,27,2026,EUCS Ranking 2026 season roster,2026-08-07
 29,LMU,euf:euf-women:lmu,euf-women,1483.8,21,2026,EUCS Ranking 2026 season roster,2026-08-07
-1,South Eugene (AXE),south eugene (axe) (HS),hs-boys,1726.1,13,2026,2026 Oregon High School State Championships,2026-05-30
+1,South Eugene (AXE),south eugene (axe) (HS),hs-boys,1726.9,13,2026,2026 Oregon High School State Championships,2026-05-30
 2,Albany High School (Albany Cougars),albany high school (albany cougars) (HS),hs-boys,1660.8,18,2026,2026 California High School State Championships,2026-05-16
 3,Green Canyon-A (Green Canyon A),green canyon-a (green canyon a) (HS),hs-boys,1614.3,20,2026,2026 Utah Middle & High School State Championships,2026-05-08
 4,Middleton (Middleton Ultimate),middleton (middleton ultimate) (HS),hs-boys,1549.3,19,2026,2026 Wisconsin High School State Championships,2026-05-23
 5,Lakeside-Varsity (Vikings),lakeside-varsity (vikings) (HS),hs-boys,1534.7,16,2026,2026 Georgia High School State Championships,2026-04-25
-6,Santa Cruz (Santa Cruz Ultimate),santa cruz (santa cruz ultimate) (HS),hs-boys,1495.6,19,2026,2026 California High School State Championships,2026-05-16
+6,Santa Cruz (Santa Cruz Ultimate),santa cruz (santa cruz ultimate) (HS),hs-boys,1495.5,19,2026,2026 California High School State Championships,2026-05-16
 7,Berkeley (HC-R) (Berkeley High Coup - Red),berkeley (hc-r) (berkeley high coup - red) (HS),hs-boys,1483.2,23,2026,2026 California High School State Championships,2026-05-16
-8,Grant (Grant Ultimate),grant (grant ultimate) (HS),hs-boys,1466.7,19,2026,2026 Oregon High School State Championships,2026-05-30
+8,Grant (Grant Ultimate),grant (grant ultimate) (HS),hs-boys,1466.4,19,2026,2026 Oregon High School State Championships,2026-05-30
 9,Santa Barbara (Flow),santa barbara (flow) (HS),hs-boys,1461.4,17,2026,2026 California High School State Championships,2026-05-16
 10,El Cerrito (EC HUC),el cerrito (ec huc) (HS),hs-boys,1448.5,25,2026,2026 California High School State Championships,2026-05-16
 11,Liberal Arts and Science Academy  (Vertikills A ),liberal arts and science academy (vertikills a ) (HS),hs-boys,1445.7,21,2026,2026 Texas High School Boys State Championships,2026-05-16
@@ -1746,8 +1742,8 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 27,River's Edge Christian Academy (RECA) (Eagles),river's edge christian academy (reca) (eagles) (HS),hs-boys,1329.9,17,2026,2026 Tennessee High School State Championships,2026-05-09
 28,Northfield-Varsity (Northfield Nighthawks),northfield-varsity (northfield nighthawks) (HS),hs-boys,1321.4,14,2026,2026 Colorado High School State Championships,2026-05-09
 29,Gunn (Control),gunn (control) (HS),hs-boys,1318.0,16,2026,2026 California High School State Championships,2026-05-16
-30,Midtown-Varsity (Gauntlet (boys)),midtown-varsity (gauntlet (boys)) (HS),hs-boys,1315.1,24,2026,2026 Georgia High School State Championships,2026-04-25
-31,Montgomery Blair (Blair Ultimate),montgomery blair (blair ultimate) (HS),hs-boys,1315.1,18,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+30,Montgomery Blair (Blair Ultimate),montgomery blair (blair ultimate) (HS),hs-boys,1315.2,18,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+31,Midtown-Varsity (Gauntlet (boys)),midtown-varsity (gauntlet (boys)) (HS),hs-boys,1315.1,24,2026,2026 Georgia High School State Championships,2026-04-25
 32,Evanston Township-Varsity (Evanston Ultimate),evanston township-varsity (evanston ultimate) (HS),hs-boys,1312.0,20,2026,2026 Illinois High School State Championships,2026-05-29
 33,Washington-Liberty (Washington-Lee Slarenegs),washington-liberty (washington-lee slarenegs) (HS),hs-boys,1307.1,20,2026,2026 Virginia High School State Championships,2026-05-16
 34,Layton-A (Break Force A),layton-a (break force a) (HS),hs-boys,1303.3,12,2026,2026 Utah Middle & High School State Championships,2026-05-08
@@ -1763,16 +1759,16 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 44,East (Denver East Varsity),east (denver east varsity) (HS),hs-boys,1241.0,18,2026,2026 Colorado High School State Championships,2026-05-09
 45,Montclair Varsity (Montclair Geese Varsity),montclair varsity (montclair geese varsity) (HS),hs-boys,1238.1,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 46,Newton (NSHS Ultimate),newton (nshs ultimate) (HS),hs-boys,1234.6,16,2026,2026 Massachusetts High School State Championships,2026-06-06
-47,Monarch (Monarch Boys A),monarch (monarch boys a) (HS),hs-boys,1232.6,14,2026,2026 Colorado High School State Championships,2026-05-09
+47,Monarch (Monarch Boys A),monarch (monarch boys a) (HS),hs-boys,1232.7,14,2026,2026 Colorado High School State Championships,2026-05-09
 48,Madison West (Madison West Ultimate),madison west (madison west ultimate) (HS),hs-boys,1226.5,21,2026,2026 Wisconsin High School State Championships,2026-05-23
 49,Independence (FLIGHT),independence (flight) (HS),hs-boys,1222.4,16,2026,2026 Tennessee High School State Championships,2026-05-09
 50,Falmouth - Waynflete (Falmouth Boys Varsity),falmouth - waynflete (falmouth boys varsity) (HS),hs-boys,1221.9,19,2026,2026 Maine High School Boys State Championships,2026-05-30
 51,De Smet Jesuit-JV (DUC (De Smet Jesuit) JV),de smet jesuit-jv (duc (de smet jesuit) jv) (HS),hs-boys,1220.1,10,2026,2026 Missouri High School State Championships,2026-05-02
 52,Lyons Township (LT Ultimate),lyons township (lt ultimate) (HS),hs-boys,1217.3,12,2026,2026 Illinois High School State Championships,2026-05-29
-53,South Eugene-JV (AXE JV),south eugene-jv (axe jv) (HS),hs-boys,1216.6,13,2026,2026 Oregon High School State Championships,2026-05-30
+53,South Eugene-JV (AXE JV),south eugene-jv (axe jv) (HS),hs-boys,1216.3,13,2026,2026 Oregon High School State Championships,2026-05-30
 54,Fresh Coast Ultimate,fresh coast ultimate (HS),hs-boys,1215.6,21,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
 55,Verona Area (Verona Area Ultimate),verona area (verona area ultimate) (HS),hs-boys,1208.9,28,2026,2026 Wisconsin High School State Championships,2026-05-23
-56,Portland Waldorf (Waldorf Wolfpack),portland waldorf (waldorf wolfpack) (HS),hs-boys,1207.5,16,2026,2026 Oregon High School State Championships,2026-05-30
+56,Portland Waldorf (Waldorf Wolfpack),portland waldorf (waldorf wolfpack) (HS),hs-boys,1207.2,16,2026,2026 Oregon High School State Championships,2026-05-30
 57,Ridgeline (Ridgeline),ridgeline (ridgeline) (HS),hs-boys,1205.7,18,2026,2026 Utah Middle & High School State Championships,2026-05-08
 58,Arapahoe High School  (Arapahoe Warriors),arapahoe high school (arapahoe warriors) (HS),hs-boys,1203.3,17,2026,2026 Colorado High School State Championships,2026-05-09
 59,Round Table-Senior,round table-senior (HS),hs-boys,1201.4,19,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
@@ -1791,13 +1787,13 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 72,Lexington Homeschool (Pi),lexington homeschool (pi) (HS),hs-boys,1157.7,16,2026,Neuqua Knockout 2026,2026-05-09
 73,North Atlanta-JV (NAHS),north atlanta-jv (nahs) (HS),hs-boys,1153.5,12,2026,2026 Georgia High School State Championships,2026-04-25
 74,Paideia-Varsity (Gruel),paideia-varsity (gruel) (HS),hs-boys,1152.3,22,2026,2026 Georgia High School State Championships,2026-04-25
-75,Chesterton Academy of the Willamette Valley (Saints),chesterton academy of the willamette valley (saints) (HS),hs-boys,1149.9,13,2026,2026 Oregon High School State Championships,2026-05-30
+75,Chesterton Academy of the Willamette Valley (Saints),chesterton academy of the willamette valley (saints) (HS),hs-boys,1149.7,13,2026,2026 Oregon High School State Championships,2026-05-30
 76,Scarsdale (Raiders Ultimate),scarsdale (raiders ultimate) (HS),hs-boys,1143.3,25,2026,2026 New York High School Boys State Championships,2026-05-23
 77,Princeton International School of Mathematics & Science (PRISMS Peregrines),princeton international school of mathematics & science (prisms peregrines) (HS),hs-boys,1142.4,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 78,Bronx Science-A (Lone Wolves),bronx science-a (lone wolves) (HS),hs-boys,1140.7,21,2026,2026 New York High School Boys State Championships,2026-05-23
 79,Greely (Cumberland Ultimate),greely (cumberland ultimate) (HS),hs-boys,1138.6,14,2026,2026 Maine High School Boys State Championships,2026-05-30
 80,De Smet Jesuit (DUC (De Smet Jesuit) Varsity),de smet jesuit (duc (de smet jesuit) varsity) (HS),hs-boys,1137.1,11,2026,2026 Missouri High School State Championships,2026-05-02
-81,Bethesda-Chevy Chase (B-CC Barons),bethesda-chevy chase (b-cc barons) (HS),hs-boys,1131.6,21,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
+81,Bethesda-Chevy Chase (B-CC Barons),bethesda-chevy chase (b-cc barons) (HS),hs-boys,1131.7,21,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
 82,Lebanon (Warriors Open),lebanon (warriors open) (HS),hs-boys,1126.4,11,2026,2026 Ohio High School State Championships,2026-05-30
 83,School Without Walls Y (Flightless Bird Squad),school without walls y (flightless bird squad) (HS),hs-boys,1126.0,22,2026,2026 Virginia High School State Championships,2026-05-16
 84,Maynard Jackson-Varsity (Maynard Jackson Varsity),maynard jackson-varsity (maynard jackson varsity) (HS),hs-boys,1125.3,15,2026,2026 Georgia High School State Championships,2026-04-25
@@ -1810,7 +1806,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 91,West (Krakens.),west (krakens.) (HS),hs-boys,1112.1,20,2026,2026 Utah Middle & High School State Championships,2026-05-08
 92,Walt Whitman (Poets),walt whitman (poets) (HS),hs-boys,1109.7,19,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
 93,Regis (Regis A),regis (regis a) (HS),hs-boys,1108.3,18,2026,2026 New York High School Boys State Championships,2026-05-23
-94,Northfield-JV (Northfield HS JV),northfield-jv (northfield hs jv) (HS),hs-boys,1106.0,12,2026,2026 Colorado High School State Championships,2026-05-09
+94,Northfield-JV (Northfield HS JV),northfield-jv (northfield hs jv) (HS),hs-boys,1106.1,12,2026,2026 Colorado High School State Championships,2026-05-09
 95,Lake Travis High School (Lake Travis),lake travis high school (lake travis) (HS),hs-boys,1102.4,12,2026,2026 Texas High School Boys State Championships,2026-05-16
 96,Forsyth Central (Eclipse Ultimate),forsyth central (eclipse ultimate) (HS),hs-boys,1098.2,17,2026,2026 Georgia High School State Championships,2026-04-25
 97,Druid Hills-JV (Druid Hills JV),druid hills-jv (druid hills jv) (HS),hs-boys,1093.0,18,2026,2026 Georgia High School State Championships,2026-04-25
@@ -1824,7 +1820,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 105,Edwardsville-JV (Edwardsville JV),edwardsville-jv (edwardsville jv) (HS),hs-boys,1078.5,16,2026,2026 Illinois High School State Championships,2026-05-29
 106,Dwight-Englewood (Bulldogs),dwight-englewood (bulldogs) (HS),hs-boys,1065.3,17,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 107,Stewarts Creek (SCUF),stewarts creek (scuf) (HS),hs-boys,1064.6,19,2026,2026 Tennessee High School State Championships,2026-05-09
-108,Oakland Technical (Disc-O-Tech),oakland technical (disc-o-tech) (HS),hs-boys,1062.2,22,2026,2026 California High School State Championships,2026-05-16
+108,Oakland Technical (Disc-O-Tech),oakland technical (disc-o-tech) (HS),hs-boys,1062.3,22,2026,2026 California High School State Championships,2026-05-16
 109,Neuqua Valley (NV Ultimate Mixed),neuqua valley (nv ultimate mixed) (HS),hs-boys,1060.6,13,2026,2026 Illinois High School State Championships,2026-05-29
 110,Edward R. Murrow-A (Murrow Magic),edward r. murrow-a (murrow magic) (HS),hs-boys,1057.2,14,2026,2026 New York High School Boys State Championships,2026-05-23
 111,Lindbergh (Lindbergh Flyers),lindbergh (lindbergh flyers) (HS),hs-boys,1055.5,22,2026,2026 Missouri High School State Championships,2026-05-02
@@ -1833,7 +1829,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 114,Barrington High School (Barrington High School),barrington high school (barrington high school) (HS),hs-boys,1047.7,14,2026,2026 Illinois High School State Championships,2026-05-29
 115,Carolina Friends (Fighting Quakers),carolina friends (fighting quakers) (HS),hs-boys,1046.8,13,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
 116,Kirkwood (Kirkwood Pioneers),kirkwood (kirkwood pioneers) (HS),hs-boys,1043.2,14,2026,2026 Missouri High School State Championships,2026-05-02
-117,McDaniel (McDaniel),mcdaniel (mcdaniel) (HS),hs-boys,1041.3,13,2026,2026 Oregon High School State Championships,2026-05-30
+117,McDaniel (McDaniel),mcdaniel (mcdaniel) (HS),hs-boys,1041.2,13,2026,2026 Oregon High School State Championships,2026-05-30
 118,Bingham (Bingham Ultimate - White),bingham (bingham ultimate - white) (HS),hs-boys,1040.7,15,2026,2026 Utah Middle & High School State Championships,2026-05-08
 119,Boulder (The Wave (Open)),boulder (the wave (open)) (HS),hs-boys,1040.1,19,2026,2026 Colorado High School State Championships,2026-05-09
 120,Compass Montessori - Golden (Compass Montessori Unicorns - Open),compass montessori - golden (compass montessori unicorns - open) (HS),hs-boys,1037.2,22,2026,2026 Colorado High School State Championships,2026-05-09
@@ -1851,7 +1847,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 132,East  (Denver East Junior Varsity),east (denver east junior varsity) (HS),hs-boys,1016.4,23,2026,2026 Colorado High School State Championships,2026-05-09
 133,Stuyvesant (Sticky Fingers ),stuyvesant (sticky fingers ) (HS),hs-boys,1015.9,29,2026,2026 New York High School Boys State Championships,2026-05-23
 134,Wakefield-Arlington Career Center (WACC) (WACC),wakefield-arlington career center (wacc) (wacc) (HS),hs-boys,1013.3,21,2026,2026 Virginia High School State Championships,2026-05-16
-135,Cleveland (Warriors),cleveland (warriors) (HS),hs-boys,1011.6,13,2026,2026 Oregon High School State Championships,2026-05-30
+135,Cleveland (Warriors),cleveland (warriors) (HS),hs-boys,1011.5,13,2026,2026 Oregon High School State Championships,2026-05-30
 136,Webster Groves (Webster Whirlwind),webster groves (webster whirlwind) (HS),hs-boys,1005.6,15,2026,2026 Missouri High School State Championships,2026-05-02
 137,XUA (St Xavier),xua (st xavier) (HS),hs-boys,1001.3,14,2026,2026 Ohio High School State Championships,2026-05-30
 138,Walter Johnson (Walter Johnson Pitchers),walter johnson (walter johnson pitchers) (HS),hs-boys,995.9,10,2026,2026 Maryland High School Boys/Open State Championship,2026-05-09
@@ -1863,8 +1859,8 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 144,Columbia-JV (CHS JV),columbia-jv (chs jv) (HS),hs-boys,986.0,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 145,Berkeley (LC) (Berkeley High Coup - Lo Coup),berkeley (lc) (berkeley high coup - lo coup) (HS),hs-boys,985.7,17,2026,2026 California High School State Championships,2026-05-16
 146,Kennebunk (Kennebunk Rams),kennebunk (kennebunk rams) (HS),hs-boys,985.4,15,2026,2026 Maine High School Boys State Championships,2026-05-30
-147,Franklin-JV (Lightning JV),franklin-jv (lightning jv) (HS),hs-boys,976.9,18,2026,2026 Oregon High School State Championships,2026-05-30
-148,Yorktown (Patriots),yorktown (patriots) (HS),hs-boys,976.8,18,2026,2026 Virginia High School State Championships,2026-05-16
+147,Yorktown (Patriots),yorktown (patriots) (HS),hs-boys,976.8,18,2026,2026 Virginia High School State Championships,2026-05-16
+148,Franklin-JV (Lightning JV),franklin-jv (lightning jv) (HS),hs-boys,976.8,18,2026,2026 Oregon High School State Championships,2026-05-30
 149,Urbana High School-JV (Tigers),urbana high school-jv (tigers) (HS),hs-boys,973.7,7,2026,2026 Illinois High School State Championships,2026-05-29
 150,Fairview (Fairview Open B),fairview (fairview open b) (HS),hs-boys,973.3,20,2026,2026 Colorado High School State Championships,2026-05-09
 151,La Follette (LUF),la follette (luf) (HS),hs-boys,973.3,15,2026,2026 Wisconsin High School State Championships,2026-05-23
@@ -1878,7 +1874,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 159,Hydra,hydra (HS),hs-boys,954.6,14,2026,2026 Utah Middle & High School State Championships,2026-05-08
 160,Asheville (Asheville),asheville (asheville) (HS),hs-boys,952.6,23,2026,2026 Queen City Tune Up Youth Tournament,2026-04-11
 161,St. John Vianney-Varsity (Vianney ),st. john vianney-varsity (vianney ) (HS),hs-boys,947.9,18,2026,2026 Missouri High School State Championships,2026-05-02
-162,St. Louis University High (SLUH Ultimate),st. louis university high (sluh ultimate) (HS),hs-boys,947.3,19,2026,2026 Missouri High School State Championships,2026-05-02
+162,St. Louis University High (SLUH Ultimate),st. louis university high (sluh ultimate) (HS),hs-boys,947.2,19,2026,2026 Missouri High School State Championships,2026-05-02
 163,New Vista (Owls),new vista (owls) (HS),hs-boys,943.3,24,2026,2026 Colorado High School State Championships,2026-05-09
 164,Saint Louis Priory (Priory Ravens),saint louis priory (priory ravens) (HS),hs-boys,940.9,23,2026,2026 Missouri High School State Championships,2026-05-02
 165,Bend Senior (Lava Bears - Varsity),bend senior (lava bears - varsity) (HS),hs-boys,939.6,16,2026,2026 Oregon High School State Championships,2026-05-30
@@ -1936,7 +1932,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 217,Watchung Hills Regional (Warriors),watchung hills regional (warriors) (HS),hs-boys,822.1,25,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 218,Fairfax (Fairfax Fog),fairfax (fairfax fog) (HS),hs-boys,816.9,17,2026,2026 Virginia High School State Championships,2026-05-16
 219,Fort Collins Club (Fort Collins AYU Club),fort collins club (fort collins ayu club) (HS),hs-boys,815.4,19,2026,2026 Colorado High School State Championships,2026-05-09
-220,EVU X (EVU X),evu x (evu x) (HS),hs-boys,814.2,12,2026,2026 Oregon High School State Championships,2026-05-30
+220,EVU X (EVU X),evu x (evu x) (HS),hs-boys,814.0,12,2026,2026 Oregon High School State Championships,2026-05-30
 221,Cape Elizabeth (Cape Ultimate - Open),cape elizabeth (cape ultimate - open) (HS),hs-boys,810.0,15,2026,2026 Maine High School Boys State Championships,2026-05-30
 222,Traverse City  (Lake Effect),traverse city (lake effect) (HS),hs-boys,804.8,18,2026,2026 Michigan High School Boys/Open State Championship,2026-06-06
 223,McFarland (McFarland Spartans),mcfarland (mcfarland spartans) (HS),hs-boys,802.2,15,2026,2026 Wisconsin High School State Championships,2026-05-23
@@ -2072,7 +2068,7 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 8,Cape Elizabeth (Cape Ultimate - Mixed),cape elizabeth (cape ultimate - mixed) (HS mixed),hs-mixed,811.4,31,2026,2026 Maine High School Mixed State Championships,2026-05-23
 1,Westfield MS Travel-A (Westfield Middle),westfield ms travel-a (westfield middle) (MS),ms-boys,1019.6,29,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 2,MS 243 Center School (Outsiders),ms 243 center school (outsiders) (MS),ms-boys,854.6,8,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
-3,Montclair Middle-A (Montclair Middle School Ultimate ),montclair middle-a (montclair middle school ultimate ) (MS),ms-boys,793.3,13,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
+3,Montclair Middle-A (Montclair Middle School Ultimate ),montclair middle-a (montclair middle school ultimate ) (MS),ms-boys,793.4,13,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 4,Maplewood/South Orange Middle (Columbia Cougars (Middle School)),maplewood/south orange middle (columbia cougars (middle school)) (MS),ms-boys,682.8,19,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 5,Montclair Middle-B (Montclair Middle B),montclair middle-b (montclair middle b) (MS),ms-boys,638.3,20,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
 6,Tenafly-A (Tiger Ultimate),tenafly-a (tiger ultimate) (MS),ms-boys,558.0,25,2026,2026 New Jersey Middle & High School State Championships,2026-05-23
@@ -2180,22 +2176,22 @@ rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_dat
 12,DEVYL U-20 Mixed,devyl u-20 mixed (YCC-U20 mixed),ycc-u20-mixed,1070.6,24,2026,Edgely YCC Warm Up,2026-07-11
 13,LA Sky,la sky (YCC-U20 mixed),ycc-u20-mixed,1001.9,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 14,NWA White Tails,nwa white tails (YCC-U20 mixed),ycc-u20-mixed,863.1,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-1,Oregon Eclipse,oregon eclipse (YCC-U17),ycc-u17-boys,1583.6,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+1,Oregon Eclipse,oregon eclipse (YCC-U17),ycc-u17-boys,1583.8,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 2,SoCal Air Show,socal air show (YCC-U17),ycc-u17-boys,1507.3,16,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-3,OAK Sparks,oak sparks (YCC-U17),ycc-u17-boys,1488.2,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-4,Philadelphia PADAwans,philadelphia padawans (YCC-U17),ycc-u17-boys,1402.3,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+3,OAK Sparks,oak sparks (YCC-U17),ycc-u17-boys,1488.1,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+4,Philadelphia PADAwans,philadelphia padawans (YCC-U17),ycc-u17-boys,1402.4,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 5,Minnesota Superior U17B,minnesota superior u17b (YCC-U17),ycc-u17-boys,1366.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 6,Seven Hills U17 Bx,seven hills u17 bx (YCC-U17),ycc-u17-boys,1343.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-7,Capitol Heights,capitol heights (YCC-U17),ycc-u17-boys,1246.8,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+7,Capitol Heights,capitol heights (YCC-U17),ycc-u17-boys,1246.9,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 8,Aftershock,aftershock (YCC-U17),ycc-u17-boys,1200.3,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 9,Richmond Spinners (Richmond Spinners),richmond spinners (richmond spinners) (YCC-U17),ycc-u17-boys,1198.6,15,2026,James River Jam 2026,2026-06-13
 10,NC Hammer,nc hammer (YCC-U17),ycc-u17-boys,1191.5,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-11,Texas Double Trouble,texas double trouble (YCC-U17),ycc-u17-boys,1189.5,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+11,Texas Double Trouble,texas double trouble (YCC-U17),ycc-u17-boys,1189.6,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 12,Colorado Cutthroat U-17 Boys,colorado cutthroat u-17 boys (YCC-U17),ycc-u17-boys,1187.2,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 13,ATLas,atlas (YCC-U17),ycc-u17-boys,1175.4,20,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 14,Neap Tide,neap tide (YCC-U17),ycc-u17-boys,1151.5,17,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 15,DEVYL U-17,devyl u-17 (YCC-U17),ycc-u17-boys,1137.8,24,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
-16,BUDA U17B,buda u17b (YCC-U17),ycc-u17-boys,1121.1,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
+16,BUDA U17B,buda u17b (YCC-U17),ycc-u17-boys,1121.3,22,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 17,Illinois Nightmare,illinois nightmare (YCC-U17),ycc-u17-boys,1104.4,23,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 18,Utah Swarm U17 Boys,utah swarm u17 boys (YCC-U17),ycc-u17-boys,1040.0,18,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
 19,Lucky PuNCs,lucky puncs (YCC-U17),ycc-u17-boys,993.1,25,2026,2026 U.S. Open Youth Club Championships (YCC),2026-08-01
