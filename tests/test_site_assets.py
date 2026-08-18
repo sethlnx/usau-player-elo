@@ -6,12 +6,22 @@ from pathlib import Path
 
 from analysis.backtest import DB_PATH
 from analysis.site import (bucket_urls, content_version, load_csv,
+                           TEMPLATE,
                            load_player_box_score_payload,
                            load_player_metric_payload, load_ufa_payload,
                            ufa_game_ratings)
 
 
 class SiteAssetContractTests(unittest.TestCase):
+    def test_refresh_link_opens_authenticated_workflow(self):
+        self.assertIn(
+            'href="https://github.com/sethlnx/usau-player-elo/actions/workflows/'
+            'refresh-rankings.yml"',
+            TEMPLATE,
+        )
+        self.assertIn(">Refresh rankings</a>", TEMPLATE)
+        self.assertNotIn("GITHUB_TOKEN", TEMPLATE)
+
     def test_sidecar_urls_share_content_version_and_change_with_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "history.json"

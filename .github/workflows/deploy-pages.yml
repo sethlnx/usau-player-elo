@@ -1,0 +1,38 @@
+name: Deploy rankings site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/**
+# Preserve Pages deployment for ordinary human-authenticated docs pushes. The
+# manual refresh deploys itself because its GITHUB_TOKEN push cannot trigger us.
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy site
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out site
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,93 @@
+name: Refresh rankings
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: Optional four-digit season; blank refreshes the current year
+        required: false
+        type: string
+
+
+concurrency:
+  group: refresh-rankings
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh and publish
+    runs-on: [self-hosted, macOS, rankings]
+    timeout-minutes: 120
+    permissions:
+      contents: write
+
+    steps:
+      - name: Validate persistent checkout
+        env:
+          REPO: ${{ vars.RANKINGS_REPO_PATH }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$REPO" ]]; then
+            echo "Set the RANKINGS_REPO_PATH repository variable to the persistent checkout." >&2
+            exit 1
+          fi
+          test -f "$REPO/refresh_and_publish.py"
+          test -x "$REPO/.venv/bin/python"
+          test -s "$REPO/data/usau.db"
+          test -s "$REPO/data/euf.db"
+
+      - name: Refresh Elo and publish GitHub Pages
+        working-directory: ${{ vars.RANKINGS_REPO_PATH }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SEASON: ${{ inputs.season }}
+        run: |
+          set -euo pipefail
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          basic_auth="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $basic_auth"
+
+          if [[ -z "$SEASON" ]]; then
+            .venv/bin/python refresh_and_publish.py
+          elif [[ "$SEASON" =~ ^[0-9]{4}$ ]]; then
+            .venv/bin/python refresh_and_publish.py --season "$SEASON"
+          else
+            echo "season must be exactly four digits" >&2
+            exit 2
+          fi
+
+  # A push authenticated with GITHUB_TOKEN cannot trigger deploy-pages.yml,
+  # so the manual refresh must deploy the commit inside this workflow.
+  deploy:
+    name: Deploy refreshed site
+    needs: refresh
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out refreshed main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4

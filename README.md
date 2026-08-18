@@ -13,6 +13,60 @@ opening rating falls out of whoever is on its roster.
 
 Full plan: `USAU_by_player_elo.md`.
 
+## Refresh and publish
+
+From a clean `main` checkout with the local `data/usau.db` and `data/euf.db`
+corpora present, run:
+
+```bash
+.venv/bin/python refresh_and_publish.py
+```
+
+The command pulls `origin/main` with `--ff-only`, tops up newly finished or
+incomplete USAU events in the current season, rebuilds bracket structure,
+player identity, Elo outputs, and the static site, runs the focused publication
+checks, commits only the generated data and `docs/` assets, then pushes
+`main`. GitHub Pages deploys the pushed `docs/` site.
+
+Refresh more than one season when an older result changed:
+
+```bash
+.venv/bin/python refresh_and_publish.py --season 2025 --season 2026
+```
+
+Preview the exact pipeline without reading data, changing files, or using the
+network:
+
+```bash
+.venv/bin/python refresh_and_publish.py --dry-run
+```
+
+The command refuses a dirty worktree, a branch other than `main`, or missing
+source databases. A failed refresh or check is not committed or pushed.
+
+### Trigger the refresh from the site
+
+Set up the self-hosted runner once:
+
+1. In the repository, open **Settings → Actions → Runners → New self-hosted
+   runner**, choose macOS, and follow GitHub's installation commands.
+2. Add the custom label `rankings` while configuring the runner, then install
+   and start it as a service. The runner must be online when a refresh starts.
+3. Under **Settings → Secrets and variables → Actions → Variables**, create
+   `RANKINGS_REPO_PATH` with the absolute path of this persistent checkout.
+4. Keep that checkout on a clean `main` branch with `.venv/bin/python`,
+   `data/usau.db`, and `data/euf.db` present.
+5. Under **Settings → Actions → General**, allow workflows read and write
+   access to repository contents.
+6. Under **Settings → Pages → Build and deployment**, change **Source** to
+   **GitHub Actions**.
+
+On the rankings site, press **Refresh rankings**. GitHub requires a signed-in
+collaborator with write access to press **Run workflow**; public visitors can
+open the workflow page but cannot run it. The refresh job uses its short-lived
+GitHub token for the push, then a separate least-privilege job deploys `docs/`
+to Pages—the site never receives a repository credential.
+
 ## Pipeline
 
 ```
@@ -127,10 +181,10 @@ genuinely behind — 306 club men's events looked stale on the cheap DB filter
 and exactly 2 were. Run over the whole corpus it topped up 7 events and 125
 played games; the college divisions were already complete.
 
-It writes to whichever file OWNS the division, which is not always
-`data/usau.db`: `merge_divisions` drops and re-imports four divisions from
-their own sources, so a club-mixed refresh written into the main DB survives
-precisely until the next merge. Replacement is wholesale through
+It writes every division directly to the unified `data/usau.db`. The old
+per-division files and `merge_divisions` belong only to the retired HTML
+ingest; routing a refresh through them could overwrite newer unified rows.
+Replacement is wholesale through
 `scraper/graphql.py`, because for a game we hold no result for there is no
 score to match on and the team pair alone cannot separate a pool meeting from a
 bracket rematch.

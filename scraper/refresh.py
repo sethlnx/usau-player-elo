@@ -11,13 +11,12 @@ This is that fix as a function, and it reads from the mirror rather than the
 WAF-guarded HTML: one request per event instead of a schedule fetch plus a
 roster fetch per team, and no rotation budget to spend.
 
-WHICH DB GETS WRITTEN
----------------------
-Not always data/usau.db. `scraper/merge_divisions.py` DROPS four divisions and
-re-imports them from their own source files, so a refresh written into the main
-DB for club-mixed, club-women, college-women or college-women-d3 survives
-exactly until the next merge. Each division is therefore refreshed in the file
-that OWNS it, and the merge is re-run afterwards -- `main` says so on exit.
+THE AUTHORITATIVE DB
+--------------------
+The default GraphQL build stores every division in ``data/usau.db``. Refreshes
+therefore update that unified database directly. The split per-division files
+belong only to the retired HTML ingest; routing fresh rows through them would
+let a later legacy merge overwrite the unified corpus with stale data.
 
 WHAT COUNTS AS STALE
 --------------------
@@ -45,15 +44,8 @@ from datetime import date
 from .build_db import DB_PATH, SCHEMA, _ensure_columns, connect
 from .graphql import (API_DIVISION, WORKERS, fetch_event, ingest_event,
                       list_events, upsert_event)
-from .merge_divisions import SOURCES
 
 
-def owner_db(division: str):
-    """The file whose rows for this division are authoritative."""
-    for path, div, _ in SOURCES:
-        if div == division:
-            return path
-    return DB_PATH
 
 
 def stale_events(con, division: str, seasons: list[int] | None, today: str):
@@ -89,7 +81,7 @@ def stale_events(con, division: str, seasons: list[int] | None, today: str):
 def refresh_division(division: str, seasons: list[int] | None, workers: int,
                      dry_run: bool) -> tuple[int, int, int]:
     """(examined, replaced, games_gained) for one division."""
-    path = owner_db(division)
+    path = DB_PATH
     if not path.exists():
         print(f"{division}: {path.name} does not exist, skipping", flush=True)
         return 0, 0, 0
@@ -174,23 +166,16 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
 def main(seasons: list[int] | None, division: str | None = None,
          workers: int = WORKERS, dry_run: bool = False):
     divisions = [division] if division else sorted(API_DIVISION)
-    touched, total_replaced, total_gained = set(), 0, 0
+    total_replaced, total_gained = 0, 0
     for div in divisions:
         _, replaced, gained = refresh_division(div, seasons, workers, dry_run)
-        if replaced:
-            touched.add(owner_db(div).name)
-            total_replaced += replaced
-            total_gained += gained
+        total_replaced += replaced
+        total_gained += gained
     print(f"\n{total_replaced} events refreshed, +{total_gained} played games")
     if dry_run or not total_replaced:
         return
-    # The refreshed rows are only half the job: bracket structure has to be
-    # re-attached, and any division living in its own file has to be merged
-    # before the main DB sees it.
-    merged = touched - {DB_PATH.name}
-    if merged:
-        print("re-run `python -m scraper.merge_divisions` "
-              f"to fold in {', '.join(sorted(merged))}")
+    # The refreshed rows are only half the job: bracket structure and every
+    # derived publication artifact must be rebuilt before the result is used.
     print("then `python -m scraper.structure` and the analysis pipeline")
 
 

@@ -666,6 +666,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);
 header{padding:22px 20px 0;max-width:1180px;margin:0 auto}
 h1{font-size:19px;margin:0 0 2px;letter-spacing:-.01em}
 .sub{color:var(--ink-3);font-size:13px;margin-bottom:16px}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  flex-wrap:wrap}
+.headrow h1{flex:1;min-width:220px}
+.refresh-link{flex:none;font-size:13px;line-height:1;text-decoration:none;
+  padding:7px 11px;border:1px solid var(--line-strong);border-radius:7px;
+  background:var(--surface);color:var(--ink-2)}
+.refresh-link:hover,.refresh-link:focus-visible{border-color:var(--accent);
+  color:var(--ink);outline:none}
 nav{display:flex;gap:4px;border-bottom:1px solid var(--line);max-width:1180px;margin:0 auto;
     padding:0 20px}
 nav button{background:none;border:0;padding:9px 15px;font:inherit;font-size:14px;
@@ -1085,7 +1093,13 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div id="dbody"></div></div>
 <div id="tip"></div>
 <header>
-  <h1>USAU + International Player-Elo Rankings</h1>
+  <div class="headrow">
+    <h1>USAU + International Player-Elo Rankings</h1>
+    <a class="refresh-link"
+       href="https://github.com/sethlnx/usau-player-elo/actions/workflows/refresh-rankings.yml"
+       target="_blank" rel="noopener noreferrer"
+       title="Open the authenticated GitHub Actions refresh">Refresh rankings</a>
+  </div>
   <div class="sub" id="sub"></div>
 </header>
 <nav>
