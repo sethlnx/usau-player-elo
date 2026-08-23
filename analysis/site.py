@@ -1,8 +1,8 @@
 """Build the published rankings page.
 
-Three tabs: combined USAU/EUF club and player rankings, per-season Trends, and
-a USAU Tournaments browser showing every event's recovered pools and bracket
-plus the history of the series it belongs to.
+Three tabs: combined USAU/EUF club and player rankings, per-season Trends,
+and a Tournaments browser showing USAU events plus selected WFDF events with
+their recovered pools and bracket plus the history of the series they belong to.
 
 The page itself is one file and opens over file:// with no server. Two things
 ride beside it rather than inside it, both as classic <script> tags because a
@@ -17,7 +17,7 @@ never replays the model, so the page can never disagree with the CSVs:
     data/team_elo.csv            clubs, most recent COMPLETED event roster
     data/team_elo_best.csv       clubs, best full-strength roster of 2026
     data/usau.db                 USAU schedules for the Tournaments browser
-    data/euf.db                  European games and captured season rosters
+    data/euf.db                  selected WFDF games for the same browser
 
 Usage: python -m analysis.site   ->   docs/index.html + history.js + t/<season>.js
 """
@@ -337,11 +337,19 @@ def write_buckets(directory, global_name, buckets):
 
 def build():
     con = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    euf_db = DB_PATH.parent / "euf.db"
+    euf_con = None
+    wucc_ids = []
+    if euf_db.exists():
+        euf_con = sqlite3.connect(f"file:{euf_db}?mode=ro", uri=True)
+        wucc_ids = [row[0] for row in euf_con.execute(
+            "SELECT event_id FROM events WHERE name = 'WFDF WUCC 2026'"
+        )]
     # Every event's recovered shape, for the Tournaments tab. Derived here
     # rather than replayed: analysis.tournaments reads the same schedule the
     # tracker does and infers pools and brackets from the results.
-    tourneys = build_tournaments(con)
-
+    supplemental = [(euf_con, "wfdf", wucc_ids)] if euf_con else []
+    tourneys = build_tournaments(con, supplemental)
     all_players = load_csv("player_elo.csv")
     total_rated = len(all_players)
     players = [r for r in all_players if int(r["games"]) >= MIN_GAMES]
@@ -427,11 +435,9 @@ def build():
         return 0 if v <= -0.002 else 2 if v >= 0.003 else 1
 
     # Tournament detail out of the payload and into per-season files. Keys are
-    # event indices into `tourneys.events`, which stays inline: the list, the
-    # filters, the series table and the champion column all read it, so the
-    # index never waits on a fault. Only `drawTournament` needs a bucket, and
-    # only for the one season it is drawing.
+    # event indices into `tourneys.events`, which stays inline.
     tdetail = tourneys.pop("detail")
+    tourney_sources = tourneys.pop("eventSources")
     tbuckets = collections.defaultdict(dict)
     for ix, det in tdetail.items():
         tbuckets[tourneys["events"][int(ix)][2]][ix] = det
@@ -453,8 +459,13 @@ def build():
     played = {eid for (eid,) in con.execute(
         """SELECT DISTINCT event_id FROM games
            WHERE home_score IS NOT NULL AND away_score IS NOT NULL""")}
-    for row in tourneys["events"]:
+    if euf_con:
+        played.update(f"wfdf:{eid}" for (eid,) in euf_con.execute(
+            """SELECT DISTINCT event_id FROM games
+               WHERE home_score IS NOT NULL AND away_score IS NOT NULL"""))
+    for row, source in zip(tourneys["events"], tourney_sources):
         row.append(0 if row[0] in played else 1)
+        row.append(source)
     tourneys["strengthNotes"] = FIELD_TIER_NAMES
     # Tournament forecasts use the strongest current roster rating when it
     # exists, falling back to the latest completed roster for older or
@@ -633,6 +644,8 @@ def build():
           f"{len(clubs['completed'])} clubs")
     print(f"  {len(tourneys['events']):,} tournaments in "
           f"{len(tourneys['series']):,} series")
+    if euf_con:
+        euf_con.close()
     con.close()
 
 
@@ -2987,7 +3000,7 @@ function closeDetail(silent) {
   $('#tip').classList.remove('on'); $('#dback').classList.remove('on');
   navStack = []; cur = null;
   if (silent === true || !was || !location.hash) return;
-  const back = curEvent !== null ? '#t/' + EVS[curEvent][0] : '#';
+  const back = curEvent !== null ? tournamentHash(EVS[curEvent][0]) : '#';
   if (location.hash !== back) location.hash = back;
 }
 $('#dclose').onclick = () => closeDetail();
@@ -3068,7 +3081,8 @@ const EVS = TV.events, ESER = TV.series, ETM = TV.teams;
    Nothing in the list needs it: the champion column reads a global team index
    off the event row precisely so that 400 rendered rows pull no games. */
 const EDET = {};
-const EVBYID = new Map(EVS.map((e, i) => [e[0], i]));
+const EVBYID = new Map(EVS.map((e, i) => [String(e[0]), i]));
+const tournamentHash = eid => '#t/' + encodeURIComponent(String(eid));
 const EDIVL = ["Club Men's", "College Men's", "College Men's D-III",
                'Club Mixed', "Club Women's",
                "College Women's", "College Women's D-III",
@@ -3226,6 +3240,13 @@ function drawEvents() {
   if (q) rows = rows.filter(e => e[1].toLowerCase().includes(q) ||
                                  e[6].toLowerCase().includes(q) ||
                                  ESER[e[9]][0].toLowerCase().includes(q));
+  // WFDF publishes one event record per division; keep the championship as
+  // one list row while its sibling divisions remain available in the detail.
+  if (div === 'all') {
+    const seen = new Set();
+    rows = rows.filter(e => e[14] !== 'wfdf' ||
+      !seen.has(`${e[1]}|${e[2]}`) && (seen.add(`${e[1]}|${e[2]}`), true));
+  }
   const total = rows.length;
   // The cap is a DOM budget, not a filter: the count says how many matched so
   // a narrower search is an obvious next move. An unrated event sorts last on
@@ -3276,7 +3297,7 @@ function drawEvents() {
 });
 $('#etb').addEventListener('click', e => {
   const tr = e.target.closest('[data-ev]');
-  if (tr) location.hash = '#t/' + tr.dataset.ev;
+  if (tr) location.hash = tournamentHash(tr.dataset.ev);
 });
 
 /* ---------- standings ---------- */
@@ -3677,9 +3698,8 @@ function evSeeds(det) {
   });
   return out;
 }
-
 function openTournament(eid) {
-  const i = EVBYID.get(eid);
+  const i = EVBYID.get(String(eid));
   if (i === undefined) { closeTournament(); return; }
   if (curEvent !== i) drawTournament(i);
   $('#tlist').style.display = 'none';
@@ -3697,7 +3717,7 @@ $('#tvbody').addEventListener('click', ev => {
   const c = ev.target.closest('[data-club]');
   if (c) { openDetail('c', c.dataset.club); return; }
   const tr = ev.target.closest('[data-ev]');
-  if (tr) location.hash = '#t/' + tr.dataset.ev;
+  if (tr) location.hash = tournamentHash(tr.dataset.ev);
 });
 
 /* ---------- deep links ---------- */
@@ -3714,7 +3734,9 @@ function routeHash() {
   // club panel opened from inside it is layered on top and closed first.
   if (m && m[1] === 't') {
     if (cur) closeDetail(true);
-    openTournament(+m[2]);
+    let eid;
+    try { eid = decodeURIComponent(m[2]); } catch (err) { eid = m[2]; }
+    openTournament(eid);
     return;
   }
   // Only a bare hash tears the tournament down. A club panel opened from

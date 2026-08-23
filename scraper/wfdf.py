@@ -158,6 +158,11 @@ EVENTS = {
             "WFDF Asia-Oceanic Ultimate Championships 2025", "club",
             "Kamisu", "Japan", "live",
         ),
+        EventSpec(
+            "wucc-2026", "wucc-2026", "WUCC2026", 2026,
+            "WFDF WUCC 2026", "club",
+            "Limerick", "Ireland", "live",
+        ),
     )
 }
 

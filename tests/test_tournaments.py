@@ -46,6 +46,42 @@ class TournamentPublicationTests(unittest.TestCase):
         self.assertEqual([], payload["detail"][0]["p"])
         self.assertEqual([], payload["detail"][0]["b"])
         self.assertEqual([], payload["detail"][0]["o"])
+    def test_supplemental_event_ids_are_namespaced(self):
+        supplemental = sqlite3.connect(":memory:")
+        supplemental.executescript(SCHEMA)
+        supplemental.execute(
+            """INSERT INTO events
+               (event_id, season, name, url, start_date, end_date, division)
+               VALUES (1, 2026, 'WFDF WUCC 2026', 'https://results.wfdf.sport/wucc-2026/',
+                       '2026-08-15', '2026-08-22', 'club-men')"""
+        )
+        supplemental.executemany(
+            """INSERT INTO event_teams
+               (event_team_id, event_id, display_name, roster_fetched)
+               VALUES (?, 1, ?, 1)""",
+            [("wucc:a", "Alpha"), ("wucc:b", "Beta")],
+        )
+        supplemental.execute(
+            """INSERT INTO games
+               (event_id, game_key, stage, date, home_id, away_id,
+                home_score, away_score, status)
+               VALUES (1, 'game-1', 'Pool A', '2026-08-15',
+                       'wucc:a', 'wucc:b', 13, 11, 'played')"""
+        )
+        try:
+            self.add_scheduled_event(1, "USAU Event", "2999-08-22")
+            payload = build(self.con, [(supplemental, "wfdf", [1])])
+        finally:
+            supplemental.close()
+
+        rows = {event[1]: (index, event) for index, event in
+                enumerate(payload["events"])}
+        self.assertEqual(1, rows["USAU Event"][1][0])
+        wucc_index, wucc = rows["WFDF WUCC 2026"]
+        self.assertEqual("wfdf:1", wucc[0])
+        self.assertEqual(4, wucc[8])
+        self.assertEqual("wfdf", payload["eventSources"][wucc_index])
+        self.assertIn(wucc_index, payload["detail"])
 
 
 if __name__ == "__main__":

@@ -87,7 +87,7 @@ TIME_RE = re.compile(r"^\s*(\d{1,2}):(\d{2})\s*([AaPp])?")
 TIER_RE = [
     (4, re.compile(r"\bnational|college championships?\b"
                    r"|usa ultimate club championships?\b|u\.?s\.? open"
-                   r"|world .*championships?|pan american", re.I)),
+                   r"|world .*championships?|\bwucc\b|pan american", re.I)),
     (3, re.compile(r"\bregionals?\b", re.I)),
     (2, re.compile(r"\bsectionals?\b", re.I)),
     (1, re.compile(r"\bconference\b|\bcc\b|\bconf\b", re.I)),
@@ -498,20 +498,23 @@ def decompose(games):
             sorted(loose + odd, key=lambda g: g["ord"]))
 
 
-def load(con):
-    """Every event's fixtures, in playing order, keyed by event id.
+def _event_key(source, event_id):
+    """Keep supplemental event IDs distinct from the USAU integer IDs."""
+    return event_id if source == "usau" else f"{source}:{event_id}"
 
-    `bracket`/`bracket_place`/`bracket_round` ride along where
-    scraper/structure.py has attached them. They are the organiser's PUBLISHED
-    shape rather than a reading of the label, so `decompose` prefers them and
-    only falls back to recovery for the games that have none.
 
-    `stage_pub` overrides `stage` for the same reason: where the mirror names a
-    fixture USAU filed under a pool heading it did not belong to, the published
-    name wins. The 2026 U.S. Open's two quarterfinal-seeding games read
-    "Pool D" in USAU's schedule and "Seeding Crossovers" here, and the first
-    spelling puts a seeding round into pool play.
-    """
+def _event_filter(event_ids):
+    if event_ids is None:
+        return "", []
+    ids = tuple(event_ids)
+    if not ids:
+        return " WHERE 0", []
+    return " WHERE g.event_id IN (" + ",".join("?" for _ in ids) + ")", list(ids)
+
+
+def load(con, source="usau", event_ids=None):
+    """Every selected event's fixtures, keyed by source-qualified ID."""
+    where, params = _event_filter(event_ids)
     rows = con.execute("""
         SELECT g.event_id, g.game_key, COALESCE(g.stage_pub, g.stage),
                g.date, g.time, g.slot,
@@ -520,15 +523,16 @@ def load(con):
                g.bracket_round
         FROM games g
         LEFT JOIN event_teams h ON h.event_team_id = g.home_id
-        LEFT JOIN event_teams a ON a.event_team_id = g.away_id""").fetchall()
+        LEFT JOIN event_teams a ON a.event_team_id = g.away_id""" + where,
+        params).fetchall()
     by_event = collections.defaultdict(list)
     for (eid, key, stage, d, t, slot, home, away, hs, as_, status,
          br, place, btype, bround) in rows:
-        by_event[eid].append({
+        by_event[_event_key(source, eid)].append({
             "stage": (stage or "").strip(), "date": d or "",
             "home": home, "away": away, "hs": hs, "as": as_,
-            "done": status == "Final" and hs is not None and as_ is not None
-                    and (hs or 0) + (as_ or 0) > 0,
+            "done": status in {"Final", "played"} and hs is not None
+                    and as_ is not None and (hs or 0) + (as_ or 0) > 0,
             "br": br, "place": place, "btype": btype, "bround": bround,
             "ord": (d or "\uffff", _minutes(t), _slotnum(slot), key),
         })
@@ -537,33 +541,55 @@ def load(con):
     return by_event
 
 
-def build(con):
-    """The `tourneys` payload.
-
-    Encoding is index-heavy because it carries 90,000 games into a file that
-    has to open over file://. Team names live in one global pool; a game
-    references its event's own field by a local index, which keeps almost
-    every number under two digits.
-
-        teams    [display name, ...]
-        series   [[label, [event index, ...]], ...]
-        events   [[id, name, season, div, start, end, place, nTeams, tier,
-                   series index, champion GLOBAL team index or -1], ...]
-        detail   {event index: {t, d, p, b, o}}
-                   t  field, as global team indices
-                   d  distinct dates
-                   p  pools:    [[isLater, [game, ...]], ...]
-                   b  brackets: [[key, [[game|0, ...], ...]], ...]
-                   o  loose:    [[game, stage], ...]
-        game     [homeLocal, awayLocal, homeScore, awayScore, dateIndex]
-    """
-    by_event = load(con)
-    meta = list(con.execute("""
+def _meta(con, source="usau", event_ids=None):
+    where = ""
+    params = []
+    if event_ids is not None:
+        ids = tuple(event_ids)
+        if not ids:
+            return []
+        where = " WHERE event_id IN (" + ",".join("?" for _ in ids) + ")"
+        params = list(ids)
+    rows = con.execute("""
         SELECT event_id, name, season, division, start_date, end_date,
                city, state
-        FROM events ORDER BY COALESCE(start_date, ''), name"""))
-    counts = dict(con.execute(
-        "SELECT event_id, COUNT(*) FROM event_teams GROUP BY 1"))
+        FROM events""" + where + """
+        ORDER BY COALESCE(start_date, ''), name""", params)
+    return [
+        (_event_key(source, eid), name, season, division, start, end,
+         city, state, source)
+        for eid, name, season, division, start, end, city, state in rows
+    ]
+
+
+def build(con, supplemental=()):
+    """Build the USAU tournament payload plus selected supplemental sources.
+
+    `supplemental` contains ``(connection, source, event_ids)`` tuples. The
+    existing USAU rows retain their numeric IDs and array positions; only
+    supplemental IDs are namespaced at the payload boundary.
+    """
+    sources = [(con, "usau", None), *supplemental]
+    by_event = {}
+    meta = []
+    counts = {}
+    for source_con, source, event_ids in sources:
+        by_event.update(load(source_con, source, event_ids))
+        meta.extend(_meta(source_con, source, event_ids))
+        where = ""
+        params = []
+        if event_ids is not None:
+            ids = tuple(event_ids)
+            if not ids:
+                continue
+            where = " WHERE event_id IN (" + ",".join("?" for _ in ids) + ")"
+            params = list(ids)
+        for eid, count in source_con.execute(
+            "SELECT event_id, COUNT(*) FROM event_teams" + where +
+            " GROUP BY 1",
+            params,
+        ):
+            counts[_event_key(source, eid)] = count
 
     teams, tix = [], {}
 
@@ -573,7 +599,9 @@ def build(con):
             teams.append(name)
         return tix[name]
 
-    events, detail, series = [], {}, collections.defaultdict(list)
+    events, event_sources, detail = [], [], {}
+    series = collections.defaultdict(list)
+
     # An event the source has announced but published nothing for yet — no
     # fixtures, often no team roll — used to be dropped here along with the
     # dead ones. That silently cost the page every UPCOMING tournament: 29 of
@@ -586,7 +614,7 @@ def build(con):
     # cancelled, or one the source never filled in, and listing several
     # hundred of those would bury the handful that are actually ahead.
     today = date.today().isoformat()
-    for eid, name, season, division, start, end, city, state in meta:
+    for eid, name, season, division, start, end, city, state, source in meta:
         games = by_event.get(eid)
         upcoming = (start or "") >= today
         if not games and not upcoming:
@@ -638,6 +666,7 @@ def build(con):
                        start or "", end or "", place,
                        counts.get(eid, len(field)), tier(name), 0,
                        detail[ix]["t"][champ] if champ >= 0 else -1])
+        event_sources.append(source)
         series[series_key(name)].append(ix)
 
     # Series in a stable order, and each event told which one it is in. A
@@ -659,4 +688,5 @@ def build(con):
         slist.append([label, ixs])
 
     return {"teams": teams, "series": slist, "events": events,
-            "detail": detail, "rounds": ROUND_NAMES, "tiers": TIER_NAMES}
+            "eventSources": event_sources, "detail": detail,
+            "rounds": ROUND_NAMES, "tiers": TIER_NAMES}
