@@ -3240,13 +3240,6 @@ function drawEvents() {
   if (q) rows = rows.filter(e => e[1].toLowerCase().includes(q) ||
                                  e[6].toLowerCase().includes(q) ||
                                  ESER[e[9]][0].toLowerCase().includes(q));
-  // WFDF publishes one event record per division; keep the championship as
-  // one list row while its sibling divisions remain available in the detail.
-  if (div === 'all') {
-    const seen = new Set();
-    rows = rows.filter(e => e[14] !== 'wfdf' ||
-      !seen.has(`${e[1]}|${e[2]}`) && (seen.add(`${e[1]}|${e[2]}`), true));
-  }
   const total = rows.length;
   // The cap is a DOM budget, not a filter: the count says how many matched so
   // a narrower search is an obvious next move. An unrated event sorts last on
