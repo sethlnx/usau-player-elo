@@ -4,7 +4,12 @@ import unittest
 from pathlib import Path
 
 from analysis.euf_overlap import measure_overlap
-from analysis.euf_ratings import _usa_bridge_candidates, european_player_id
+from analysis.euf_ratings import (
+    EuropeanInputs,
+    _usa_bridge_candidates,
+    european_player_id,
+    merge_inputs,
+)
 from analysis.international_ratings import (
     _load_manual_usa_aliases,
     _usa_assignment,
@@ -152,6 +157,31 @@ class EUFRankingIngestionTests(unittest.TestCase):
         self.assertLess(first, 0)
         self.assertGreaterEqual(first, -(2**53 - 1))
         self.assertLess(first % 32, 32)
+
+    def test_external_inputs_publish_the_latest_team_roster(self):
+        older = EuropeanInputs(team_rosters={
+            (2026, "club-mixed"): (
+                {"hybrid": [1]},
+                {"hybrid": ("EUCS Ranking 2026 season roster", "2026-08-07")},
+                {"hybrid": "Hybrid"},
+            ),
+        })
+        newer = EuropeanInputs(team_rosters={
+            (2026, "club-mixed"): (
+                {"hybrid": [1, 2]},
+                {"hybrid": ("WFDF WUCC 2026", "2026-08-15")},
+                {"hybrid": "Hybrid"},
+            ),
+        })
+        merged = merge_inputs(older, newer)
+        rosters, sources, display = merged.team_rosters[
+            (2026, "club-mixed")
+        ]
+        self.assertEqual([1, 2], rosters["hybrid"])
+        self.assertEqual(
+            ("WFDF WUCC 2026", "2026-08-15"), sources["hybrid"]
+        )
+        self.assertEqual("Hybrid", display["hybrid"])
 
     def test_reviewed_wfdf_alias_targets_one_usau_identity(self):
         db = sqlite3.connect(":memory:")

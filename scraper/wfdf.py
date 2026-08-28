@@ -292,6 +292,47 @@ def fetch_live_json(
     return payload, page
 
 
+def fetch_live_data_json(
+    spec: EventSpec,
+    resource: str,
+    refresh: bool = False,
+) -> tuple[dict[str, Any], FetchedPage]:
+    """Fetch one generated BULA Live data file and retain its source payload."""
+    path = _json_cache_path(spec, resource)
+    url = urljoin(
+        spec.url, f"live/data/{spec.season_id}_{resource}.json"
+    )
+    if path.exists() and not refresh:
+        raw = path.read_bytes()
+        observed = datetime.fromtimestamp(
+            path.stat().st_mtime, timezone.utc
+        ).isoformat()
+        page = FetchedPage(
+            raw.decode("utf-8", errors="replace"),
+            url,
+            observed,
+            hashlib.sha256(raw).hexdigest(),
+            True,
+        )
+    else:
+        response = _session().get(url, timeout=45)
+        response.raise_for_status()
+        raw = response.content
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        page = FetchedPage(
+            raw.decode(response.encoding or "utf-8", errors="replace"),
+            response.url,
+            datetime.now(timezone.utc).isoformat(),
+            hashlib.sha256(raw).hexdigest(),
+            False,
+        )
+    payload = json.loads(page.text)
+    if not isinstance(payload, dict) or "error" in payload:
+        raise ValueError(f"invalid WFDF live {resource} response at {page.url}")
+    return payload, page
+
+
 def _live_division(name: str) -> tuple[str, str] | None:
     return _stage_division(name)
 
@@ -400,6 +441,53 @@ def parse_live_teams(
     return out
 
 
+def parse_live_team_roster(
+    payload: dict[str, Any],
+    expected_team_id: str,
+) -> list[dict[str, Any]]:
+    """Normalize one public BULA Live team roster."""
+    team_id = str(payload.get("team_id"))
+    if team_id != expected_team_id:
+        raise ValueError(
+            f"live roster team {team_id} does not match {expected_team_id}"
+        )
+    players = payload.get("players")
+    if not isinstance(players, list):
+        raise ValueError(f"live roster {team_id} has no players list")
+    entries: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw in players:
+        player_id = str(raw["player_id"])
+        if player_id in seen:
+            raise ValueError(
+                f"player {player_id} appears twice in live roster {team_id}"
+            )
+        seen.add(player_id)
+        player_team_id = str(raw.get("team"))
+        if player_team_id != team_id:
+            raise ValueError(
+                f"player {player_id} references team {player_team_id}, "
+                f"expected {team_id}"
+            )
+        name = _clean(
+            f"{raw.get('firstname') or ''} {raw.get('lastname') or ''}"
+        )
+        if not name:
+            raise ValueError(f"player {player_id} has no name")
+        entries.append({
+            "player_id": player_id,
+            "team_id": team_id,
+            "name": name,
+            "number": (
+                str(raw["num"]) if raw.get("num") is not None else None
+            ),
+            "games": raw.get("games"),
+            "assists": raw.get("fedin"),
+            "points": raw.get("done"),
+        })
+    return entries
+
+
 def _live_dates(reference: dict[str, Any]) -> tuple[str | None, str | None]:
     start = _clean(reference.get("season", {}).get("starttime", ""))
     end = _clean(reference.get("season", {}).get("endtime", ""))
@@ -410,13 +498,55 @@ def ingest_live_event(
     con,
     spec: EventSpec,
     refresh: bool = False,
+    workers: int = 4,
+    include_rosters: bool = True,
 ) -> list[dict[str, Any]]:
     reference, reference_page = fetch_live_json(spec, "reference", refresh)
     games_payload, games_page = fetch_live_json(spec, "games", refresh)
     teams = parse_live_teams(reference)
     games = parse_live_games(games_payload, reference)
     start_date, end_date = _live_dates(reference)
-    source_pages = [reference_page, games_page]
+    roster_pages: dict[str, FetchedPage] = {}
+    rosters: dict[str, list[dict[str, Any]]] = {
+        team["team_id"]: [] for team in teams
+    }
+
+    def fetch_roster(team: dict[str, Any]):
+        team_id = team["team_id"]
+        payload, page = fetch_live_data_json(
+            spec, f"teams_{team_id}", refresh
+        )
+        return team_id, page, parse_live_team_roster(payload, team_id)
+
+    if include_rosters:
+        with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+            futures = [pool.submit(fetch_roster, team) for team in teams]
+            for future in as_completed(futures):
+                team_id, page, entries = future.result()
+                roster_pages[team_id] = page
+                rosters[team_id] = entries
+
+        player_teams: dict[str, str] = {}
+        for team_id, entries in rosters.items():
+            for entry in entries:
+                prior = player_teams.setdefault(entry["player_id"], team_id)
+                if prior != team_id:
+                    raise ValueError(
+                        f"player {entry['player_id']} appears for live teams "
+                        f"{prior} and {team_id}"
+                    )
+        declared_count = reference.get("season", {}).get("player_count")
+        if (
+            len(teams) == len(reference.get("teams", []))
+            and declared_count is not None
+            and len(player_teams) != int(declared_count)
+        ):
+            raise ValueError(
+                f"live roster has {len(player_teams)} players; "
+                f"reference declares {declared_count}"
+            )
+
+    source_pages = [reference_page, games_page, *roster_pages.values()]
     event_hash = _combined_hash(source_pages)
     observed_at = max(page.observed_at for page in source_pages)
     summaries: list[dict[str, Any]] = []
@@ -433,6 +563,13 @@ def ingest_live_event(
             observed_at=games_page.observed_at,
             payload_hash=games_page.payload_hash, state="ok",
         )
+        for team_id, page in roster_pages.items():
+            observe(
+                con, WFDF_SOURCE, "roster", _prefix(spec, team_id),
+                count=len(rosters[team_id]), source_url=page.url,
+                observed_at=page.observed_at, payload_hash=page.payload_hash,
+                state="ok" if rosters[team_id] else "empty",
+            )
         for division_name in dict.fromkeys(
             team["division_name"] for team in teams
         ):
@@ -443,6 +580,18 @@ def ingest_live_event(
             selected_games = [
                 game for game in games if game["division"] == division
             ]
+            selected_rosters = [
+                entry
+                for team in selected_teams
+                for entry in rosters[team["team_id"]]
+            ]
+            rostered = {entry["team_id"] for entry in selected_rosters}
+            if rostered == {team["team_id"] for team in selected_teams}:
+                roster_state = "public"
+            elif rostered:
+                roster_state = "partial"
+            else:
+                roster_state = "unavailable"
             event_id = upsert_event(
                 con, spec.season, spec.name, spec.url, division,
                 f"{spec.key}:{division}", WFDF_SOURCE, spec.season_id,
@@ -482,11 +631,25 @@ def ingest_live_event(
                 "observed_at": reference_page.observed_at,
                 "payload_hash": reference_page.payload_hash,
             } for team in selected_teams if team["place"]]
+            person_rows = []
+            for entry in selected_rosters:
+                page = roster_pages[entry["team_id"]]
+                person_rows.append({
+                    "source_id": _prefix(spec, entry["player_id"]),
+                    "team_source_id": _prefix(spec, entry["team_id"]),
+                    "name": entry["name"],
+                    "number": entry["number"],
+                    "points": entry["points"],
+                    "assists": entry["assists"],
+                    "source_url": page.url,
+                    "observed_at": page.observed_at,
+                    "payload_hash": page.payload_hash,
+                })
             replace_event(
                 con, event_id, WFDF_SOURCE, f"{spec.key}:{division}",
                 f"{spec.key}:{division}", team_rows, game_rows,
-                standing_rows, "unavailable", spec.url, observed_at,
-                event_hash,
+                standing_rows, roster_state, spec.url, observed_at,
+                event_hash, person_rows,
             )
             stats = validate_event(con, event_id)
             con.execute("UPDATE events SET complete=1 WHERE event_id=?", (event_id,))
@@ -494,8 +657,8 @@ def ingest_live_event(
                 "event": spec.key,
                 "event_id": event_id,
                 "division": division,
-                "roster_state": "unavailable",
-                "roster_entries": 0,
+                "roster_state": roster_state,
+                "roster_entries": len(person_rows),
                 **stats,
             })
     return summaries
@@ -900,7 +1063,10 @@ def ingest_world_event(
     include_rosters: bool = True,
 ) -> list[dict[str, Any]]:
     if spec.adapter == "live":
-        return ingest_live_event(con, spec, refresh=refresh)
+        return ingest_live_event(
+            con, spec, refresh=refresh, workers=workers,
+            include_rosters=include_rosters,
+        )
     standings_page = fetch_page(
         spec, "standings",
         {"view": "teams", "season": spec.season_id, "list": "bystandings"},

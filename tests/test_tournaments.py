@@ -84,7 +84,8 @@ class TournamentPublicationTests(unittest.TestCase):
         self.assertEqual(4, wucc[8])
         self.assertEqual("wfdf", payload["eventSources"][wucc_index])
         self.assertIn(wucc_index, payload["detail"])
-    def test_official_placement_relabels_parallel_final(self):
+
+    def test_official_placements_order_parallel_finals(self):
         def game(key, stage, home, away, hs, away_score):
             return {
                 "stage": stage, "date": "2026-08-15", "home": home,
@@ -94,16 +95,17 @@ class TournamentPublicationTests(unittest.TestCase):
             }
 
         games = [
-            game("semi-1", "Playoff Semifinals", "A", "B", 15, 10),
-            game("semi-2", "Playoff Semifinals", "C", "D", 15, 12),
-            game("final", "Playoff Finals", "A", "C", 11, 15),
+            game("semi-1", "Playoff Semifinals", "Revolver", "Bravo", 15, 10),
+            game("semi-2", "Playoff Semifinals", "Charlie", "Delta", 15, 12),
+            game("title", "Playoff Finals", "Revolver", "Charlie", 15, 11),
+            game("third", "Playoff Finals", "Bravo", "Delta", 15, 13),
         ]
 
         _pools, brackets, _loose = decompose(
-            games, {"C": 3, "A": 4, "B": 5, "D": 6}
+            games, {"Revolver": 1, "Charlie": 2, "Bravo": 3, "Delta": 4}
         )
 
-        self.assertEqual("3rd", brackets[0][0])
+        self.assertEqual(["champ", "3rd"], [bracket[0] for bracket in brackets])
 
 
 if __name__ == "__main__":

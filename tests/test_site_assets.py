@@ -121,6 +121,22 @@ class SiteAssetContractTests(unittest.TestCase):
         bucket = next(iter(roster_buckets.values()))
         self.assertIn("canada:test:club", bucket["b"])
 
+    def test_revolver_history_includes_wucc_2026(self):
+        history = json.loads((DB_PATH.parent / "history.json").read_text())
+        wucc_index = next(
+            index
+            for index, event in enumerate(history["events"])
+            if event[1] == "WFDF WUCC 2026" and event[3] == 0
+        )
+        deltas = history["teams"]["revolver"][0]
+        event_indices = []
+        current = 0
+        for delta in deltas:
+            current += delta
+            event_indices.append(current)
+
+        self.assertIn(wucc_index, event_indices)
+
 
 
     def test_head_to_head_ignores_draws_and_self_fixtures(self):

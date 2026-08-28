@@ -91,7 +91,7 @@ class EuropeanInputs:
 
 
 def merge_inputs(*inputs: EuropeanInputs) -> EuropeanInputs:
-    """Combine independent external corpora without hiding key collisions."""
+    """Combine external corpora, selecting the latest published team roster."""
     out = EuropeanInputs()
     appearances: set[tuple[int, int, str, str]] = set()
 
@@ -100,6 +100,42 @@ def merge_inputs(*inputs: EuropeanInputs) -> EuropeanInputs:
             if key in target and target[key] != value:
                 raise ValueError(f"conflicting {label} for {key!r}")
             target[key] = value
+
+    def merge_team_rosters(
+        target: tuple[
+            dict[str, list[int]],
+            dict[str, tuple[str, str]],
+            dict[str, str],
+        ],
+        current: tuple[
+            dict[str, list[int]],
+            dict[str, tuple[str, str]],
+            dict[str, str],
+        ],
+    ) -> None:
+        target_rosters, target_sources, target_display = target
+        rosters, sources, display = current
+        for club, roster in rosters.items():
+            current_source = sources[club]
+            prior_source = target_sources.get(club)
+            if prior_source is not None:
+                if current_source[1] < prior_source[1]:
+                    continue
+                if (
+                    current_source[1] == prior_source[1]
+                    and (
+                        roster != target_rosters[club]
+                        or current_source != prior_source
+                        or display[club] != target_display[club]
+                    )
+                ):
+                    raise ValueError(
+                        f"conflicting published roster for {club!r} "
+                        f"on {current_source[1]}"
+                    )
+            target_rosters[club] = roster
+            target_sources[club] = current_source
+            target_display[club] = display[club]
 
     for current in inputs:
         out.games.extend(current.games)
@@ -121,11 +157,9 @@ def merge_inputs(*inputs: EuropeanInputs) -> EuropeanInputs:
         merge_map(out.event_info, current.event_info, "event")
         merge_map(out.event_team_event, current.event_team_event, "event-team event")
         out.event_roster_rows.extend(current.event_roster_rows)
-        for key, (rosters, source, display) in current.team_rosters.items():
+        for key, current_rosters in current.team_rosters.items():
             target = out.team_rosters.setdefault(key, ({}, {}, {}))
-            merge_map(target[0], rosters, "published roster")
-            merge_map(target[1], source, "published roster source")
-            merge_map(target[2], display, "published roster display")
+            merge_team_rosters(target, current_rosters)
         for key, value in current.team_names.items():
             if key not in out.team_names or value[0] >= out.team_names[key][0]:
                 out.team_names[key] = value

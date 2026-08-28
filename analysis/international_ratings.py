@@ -224,6 +224,7 @@ def load_international_inputs(
         team_club: dict[str, str] = {}
         team_display: dict[str, str] = {}
         team_is_club: dict[str, bool] = {}
+        team_publication: dict[str, tuple[int, str, str, str]] = {}
         for row in event_rows:
             event_id = -int(row["event_id"])
             event_team_id = f"wfdf:{row['event_team_id']}"
@@ -256,6 +257,12 @@ def load_international_inputs(
             team_club[row["event_team_id"]] = club
             team_display[row["event_team_id"]] = name
             team_is_club[row["event_team_id"]] = not is_national
+            team_publication[row["event_team_id"]] = (
+                int(row["season"]),
+                row["division"],
+                row["name"],
+                row["start_date"] or row["end_date"] or str(row["season"]),
+            )
             out.clubs[event_team_id] = club
             prior = out.team_names.get(club)
             dated_name = (row["start_date"] or "", name)
@@ -348,6 +355,23 @@ def load_international_inputs(
 
         for event_team_id, roster in out.rosters.items():
             out.rosters[event_team_id] = list(dict.fromkeys(roster))
+        for source_team_id, event_team_id in source_team.items():
+            roster = out.rosters.get(event_team_id)
+            if not roster or not team_is_club[source_team_id]:
+                continue
+            season, division, event_name, event_date = team_publication[
+                source_team_id
+            ]
+            club = team_club[source_team_id]
+            by_club, source, display = out.team_rosters.setdefault(
+                (season, division), ({}, {}, {})
+            )
+            prior = source.get(club)
+            if prior is not None and prior[1] > event_date:
+                continue
+            by_club[club] = roster
+            source[club] = (event_name, event_date)
+            display[club] = team_display[source_team_id]
 
         for row in con.execute(
             """SELECT g.event_id,g.game_key,g.date,g.time,g.home_id,g.away_id,

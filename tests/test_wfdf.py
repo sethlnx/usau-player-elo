@@ -7,6 +7,7 @@ from scraper.wfdf import (
     parse_games,
     parse_live_games,
     parse_live_teams,
+    parse_live_team_roster,
     parse_player_card,
     parse_player_index,
     parse_team_index,
@@ -118,6 +119,40 @@ class WFDFParserTests(unittest.TestCase):
         self.assertEqual("scheduled", games[0]["state"])
         self.assertIsNone(games[0]["away_score"])
 
+
+    def test_live_team_roster_preserves_membership_and_stats(self):
+        roster = parse_live_team_roster({
+            "team_id": 1131,
+            "players": [{
+                "player_id": 4107,
+                "firstname": " Jesse ",
+                "lastname": " Johnson",
+                "team": 1131,
+                "num": 0,
+                "games": 10,
+                "fedin": 4,
+                "done": 4,
+            }],
+        }, "1131")
+        self.assertEqual([{
+            "player_id": "4107",
+            "team_id": "1131",
+            "name": "Jesse Johnson",
+            "number": "0",
+            "games": 10,
+            "assists": 4,
+            "points": 4,
+        }], roster)
+        with self.assertRaisesRegex(ValueError, "expected 1131"):
+            parse_live_team_roster({
+                "team_id": 1131,
+                "players": [{
+                    "player_id": 4107,
+                    "firstname": "Jesse",
+                    "lastname": "Johnson",
+                    "team": 999,
+                }],
+            }, "1131")
 
 if __name__ == "__main__":
     unittest.main()
