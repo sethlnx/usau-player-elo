@@ -400,7 +400,9 @@ def build():
     ufa = load_ufa_payload(
         con, {int(r["player_id"]): r for r in all_players}, history, role_rows,
     )
-    version_inputs = (DB_PATH, hist_path) + ((role_path,) if role_path.exists() else ())
+    version_inputs = (DB_PATH, euf_db, hist_path) + (
+        (role_path,) if role_path.exists() else ()
+    )
     asset_version = content_version(version_inputs)
 
     # Gender-matching group, decided in identity.resolve and carried on
@@ -1015,6 +1017,8 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .ufatbl td:nth-child(2){min-width:300px}
 /* ---------- tournaments ---------- */
 .evtbl tr.ev{cursor:pointer}
+.evscroll{overflow-x:auto}
+.evscroll .evtbl{min-width:max-content}
 .evtbl tr.ev:hover td{background:var(--chip)}
 td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
 .tag{display:inline-block;font-size:10.5px;text-transform:uppercase;
@@ -1286,12 +1290,11 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
         <option value="up">Upcoming</option>
       </select>
       <span class="count" id="ecount"></span>
-    </div>
-    <table class="evtbl"><thead><tr>
+    <div class="evscroll"><table class="evtbl"><thead><tr>
       <th>Dates</th><th>Tournament</th><th>Division</th>
       <th class="n">Teams</th><th class="n">Field</th><th>Champion</th>
       <th class="n">Editions</th>
-    </tr></thead><tbody id="etb"></tbody></table>
+    </tr></thead><tbody id="etb"></tbody></table></div>
     <p class="note" id="enote"></p>
   </div>
   <div id="tview" style="display:none">
@@ -1370,7 +1373,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c =>
 const pct = v => (v*100).toFixed(1) + '%';
 // Division wording lives HERE, once. NDIV describes the divisions a reader
 // can actually select in Rankings and Trends, not registered-but-unplayed
-// divisions. The Tournaments tab remains USAU-only.
+// divisions. Tournaments adds selected official WFDF events to the USAU corpus.
 const NDIV = 'eighteen';
 const NDIV_LIST = "USAU club men's, mixed and women's; college men's and " +
   "women's and their D-III counterparts; men's, women's and mixed at both " +
@@ -1423,7 +1426,7 @@ $('#sub').textContent =
   `softmax-weighted mean of its event roster. Rankings and Trends span ` +
   `${NDIV} USAU and EUF divisions — ${NDIV_LIST}. PUL, WUL, and UFA team ` +
   `seasons are also available from the Rankings division picker; PUL and WUL ` +
-  `are available in Trends. The Tournaments browser is USAU-only.` +
+  `are available in Trends. Tournaments includes USAU and selected official WFDF events.` +
   (IS_GLICKO && PERIOD_LABEL ? ` Ratings update after ${PERIOD_LABEL}.` : '') +
   (heldOut?.n ? ` Held-out 2024–25: ${(heldOut.accuracy * 100).toFixed(1)}% ` +
     `accuracy · ${heldOut.logloss.toFixed(3)} log loss over ` +
@@ -3472,9 +3475,9 @@ function drawTournament(i) {
     html += `<h3 class="sect">${esc(ser[0])} <span class="muted">\u2014 ` +
       `<span id="scount">${sibs.length}</span> instances on record</span>` +
       `${pick}</h3>` +
-      `<table class="evtbl"><thead><tr><th class="n">Year</th><th>Division</th>` +
+      `<div class="evscroll"><table class="evtbl"><thead><tr><th class="n">Year</th><th>Division</th>` +
       `<th>Event</th><th class="n">Teams</th><th class="n">Field</th>` +
-      `<th>Champion</th></tr></thead><tbody id="sbody">${seriesRows(start)}</tbody></table>`;
+      `<th>Champion</th></tr></thead><tbody id="sbody">${seriesRows(start)}</tbody></table></div>`;
   }
   $('#tvbody').innerHTML = html;
   // Re-rendered rather than re-drawn: drawTournament rebuilds the whole view

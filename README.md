@@ -1134,27 +1134,25 @@ replay only through the conservative identity contracts described below.
 | [Ultimate Central API](https://help.ultimatecentral.com/support/solutions/articles/4000064797-api-access) | Public, paginated REST endpoints discovered from `/api/help`: events, teams, games, final standings, and public persons | Historical event metadata, scored games, teams, and final standings. Roster responses remain `incomplete` or `restricted` unless public rows are actually returned. |
 | [EUCS Schedule](https://eucs-schedule.ultimatefederation.eu/) | Server-rendered season schedule plus iCalendar cross-check | Schedule rows, scores, pools/stages, divisions, dates, times, fields, and placeholder/forfeit state. There is no roster contract. HTML is cached with URL, observation time, and SHA-256. |
 | [EUCS Ranking](https://ranking.ultimatefederation.eu/) | R/Shiny `dataobj/team_master_roster` responses captured through a browser session | Season/team roster names for 2024–2026. The `session/.../dataobj/...` URLs are transient and are retained only as observation evidence, not presented as a stable API. The source exposes names, not player IDs. |
-| [WFDF Results](https://results.wfdf.sport/) | Official server-rendered results pages plus the BULA Live JSON API: event index, teams, standings, schedules/scores, and (where requested) public rosters | WFDF-only: all 17 completed tournaments available in the official 2022–2025 corpus, covering 69 event/division records, 973 source-scoped teams, and 4,550 games. 2026 events are excluded as current/upcoming. Legacy games without published gameplay links receive deterministic row-based IDs; live API games use WFDF game IDs. WFDF player IDs are scoped to one results installation, not globally stable. |
+| [WFDF Results](https://results.wfdf.sport/) | Official server-rendered results pages plus the BULA Live JSON API: event index, teams, standings, schedules/scores, and (where requested) public rosters | WFDF-only: all 17 completed tournaments available in the official 2022–2025 corpus plus the three WUCC 2026 divisions, covering 72 event/division records, 1,109 source-scoped teams, and 5,203 scored games. Legacy games without published gameplay links receive deterministic row-based IDs; live API games use WFDF game IDs. WFDF player IDs are scoped to one results installation, not globally stable. |
 
 The observed `data/euf.db` audit covers Ultimate Central EUCF events from
 2015, 2016, 2019, 2021, and 2022; all discoverable completed EUCS schedules
-from 2023–2025; and all 17 completed WFDF tournaments exposed for 2022–2025.
-It contains 116 event/division records, 1,702 source-scoped canonical teams,
-6,548 scored result records, and 1,237 standing rows. Six 2022 EUF carryover
-`incomplete`; 41 rows remain `scheduled` or `teams_not_set`.
-The 2026 WFDF and EUCS events are excluded because they are current or
-upcoming. Years and event classes not listed above are coverage gaps, not
-zero-game seasons.
+from 2023–2025; all 17 completed WFDF tournaments exposed for 2022–2025;
+and WUCC 2026. The remaining 2026 WFDF and EUCS events are excluded while
+current or upcoming. Years and event classes not listed above are coverage
+gaps, not zero-game seasons.
 
-WFDF-only, the tournaments contribute 69 event/division records, 973
-source-scoped teams, and 4,550 games, of which 4,547 have complete scores. The
-championships previously loaded with public rosters retain 8,345 roster
-memberships. The remaining newly added tournaments publish teams and games
-but no roster rows were requested during the historical load; their roster
-state is explicitly `unavailable`, not inferred empty. Normalized divisions
-include club men's/women's/mixed plus masters, grand masters, and
-great-grandmasters divisions. Legacy games with no gameplay link use a stable
-source-row identifier.
+WFDF-only, the tournaments contribute 72 event/division records, 1,109
+source-scoped teams, and 5,203 games with complete scores. The championships
+previously loaded with public rosters retain 9,602 roster memberships. The
+remaining newly added tournaments publish teams and games but no roster rows
+were requested during the historical load; their roster state is explicitly
+`unavailable`, not inferred empty. Normalized divisions include club
+men's/women's/mixed plus masters, grand masters, and great-grandmasters
+divisions. Legacy games with no gameplay link use a stable source-row
+identifier.
+
 
 The captured EUCS Ranking snapshot adds 384 season/team rosters, 11,274 roster
 memberships, and 6,804 distinct display names across 2024–2026. Eleven
@@ -1173,22 +1171,22 @@ IDs are not coerced to integers. Team-name similarity creates review
 candidates only; it never merges team identities.
 
 The rating replay uses 908 scored 2024–2025 EUCS games whose teams map to a
-captured ranking roster and 1,747 eligible WFDF games with event rosters.
-European-only roster names receive deterministic negative IDs within
-JavaScript's safe-integer range. A European name reuses a positive USAU player
-ID only when its accent-, punctuation-, and spacing-insensitive key maps to
-one non-ambiguous USAU identity, appears in both corpora during the same
-calendar season, and does not occur on two European teams in the same
-season/division. This produces 208 EU/USA bridges, recorded with their match
-method in `data/euf_bridge_audit.csv`.
+captured ranking roster and 5,194 eligible WFDF games. European-only roster
+names receive deterministic negative IDs within JavaScript's safe-integer range.
+A European name reuses a positive USAU player ID only when its accent-,
+punctuation-, and spacing-insensitive key maps to one non-ambiguous USAU
+identity, appears in both corpora during the same calendar season, and does
+not occur on two European teams in the same season/division. This produces
+208 EU/USA bridges, recorded with their match method in
+`data/euf_bridge_audit.csv`.
 
 WFDF player IDs are event-installation scoped, so they are retained as source
 provenance but are not treated as global identities. The replay instead uses
 the same conservative same-season name rule against USAU and EUF rosters,
 rejects names duplicated across two teams at one championship, and assigns a
-deterministic international ID otherwise. The current build makes 2,607
-WFDF-to-USAU/EUF name bridges; all 8,345 roster-name decisions are written to
-`data/wfdf_bridge_audit.csv`.
+deterministic international ID otherwise. The current build makes 4,334
+WFDF-to-USAU/EUF name bridges; all 11,544 roster-name decisions are written
+to `data/wfdf_bridge_audit.csv`.
 Reviewed cross-name assignments live in `data/wfdf_player_aliases.csv`. Each
 row maps one WFDF source name to one unique, non-ambiguous USAU display name;
 an event-level duplicate still blocks the assignment.

@@ -24,10 +24,10 @@ whatever the organiser called it.
 
 Entry point: build(con) -> the `tourneys` payload embedded by analysis.site.
 """
-
 import collections
 import itertools
 import re
+import sqlite3
 from datetime import date
 
 from analysis.rankings import DIVCODE
@@ -452,8 +452,15 @@ def published_brackets(games):
     return out, [g for g in games if id(g) not in used]
 
 
-def decompose(games):
-    """(pools, brackets, loose) for one event's fixture list."""
+def decompose(games, placements=None):
+    """(pools, brackets, loose) for one event's fixture list.
+
+    ``placements`` is an optional team-name -> official finishing-place map.
+    WFDF WUCC publishes several parallel placement trees under one generic
+    ``Finals`` label; when that map is present, relabel each recovered tree
+    from the winner's official place instead of calling every tree a
+    championship bracket.
+    """
     playable = [g for g in games if g["home"] and g["away"] and g["done"]]
     # A fixture whose two sides carry the same display name (USAU occasionally
     # files a club's A and B squads identically) is not an edge and cannot be
@@ -484,6 +491,22 @@ def decompose(games):
         pools, left = pools_of([g for g in rest if not classify(g["stage"])])
         rest = left + named
     brackets, loose = brackets_of(sorted(rest, key=lambda g: g["ord"]))
+    if placements:
+        # A WUCC placement tree can contain a final for any odd-ranked place.
+        # Its winner is therefore the stable discriminator; team order and
+        # bracket size are not reliable once all finals share one stage label.
+        relabelled = []
+        for kind, root_rank, rounds in brackets:
+            final = next((g for g in reversed(rounds[-1]) if g), None)
+            winner_name = None
+            if final:
+                winner_name = (final["home"] if final["hs"] > final["as"]
+                               else final["away"])
+            place = placements.get(winner_name)
+            if place is not None:
+                kind = "champ" if place == 1 else _ordinal(place)
+            relabelled.append((kind, root_rank, rounds))
+        brackets = relabelled
     # A kind the published shape already claimed cannot be claimed again. The
     # label path only ever sees leftovers, but a stray game reading like a
     # final earns its own 'champ' bracket and the page then shows two sections
@@ -510,6 +533,30 @@ def _event_filter(event_ids):
     if not ids:
         return " WHERE 0", []
     return " WHERE g.event_id IN (" + ",".join("?" for _ in ids) + ")", list(ids)
+
+def _placements(con, source, event_ids):
+    """Read official finishing places for supplemental WFDF events."""
+    if source != "wfdf":
+        return {}
+    ids = tuple(event_ids or ())
+    if not ids:
+        return {}
+    try:
+        rows = con.execute(
+            """SELECT s.event_id,et.display_name,s.place
+               FROM standings s
+               JOIN event_teams et USING(event_team_id)
+               WHERE s.event_id IN (""" + ",".join("?" for _ in ids) + ")",
+            ids,
+        )
+    except sqlite3.OperationalError:
+        # USAU's database has no supplemental standings table.
+        return {}
+    out = collections.defaultdict(dict)
+    for event_id, name, place in rows:
+        if name and place is not None:
+            out[_event_key(source, event_id)][name] = int(place)
+    return dict(out)
 
 
 def load(con, source="usau", event_ids=None):
@@ -573,9 +620,11 @@ def build(con, supplemental=()):
     by_event = {}
     meta = []
     counts = {}
+    placements = {}
     for source_con, source, event_ids in sources:
         by_event.update(load(source_con, source, event_ids))
         meta.extend(_meta(source_con, source, event_ids))
+        placements.update(_placements(source_con, source, event_ids))
         where = ""
         params = []
         if event_ids is not None:
@@ -619,7 +668,13 @@ def build(con, supplemental=()):
         upcoming = (start or "") >= today
         if not games and not upcoming:
             continue
-        pools, brs, loose = decompose(games) if games else ([], [], [])
+        official_places = (
+            placements.get(eid) if source == "wfdf" and name == "WFDF WUCC 2026"
+            else None
+        )
+        pools, brs, loose = (
+            decompose(games, official_places) if games else ([], [], [])
+        )
         if games and not (pools or brs or loose) and not upcoming:
             continue
 
@@ -639,12 +694,20 @@ def build(con, supplemental=()):
         # crowns nobody either — `winner` returns None on a tie, and the
         # published brackets surface ties the label path never reached.
         champ = -1
-        for kind, root_rank, rounds in brs:
-            if kind == "champ" and root_rank == 0 and len(rounds[-1]) == 1 \
-                    and rounds[-1][0]:
-                w = winner(rounds[-1][0])
-                champ = local[w] if w is not None else -1
-                break
+        if official_places:
+            champion = next(
+                (name for name, place in official_places.items() if place == 1),
+                None,
+            )
+            if champion in local:
+                champ = local[champion]
+        if champ < 0:
+            for kind, root_rank, rounds in brs:
+                if kind == "champ" and root_rank == 0 and len(rounds[-1]) == 1 \
+                        and rounds[-1][0]:
+                    w = winner(rounds[-1][0])
+                    champ = local[w] if w is not None else -1
+                    break
 
         ix = len(events)
         detail[ix] = {

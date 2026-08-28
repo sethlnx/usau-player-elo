@@ -1,7 +1,7 @@
 import sqlite3
 import unittest
 
-from analysis.tournaments import build
+from analysis.tournaments import build, decompose
 from scraper.build_db import SCHEMA
 
 
@@ -47,6 +47,8 @@ class TournamentPublicationTests(unittest.TestCase):
         self.assertEqual([], payload["detail"][0]["b"])
         self.assertEqual([], payload["detail"][0]["o"])
     def test_supplemental_event_ids_are_namespaced(self):
+
+
         supplemental = sqlite3.connect(":memory:")
         supplemental.executescript(SCHEMA)
         supplemental.execute(
@@ -82,6 +84,26 @@ class TournamentPublicationTests(unittest.TestCase):
         self.assertEqual(4, wucc[8])
         self.assertEqual("wfdf", payload["eventSources"][wucc_index])
         self.assertIn(wucc_index, payload["detail"])
+    def test_official_placement_relabels_parallel_final(self):
+        def game(key, stage, home, away, hs, away_score):
+            return {
+                "stage": stage, "date": "2026-08-15", "home": home,
+                "away": away, "hs": hs, "as": away_score, "done": True,
+                "br": None, "place": None, "btype": None, "bround": None,
+                "ord": ("2026-08-15", 0, 0, key),
+            }
+
+        games = [
+            game("semi-1", "Playoff Semifinals", "A", "B", 15, 10),
+            game("semi-2", "Playoff Semifinals", "C", "D", 15, 12),
+            game("final", "Playoff Finals", "A", "C", 11, 15),
+        ]
+
+        _pools, brackets, _loose = decompose(
+            games, {"C": 3, "A": 4, "B": 5, "D": 6}
+        )
+
+        self.assertEqual("3rd", brackets[0][0])
 
 
 if __name__ == "__main__":
