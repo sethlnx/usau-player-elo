@@ -1,6 +1,6 @@
 """Build the published rankings page.
 
-Three tabs: combined USAU/EUF club and player rankings, per-season Trends,
+Three tabs: combined USAU/EUF club and player rankings, event-grain Trends,
 and a Tournaments browser showing USAU events plus selected WFDF events with
 their recovered pools and bracket plus the history of the series they belong to.
 
@@ -952,10 +952,11 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .tchart .ax{stroke:var(--line);stroke-width:1}
 .tchart text{fill:var(--ink-3);font-size:10px;font-family:var(--mono)}
 .tchart text.sx{text-anchor:middle}
-/* Dimming is two class writes plus one root class, not 25 inline styles: the
-   root carries .dim, only the hovered group and its legend row carry .hot. */
+/* Dimming is two class writes plus one root class: the root carries .dim,
+   only the hovered group and its legend row carry .hot. */
 .tchart .sg{fill:none;stroke:currentColor;stroke-width:1.5;opacity:.85}
-.tchart .sg circle{fill:currentColor;stroke:none}
+.tchart .sg circle{fill:currentColor;stroke:var(--surface);stroke-width:.6;
+  cursor:crosshair}
 .tchart .sg .hit{stroke-width:10;stroke-opacity:0}
 .tchart.dim .sg{opacity:.15}
 .tchart.dim .sg.hot{opacity:1;stroke-width:2.5}
@@ -995,11 +996,8 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .gtbl td.st{font-size:11.5px;color:var(--ink-3);white-space:nowrap;width:34%}
 .gtbl td.wl{font-family:var(--mono);font-size:12px;width:22px;text-align:center}
 .gtbl td.sc{font-family:var(--mono);font-size:12.5px;text-align:right;width:62px}
-/* hovering a season column reorders the legend by that season */
-.tchart .xh{fill:transparent;cursor:pointer}
-.tchart .yg{stroke:var(--line-strong);stroke-width:1;opacity:0}
-.tchart .yg.on{opacity:1}
-.tchart .yg.locked{stroke:var(--accent);stroke-width:2;opacity:1}
+/* Every circle is an actual tournament/rating-event update. The connecting
+   path is stepped, so the rating stays flat until the next event changes it. */
 /* Past ~40 series the field has to thin out or it reads as a single smear;
    isolation on hover is what makes an individual line legible. */
 .tchart[data-dense] .sg{opacity:.5;stroke-width:1.1}
@@ -1353,7 +1351,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
     </select>
     <select id="tmode">
       <option value="elo">Elo</option>
-      <option value="med">Above season median</option>
+      <option value="med">Above event median</option>
     </select>
     <span class="count" id="tcount"></span>
   </div>
@@ -1415,8 +1413,8 @@ function showTab(id) {
     x => x.classList.toggle('on', x.dataset.t === id));
   document.querySelectorAll('section').forEach(
     s => s.classList.toggle('on', s.id === id));
-  // Reducing 26k trajectories to season maps is ~370k operations, so it runs on
-  // first activation of the tab rather than at load. seasonData memoises.
+  // Trends draws from the background-loaded resident core. drawTrends handles
+  // activation before that script has arrived and redraws when it does.
   if (id === 'trends' && !$('#tsvg')) drawTrends();
 }
 document.querySelectorAll('nav button').forEach(
@@ -2156,7 +2154,7 @@ let GSIDE = {};   // eventIdx -> Set(club index), from the core
 let EMETA = {};
 let RBC = {};     // clubKey -> {b: roster bucket, evs: [eventIdx], has: Set}
 let UFA_BY_KEY = new Map();
-let SEASONS = [], SIX = new Map(), DEFYEAR = 0;
+let SEASONS = [];
 let HREADY = false, HFAILED = false;
 
 /* Filled by faulted buckets rather than by the core, and never reset: a
@@ -2211,8 +2209,6 @@ function applyHistory(h) {
     RBC[ck] = {b: a[0], evs, has: new Set(evs)};
   }
   SEASONS = [...new Set(HEV.map(e => e[2]))].sort((a, b) => a - b);
-  SIX = new Map(SEASONS.map((s, i) => [s, i]));
-  DEFYEAR = SEASONS.length - 1;
   const ryear = $('#ryear');
   if (ryear) {
     const selected = ryear.value;
@@ -3836,120 +3832,142 @@ const DIVLABEL = {all: 'all divisions', 0: "club men's", 1: "college men's",
 const GENLABEL = {all: '', 1: ' male-matching', 2: ' female-matching'};
 const trendCache = {};
 
-// Every rated trajectory belongs to a player in the ranked table, so this
-// never has to reach past it.
-function playerLabel(pid) {
-  const row = PBY.get(String(pid));
-  return row ? row[0] : String(pid);
+/* Every retained trajectory point is a source rating event. `history.events`
+   keeps those identities by index: date/name/division are display metadata
+   and are deliberately not used to merge events. */
+function decodeTrendEvents(deltas) {
+  const out = [];
+  let event = 0;
+  for (const delta of deltas) { event += delta; out.push(event); }
+  return out;
 }
 
-/* One value per season: the rating after that season's LAST event, per
-   subject, plus the population median and the population count.
-
-   Precomputed in analysis/history_split.py rather than derived here. The
-   median and the top-25 cut are statistics over the WHOLE population, so no
-   subset computes them — which meant this function, and this function alone,
-   pinned all 39,325 trajectories in the page. There are only 24 answers it
-   can ever give, so all 24 ship in the core at 40 KB gzipped against the
-   1.9 MB corpus they replace. Clubs carry no gender-matching group, so that
-   side has one answer per division and the control is normalized away. */
-function seasonData(kind, div, gen) {
+function trendData(kind, div, gen) {
   const ck = kind + '|' + div + '|' + (kind === 'c' ? 'all' : gen);
   if (trendCache[ck]) return trendCache[ck];
   const raw = (H.trends || {})[ck];
-  // Mapped to objects once and kept: drawTrends writes `best` onto each.
-  trendCache[ck] = raw
-    ? {top: raw.top.map(t => ({key: t[0], label: t[1], vals: t[2], peak: t[3]})),
-       med: raw.med, n: raw.n}
-    : {top: [], med: SEASONS.map(() => 0), n: 0};
+  if (!raw) {
+    trendCache[ck] = {top: [], events: [], med: new Map(), n: 0};
+    return trendCache[ck];
+  }
+  const medEvents = decodeTrendEvents(raw.med[0]);
+  const med = new Map(medEvents.map((event, i) => [event, raw.med[1][i]]));
+  trendCache[ck] = {
+    top: raw.top.map(t => ({
+      key: t[0], label: t[1], events: decodeTrendEvents(t[2]), vals: t[3],
+    })),
+    events: medEvents,
+    med,
+    n: raw.n,
+  };
   return trendCache[ck];
 }
 
-function trendChart(series) {
+const trendDivision = event => {
+  const code = (HEV[event] || [,,, ''])[3];
+  return DIVLABEL[code] || EDIVL[code] || `Division ${code}`;
+};
+
+function trendChart(series, events) {
   const W = 900, Hh = 460, T = 18, Rm = 12, B = 34, L = 52;
-  const n = SEASONS.length;
-  const vof = seriesVal;
   let y0 = Infinity, y1 = -Infinity;
-  series.forEach(s => SEASONS.forEach((_, i) => {
-    const v = vof(s, i);
-    if (v === null) return;
-    if (v < y0) y0 = v;
-    if (v > y1) y1 = v;
+  series.forEach(sr => sr.events.forEach((_, i) => {
+    const y = seriesVal(sr, i);
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
   }));
-  if (!isFinite(y0)) return '<p class="muted" style="font-size:13px">Nothing to plot.</p>';
-  const pad = (y1 - y0) * 0.06 || 40; y0 -= pad; y1 += pad;
-  const px = i => L + (W - L - Rm) * (n > 1 ? i / (n - 1) : 0.5);
-  const py = v => T + (Hh - T - B) * (1 - (v - y0) / (y1 - y0));
-  let s = `<svg class="tchart" id="tsvg" viewBox="0 0 ${W} ${Hh}" ` +
-          `preserveAspectRatio="none"` +
-          (series.length > 40 ? ` data-dense=""` : ``) + `>`;
-  const step = curMode === 'med' ? 100 : 200;
-  for (let g = Math.ceil(y0 / step) * step; g < y1; g += step) {
-    const y = py(g).toFixed(1);
-    s += `<line class="gl" x1="${L}" x2="${W - Rm}" y1="${y}" y2="${y}"/>` +
-         `<text x="4" y="${(py(g) + 3).toFixed(1)}">${g}</text>`;
+  if (!events.length || !isFinite(y0)) {
+    return '<p class="muted" style="font-size:13px">Nothing to plot.</p>';
   }
-  s += `<line class="ax" x1="${L}" x2="${W - Rm}" y1="${Hh - B}" y2="${Hh - B}"/>`;
-  SEASONS.forEach((yr, i) => {
-    s += `<text class="sx" x="${px(i).toFixed(1)}" y="${Hh - B + 16}">${yr}</text>`;
-  });
-  // Per-season hit columns and guides, emitted BEFORE the series so a line
-  // still wins the hover wherever one passes: over a line you isolate that
-  // series, over empty space you reorder the legend by that season.
-  const half = (W - L - Rm) / (n > 1 ? 2 * (n - 1) : 2);
-  SEASONS.forEach((_, i) => {
-    const a = Math.max(L, px(i) - half), b = Math.min(W - Rm, px(i) + half);
-    s += `<rect class="xh" data-yi="${i}" x="${a.toFixed(1)}" y="${T}" ` +
-         `width="${(b - a).toFixed(1)}" height="${(Hh - T - B).toFixed(1)}"/>` +
-         `<line class="yg" data-yi="${i}" x1="${px(i).toFixed(1)}" ` +
-         `x2="${px(i).toFixed(1)}" y1="${T}" y2="${Hh - B}"/>`;
+  const eventPosition = new Map(events.map((event, i) => [event, i]));
+  const lastPosition = events.length - 1;
+  const pad = (y1 - y0) * 0.06 || 40; y0 -= pad; y1 += pad;
+  const px = event => L + (W - L - Rm) *
+    (lastPosition ? eventPosition.get(event) / lastPosition : 0.5);
+  const py = value => T + (Hh - T - B) * (1 - (value - y0) / (y1 - y0));
+  let svg = `<svg class="tchart" id="tsvg" viewBox="0 0 ${W} ${Hh}" ` +
+    `preserveAspectRatio="none"` +
+    (series.length > 40 ? ` data-dense=""` : ``) + `>`;
+  const step = curMode === 'med' ? 100 : 200;
+  for (let grid = Math.ceil(y0 / step) * step; grid < y1; grid += step) {
+    const y = py(grid).toFixed(1);
+    svg += `<line class="gl" x1="${L}" x2="${W - Rm}" y1="${y}" y2="${y}"/>` +
+      `<text x="4" y="${(py(grid) + 3).toFixed(1)}">${grid}</text>`;
+  }
+  svg += `<line class="ax" x1="${L}" x2="${W - Rm}" ` +
+    `y1="${Hh - B}" y2="${Hh - B}"/>`;
+  let tickYear = null, lastLabelX = -Infinity;
+  events.forEach(event => {
+    const year = (HEV[event] || [,, null])[2];
+    if (year === tickYear || year === null) return;
+    tickYear = year;
+    const position = px(event), x = position.toFixed(1);
+    svg += `<line class="gl" x1="${x}" x2="${x}" y1="${T}" y2="${Hh - B}"/>`;
+    // An ordinal axis can put adjacent calendar years close together when one
+    // year contains far fewer events. Keep the grid line but skip labels that
+    // would collide.
+    if (position - lastLabelX >= 38) {
+      svg += `<text class="sx" x="${x}" y="${Hh - B + 16}">${year}</text>`;
+      lastLabelX = position;
+    }
   });
   series.forEach((sr, si) => {
     const dash = DASH[Math.floor(si / 8) % DASH.length];
-    s += `<g class="sg" data-series="${si}" style="color:var(--s${si % 8 + 1})"` +
-         (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `>`;
-    // A missing season BREAKS the line: one polyline per contiguous run. SVG
-    // has no null point, and interpolating across a year a club did not play
-    // would invent a season it never had.
-    let run = [];
-    const flush = () => {
-      if (run.length > 1) {
-        s += `<polyline points="${run.join(' ')}"/>` +
-             `<polyline class="hit" stroke-dasharray="none" points="${run.join(' ')}"/>`;
-      } else if (run.length === 1) {
-        const xy = run[0].split(',');
-        s += `<circle cx="${xy[0]}" cy="${xy[1]}" r="2.4"/>`;
-      }
-      run = [];
-    };
-    SEASONS.forEach((_, i) => {
-      const v = vof(sr, i);
-      if (v === null) flush();
-      else run.push(px(i).toFixed(1) + ',' + py(v).toFixed(1));
+    const path = [];
+    let priorY = null;
+    sr.events.forEach((event, i) => {
+      const x = px(event).toFixed(1), y = py(seriesVal(sr, i)).toFixed(1);
+      if (priorY === null) path.push(`${x},${y}`);
+      else path.push(`${x},${priorY}`, `${x},${y}`);
+      priorY = y;
     });
-    flush();
-    s += `</g>`;
+    svg += `<g class="sg" data-series="${si}" style="color:var(--s${si % 8 + 1})"` +
+      (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `>`;
+    if (path.length > 1) {
+      svg += `<polyline points="${path.join(' ')}"/>` +
+        `<polyline class="hit" stroke-dasharray="none" points="${path.join(' ')}"/>`;
+    }
+    sr.events.forEach((event, i) => {
+      const ev = HEV[event] || [];
+      const value = seriesVal(sr, i);
+      const detail = `${sr.label} · ${ev[0] || ''} · ${ev[1] || 'Event'} · ` +
+        `${trendDivision(event)} · ${trendValueText(value)}`;
+      svg += `<circle class="tp" data-point="${i}" cx="${px(event).toFixed(1)}" ` +
+        `cy="${py(value).toFixed(1)}" r="2.2"><title>${esc(detail)}</title></circle>`;
+    });
+    svg += `</g>`;
   });
-  return s + `</svg>`;
+  return svg + `</svg>`;
 }
 
-let hotIdx = null, pinIdx = null, yearIdx = null, yearLocked = null;
-// The season the legend falls back to is the most recent one, and it moves
-// with the history file: DEFYEAR is set in applyHistory alongside SEASONS.
-// The chart, its baseline and its mode, so the legend can be re-sorted against
-// a season without re-deriving anything.
-let curSeries = [], curMed = [], curMode = 'elo';
-const seriesVal = (s, i) => s.vals[i] === null ? null
-  : (curMode === 'med' ? s.vals[i] - curMed[i] : s.vals[i]);
+let hotIdx = null, pinIdx = null;
+let curSeries = [], curEvents = [], curMed = new Map(), curMode = 'elo';
+const seriesVal = (series, i) => curMode === 'med'
+  ? series.vals[i] - curMed.get(series.events[i])
+  : series.vals[i];
+const trendValueText = value =>
+  (curMode === 'med' && value > 0 ? '+' : '') + Math.round(value);
+
+function resetTrendHead() {
+  $('#tlhead').textContent = `${curSeries.length} series · latest event rating`;
+}
+
+function showTrendPoint(seriesIndex, pointIndex) {
+  const series = curSeries[seriesIndex], event = series.events[pointIndex];
+  const ev = HEV[event] || [];
+  $('#tlhead').textContent =
+    `${ev[0] || ''} · ${ev[1] || 'Event'} · ${trendDivision(event)} · ` +
+    `${series.label}: ${trendValueText(seriesVal(series, pointIndex))}`;
+}
 
 function drawTrends() {
-  // Trends is built entirely out of the trajectory file. Until that lands
-  // there is nothing to plot, so say which state we are in and come back.
+  // Trends is built entirely out of the resident core. Until that lands there
+  // is nothing to plot, so say which state we are in and come back.
   if (!HREADY) {
     $('#tchart').innerHTML = `<p class="muted" style="font-size:13px">` + (HFAILED
       ? `Trends needs <code>${esc(D.historyJs || 'history.js')}</code>, which ` +
         `could not be loaded.`
-      : `Loading season trajectories\u2026`) + `</p>`;
+      : `Loading tournament trajectories\u2026`) + `</p>`;
     $('#tlegend').innerHTML = ''; $('#tlhead').textContent = '';
     $('#tcount').textContent = '';
     return;
@@ -3959,95 +3977,36 @@ function drawTrends() {
   // Clubs carry no gender-matching group, so the control is disabled rather
   // than silently ignored when the subject is clubs.
   $('#tgen').disabled = kind !== 'p';
-  const dat = seasonData(kind, div, gen);
-  hotIdx = null; pinIdx = null; yearIdx = null; yearLocked = null;
-  curMode = mode; curMed = dat.med; curSeries = dat.top;
-  // Only used to break ties between subjects with no value in the ranked
-  // season, which puts the better historical side first among the em dashes.
-  curSeries.forEach(s => {
-    let m = -Infinity;
-    SEASONS.forEach((_, i) => {
-      const v = seriesVal(s, i);
-      if (v !== null && v > m) m = v;
-    });
-    s.best = m;
-  });
-  $('#tchart').innerHTML = trendChart(curSeries);
-  $('#tlegend').innerHTML = curSeries.map((sr, i) => {
+  const dat = trendData(kind, div, gen);
+  hotIdx = null; pinIdx = null;
+  curMode = mode; curEvents = dat.events; curMed = dat.med; curSeries = dat.top;
+  $('#tchart').innerHTML = trendChart(curSeries, curEvents);
+  $('#tlegend').innerHTML = curSeries.map((series, i) => {
     const dash = DASH[Math.floor(i / 8) % DASH.length];
-    const link = kind === 'p' ? `data-pid="${esc(sr.key)}"`
-                              : `data-club="${esc(sr.key)}"`;
+    const link = kind === 'p' ? `data-pid="${esc(series.key)}"`
+                              : `data-club="${esc(series.key)}"`;
+    const value = seriesVal(series, series.vals.length - 1);
     return `<div class="lrow" data-series="${i}" style="color:var(--s${i % 8 + 1})">` +
       `<svg class="sw" viewBox="0 0 14 3"><line x1="0" y1="1.5" x2="14" y2="1.5" ` +
       `stroke="currentColor" stroke-width="3"` +
       (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `/></svg>` +
-      `<span class="lbl nmlink" ${link} title="${esc(sr.label)}">` +
-      `${esc(sr.label)}</span><span class="pk"></span></div>`;
+      `<span class="lbl nmlink" ${link} title="${esc(series.label)}">` +
+      `${esc(series.label)}</span><span class="pk">${trendValueText(value)}</span></div>`;
   }).join('');
   $('#tlegend').classList.remove('dim');
-  setYear(DEFYEAR);
+  resetTrendHead();
+  const plottedDates = curEvents.map(event => (HEV[event] || [''])[0]).filter(Boolean);
+  const first = plottedDates.length ? plottedDates[0] : '';
+  const last = plottedDates.length ? plottedDates[plottedDates.length - 1] : '';
+  const span = first ? ` · ${first.slice(0, 4)}–${last.slice(0, 4)}` : '';
   $('#tcount').textContent = `${curSeries.length} of ` +
-    `${dat.n.toLocaleString()} ${kind === 'p' ? 'players' : 'clubs'} have closed ` +
-    `a season in the top 25 · ${DIVLABEL[div]}${kind === 'p' ? GENLABEL[gen] : ''} · ` +
-    `${SEASONS[0]}–${SEASONS[SEASONS.length - 1]}`;
+    `${dat.n.toLocaleString()} ${kind === 'p' ? 'players' : 'clubs'} have finished ` +
+    `a season in the top 25 · ${DIVLABEL[div]}${kind === 'p' ? GENLABEL[gen] : ''}${span}`;
 }
 
-/* Re-sorts the legend against the ranked season — whichever is hovered, or the
-   most recent by default. Rows are MOVED, never rebuilt: data-series stays put,
-   so a line keeps its colour and the hover machinery keeps working. One
-   fragment append, so one reflow rather than 164. */
-function orderLegend() {
-  const leg = $('#tlegend'), rows = [...leg.children];
-  if (!rows.length) return;
-  const i = yearIdx === null ? DEFYEAR : yearIdx;
-  rows.sort((a, b) => {
-    const x = curSeries[+a.dataset.series], y = curSeries[+b.dataset.series];
-    const vx = seriesVal(x, i), vy = seriesVal(y, i);
-    // A subject that did not play that season sinks to the bottom rather than
-    // sorting as zero, which would rank a club that skipped the year above one
-    // that played badly.
-    if (vx === null || vy === null) {
-      if (vx === vy) return y.best - x.best;
-      return vx === null ? 1 : -1;
-    }
-    if (vx !== vy) return vy - vx;
-    return +a.dataset.series - +b.dataset.series;
-  });
-  const frag = document.createDocumentFragment();
-  rows.forEach(r => {
-    const v = seriesVal(curSeries[+r.dataset.series], i);
-    const pk = r.querySelector('.pk');
-    pk.textContent = v === null ? '—'
-      : (curMode === 'med' && v > 0 ? '+' : '') + Math.round(v);
-    pk.classList.toggle('na', v === null);
-    frag.appendChild(r);
-  });
-  leg.appendChild(frag);
-  $('#tlhead').textContent = `${rows.length} series · ranked on ${SEASONS[i]}` +
-    (yearLocked === i ? ' (locked)' : i === DEFYEAR ? ' (current)' : '');
-}
-
-function setYear(i) {
-  if (i === yearIdx) return;
-  const svg = $('#tsvg');
-  const guide = j => svg && svg.querySelector(`.yg[data-yi="${j}"]`);
-  if (yearIdx !== null) { const g = guide(yearIdx); if (g) g.classList.remove('on'); }
-  yearIdx = i;
-  if (i !== null) { const g = guide(i); if (g) g.classList.add('on'); }
-  orderLegend();
-}
-// A locked season survives leaving the chart: clicking a column pins the
-// legend's ranking to that season until it is clicked again (unlock) or a
-// different column is clicked (relock). The hover guide (.on) still tracks
-// the pointer for the live preview; .locked marks the sticky one so the two
-// read as distinct even when they coincide.
-function setYearLock(i) {
-  const svg = $('#tsvg');
-  const guide = j => svg && svg.querySelector(`.yg[data-yi="${j}"]`);
-  if (yearLocked !== null) { const g = guide(yearLocked); if (g) g.classList.remove('locked'); }
-  yearLocked = yearLocked === i ? null : i;
-  if (yearLocked !== null) { const g = guide(yearLocked); if (g) g.classList.add('locked'); }
-  setYear(yearLocked === null ? DEFYEAR : yearLocked);
+function pinTrendSeries(i) {
+  pinIdx = pinIdx === i ? null : i;
+  setHot(pinIdx);
 }
 
 // Two element writes plus one class on each root, never 25 inline styles.
@@ -4068,17 +4027,20 @@ $('#tlegend').addEventListener('mouseover', e => {
 });
 $('#tlegend').addEventListener('mouseleave', () => setHot(pinIdx));
 $('#tchart').addEventListener('mouseover', e => {
-  const g = e.target.closest('.sg');
-  if (g) { setHot(+g.dataset.series); return; }
-  // Background means a season column: drop any line isolation and rank on it.
-  const h = e.target.closest('.xh');
-  if (h) { setHot(pinIdx); setYear(+h.dataset.yi); }
+  const group = e.target.closest('.sg');
+  if (!group) return;
+  const seriesIndex = +group.dataset.series;
+  setHot(seriesIndex);
+  const point = e.target.closest('.tp');
+  if (point) showTrendPoint(seriesIndex, +point.dataset.point);
 });
-$('#tchart').addEventListener('mouseleave',
-  () => { setHot(pinIdx); setYear(yearLocked === null ? DEFYEAR : yearLocked); });
+$('#tchart').addEventListener('mouseleave', () => {
+  setHot(pinIdx);
+  resetTrendHead();
+});
 $('#tchart').addEventListener('click', e => {
-  const h = e.target.closest('.xh');
-  if (h) setYearLock(+h.dataset.yi);
+  const group = e.target.closest('.sg');
+  if (group) pinTrendSeries(+group.dataset.series);
 });
 $('#tlegend').addEventListener('click', e => {
   const lab = e.target.closest('[data-pid],[data-club]');
@@ -4088,37 +4050,32 @@ $('#tlegend').addEventListener('click', e => {
     return;
   }
   const r = e.target.closest('.lrow'); if (!r) return;
-  const i = +r.dataset.series;
-  pinIdx = pinIdx === i ? null : i;
-  setHot(pinIdx);
+  pinTrendSeries(+r.dataset.series);
 });
 $('#tsub').onchange = drawTrends;
 $('#tdiv').onchange = drawTrends;
 $('#tgen').onchange = drawTrends;
 $('#tmode').onchange = drawTrends;
 $('#tnote').textContent =
-  `One point per season: the rating after that season's last event. Every subject ` +
-  `that has ever closed a season inside the top 25 gets a line — __TRENDN__ of them ` +
-  `depending on the view, which is why the field thins out and hovering is how you ` +
-  `read an individual. Click a season column to lock the legend's ranking to ` +
-  `it — the guide line turns solid and stays until you click it again or ` +
-  `another column. The legend is ranked on the most recent season, not on an ` +
-  `all-time peak, so it opens as the current table; hover any other season in the ` +
-  `chart and it re-ranks on that one, showing that season's rating, and leaving ` +
-  `returns it to the locked season, or the current one if none is locked. ` +
-  `A subject that did not play the ranked season shows an em dash and sinks ` +
-  `to the bottom rather than sorting as zero. ` +
-  `Hover a line or a legend row to isolate it, click the row to pin, click the ` +
-  `name to open its full history. A season a subject did not play breaks the line ` +
-  `rather than being interpolated across. "Above season median" subtracts the ` +
-  `median of every rated subject active that season. Narrowing the division keeps ` +
-  `only events in it, so a season reads as the rating after that season's last ` +
-  `event in that division — __MULTIDIV__ club identities play in more than one, and each ` +
-  `is ranked on its own record in whichever division you are looking at. Gender ` +
-  `works the other way and selects whole people, since nobody changes group ` +
-  `between events; it is inert for clubs. Both narrow the population, so the top ` +
-  `25 is recomputed inside whatever you have selected. All ${NDIV} divisions share ` +
-  `one rating scale, bridged by the ${GENDER_NOTE}`;
+  `One point per tournament, using the rating after that event. Professional ` +
+  `fixtures are one-game rating events, so those divisions update per game. ` +
+  `Every subject that has ever finished a season inside the top 25 gets a line — ` +
+  `__TRENDN__ of them depending on the view. Keeping season-end eligibility ` +
+  `prevents a small tournament from qualifying its entire field; the plotted ` +
+  `ratings themselves are not reduced to seasons. The line stays flat between ` +
+  `events and changes at the next point. Hover a point for its date, event, ` +
+  `division, and rating. Hover a line or legend row to isolate it; click either ` +
+  `to pin it, and click a name to open its full history. The legend shows each ` +
+  `subject's latest event rating in the selected scope. "Above event median" ` +
+  `subtracts the median post-event rating of every rated subject who participated ` +
+  `in that same source event. Narrowing the division keeps only events in it — ` +
+  `__MULTIDIV__ club identities play in more than one, and each is plotted on its ` +
+  `own record in whichever division you are looking at. Distinct source events ` +
+  `remain distinct even when a tournament name or date repeats across divisions. ` +
+  `Gender works the other way and selects whole people, since nobody changes ` +
+  `group between events; it is inert for clubs. Both controls narrow the ` +
+  `population before season-end top-25 eligibility is computed. All ${NDIV} ` +
+  `divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
 
 $('#enote').innerHTML =
   `Every event in the corpus with a completed game, plus scheduled future ` +

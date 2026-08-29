@@ -74,6 +74,36 @@ class SiteAssetContractTests(unittest.TestCase):
             generator.write_text("second")
             self.assertNotEqual(first, sidecar_version((source,), (generator,)))
 
+    def test_trends_preserve_distinct_events_and_population_medians(self):
+        from analysis.history_split import _combo
+
+        events = [
+            ["2025-05-01", "Tournament A", 2025, 0],
+            ["2025-05-01", "Tournament B", 2025, 0],
+        ]
+        # Player 0 attends both events but finishes outside the season-end top
+        # 25. The first event must still occupy its own axis position and carry
+        # its population median even though none of the drawn lines attended.
+        items = [("0", [[0, 1], [1000, 1000]])]
+        items.extend(
+            (str(i), [[1], [2000 + i]])
+            for i in range(1, 26)
+        )
+
+        trend = _combo(
+            items, events, [2025], {2025: 0}, str, {}, None, None,
+        )
+
+        self.assertEqual(26, trend["n"])
+        self.assertEqual(
+            [str(i) for i in range(25, 0, -1)],
+            [row[0] for row in trend["top"]],
+        )
+        self.assertTrue(all(row[2] == [1] for row in trend["top"]))
+        self.assertEqual([0, 1], trend["med"][0])
+        self.assertEqual([1000, 2012.5], trend["med"][1])
+
+
     def test_player_metric_payload_preserves_missing_scores_and_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "player_metrics.csv"

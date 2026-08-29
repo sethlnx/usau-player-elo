@@ -388,8 +388,8 @@ as it does on Pages.
 
 `analysis/site.py` emits it: searchable club rankings on three roster bases, a
 searchable player table over all seven divisions, a current UFA player-stats
-view toggled from that same table, a **Trends** tab drawing one line per season
-for every player or club that has ever closed a season in the top 25, and a
+view toggled from that same table, a **Trends** tab drawing one stepped line
+per player or club with one point at every tournament/rating event, and a
 **Tournaments** browser over all 3,863 events. Club rankings can switch
 from the ranked list to a 25-club head-to-head results matrix; green cells are
 winning records, red cells are losing records, and stronger color marks a more
@@ -430,8 +430,10 @@ cosmetic — a career-wide mask left 43% of the club men's list stale (Nathan
 Champoux last played men's in 2018 and has been on Hybrid since 2019, and
 every graduated player still sat under college). Either way the rating is the
 single number they carry everywhere, not a per-division rating. **Trends**
-selects POINTS rather than subjects, so a season reads as the rating after
-that season's last event in the division picked.
+selects event points rather than whole subjects: narrowing the division keeps
+only rating events in that division. Every tournament remains a distinct point
+even when its date or display name matches another division; professional
+fixtures are intentionally one-game rating events.
 
 **Gender-matching** selects whole subjects everywhere, since nobody changes
 group between events; it is disabled for clubs, which have no group. Neither
@@ -557,28 +559,27 @@ exist in more than one gender division, and men's Phoenix and women's Phoenix
 are two teams. The men's group keeps the bare key, so every pre-existing
 identity is byte-identical to before.
 
-That selection is a union across seasons, so it is 61–192 lines depending on the
-view rather than a fixed 25 — the point being that a club that owned 2019 and has
-since folded sits on the chart beside this year's best. At that density no
-stroke can identify a line on its own (8 hues x 8 dash patterns gives 64
-combinations), so the interaction carries it: hovering a line or legend row
-isolates it and drops the rest. **The legend is ranked on the most recent season
-by default** — it opens as the current table, not as an all-time-peak list — and
-hovering any other season in the chart re-ranks it on the one under the cursor,
-showing that season's rating; leaving returns to the current season. A subject
-that did not play the ranked season shows an em dash and sinks to the bottom
-rather than sorting as zero, which would rank a club that skipped the year above
-one that played badly.
+Trend eligibility remains a union across season-end top-25 lists rather than a
+fixed 25. That keeps a club that owned 2019 and has since folded beside the
+current leaders without allowing a small tournament to qualify its entire
+field. Eligibility is the only season-grain part: each eligible line retains
+every tournament/rating-event update. The chart uses an ordinal source-event
+axis, so two divisions or source events on the same date stay distinct. A
+stepped segment remains flat between events and changes at the event point;
+professional fixtures are intentionally one-game events.
 
-The division filter selects **events, not teams**. 461 club identities play in
+At that density no stroke can identify a line on its own, so the interaction
+carries it. Hovering a line or legend row isolates it; hovering a point names
+its date, source event, division, and post-event rating. The legend opens in
+latest-event rating order for the selected scope. "Above event median" compares
+each point with the median post-event rating of every rated participant in that
+same source event.
+
+The division filter selects **events, not teams**. Club identities can play in
 more than one division, so classifying a whole identity would misfile every one
-of them — Colorado College (Wasabi) has both club and college events in 2024, and
-its 2024 value is 1449 in the club view against 1512 in the college view. Within
-a division a season reads as the rating after that season's last event *in that
-division*, the population is only the subjects with an event there (970 club
-men's, 980 college men's, 316 its D-III, 938 mixed, 325 club women's, 579
-college women's, 170 its D-III, of 3,779), and the "above season median"
-baseline is recomputed over that population.
+of them. Narrowing the picker removes event points outside that division and
+recomputes both the participant medians and season-end eligibility over the
+remaining population.
 
 ### Field strength
 
@@ -765,11 +766,11 @@ every visit whether or not anything was ever clicked. Nothing was wrong with
 the corpus; what was wrong is that two features held it hostage, and both are
 precomputed in `analysis/history_split.py` now:
 
-- **Trends** walked all 39,325 trajectories to find a per-season median and a
-  per-season top-25 cut. Both are statistics over the whole population, so no
-  subset computes them, and that one function pinned the entire corpus. It can
-  only ever be asked 24 questions (subject × division × gender-matching), so
-  all 24 answers ship in the core at 40 KB gzipped.
+- **Trends** walked all 39,325 trajectories to find population medians and the
+  season-end top-25 eligibility cut. Both are statistics over the whole
+  population, so no lazy subset can compute them. The resident answers now
+  retain every tournament/rating-event change for eligible lines, plus an
+  ordinal event axis and one participant median per event.
 - **The expandable-row test.** A panel's event table marks a row clickable
   only where the model scored games, which asked `games[evIdx]` per row and so
   wanted every season a subject ever played. `gameSides` answers it from the

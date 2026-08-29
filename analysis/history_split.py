@@ -12,13 +12,13 @@ tag. What decides the split is not size but WHEN a thing is needed:
 Two things make the split possible at all, and both are precomputed here
 rather than derived in the browser:
 
-**Trends.** `seasonData` in the page used to walk all 39,325 trajectories to
-get a per-season median and a per-season top-25 cut. Both are population
-statistics, so no subset computes them, and that single function pinned the
-whole player corpus in memory. The distinct answers (subject x division x
-gender-matching) number 32 across seven divisions, so they are computed once
-here — 40 KB gzipped for every combination, against 1.9 MB for the corpus
-they replace.
+**Trends.** The page draws every rating change for the subjects it follows,
+but the population median and the top-25 eligibility cut both need the whole
+trajectory corpus. They are computed once here so opening Trends does not pin
+all 39,325 player trajectories in memory. A tournament division keeps the
+source event index assigned by `rankings.write_history`; professional fixtures
+are intentionally one-game rating events. Event indices, not display names or
+dates, are the identity: distinct source events can share truncated metadata.
 
 **Which (club, event) pairs have games.** The event table marks a row
 expandable only where the model scored games, which asked `games[evIdx]` for
@@ -44,22 +44,24 @@ import collections
 # knee rather than a limit.
 BUCKETS = 32
 
-# The per-season cut a subject must have made, once, ever, to earn a line on
-# Trends. Mirrors TOPN in the page.
+# The per-season cut a subject must have made, once, to earn a line on Trends.
+# The line itself retains every tournament/rating-event point. Mirrors the
+# top-25 explanation in the page.
 TOPN = 25
 
 
 def _decode(entry, events):
-    """(season, division, elo) per rated event, from the delta encoding."""
+    """Yield (event index, season, division, Elo) for every rating update."""
     deltas, vals = entry[0], entry[1]
-    out, i = [], 0
+    i = 0
     for k, d in enumerate(deltas):
         i += d
         if i >= len(events):
             continue
-        v = vals[k]
-        out.append((events[i][2], events[i][3], v[0] if isinstance(v, list) else v))
-    return out
+        event, value = events[i], vals[k]
+        yield i, event[2], event[3], (
+            value[0] if isinstance(value, list) else value
+        )
 
 
 def _median(v):
@@ -70,76 +72,97 @@ def _median(v):
 
 
 def _combo(items, events, seasons, six, labels, gender, div, gen):
-    """One Trends answer: the drawn lines, the population median, the count.
+    """One Trends answer: event-grain lines, event medians, population count.
 
-    `items` arrives in the order ties are to be broken in — the sort below is
-    stable, so two subjects with the same current rating and the same peak
-    come out in the order they went in.
+    Line eligibility stays the per-season top-25 cut. Ranking against each
+    individual tournament would qualify nearly every club at a small event and
+    turn the chart into the full corpus. Once a subject qualifies, however,
+    every one of its rating changes is retained.
+
+    `items` arrives in the order ties are to be broken in. The sorts below are
+    stable, so equal ratings keep that order.
     """
     rows = []
+    event_values = collections.defaultdict(list)
     for key, entry in items:
         if gen is not None and gender.get(key) != gen:
             continue
-        vals = [None] * len(seasons)
-        for season, pdiv, elo in _decode(entry, events):
-            # A division selects POINTS, never whole subjects: 461 club keys
-            # play in more than one (multi_division_clubs counts them), so any
-            # per-subject verdict misfiles them.
+        points = []
+        season_values = [None] * len(seasons)
+        for event_index, season, pdiv, elo in _decode(entry, events):
+            # A division selects POINTS, never whole subjects: hundreds of club
+            # identities play in more than one, so a per-subject verdict would
+            # misfile them.
             if div is not None and pdiv != div:
                 continue
+            points.append((event_index, elo))
+            event_values[event_index].append(elo)
             si = six.get(season)
             if si is not None:
-                vals[si] = elo
-        peak = max((v for v in vals if v is not None), default=None)
-        if peak is None:
-            continue
-        rows.append((key, vals, peak))
+                season_values[si] = elo
+        if points:
+            rows.append((key, points, season_values))
 
-    # Median over the WHOLE population, not the drawn lines: the mode answers
-    # "how far above a typical subject", and the top 25 are typical of nothing.
-    med = []
-    for i in range(len(seasons)):
-        med.append(_median(sorted(vals[i] for _, vals, _ in rows
-                                  if vals[i] is not None)))
-    # The cut is the 25th value compared with >=, so a tie is never broken
-    # arbitrarily and a season can contribute 26. A season with fewer than 25
-    # active subjects qualifies all of them.
+    # The top-25 eligibility cut is still season-grain and still covers the
+    # WHOLE filtered population. A season with fewer than 25 active subjects
+    # qualifies all of them; >= keeps every exact tie at the cut.
     cut = []
     for i in range(len(seasons)):
-        v = sorted((vals[i] for _, vals, _ in rows if vals[i] is not None),
-                   reverse=True)
-        cut.append(v[min(TOPN, len(v)) - 1] if v else None)
-    top = [r for r in rows
-           if any(r[1][i] is not None and cut[i] is not None and r[1][i] >= cut[i]
-                  for i in range(len(seasons)))]
-    # Ordered on the CURRENT season, so the series index — and with it the
-    # colour and dash — matches the default legend order. All-time peak only
-    # breaks ties among subjects that did not play it.
-    last = len(seasons) - 1
-    top.sort(key=lambda r: (r[1][last] is None, -(r[1][last] or 0), -r[2]))
-    return {"top": [[k, labels(k), vals, peak] for k, vals, peak in top],
-            "med": med, "n": len(rows)}
+        values = sorted(
+            (season_values[i] for _, _, season_values in rows
+             if season_values[i] is not None),
+            reverse=True,
+        )
+        cut.append(values[min(TOPN, len(values)) - 1] if values else None)
+    top = [
+        row for row in rows
+        if any(
+            row[2][i] is not None
+            and cut[i] is not None
+            and row[2][i] >= cut[i]
+            for i in range(len(seasons))
+        )
+    ]
+    # Default legend order is the latest rating in the selected scope. This is
+    # event-grain too: a subject need not have played in the latest season.
+    top.sort(key=lambda row: -row[1][-1][1])
+
+    # "Above event median" compares a point with every rated subject that
+    # participated in that exact source event, after the update. Keep every
+    # filtered event here, including events none of the drawn lines attended:
+    # the chart uses this same list as its ordinal tournament axis, so distinct
+    # events on one date never collapse onto one x-coordinate.
+    median_events = sorted(event_values)
+    medians = [
+        _median(sorted(event_values[event_index]))
+        for event_index in median_events
+    ]
+    return {
+        "top": [
+            [
+                key,
+                labels(key),
+                _delta([event_index for event_index, _ in points]),
+                [elo for _, elo in points],
+            ]
+            for key, points, _ in top
+        ],
+        "med": [_delta(median_events), medians],
+        "n": len(rows),
+    }
 
 
 def _trends(history, player_names, genders, seasons, six):
-    """Every Trends answer the four controls can ask for.
+    """Every Trends answer the subject, division, and gender controls can ask.
 
     Clubs carry no gender-matching group, so the page normalizes gen to 'all'
-    on that side and only eight club combinations exist rather than twenty-four.
-
-    The division codes are read off the EVENT table rather than listed here.
-    They used to be a literal ("all", "0".."4"), which silently stopped one
-    short when college women's and college women's D-III became codes 5 and 6:
-    `seasonData` finds no key for a division nobody generated, falls through to
-    its empty default, and Trends draws a blank chart with no error anywhere.
-    Deriving them means a division appears on Trends as soon as it has a rated
-    event, and an eighth needs no edit here.
+    on that side. Division codes are read off the EVENT table rather than
+    listed here. This lets a division appear as soon as it has a rated event.
 
     Players are walked in ASCENDING pid, which is what the browser did when
     this ran there: `for (const key in obj)` visits integer-like keys in
-    numeric order before anything else, so that — not insertion order — is
-    what used to break a tie between two subjects on the same rating and the
-    same peak. Club keys are not integer-like and keep insertion order.
+    numeric order before anything else. Club keys are not integer-like and
+    keep insertion order.
     """
     events = history["events"]
     tn = history.get("teamNames", {})
@@ -181,7 +204,7 @@ def multi_division_clubs(core):
     """
     events = core["events"]
     return sum(1 for entry in core.get("teams", {}).values()
-               if len({d for _, d, _ in _decode(entry, events)}) > 1)
+               if len({d for _, _, d, _ in _decode(entry, events)}) > 1)
 
 
 def _delta(xs):
