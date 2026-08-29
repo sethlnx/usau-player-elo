@@ -4008,11 +4008,13 @@ function renderTrendSnapshot(eventIndex, state) {
     return;
   }
   eventIndex = Math.max(0, Math.min(curEvents.length - 1, eventIndex));
-  const event = curEvents[eventIndex], season = (HEV[event] || [,, null])[2];
+  const event = curEvents[eventIndex];
   const ranked = curSeries.map((series, seriesIndex) => {
     const pointIndex = trendPointAtEvent(series, event);
-    if (pointIndex < 0 ||
-        (HEV[series.events[pointIndex]] || [,, null])[2] !== season) return null;
+    if (pointIndex < 0) return null;
+    const playsNow = series.events[pointIndex] === event;
+    const playsLater = pointIndex + 1 < series.events.length;
+    if (!playsNow && !playsLater) return null;
     return {series, seriesIndex, value: seriesVal(series, pointIndex)};
   }).filter(Boolean);
   ranked.sort((a, b) => b.value - a.value ||
@@ -4158,9 +4160,10 @@ $('#tnote').textContent =
   `nearest event; click the chart to lock that snapshot, then choose Latest to ` +
   `resume scrubbing. Hover a point for its event details. Hover a line or legend ` +
   `row to isolate it; click a legend row to pin it, and click a name to open its ` +
-  `full history. The sidebar includes only subjects who have already played in ` +
-  `the selected event's season, carrying their last rating forward within that ` +
-  `season. "Above event median" ` +
+  `full history. The sidebar includes each subject from their first event through ` +
+  `their final event in the selected division. Between appearances, a subject ` +
+  `remains current only when another later rating event exists in that scope. ` +
+  `"Above event median" ` +
   `subtracts the median post-event rating of every rated subject who participated ` +
   `in that same source event. Narrowing the division keeps only events in it — ` +
   `__MULTIDIV__ club identities play in more than one, and each is plotted on its ` +
