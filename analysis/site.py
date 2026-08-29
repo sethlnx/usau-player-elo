@@ -997,7 +997,7 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .gtbl td.wl{font-family:var(--mono);font-size:12px;width:22px;text-align:center}
 .gtbl td.sc{font-family:var(--mono);font-size:12.5px;text-align:right;width:62px}
 /* Every circle is an actual tournament/rating-event update. The connecting
-   path is stepped, so the rating stays flat until the next event changes it. */
+   path runs directly between consecutive event ratings. */
 /* Past ~40 series the field has to thin out or it reads as a single smear;
    isolation on hover is what makes an individual line legible. */
 .tchart[data-dense] .sg{opacity:.5;stroke-width:1.1}
@@ -3913,14 +3913,8 @@ function trendChart(series, events) {
   });
   series.forEach((sr, si) => {
     const dash = DASH[Math.floor(si / 8) % DASH.length];
-    const path = [];
-    let priorY = null;
-    sr.events.forEach((event, i) => {
-      const x = px(event).toFixed(1), y = py(seriesVal(sr, i)).toFixed(1);
-      if (priorY === null) path.push(`${x},${y}`);
-      else path.push(`${x},${priorY}`, `${x},${y}`);
-      priorY = y;
-    });
+    const path = sr.events.map((event, i) =>
+      `${px(event).toFixed(1)},${py(seriesVal(sr, i)).toFixed(1)}`);
     svg += `<g class="sg" data-series="${si}" style="color:var(--s${si % 8 + 1})"` +
       (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `>`;
     if (path.length > 1) {
@@ -4062,8 +4056,8 @@ $('#tnote').textContent =
   `Every subject that has ever finished a season inside the top 25 gets a line — ` +
   `__TRENDN__ of them depending on the view. Keeping season-end eligibility ` +
   `prevents a small tournament from qualifying its entire field; the plotted ` +
-  `ratings themselves are not reduced to seasons. The line stays flat between ` +
-  `events and changes at the next point. Hover a point for its date, event, ` +
+  `ratings themselves are not reduced to seasons. Consecutive event ratings ` +
+  `are connected directly. Hover a point for its date, event, ` +
   `division, and rating. Hover a line or legend row to isolate it; click either ` +
   `to pin it, and click a name to open its full history. The legend shows each ` +
   `subject's latest event rating in the selected scope. "Above event median" ` +
