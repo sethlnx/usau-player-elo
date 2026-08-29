@@ -4008,12 +4008,12 @@ function renderTrendSnapshot(eventIndex, state) {
     return;
   }
   eventIndex = Math.max(0, Math.min(curEvents.length - 1, eventIndex));
-  const event = curEvents[eventIndex];
+  const event = curEvents[eventIndex], season = (HEV[event] || [,, null])[2];
   const ranked = curSeries.map((series, seriesIndex) => {
     const pointIndex = trendPointAtEvent(series, event);
-    return pointIndex < 0 ? null : {
-      series, seriesIndex, value: seriesVal(series, pointIndex),
-    };
+    if (pointIndex < 0 ||
+        (HEV[series.events[pointIndex]] || [,, null])[2] !== season) return null;
+    return {series, seriesIndex, value: seriesVal(series, pointIndex)};
   }).filter(Boolean);
   ranked.sort((a, b) => b.value - a.value ||
     a.series.label.localeCompare(b.series.label));
@@ -4035,7 +4035,7 @@ function renderTrendSnapshot(eventIndex, state) {
   const ev = HEV[event] || [];
   const label = state === 'locked' ? 'Locked' : state === 'latest' ? 'Latest' : 'Scrubbing';
   $('#tlhead').textContent = `${label} · ${ev[0] || ''} · ${ev[1] || 'Event'} · ` +
-    `${ranked.length} rated`;
+    `${ranked.length} current`;
   $('#tunlock').hidden = state !== 'locked';
   shownTrendEventIdx = eventIndex;
 }
@@ -4158,8 +4158,9 @@ $('#tnote').textContent =
   `nearest event; click the chart to lock that snapshot, then choose Latest to ` +
   `resume scrubbing. Hover a point for its event details. Hover a line or legend ` +
   `row to isolate it; click a legend row to pin it, and click a name to open its ` +
-  `full history. The sidebar carries each subject's last rating into the selected ` +
-  `event until that subject next plays. "Above event median" ` +
+  `full history. The sidebar includes only subjects who have already played in ` +
+  `the selected event's season, carrying their last rating forward within that ` +
+  `season. "Above event median" ` +
   `subtracts the median post-event rating of every rated subject who participated ` +
   `in that same source event. Narrowing the division keeps only events in it — ` +
   `__MULTIDIV__ club identities play in more than one, and each is plotted on its ` +
