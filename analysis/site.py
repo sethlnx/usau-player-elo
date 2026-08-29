@@ -956,7 +956,7 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
    only the hovered group and its legend row carry .hot. */
 .tchart .sg{fill:none;stroke:currentColor;stroke-width:1.5;opacity:.85}
 .tchart .sg circle{fill:currentColor;stroke:var(--surface);stroke-width:.6;
-  cursor:crosshair}
+  cursor:ew-resize}
 .tchart .sg .hit{stroke-width:10;stroke-opacity:0}
 .tchart.dim .sg{opacity:.15}
 .tchart.dim .sg.hot{opacity:1;stroke-width:2.5}
@@ -972,6 +972,16 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .lrow .sw{width:14px;height:3px;overflow:visible}
 .lrow .lbl{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lrow .pk{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);text-align:right}
+.trankhead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.trankhead #tlhead{min-width:0}
+.trankhead button{border:0;background:none;color:var(--accent);font:inherit;
+  padding:0;cursor:pointer;white-space:nowrap}
+.trankhead button:hover{text-decoration:underline}
+.tchart .scrubzone{fill:transparent;cursor:ew-resize}
+.tchart .scrubline{display:none;stroke:var(--accent);stroke-width:1;
+  pointer-events:none;vector-effect:non-scaling-stroke}
+.tchart.scrubbing .scrubline{display:block}
+.tchart.locked .scrubline{stroke-width:2}
 /* drill-down: back button + inline roster row */
 #detail .back{position:absolute;top:17px;right:52px;font-size:13px;line-height:1;
   background:none;border:0;color:var(--ink-3);cursor:pointer;padding:4px 6px;display:none}
@@ -1358,7 +1368,8 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   <div class="tgrid">
     <div id="tchart"></div>
     <div>
-      <div class="lhead" id="tlhead"></div>
+      <div class="lhead trankhead"><span id="tlhead"></span><button id="tunlock"
+        type="button" hidden>Latest</button></div>
       <div class="legend" id="tlegend"></div>
     </div>
   </div>
@@ -3868,8 +3879,12 @@ const trendDivision = event => {
   return DIVLABEL[code] || EDIVL[code] || `Division ${code}`;
 };
 
+const TREND_W = 900, TREND_H = 460, TREND_T = 18;
+const TREND_R = 12, TREND_B = 34, TREND_L = 52;
+
 function trendChart(series, events) {
-  const W = 900, Hh = 460, T = 18, Rm = 12, B = 34, L = 52;
+  const W = TREND_W, Hh = TREND_H, T = TREND_T;
+  const Rm = TREND_R, B = TREND_B, L = TREND_L;
   let y0 = Infinity, y1 = -Infinity;
   series.forEach(sr => sr.events.forEach((_, i) => {
     const y = seriesVal(sr, i);
@@ -3895,7 +3910,9 @@ function trendChart(series, events) {
       `<text x="4" y="${(py(grid) + 3).toFixed(1)}">${grid}</text>`;
   }
   svg += `<line class="ax" x1="${L}" x2="${W - Rm}" ` +
-    `y1="${Hh - B}" y2="${Hh - B}"/>`;
+    `y1="${Hh - B}" y2="${Hh - B}"/>` +
+    `<rect class="scrubzone" x="${L}" y="${T}" width="${W - L - Rm}" ` +
+    `height="${Hh - T - B}"/>`;
   let tickYear = null, lastLabelX = -Infinity;
   events.forEach(event => {
     const year = (HEV[event] || [,, null])[2];
@@ -3931,10 +3948,12 @@ function trendChart(series, events) {
     });
     svg += `</g>`;
   });
-  return svg + `</svg>`;
+  return svg + `<line class="scrubline" id="tscrubline" x1="${L}" x2="${L}" ` +
+    `y1="${T}" y2="${Hh - B}"/></svg>`;
 }
 
 let hotIdx = null, pinIdx = null;
+let lockedTrendEventIdx = null, shownTrendEventIdx = null;
 let curSeries = [], curEvents = [], curMed = new Map(), curMode = 'elo';
 const seriesVal = (series, i) => curMode === 'med'
   ? series.vals[i] - curMed.get(series.events[i])
@@ -3942,16 +3961,83 @@ const seriesVal = (series, i) => curMode === 'med'
 const trendValueText = value =>
   (curMode === 'med' && value > 0 ? '+' : '') + Math.round(value);
 
-function resetTrendHead() {
-  $('#tlhead').textContent = `${curSeries.length} series · latest event rating`;
+function trendPointAtEvent(series, event) {
+  let lo = 0, hi = series.events.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (series.events[mid] <= event) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo - 1;
 }
 
-function showTrendPoint(seriesIndex, pointIndex) {
-  const series = curSeries[seriesIndex], event = series.events[pointIndex];
+function trendEventX(eventIndex) {
+  if (curEvents.length === 1) return (TREND_L + TREND_W - TREND_R) / 2;
+  return TREND_L + (TREND_W - TREND_L - TREND_R) *
+    eventIndex / (curEvents.length - 1);
+}
+
+function trendEventIndexFromPointer(e) {
+  const svg = $('#tsvg');
+  if (!svg || !curEvents.length) return null;
+  const bounds = svg.getBoundingClientRect();
+  const x = (e.clientX - bounds.left) * TREND_W / bounds.width;
+  const y = (e.clientY - bounds.top) * TREND_H / bounds.height;
+  if (x < TREND_L || x > TREND_W - TREND_R ||
+      y < TREND_T || y > TREND_H - TREND_B) return null;
+  if (curEvents.length === 1) return 0;
+  const ratio = (x - TREND_L) / (TREND_W - TREND_L - TREND_R);
+  return Math.round(ratio * (curEvents.length - 1));
+}
+
+function setTrendMarker(eventIndex, locked = false) {
+  const svg = $('#tsvg'), line = $('#tscrubline');
+  if (!svg || !line) return;
+  const visible = eventIndex !== null;
+  svg.classList.toggle('scrubbing', visible);
+  svg.classList.toggle('locked', visible && locked);
+  if (!visible) return;
+  const x = trendEventX(eventIndex).toFixed(1);
+  line.setAttribute('x1', x); line.setAttribute('x2', x);
+}
+
+function renderTrendSnapshot(eventIndex, state) {
+  if (!curEvents.length) {
+    $('#tlegend').innerHTML = ''; $('#tlhead').textContent = '';
+    $('#tunlock').hidden = true;
+    return;
+  }
+  eventIndex = Math.max(0, Math.min(curEvents.length - 1, eventIndex));
+  const event = curEvents[eventIndex];
+  const ranked = curSeries.map((series, seriesIndex) => {
+    const pointIndex = trendPointAtEvent(series, event);
+    return pointIndex < 0 ? null : {
+      series, seriesIndex, value: seriesVal(series, pointIndex),
+    };
+  }).filter(Boolean);
+  ranked.sort((a, b) => b.value - a.value ||
+    a.series.label.localeCompare(b.series.label));
+  const kind = $('#tsub').value;
+  $('#tlegend').innerHTML = ranked.map(({series, seriesIndex, value}) => {
+    const dash = DASH[Math.floor(seriesIndex / 8) % DASH.length];
+    const link = kind === 'p' ? `data-pid="${esc(series.key)}"`
+                              : `data-club="${esc(series.key)}"`;
+    return `<div class="lrow${hotIdx === seriesIndex ? ' hot' : ''}" ` +
+      `data-series="${seriesIndex}" style="color:var(--s${seriesIndex % 8 + 1})">` +
+      `<svg class="sw" viewBox="0 0 14 3"><line x1="0" y1="1.5" x2="14" y2="1.5" ` +
+      `stroke="currentColor" stroke-width="3"` +
+      (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `/></svg>` +
+      `<span class="lbl nmlink" ${link} title="${esc(series.label)}">` +
+      `${esc(series.label)}</span><span class="pk">${trendValueText(value)}</span></div>`;
+  }).join('');
+  $('#tlegend').classList.toggle('dim', hotIdx !== null);
+  $('#tlegend').scrollTop = 0;
   const ev = HEV[event] || [];
-  $('#tlhead').textContent =
-    `${ev[0] || ''} · ${ev[1] || 'Event'} · ${trendDivision(event)} · ` +
-    `${series.label}: ${trendValueText(seriesVal(series, pointIndex))}`;
+  const label = state === 'locked' ? 'Locked' : state === 'latest' ? 'Latest' : 'Scrubbing';
+  $('#tlhead').textContent = `${label} · ${ev[0] || ''} · ${ev[1] || 'Event'} · ` +
+    `${ranked.length} rated`;
+  $('#tunlock').hidden = state !== 'locked';
+  shownTrendEventIdx = eventIndex;
 }
 
 function drawTrends() {
@@ -3973,22 +4059,16 @@ function drawTrends() {
   $('#tgen').disabled = kind !== 'p';
   const dat = trendData(kind, div, gen);
   hotIdx = null; pinIdx = null;
+  lockedTrendEventIdx = null; shownTrendEventIdx = null;
   curMode = mode; curEvents = dat.events; curMed = dat.med; curSeries = dat.top;
   $('#tchart').innerHTML = trendChart(curSeries, curEvents);
-  $('#tlegend').innerHTML = curSeries.map((series, i) => {
-    const dash = DASH[Math.floor(i / 8) % DASH.length];
-    const link = kind === 'p' ? `data-pid="${esc(series.key)}"`
-                              : `data-club="${esc(series.key)}"`;
-    const value = seriesVal(series, series.vals.length - 1);
-    return `<div class="lrow" data-series="${i}" style="color:var(--s${i % 8 + 1})">` +
-      `<svg class="sw" viewBox="0 0 14 3"><line x1="0" y1="1.5" x2="14" y2="1.5" ` +
-      `stroke="currentColor" stroke-width="3"` +
-      (dash === 'none' ? '' : ` stroke-dasharray="${dash}"`) + `/></svg>` +
-      `<span class="lbl nmlink" ${link} title="${esc(series.label)}">` +
-      `${esc(series.label)}</span><span class="pk">${trendValueText(value)}</span></div>`;
-  }).join('');
   $('#tlegend').classList.remove('dim');
-  resetTrendHead();
+  if (curEvents.length) renderTrendSnapshot(curEvents.length - 1, 'latest');
+  else {
+    $('#tlegend').innerHTML = ''; $('#tlhead').textContent = '';
+    $('#tunlock').hidden = true;
+  }
+  setTrendMarker(null);
   const plottedDates = curEvents.map(event => (HEV[event] || [''])[0]).filter(Boolean);
   const first = plottedDates.length ? plottedDates[0] : '';
   const last = plottedDates.length ? plottedDates[plottedDates.length - 1] : '';
@@ -4022,20 +4102,37 @@ $('#tlegend').addEventListener('mouseover', e => {
 $('#tlegend').addEventListener('mouseleave', () => setHot(pinIdx));
 $('#tchart').addEventListener('mouseover', e => {
   const group = e.target.closest('.sg');
-  if (!group) return;
-  const seriesIndex = +group.dataset.series;
-  setHot(seriesIndex);
-  const point = e.target.closest('.tp');
-  if (point) showTrendPoint(seriesIndex, +point.dataset.point);
+  if (group) setHot(+group.dataset.series);
+});
+$('#tchart').addEventListener('pointermove', e => {
+  if (lockedTrendEventIdx !== null) return;
+  const eventIndex = trendEventIndexFromPointer(e);
+  if (eventIndex === null || eventIndex === shownTrendEventIdx) return;
+  renderTrendSnapshot(eventIndex, 'scrub');
+  setTrendMarker(eventIndex);
 });
 $('#tchart').addEventListener('mouseleave', () => {
   setHot(pinIdx);
-  resetTrendHead();
+  if (lockedTrendEventIdx === null && curEvents.length) {
+    renderTrendSnapshot(curEvents.length - 1, 'latest');
+    setTrendMarker(null);
+  }
 });
 $('#tchart').addEventListener('click', e => {
-  const group = e.target.closest('.sg');
-  if (group) pinTrendSeries(+group.dataset.series);
+  const svg = $('#tsvg');
+  const eventIndex = lockedTrendEventIdx === null && svg &&
+      svg.classList.contains('scrubbing')
+    ? shownTrendEventIdx : trendEventIndexFromPointer(e);
+  if (eventIndex === null) return;
+  lockedTrendEventIdx = eventIndex;
+  renderTrendSnapshot(eventIndex, 'locked');
+  setTrendMarker(eventIndex, true);
 });
+$('#tunlock').onclick = () => {
+  lockedTrendEventIdx = null;
+  if (curEvents.length) renderTrendSnapshot(curEvents.length - 1, 'latest');
+  setTrendMarker(null);
+};
 $('#tlegend').addEventListener('click', e => {
   const lab = e.target.closest('[data-pid],[data-club]');
   if (lab) {
@@ -4057,10 +4154,12 @@ $('#tnote').textContent =
   `__TRENDN__ of them depending on the view. Keeping season-end eligibility ` +
   `prevents a small tournament from qualifying its entire field; the plotted ` +
   `ratings themselves are not reduced to seasons. Consecutive event ratings ` +
-  `are connected directly. Hover a point for its date, event, ` +
-  `division, and rating. Hover a line or legend row to isolate it; click either ` +
-  `to pin it, and click a name to open its full history. The legend shows each ` +
-  `subject's latest event rating in the selected scope. "Above event median" ` +
+  `are connected directly. Move across the chart to rank the sidebar at the ` +
+  `nearest event; click the chart to lock that snapshot, then choose Latest to ` +
+  `resume scrubbing. Hover a point for its event details. Hover a line or legend ` +
+  `row to isolate it; click a legend row to pin it, and click a name to open its ` +
+  `full history. The sidebar carries each subject's last rating into the selected ` +
+  `event until that subject next plays. "Above event median" ` +
   `subtracts the median post-event rating of every rated subject who participated ` +
   `in that same source event. Narrowing the division keeps only events in it — ` +
   `__MULTIDIV__ club identities play in more than one, and each is plotted on its ` +
