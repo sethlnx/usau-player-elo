@@ -5,11 +5,11 @@ import unittest
 from pathlib import Path
 
 from analysis.backtest import DB_PATH
-from analysis.site import (bucket_urls, content_version, load_csv,
+from analysis.site import (bucket_urls, load_csv,
                            TEMPLATE,
                            load_player_box_score_payload,
                            load_player_metric_payload, load_ufa_payload,
-                           ufa_game_ratings)
+                           sidecar_version, ufa_game_ratings)
 
 
 class SiteAssetContractTests(unittest.TestCase):
@@ -22,17 +22,23 @@ class SiteAssetContractTests(unittest.TestCase):
         self.assertIn(">Refresh rankings</a>", TEMPLATE)
         self.assertNotIn("GITHUB_TOKEN", TEMPLATE)
 
-    def test_sidecar_urls_share_content_version_and_change_with_source(self):
+    def test_sidecar_urls_change_with_data_and_generator_code(self):
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "history.json"
+            generator = Path(tmp) / "generator.py"
             source.write_text("first")
-            first = content_version((source,))
+            generator.write_text("first")
+            first = sidecar_version((source,), (generator,))
             urls = bucket_urls(Path("p"), {0: {}, 31: {}}, first)
             self.assertEqual(f"p/0.js?v={first}", urls["0"])
             self.assertEqual(f"p/31.js?v={first}", urls["31"])
 
             source.write_text("second")
-            self.assertNotEqual(first, content_version((source,)))
+            self.assertNotEqual(first, sidecar_version((source,), (generator,)))
+
+            source.write_text("first")
+            generator.write_text("second")
+            self.assertNotEqual(first, sidecar_version((source,), (generator,)))
 
     def test_player_metric_payload_preserves_missing_scores_and_provenance(self):
         with tempfile.TemporaryDirectory() as tmp:

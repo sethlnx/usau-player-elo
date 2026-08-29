@@ -90,6 +90,13 @@ BOX_GLOBAL = "__USAU_BOX_SCORES__"
 TDET_DIR = OUT.parent / "t"
 TDET_GLOBAL = "__USAU_TDET__"
 
+SIDECAR_GENERATORS = (
+    Path(__file__).resolve(),
+    Path(__file__).with_name("field_strength.py"),
+    Path(__file__).with_name("history_split.py"),
+    Path(__file__).with_name("tournaments.py"),
+)
+
 # The three history tiers. Each bucket file assigns its own key on the tier's
 # global, so nothing assumes load order and two buckets in flight cannot race.
 PLAY_DIR = OUT.parent / "p"
@@ -318,6 +325,11 @@ def content_version(paths):
     return digest.hexdigest()[:12]
 
 
+def sidecar_version(data_paths, generator_paths=SIDECAR_GENERATORS):
+    """Fingerprint sidecar data and the code that determines its payload."""
+    return content_version((*generator_paths, *data_paths))
+
+
 def write_buckets(directory, global_name, buckets):
     """One file per bucket. Each creates the tier's global itself and writes
     only its own key, so nothing assumes load order and two buckets in flight
@@ -365,7 +377,7 @@ def build():
         player_id: rows for player_id, rows in player_box_scores.items()
         if player_id in shown_player_ids
     }
-    box_score_version = content_version((box_score_path,))
+    box_score_version = sidecar_version((box_score_path,))
     ufa = None
     clubs = {
         "completed": load_csv("team_elo.csv"),
@@ -403,7 +415,7 @@ def build():
     version_inputs = (DB_PATH, euf_db, hist_path) + (
         (role_path,) if role_path.exists() else ()
     )
-    asset_version = content_version(version_inputs)
+    asset_version = sidecar_version(version_inputs)
 
     # Gender-matching group, decided in identity.resolve and carried on
     # player_elo.csv: 1 = male-matching, 2 = female-matching, 0 = no evidence.
