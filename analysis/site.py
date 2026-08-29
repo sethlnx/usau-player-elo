@@ -2269,6 +2269,7 @@ function playerBucket(pid) {
 }
 const TSTATE = new Map();   // "<tier>/<key>" -> 'load' | 'ok' | 'fail'
 const TWAIT = new Map();    // same id -> [callback], drained on settle
+const TREFRESH = new Set(); // buckets already retried past the shared CDN cache
 const tierState = (tier, key) => TSTATE.get(tier + '/' + key);
 
 /* Roster buckets index their own name pool from 0, so merging one means
@@ -2293,9 +2294,9 @@ function mergeRosters(part) {
 }
 
 /* `done(ok)` fires once the bucket has settled, immediately if it already
-   has. A settled-but-failed bucket is never re-requested: the callback would
-   run synchronously and any caller that redraws on it would recurse. */
-function faultTier(tier, key, done) {
+   has. `refreshTier` owns the one allowed re-request: it uses a unique URL to
+   recover when a Pages edge cached an old payload or a transient 404. */
+function faultTier(tier, key, done, refresh = false) {
   const id = tier + '/' + key, st = TSTATE.get(id);
   if (st === 'ok' || st === 'fail') { done(st === 'ok'); return; }
   if (!TWAIT.has(id)) TWAIT.set(id, []);
@@ -2309,7 +2310,9 @@ function faultTier(tier, key, done) {
   if (!url) { finish(false); return; }
   TSTATE.set(id, 'load');
   const s = document.createElement('script');
-  s.src = url;
+  s.src = refresh
+    ? url + (url.includes('?') ? '&' : '?') + 'refresh=' + Date.now()
+    : url;
   s.async = true;
   s.onload = () => {
     const bag = window[spec.glob], part = bag && bag[key];
@@ -2321,6 +2324,13 @@ function faultTier(tier, key, done) {
   };
   s.onerror = () => finish(false);
   document.head.appendChild(s);
+}
+function refreshTier(tier, key, done) {
+  const id = tier + '/' + key;
+  if (TREFRESH.has(id)) { done(false); return; }
+  TREFRESH.add(id);
+  TSTATE.delete(id);
+  faultTier(tier, key, done, true);
 }
 // Per-event division tag in the drill-down table, indexed by DIVCODE. It used
 // to be a 3-slot array with an `|| 'club'` fallback, which silently labelled
@@ -3377,17 +3387,20 @@ function drawTournament(i) {
     `<div class="meta">${facts.join(' \u00b7 ')}</div>` +
     `<div class="meta fsline">${grade}${strBar(e[3], e[12])}</div>`;
   if (!det) {
-    // Settled-but-absent means the bucket 404'd or is missing this event, and
-    // re-requesting would call back synchronously — straight into a loop.
     const st = tierState('t', e[2]), settled = st === 'ok' || st === 'fail';
-    $('#tvbody').innerHTML = settled
-      ? `<p class="muted">This tournament's games come from <code>` +
-        `${esc((D.tourneyJs || {})[e[2]] || 't/' + e[2] + '.js')}</code>, which ` +
-        `could not be loaded. The tournament list does not need it and is ` +
-        `unaffected.</p>`
-      : `<p class="muted">Loading ${e[2]} games\u2026</p>`;
+    const retry = settled && !TREFRESH.has('t/' + e[2]);
+    $('#tvbody').innerHTML = retry
+      ? `<p class="muted">Refreshing ${e[2]} games\u2026</p>`
+      : settled
+        ? `<p class="muted">This tournament's games come from <code>` +
+          `${esc((D.tourneyJs || {})[e[2]] || 't/' + e[2] + '.js')}</code>, ` +
+          `which could not be loaded or did not match this build. The ` +
+          `tournament list is unaffected.</p>`
+        : `<p class="muted">Loading ${e[2]} games\u2026</p>`;
     $('#tvnote').innerHTML = '';
-    if (!settled)
+    if (retry)
+      refreshTier('t', e[2], () => { if (curEvent === i) drawTournament(i); });
+    else if (!settled)
       faultTier('t', e[2], () => { if (curEvent === i) drawTournament(i); });
     return;
   }
