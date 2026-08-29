@@ -1,6 +1,7 @@
 import json
 import sqlite3
 import tempfile
+from html.parser import HTMLParser
 import unittest
 from pathlib import Path
 
@@ -21,6 +22,39 @@ class SiteAssetContractTests(unittest.TestCase):
         )
         self.assertIn(">Refresh rankings</a>", TEMPLATE)
         self.assertNotIn("GITHUB_TOKEN", TEMPLATE)
+
+    def test_tournament_detail_is_a_sibling_of_the_list(self):
+        class ParentParser(HTMLParser):
+            void_tags = {
+                "area", "base", "br", "col", "embed", "hr", "img", "input",
+                "link", "meta", "param", "source", "track", "wbr",
+            }
+
+            def __init__(self):
+                super().__init__()
+                self.stack = []
+                self.parents = {}
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                element_id = attrs.get("id")
+                if element_id:
+                    parent_attrs = dict(self.stack[-1][1]) if self.stack else {}
+                    self.parents[element_id] = parent_attrs.get("id")
+                if tag not in self.void_tags:
+                    self.stack.append((tag, attrs.items()))
+
+            def handle_endtag(self, tag):
+                for index in range(len(self.stack) - 1, -1, -1):
+                    if self.stack[index][0] == tag:
+                        del self.stack[index:]
+                        return
+
+        parser = ParentParser()
+        parser.feed(TEMPLATE)
+
+        self.assertEqual("events", parser.parents["tlist"])
+        self.assertEqual("events", parser.parents["tview"])
 
     def test_sidecar_urls_change_with_data_and_generator_code(self):
         with tempfile.TemporaryDirectory() as tmp:
