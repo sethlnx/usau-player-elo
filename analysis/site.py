@@ -4013,7 +4013,8 @@ function renderTrendSnapshot(eventIndex, state) {
     const pointIndex = trendPointAtEvent(series, event);
     if (pointIndex < 0) return null;
     const playsNow = series.events[pointIndex] === event;
-    const playsLater = pointIndex + 1 < series.events.length;
+    const playsLater = pointIndex + 1 < series.events.length &&
+      series.events[pointIndex + 1] > event;
     if (!playsNow && !playsLater) return null;
     return {series, seriesIndex, value: seriesVal(series, pointIndex)};
   }).filter(Boolean);
