@@ -1139,7 +1139,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
 .forecast-pick.out{opacity:.48}
 .forecast-pick.locked{cursor:default}
 .forecast-pick.pending{border-style:dashed;color:var(--ink-3);cursor:default}
-.forecast-pick .score,.forecast-pick .seed{font-family:var(--mono);
+.forecast-pick .score,.forecast-pick .seed,.forecast-pick .odds{font-family:var(--mono);
   font-size:10.5px;color:var(--ink-3);flex:none}
 .forecast-pool .stand{margin-top:10px}
 .forecast-pool .stand td{font-size:12px;padding:3px 0}
@@ -3796,10 +3796,20 @@ function forecastSide(det, game, team, source, score) {
   const out = game.winner !== null && !picked;
   const classes = ['forecast-pick', picked ? 'on' : '', out ? 'out' : '',
                    game.locked ? 'locked' : ''].filter(Boolean).join(' ');
+  const opponent = game.home === team ? game.away : game.home;
+  const homeRating = det.r && det.r[game.home];
+  const awayRating = det.r && det.r[game.away];
+  const homePercent = Number.isFinite(homeRating) && Number.isFinite(awayRating)
+    ? Math.round(TournamentSim.winProbability(
+        homeRating, awayRating, Number.isFinite(det.s) && det.s > 0 ? det.s : 260
+      ) * 100)
+    : null;
+  const percent = homePercent === null ? null
+    : game.home === team ? homePercent : 100 - homePercent;
   const value = game.locked && Number.isFinite(score)
     ? `<span class="score">${score}</span>`
-    : Number.isFinite(det.r && det.r[team])
-      ? `<span class="seed">${Math.round(det.r[team])}</span>` : '';
+    : opponent !== null && percent !== null
+      ? `<span class="odds">${percent}%</span>` : '';
   return `<button class="${classes}" data-forecast-kind="${game.kind}" ` +
     `data-forecast-key="${esc(game.key)}" data-forecast-team="${team}" ` +
     `aria-pressed="${picked}"${game.locked ? ' disabled' : ''}>` +
