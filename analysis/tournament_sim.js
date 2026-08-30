@@ -79,6 +79,154 @@
       ? source[index]
       : fallback);
   }
+
+  function forecastPick(source, key, entrants) {
+    const value = source && source[key];
+    if (value === undefined || value === null || value === '') return null;
+    const team = Number(value);
+    return entrants.includes(team) ? team : null;
+  }
+
+  function resolveForecast(detail, picks) {
+    if (!detail || !detail.f || !Array.isArray(detail.f.p)) {
+      throw new TypeError('Tournament detail must include a forecast template');
+    }
+    picks = picks || {};
+    const poolPicks = picks.p || {};
+    const bracketPicks = picks.b || {};
+    const ratings = normalizedRatings(detail);
+    const pools = detail.f.p.map(([label, rawGames]) => {
+      const teams = [];
+      const seen = new Set();
+      for (const game of rawGames) {
+        for (const team of game.slice(0, 2)) {
+          if (!seen.has(team)) {
+            seen.add(team);
+            teams.push(team);
+          }
+        }
+      }
+      const records = new Map(teams.map((team, order) =>
+        [team, {team, wins: 0, losses: 0, differential: 0, order}]));
+      const games = rawGames.map(game => {
+        const entrants = game.slice(0, 2);
+        const actual = entrants.includes(game[2]) ? game[2] : null;
+        const selected = actual === null
+          ? forecastPick(poolPicks, game[5], entrants) : null;
+        const won = actual === null ? selected : actual;
+        if (won !== null) {
+          const lost = won === entrants[0] ? entrants[1] : entrants[0];
+          records.get(won).wins++;
+          records.get(lost).losses++;
+        }
+        if (actual !== null && Number.isFinite(game[3]) && Number.isFinite(game[4])) {
+          records.get(entrants[0]).differential += game[3] - game[4];
+          records.get(entrants[1]).differential += game[4] - game[3];
+        }
+        return {
+          key: game[5], home: entrants[0], away: entrants[1], winner: won,
+          locked: actual !== null, homeScore: game[3], awayScore: game[4],
+        };
+      });
+      const rows = [...records.values()]
+        .sort((a, b) => b.wins - a.wins ||
+          b.differential - a.differential ||
+          ratings[b.team] - ratings[a.team] || a.order - b.order);
+      for (let start = 0; start < rows.length;) {
+        let stop = start + 1;
+        while (stop < rows.length && rows[stop].wins === rows[start].wins) stop++;
+        if (stop - start > 1) {
+          const tied = new Set(rows.slice(start, stop).map(row => row.team));
+          const headToHead = new Map([...tied].map(team => [team, 0]));
+          for (const game of games) {
+            if (game.winner !== null && tied.has(game.home) && tied.has(game.away)) {
+              headToHead.set(game.winner, headToHead.get(game.winner) + 1);
+            }
+          }
+          const block = rows.slice(start, stop).sort((a, b) =>
+            headToHead.get(b.team) - headToHead.get(a.team) ||
+            b.differential - a.differential ||
+            ratings[b.team] - ratings[a.team] || a.order - b.order);
+          rows.splice(start, stop - start, ...block);
+        }
+        start = stop;
+      }
+      return {
+        label, games, standings: rows,
+        complete: games.every(game => game.winner !== null),
+      };
+    });
+
+    const bracket = {sourceEvent: null, rootRank: 0, rounds: [], champion: null};
+    if (!Array.isArray(detail.f.b)) return {pools, bracket};
+    const [sourceEvent, rootRank, rawRounds] = detail.f.b;
+    bracket.sourceEvent = sourceEvent;
+    bracket.rootRank = rootRank;
+    const winnerAt = new Map();
+    const resolveSource = source => {
+      if (!Array.isArray(source)) return null;
+      if (source[0] === 0) {
+        const pool = pools[source[1]];
+        return pool && pool.complete && pool.standings[source[2]]
+          ? pool.standings[source[2]].team : null;
+      }
+      return source[0] === 1
+        ? winnerAt.get(`${source[1]}:${source[2]}`) ?? null : null;
+    };
+    rawRounds.forEach((rawRound, roundIndex) => {
+      const round = rawRound.map((game, gameIndex) => {
+        if (!game) return null;
+        const home = resolveSource(game[0]);
+        const away = resolveSource(game[1]);
+        const entrants = home === null || away === null ? [] : [home, away];
+        const actual = entrants.includes(game[2]) ? game[2] : null;
+        const key = `${roundIndex}:${gameIndex}`;
+        const selected = actual === null
+          ? forecastPick(bracketPicks, key, entrants) : null;
+        const won = actual === null ? selected : actual;
+        if (won !== null) winnerAt.set(key, won);
+        return {
+          key, home, away, winner: won, locked: actual !== null,
+          homeScore: game[3], awayScore: game[4], sources: game.slice(0, 2),
+        };
+      });
+      bracket.rounds.push(round);
+    });
+    const finalRound = bracket.rounds[bracket.rounds.length - 1] || [];
+    const final = finalRound.find(Boolean);
+    bracket.champion = final ? final.winner : null;
+    return {pools, bracket};
+  }
+
+  function favoritePicks(detail, existing) {
+    const ratings = normalizedRatings(detail);
+    const picks = {
+      p: {...(existing && existing.p || {})},
+      b: {...(existing && existing.b || {})},
+    };
+    for (const [, games] of detail.f.p) {
+      for (const game of games) {
+        if (!game.slice(0, 2).includes(game[2])) {
+          picks.p[game[5]] = ratings[game[0]] >= ratings[game[1]]
+            ? game[0] : game[1];
+        }
+      }
+    }
+    const rawRounds = Array.isArray(detail.f.b) ? detail.f.b[2] : [];
+    rawRounds.forEach((rawRound, roundIndex) => {
+      const state = resolveForecast(detail, picks);
+      rawRound.forEach((rawGame, gameIndex) => {
+        const game = state.bracket.rounds[roundIndex][gameIndex];
+        if (rawGame && game && !game.locked &&
+            game.home !== null && game.away !== null) {
+          picks.b[`${roundIndex}:${gameIndex}`] =
+            ratings[game.home] >= ratings[game.away] ? game.home : game.away;
+        }
+      });
+    });
+    return picks;
+  }
+
   function stageForRound(detail, rank) {
     const label = String(Array.isArray(detail.q) ? detail.q[rank] || '' : '')
       .toLowerCase().replace(/[^a-z]+/g, ' ').trim();
@@ -201,5 +349,8 @@
   }
 
 
-  return {seededRandom, winProbability, stageForRound, simulateTournament};
+  return {
+    seededRandom, winProbability, stageForRound, simulateTournament,
+    resolveForecast, favoritePicks,
+  };
 }));

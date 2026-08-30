@@ -1,5 +1,7 @@
 const assert = require('assert');
-const {simulateTournament, stageForRound} = require('../analysis/tournament_sim');
+const {
+  simulateTournament, stageForRound, resolveForecast, favoritePicks,
+} = require('../analysis/tournament_sim');
 
 const poolGames = [];
 for (let home = 0; home < 8; home++) {
@@ -44,5 +46,30 @@ for (const row of first.teams) {
     assert(row[stage] >= 0 && row[stage] <= 100);
   }
 }
+
+const manualDetail = {
+  t: [0, 1, 2, 3],
+  r: [1900, 1800, 1700, 1600],
+  f: {
+    p: [
+      ['Pool A', [[0, 1, -1, null, null, 'a']]],
+      ['Pool B', [[2, 3, -1, null, null, 'b']]],
+    ],
+    b: [9, 0, [[[
+      [0, 0, 0], [0, 1, 0], -1, null, null, 'title',
+    ]]]],
+  },
+};
+const publishedDetail = JSON.stringify(manualDetail);
+let manual = resolveForecast(manualDetail, {p: {a: 0, b: 2}, b: {}});
+assert.strictEqual(manual.pools[0].complete, true);
+assert.strictEqual(manual.bracket.rounds[0][0].home, 0);
+assert.strictEqual(manual.bracket.rounds[0][0].away, 2);
+manual = resolveForecast(manualDetail, {p: {a: 0, b: 2}, b: {'0:0': 2}});
+assert.strictEqual(manual.bracket.champion, 2, 'a bracket pick must advance');
+const favorites = favoritePicks(manualDetail);
+assert.strictEqual(resolveForecast(manualDetail, favorites).bracket.champion, 0);
+assert.strictEqual(JSON.stringify(manualDetail), publishedDetail,
+  'interactive picks must not mutate published tournament detail');
 
 console.log('tournament simulator contract tests passed');

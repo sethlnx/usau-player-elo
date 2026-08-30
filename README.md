@@ -699,32 +699,28 @@ per-event standings and their tie-break rule are gone with the bands.
 Attendance is the set of clubs the model scored games for, so a team that
 registered and never played is not counted.
 
-**The tracker takes played games from USAU, not from you.** Every fixture with
-a final score arrives with it, renders the score where an unplayed game renders
-the model's probability, and cannot be clicked away; the odds are conditioned
-on it. What you can still enter is a call on a game not yet played, kept in
-`localStorage` under the fixture's USAU game number.
+**The tournament forecast starts from published pool fixtures, including games
+that have not been played.** Each unplayed matchup is a two-sided pick. A final
+score from USAU locks that result; a reader's remaining picks persist in
+`localStorage` under the event and fixture IDs. **Pick Elo favorites** fills the
+whole tournament deterministically, while **Reset picks** removes only the
+reader's calls.
 
-The field's ratings prefer the **upcoming** roster table, which rates a club
-off what it registered for this event rather than off whatever it last played
-— worth about 180 Elo for a club that fielded a B-squad last time out. But
-that table empties the moment the event finishes, and a club with nothing
-registered leaves it: rebuilding the day after the 2026 U.S. Open rated all
-twelve entrants `None`, which quietly reduced the pool lettering to arbitrary
-and the simulation to noise. It now falls back to the completed roster and
-then the best one, so the preference is unchanged and the tracker no longer
-depends on WHEN the page was built.
+Standings update after every choice. Wins come first, then head-to-head inside
+the tied group, point differential from any played games, and Elo where a set
+of winner-only picks still leaves the tie unresolved. The bracket remains in
+seed notation until every game in the relevant pool has a winner, then replaces
+`A1`, `B2`, and the other slots with teams. A bracket winner immediately feeds
+the next round.
 
-Two things it stops guessing once the tournament starts. **Pools** are the sets
-of teams that have all played each other, grown one fixture at a time — USAU
-labels every opening fixture "Pool D" and publishes no pool letters at all.
-Deriving them from the co-play graph, as this did until day one of 2026, merged
-the field into two components of six the moment the winners' crossover was
-seeded; the clique rule separates those two crossover games out instead, which
-is also what keeps them out of the pool standings. **The bracket** is read off
-USAU's published slots, which fill in as the tournament runs, replacing the old
-"2nd plays 3rd cross-pool" assumption. Only the semifinal feed is still
-assumed: quarters 1-2 into one semi, 3-4 into the other.
+Pool schedules commonly arrive before bracket slots. In that state the forecast
+uses the latest completed edition of the same series, division, and pool-size
+profile as a template, and labels that projection with its source event rather
+than presenting it as the organiser's draw. The 2026 men's Pro Championships,
+for example, publishes two four-team pools but no bracket yet; its forecast
+uses the complete 2025 championship tree. Where neither a current tree nor a
+matching prior edition exists, the page shows the pools and declines to invent
+a bracket.
 
 Clicking any name opens a drill-down: the rating curve, the full event history,
 and — for a player — **which club he turned out for** at each event. A club's

@@ -47,6 +47,79 @@ class TournamentPublicationTests(unittest.TestCase):
         self.assertEqual([], payload["detail"][0]["b"])
         self.assertEqual([], payload["detail"][0]["o"])
 
+    def test_upcoming_pool_schedule_inherits_prior_championship_tree(self):
+        events = [
+            (10, 2025, "2025 Example Cup", "2025-08-22"),
+            (11, 2999, "2026 Example Cup", "2999-08-22"),
+        ]
+        self.con.executemany(
+            """INSERT INTO events
+               (event_id, season, name, url, start_date, end_date, division)
+               VALUES (?, ?, ?, ?, ?, ?, 'club-men')""",
+            [(event_id, season, name, f"https://example.test/cup/{event_id}",
+              start, start)
+             for event_id, season, name, start in events],
+        )
+        for event_id, _, _, _ in events:
+            self.con.executemany(
+                """INSERT INTO event_teams
+                   (event_team_id, event_id, display_name, roster_fetched)
+                   VALUES (?, ?, ?, 1)""",
+                [(f"{event_id}:{team}", event_id, f"{event_id} {team}")
+                 for team in "ABCD"],
+            )
+
+        prior_pool = [
+            ("ab", "A", "B"), ("ac", "A", "C"), ("ad", "A", "D"),
+            ("bc", "B", "C"), ("bd", "B", "D"), ("cd", "C", "D"),
+        ]
+        self.con.executemany(
+            """INSERT INTO games
+               (event_id, game_key, stage, date, home_id, away_id,
+                home_score, away_score, status)
+               VALUES (10, ?, 'Pool A', '2025-08-22', ?, ?, 15, 10, 'Final')""",
+            [(key, f"10:{home}", f"10:{away}") for key, home, away in prior_pool],
+        )
+        self.con.executemany(
+            """INSERT INTO games
+               (event_id, game_key, stage, date, home_id, away_id,
+                home_score, away_score, status)
+               VALUES (10, ?, ?, '2025-08-23', ?, ?, 15, 10, 'Final')""",
+            [
+                ("semi-1", "Semifinals", "10:A", "10:D"),
+                ("semi-2", "Semifinals", "10:B", "10:C"),
+                ("final", "Final", "10:A", "10:B"),
+            ],
+        )
+        self.con.executemany(
+            """INSERT INTO games
+               (event_id, game_key, stage, date, home_id, away_id,
+                home_score, away_score, status)
+               VALUES (11, ?, 'Pool A', '2999-08-22', ?, ?, 0, 0, 'Scheduled')""",
+            [(key, f"11:{home}", f"11:{away}") for key, home, away in prior_pool],
+        )
+
+        payload = build(self.con)
+        current_ix = next(
+            index for index, event in enumerate(payload["events"])
+            if event[0] == 11
+        )
+        prior_ix = next(
+            index for index, event in enumerate(payload["events"])
+            if event[0] == 10
+        )
+        forecast = payload["detail"][current_ix]["f"]
+
+        self.assertEqual([["Pool A", 6]],
+                         [[label, len(games)] for label, games in forecast["p"]])
+        self.assertEqual(prior_ix, forecast["b"][0])
+        self.assertEqual([2, 1],
+                         [sum(bool(game) for game in round_games)
+                          for round_games in forecast["b"][2]])
+        self.assertTrue(all(source[0] == 0
+                            for game in forecast["b"][2][0] if game
+                            for source in game[:2]))
+
     def test_completed_round_robin_publishes_standings_winner(self):
         self.con.execute(
             """INSERT INTO events

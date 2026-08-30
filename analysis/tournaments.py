@@ -572,6 +572,141 @@ def decompose(games, placements=None):
     return (pools, sorted(pub + keep, key=bracket_order),
             sorted(loose + odd, key=lambda g: g["ord"]))
 
+def _forecast_pools(games):
+    """Opening pools from published pairings, including unplayed fixtures."""
+    pool_games = [
+        g for g in games
+        if g["home"] and g["away"] and g["home"] != g["away"]
+        and POOLISH.search(g["stage"])
+    ]
+    recovered, _ = pools_of(pool_games)
+    rows = []
+    for teams, fixtures, later in recovered:
+        if later:
+            continue
+        label = collections.Counter(
+            re.sub(r"\s+", " ", g["stage"]).strip() for g in fixtures
+        ).most_common(1)[0][0]
+        rows.append([label, teams, fixtures])
+    rows.sort(key=lambda row: (
+        row[0].lower(), row[2][0]["ord"],
+    ))
+    # Some organisers give every pool the same label. Distinct display labels
+    # are part of the forecast seed vocabulary, so name those A, B, ... here.
+    labels = [row[0].lower() for row in rows]
+    if len(labels) != len(set(labels)):
+        for index, row in enumerate(rows):
+            row[0] = f"Pool {chr(65 + index) if index < 26 else index + 1}"
+    return rows
+
+
+def _forecast_standings(teams, games):
+    """Completed pool order used to recover seed slots from a prior edition."""
+    records = {
+        team: {"w": 0, "pf": 0, "pa": 0}
+        for team in teams
+    }
+    for game in games:
+        if not game["done"]:
+            return None
+        home, away = game["home"], game["away"]
+        hs, as_ = game["hs"], game["as"]
+        records[home]["pf"] += hs
+        records[home]["pa"] += as_
+        records[away]["pf"] += as_
+        records[away]["pa"] += hs
+        if hs > as_:
+            records[home]["w"] += 1
+        elif as_ > hs:
+            records[away]["w"] += 1
+
+    rows = sorted(teams, key=lambda team: (
+        -records[team]["w"],
+        -(records[team]["pf"] - records[team]["pa"]),
+        -records[team]["pf"],
+        team,
+    ))
+    start = 0
+    while start < len(rows):
+        stop = start + 1
+        while stop < len(rows) \
+                and records[rows[stop]]["w"] == records[rows[start]]["w"]:
+            stop += 1
+        tied = set(rows[start:stop])
+        head_to_head = collections.Counter()
+        for game in games:
+            if game["home"] not in tied or game["away"] not in tied \
+                    or game["hs"] == game["as"]:
+                continue
+            head_to_head[
+                game["home"] if game["hs"] > game["as"] else game["away"]
+            ] += 1
+        rows[start:stop] = sorted(rows[start:stop], key=lambda team: (
+            -head_to_head[team],
+            -(records[team]["pf"] - records[team]["pa"]),
+            -records[team]["pf"],
+            team,
+        ))
+        start = stop
+    return rows
+
+
+def _forecast_bracket(pools, games):
+    """Reusable championship tree expressed in pool seeds and prior winners."""
+    pool_game_ids = {
+        id(game)
+        for _, _, fixtures in pools
+        for game in fixtures
+    }
+    brackets, _ = brackets_of([
+        game for game in games
+        if game["done"] and id(game) not in pool_game_ids
+    ])
+    championship = next((
+        bracket for bracket in brackets
+        if bracket[0] == "champ" and bracket[1] == 0
+        and len(bracket[2][-1]) == 1 and bracket[2][-1][0]
+    ), None)
+    if championship is None:
+        return None
+
+    seeds = {}
+    for pool_index, (_, teams, fixtures) in enumerate(pools):
+        order = _forecast_standings(teams, fixtures)
+        if order is None:
+            return None
+        seeds.update({
+            team: [0, pool_index, rank]
+            for rank, team in enumerate(order)
+        })
+
+    _, root_rank, rounds = championship
+    prior_winner = {}
+    sources = []
+    for round_index, round_games in enumerate(rounds):
+        source_round = []
+        for game_index, game in enumerate(round_games):
+            if not game:
+                source_round.append(0)
+                continue
+            entrants = []
+            for entrant in (game["home"], game["away"]):
+                if entrant in prior_winner:
+                    entrants.append([1, *prior_winner[entrant]])
+                elif entrant in seeds:
+                    entrants.append(seeds[entrant])
+                else:
+                    return None
+            source_round.append(entrants)
+            won = winner(game)
+            if won is None:
+                return None
+            prior_winner[won] = [round_index, game_index]
+        sources.append(source_round)
+    return root_rank, sources, rounds
+
+
+
 
 def _event_key(source, event_id):
     """Keep supplemental event IDs distinct from the USAU integer IDs."""
@@ -628,7 +763,7 @@ def load(con, source="usau", event_ids=None):
     for (eid, key, stage, d, t, slot, home, away, hs, as_, status,
          br, place, btype, bround) in rows:
         by_event[_event_key(source, eid)].append({
-            "stage": (stage or "").strip(), "date": d or "",
+            "key": key, "stage": (stage or "").strip(), "date": d or "",
             "home": home, "away": away, "hs": hs, "as": as_,
             "done": status in {"Final", "played"} and hs is not None
                     and as_ is not None and (hs or 0) + (as_ or 0) > 0,
@@ -702,6 +837,7 @@ def build(con, supplemental=()):
 
     events, event_sources, detail = [], [], {}
     series = collections.defaultdict(list)
+    forecast_shapes = {}
 
     # An event the source has announced but published nothing for yet — no
     # fixtures, often no team roll — used to be dropped here along with the
@@ -727,13 +863,18 @@ def build(con, supplemental=()):
         pools, brs, loose = (
             decompose(games, official_places) if games else ([], [], [])
         )
-        if games and not (pools or brs or loose) and not upcoming:
+        forecast_pools = _forecast_pools(games or [])
+        if games and not (pools or brs or loose or forecast_pools) and not upcoming:
             continue
 
-        field = sorted({g[k] for _, gs, _ in pools for g in gs for k in ("home", "away")}
-                       | {g[k] for _, _, rounds in brs for rd in rounds for g in rd
-                          if g for k in ("home", "away")}
-                       | {g[k] for g in loose for k in ("home", "away") if g[k]})
+        field = sorted(
+            {g[k] for _, gs, _ in pools for g in gs for k in ("home", "away")}
+            | {g[k] for _, _, rounds in brs for rd in rounds for g in rd
+               if g for k in ("home", "away")}
+            | {g[k] for g in loose for k in ("home", "away") if g[k]}
+            | {g[k] for _, _, gs in forecast_pools for g in gs
+               for k in ("home", "away")}
+        )
         local = {t: i for i, t in enumerate(field)}
         dates = sorted({g["date"] for g in (games or []) if g["date"]})
         dix = {d: i for i, d in enumerate(dates)}
@@ -772,6 +913,16 @@ def build(con, supplemental=()):
                 champ = local[round_robin_champ]
 
         ix = len(events)
+        forecast_pool_payload = [
+            [label, [[
+                local[g["home"]], local[g["away"]],
+                local[winner(g)] if g["done"] and winner(g) is not None else -1,
+                g["hs"] if g["done"] else None,
+                g["as"] if g["done"] else None,
+                g["key"],
+            ] for g in fixtures]]
+            for label, _, fixtures in forecast_pools
+        ]
         detail[ix] = {
             "t": [team(t) for t in field],
             "d": dates,
@@ -780,6 +931,15 @@ def build(con, supplemental=()):
                    [[enc(g) if g else 0 for g in rd] for rd in rounds]]
                   for kind, root_rank, rounds in brs],
             "o": [[enc(g), g["stage"]] for g in loose],
+            "f": {"p": forecast_pool_payload, "b": 0},
+        }
+        forecast_shapes[ix] = {
+            "series": series_key(name),
+            "division": DIVCODE.get(division, 0),
+            "date": start or "",
+            "profile": tuple(len(teams) for _, teams, _ in forecast_pools),
+            "shape": _forecast_bracket(forecast_pools, games or []),
+            "local": local,
         }
         # The champion is carried as a GLOBAL team index, not the local one it
         # was found as: the list and the series table print a champion for
@@ -793,6 +953,53 @@ def build(con, supplemental=()):
                        detail[ix]["t"][champ] if champ >= 0 else -1])
         event_sources.append(source)
         series[series_key(name)].append(ix)
+
+    # A future schedule usually publishes pools before it publishes any
+    # bracket slots. Reuse the latest completed edition of the same series,
+    # division, and pool-size profile as a clearly labelled forecast template.
+    # Sources are abstract pool seeds, so no prior team name leaks into it.
+    for ix, record in forecast_shapes.items():
+        if not record["profile"]:
+            continue
+        source_ix = ix
+        shape = record["shape"]
+        if shape is None:
+            candidates = [
+                (candidate["date"], candidate_ix, candidate["shape"])
+                for candidate_ix, candidate in forecast_shapes.items()
+                if candidate["shape"] is not None
+                and candidate["series"] == record["series"]
+                and candidate["division"] == record["division"]
+                and candidate["profile"] == record["profile"]
+                and candidate["date"] < record["date"]
+            ]
+            if candidates:
+                _, source_ix, shape = max(candidates)
+        if shape is None:
+            continue
+        root_rank, sources, round_games = shape
+        encoded_rounds = []
+        for round_index, source_round in enumerate(sources):
+            encoded_round = []
+            for game_index, entrants in enumerate(source_round):
+                if not entrants:
+                    encoded_round.append(0)
+                    continue
+                own_game = (
+                    round_games[round_index][game_index]
+                    if source_ix == ix else None
+                )
+                won = winner(own_game) if own_game else None
+                encoded_round.append([
+                    *entrants,
+                    record["local"].get(won, -1),
+                    own_game["hs"] if own_game else None,
+                    own_game["as"] if own_game else None,
+                    own_game["key"] if own_game else
+                    f"template:{source_ix}:{round_index}:{game_index}",
+                ])
+            encoded_rounds.append(encoded_round)
+        detail[ix]["f"]["b"] = [source_ix, root_rank, encoded_rounds]
 
     # Series in a stable order, and each event told which one it is in. A
     # series of one is still a series: the panel says so rather than implying

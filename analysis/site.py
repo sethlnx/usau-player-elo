@@ -1125,18 +1125,43 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
   font-size:11.5px;padding-left:8px}
 .forecast-head{margin:0 0 12px}
 .forecast-head h3{font-size:18px;margin:0 0 3px}
-.forecast-pool select{width:100%;margin-top:5px}
-.forecast-pool .pool-odds{margin-top:8px}
-.forecast-pool .pool-odds tr:first-child td{border-top:0}
-.forecast-pool .pool-odds td{padding:3px 0;font-size:12.5px}
-.forecast-pool .pool-odds td:last-child{text-align:right;font-family:var(--mono)}
+.forecast-game{display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);
+  gap:5px;align-items:stretch;margin:6px 0}
+.forecast-game .vs{align-self:center;text-align:center;color:var(--ink-3);
+  font-size:10px;text-transform:uppercase}
+.forecast-pick{min-width:0;border:1px solid var(--line);border-radius:7px;
+  background:var(--bg);color:var(--ink-2);font:inherit;font-size:12px;
+  padding:6px 8px;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;gap:6px;text-align:left}
+.forecast-pick:hover{border-color:var(--accent);color:var(--ink)}
+.forecast-pick.on{background:color-mix(in srgb,var(--win) 16%,transparent);
+  border-color:var(--win);color:var(--ink);font-weight:650}
+.forecast-pick.out{opacity:.48}
+.forecast-pick.locked{cursor:default}
+.forecast-pick.pending{border-style:dashed;color:var(--ink-3);cursor:default}
+.forecast-pick .score,.forecast-pick .seed{font-family:var(--mono);
+  font-size:10.5px;color:var(--ink-3);flex:none}
+.forecast-pool .stand{margin-top:10px}
+.forecast-pool .stand td{font-size:12px;padding:3px 0}
+.forecast-pool .stand td:last-child{text-align:right;font-family:var(--mono)}
+.forecast-open{font-size:10.5px;color:var(--ink-3);margin-top:8px}
+.forecast-bracket{display:flex;align-items:stretch;gap:18px;overflow-x:auto;
+  padding:2px 0 8px}
+.forecast-round{min-width:220px;display:grid;grid-template-rows:auto 1fr;gap:9px}
+.forecast-round h4{font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--ink-3);margin:0 0 1px}
+.forecast-round-games{display:flex;flex-direction:column;justify-content:space-around;
+  gap:9px}
+.forecast-match{border:1px solid var(--line);border-radius:9px;
+  background:var(--surface);padding:3px 7px}
+.forecast-match .forecast-game{grid-template-columns:1fr;margin:3px 0;gap:3px}
+.forecast-match .vs{display:none}
+.forecast-champion{border:1px solid var(--accent);border-radius:9px;
+  padding:10px 12px;margin-top:10px;background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.forecast-champion b{color:var(--accent)}
 .forecast-note{margin:12px 0;font-size:12.5px;color:var(--ink-3)}
-.forecast-table{overflow-x:auto}
-.forecast-table table{min-width:650px}
-.forecast-table td:first-child{font-weight:550}
-.forecast-table .bar-c{width:24%;padding-right:12px}
-.forecast-table .oddsbar{height:6px}
-.forecast-table .missing{color:var(--ink-3);font-style:italic}
+.forecast-missing{border:1px dashed var(--line-strong);border-radius:9px;
+  padding:12px;color:var(--ink-3);font-size:12.5px}
 </style>
 
 <div id="scrim"></div>
@@ -1361,25 +1386,20 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
     <div class="bar"><button class="act" id="eback">&lsaquo; All tournaments</button></div>
     <div id="tvhead"></div>
     <div class="bar">
-      <button class="act" id="tpre" aria-expanded="false">Pre-tournament forecast</button>
+      <button class="act" id="tpre" aria-expanded="false">Tournament forecast</button>
     </div>
     <div id="tforecast" hidden>
       <div id="tfhead"></div>
       <div class="bar">
-        <label for="tfruns">Simulation runs</label>
-        <select id="tfruns" aria-label="Simulation runs">
-          <option value="1000">1,000</option>
-          <option value="5000" selected>5,000</option>
-          <option value="20000">20,000</option>
-        </select>
-        <button class="act prim" id="tfsim">Simulate tournament</button>
+        <button class="act prim" id="tffav">Pick Elo favorites</button>
+        <button class="act" id="tfreset">Reset picks</button>
         <span class="count" id="tfstatus" aria-live="polite"></span>
       </div>
-      <p class="note">Select a pool winner to force that team into the selected
-      pool seed in every run. Leave it automatic to let Elo decide each pool
-      game. Percentages are Monte Carlo estimates from the completed runs.</p>
+      <p class="note">Pick each game winner. Pool standings seed the bracket,
+      and each bracket pick advances immediately. Played results are locked;
+      Elo breaks any tied pool record that the selected winners do not resolve.</p>
       <div id="tfpools" class="grid"></div>
-      <div id="tfresults"></div>
+      <div id="tfbracket"></div>
     </div>
     <div id="tvbody"></div>
     <p class="note" id="tvnote"></p>
@@ -3560,6 +3580,7 @@ function evTeamCell(name) {
 function drawTournament(i) {
   const e = EVS[i], det = EDET[i];
   curEvent = i;
+  $('#tpre').disabled = !det || !det.f || !Array.isArray(det.f.p) || !det.f.p.length;
   const ser = ESER[e[9]], sibs = ser[1];
   const facts = [daterange(e[4], e[5]), e[6], EDIVL[e[3]], TV.tiers[e[8]],
                  `${e[7]} teams`].filter(Boolean).map(esc);
@@ -3722,125 +3743,202 @@ function drawTournament(i) {
     `history.`;
 }
 let forecastEvent = null;
-let forecastResult = null;
+let forecastPicks = {p: {}, b: {}};
 
-function forecastPoolTeams(det) {
-  return det.p
-    .map(([later, games], sourceIndex) => {
-      if (later || !games.length) return null;
-      return {sourceIndex, teams: [...new Set(games.flatMap(g => [g[0], g[1]]))]};
-    })
-    .filter(Boolean);
+function forecastStorageKey(i) {
+  return `usau-tournament-forecast:${EVS[i][0]}`;
 }
 
-function forecastPercent(value) {
-  return `${Number(value).toFixed(1)}%`;
+function loadForecastPicks(i) {
+  try {
+    const value = JSON.parse(localStorage.getItem(forecastStorageKey(i)) || '{}');
+    return {
+      p: value.p && typeof value.p === 'object' ? value.p : {},
+      b: value.b && typeof value.b === 'object' ? value.b : {},
+    };
+  } catch (_) {
+    return {p: {}, b: {}};
+  }
 }
 
-function forecastStageLabel(stage) {
-  return {quarterfinal: 'Quarterfinals', semifinal: 'Semifinals',
-          final: 'Final', champion: 'Champion'}[stage];
+function saveForecastPicks() {
+  if (forecastEvent === null) return;
+  try {
+    const empty = !Object.keys(forecastPicks.p).length &&
+      !Object.keys(forecastPicks.b).length;
+    if (empty) localStorage.removeItem(forecastStorageKey(forecastEvent));
+    else localStorage.setItem(forecastStorageKey(forecastEvent),
+                              JSON.stringify(forecastPicks));
+  } catch (_) {}
+}
+
+function forecastSeedLabel(det, source) {
+  if (!Array.isArray(source)) return 'TBD';
+  if (source[0] === 0) {
+    const pool = det.f.p[source[1]];
+    const label = pool ? String(pool[0]).replace(/^pool\s+/i, '') : '?';
+    return `${label}${source[2] + 1}`;
+  }
+  if (source[0] === 1) {
+    const bracket = det.f.b;
+    const rank = bracket[1] + bracket[2].length - 1 - source[1];
+    return `Winner of ${(det.q && det.q[rank]) || 'round'} ${source[2] + 1}`;
+  }
+  return 'TBD';
+}
+
+function forecastSide(det, game, team, source, score) {
+  if (team === null) {
+    return `<span class="forecast-pick pending"><span>${esc(forecastSeedLabel(det, source))}</span>` +
+      `<span class="seed">TBD</span></span>`;
+  }
+  const picked = game.winner === team;
+  const out = game.winner !== null && !picked;
+  const classes = ['forecast-pick', picked ? 'on' : '', out ? 'out' : '',
+                   game.locked ? 'locked' : ''].filter(Boolean).join(' ');
+  const value = game.locked && Number.isFinite(score)
+    ? `<span class="score">${score}</span>`
+    : Number.isFinite(det.r && det.r[team])
+      ? `<span class="seed">${Math.round(det.r[team])}</span>` : '';
+  return `<button class="${classes}" data-forecast-kind="${game.kind}" ` +
+    `data-forecast-key="${esc(game.key)}" data-forecast-team="${team}" ` +
+    `aria-pressed="${picked}"${game.locked ? ' disabled' : ''}>` +
+    `<span>${esc(ETM[det.t[team]])}</span>${value}</button>`;
+}
+
+function forecastGameMarkup(det, game) {
+  return `<div class="forecast-game">` +
+    forecastSide(det, game, game.home, game.sources && game.sources[0],
+                 game.homeScore) +
+    `<span class="vs">vs</span>` +
+    forecastSide(det, game, game.away, game.sources && game.sources[1],
+                 game.awayScore) + `</div>`;
+}
+
+function forecastBracketMarkup(i, det, state) {
+  if (!Array.isArray(det.f.b)) {
+    return `<h3 class="sect">Championship bracket</h3>` +
+      `<div class="forecast-missing">No championship draw is published, and no ` +
+      `prior edition with the same pool sizes supplies a safe template.</div>`;
+  }
+  const sourceIx = det.f.b[0], source = EVS[sourceIx];
+  const note = sourceIx === i
+    ? `This is the organiser's published championship draw.`
+    : `Projected from ${esc(source[1])}, the latest matching edition with the ` +
+      `same pool sizes. The organiser has not published this bracket yet.`;
+  const rounds = state.bracket.rounds.map((round, roundIndex) => {
+    const rank = state.bracket.rootRank + state.bracket.rounds.length - 1 - roundIndex;
+    const label = (det.q && det.q[rank]) || `Round ${roundIndex + 1}`;
+    const games = round.map(game => {
+      if (!game) return '';
+      game.kind = 'b';
+      return `<div class="forecast-match">${forecastGameMarkup(det, game)}</div>`;
+    }).join('');
+    return `<div class="forecast-round"><h4>${esc(label)}</h4>` +
+      `<div class="forecast-round-games">${games}</div></div>`;
+  }).join('');
+  const champion = state.bracket.champion === null ? ''
+    : `<div class="forecast-champion">Your champion: ` +
+      `<b>${esc(ETM[det.t[state.bracket.champion]])}</b></div>`;
+  return `<h3 class="sect">Championship bracket</h3>` +
+    `<p class="forecast-note">${note}</p>` +
+    `<div class="forecast-bracket">${rounds}</div>${champion}`;
 }
 
 function renderForecast(i) {
-  forecastEvent = i;
-  const e = EVS[i], det = EDET[i];
-  const pools = det ? forecastPoolTeams(det) : [];
-  $('#tpre').disabled = !det || !pools.length;
-  $('#tfhead').innerHTML = `<div class="forecast-head"><h3>Pre-tournament forecast</h3>` +
-    `<div class="meta">${pools.length ? `Forecasting ${pools.reduce((n, p) => n + p.teams.length, 0)} ` +
-      `entrants from ${pools.length} opening pools using ${esc(D.model)} ratings.`
-      : 'This event has no recovered opening pools to simulate.'}</div></div>`;
-  if (!pools.length) {
+  const det = EDET[i];
+  if (forecastEvent !== i) {
+    forecastEvent = i;
+    forecastPicks = loadForecastPicks(i);
+  }
+  const available = det && det.f && Array.isArray(det.f.p) && det.f.p.length;
+  $('#tpre').disabled = !available;
+  $('#tffav').disabled = !available;
+  if (!available) {
+    $('#tfhead').innerHTML = `<div class="forecast-head"><h3>Tournament forecast</h3>` +
+      `<div class="meta">This event has no complete published pool pairings.</div></div>`;
     $('#tfpools').innerHTML = '';
-    $('#tfresults').innerHTML = `<p class="forecast-note">A forecast needs published pool pairings and a championship bracket.</p>`;
+    $('#tfbracket').innerHTML = '';
+    $('#tfstatus').textContent = '';
+    $('#tfreset').disabled = true;
     return;
   }
-  const selected = forecastResult && forecastResult.selected || {};
-  const poolOdds = forecastResult && forecastResult.result
-    ? new Map(forecastResult.result.pools.map(pool => [pool.sourceIndex,
-        new Map(pool.teams.map(team => [team.team, team.percent]))]))
-    : new Map();
-  $('#tfpools').innerHTML = pools.map((pool, pi) => {
-    const odds = poolOdds.get(pool.sourceIndex);
-    return `<div class="card forecast-pool"><h3>Pool ${POOLTAG[pi] || pi + 1}</h3>` +
-      `<label for="tfpool-${pool.sourceIndex}">Selected winner</label>` +
-      `<select id="tfpool-${pool.sourceIndex}" data-forecast-pool="${pool.sourceIndex}">` +
-      `<option value="">Automatic from Elo</option>` +
-      pool.teams.map(team => `<option value="${team}"${String(selected[pool.sourceIndex]) === String(team) ? ' selected' : ''}>` +
-        `${esc(ETM[det.t[team]])}</option>`).join('') + `</select>` +
-      (odds ? `<table class="pool-odds">${pool.teams.map(team =>
-        `<tr><td>${esc(ETM[det.t[team]])}</td><td>${forecastPercent(odds.get(team) || 0)}</td></tr>`
-      ).join('')}</table>` : '') + `</div>`;
+
+  const state = TournamentSim.resolveForecast(det, forecastPicks);
+  const entrants = new Set(state.pools.flatMap(pool =>
+    pool.games.flatMap(game => [game.home, game.away])));
+  $('#tfhead').innerHTML = `<div class="forecast-head"><h3>Tournament forecast</h3>` +
+    `<div class="meta">${entrants.size} entrants \u00b7 ${state.pools.length} opening ` +
+    `pool${state.pools.length === 1 ? '' : 's'} \u00b7 ${esc(D.model)} ratings</div></div>`;
+  $('#tfpools').innerHTML = state.pools.map((pool, poolIndex) => {
+    const games = pool.games.map(game => {
+      game.kind = 'p';
+      return forecastGameMarkup(det, game);
+    }).join('');
+    const standings = pool.standings.map((row, rank) =>
+      `<tr><td><span class="seed">${forecastSeedLabel(det, [0, poolIndex, rank])}</span> ` +
+      `${esc(ETM[det.t[row.team]])}</td><td>${row.wins}\u2013${row.losses}</td></tr>`
+    ).join('');
+    const open = pool.games.filter(game => game.winner === null).length;
+    return `<div class="card forecast-pool"><h3>${esc(pool.label)}</h3>${games}` +
+      `<table class="stand">${standings}</table>` +
+      `<div class="forecast-open">${open ? `${open} pick${open === 1 ? '' : 's'} remaining` :
+        'Pool complete \u00b7 bracket seed set'}</div></div>`;
   }).join('');
-  $('#tfresults').innerHTML = forecastResult && forecastResult.result
-    ? forecastResultsMarkup(det, forecastResult.result) : '';
-  document.querySelectorAll('[data-forecast-pool]').forEach(select => {
-    select.onchange = () => {
-      if (!forecastResult) forecastResult = {selected: {}, result: null};
-      if (select.value === '') delete forecastResult.selected[select.dataset.forecastPool];
-      else forecastResult.selected[select.dataset.forecastPool] = +select.value;
-    };
-  });
+  $('#tfbracket').innerHTML = forecastBracketMarkup(i, det, state);
+
+  const poolOpen = state.pools.reduce((sum, pool) =>
+    sum + pool.games.filter(game => game.winner === null).length, 0);
+  const bracketOpen = state.bracket.rounds.flat().filter(game =>
+    game && game.home !== null && game.away !== null && game.winner === null).length;
+  $('#tfstatus').textContent = state.bracket.champion !== null
+    ? `${ETM[det.t[state.bracket.champion]]} wins your forecast`
+    : poolOpen ? `${poolOpen} pool pick${poolOpen === 1 ? '' : 's'} remaining`
+      : `${bracketOpen} bracket pick${bracketOpen === 1 ? '' : 's'} remaining`;
+  $('#tfreset').disabled = !Object.keys(forecastPicks.p).length &&
+    !Object.keys(forecastPicks.b).length;
 }
 
-function forecastResultsMarkup(det, result) {
-  const labels = ['quarterfinal', 'semifinal', 'final', 'champion'];
-  const participants = new Set(forecastPoolTeams(det).flatMap(pool => pool.teams));
-  if (!participants.size) det.t.forEach((_, team) => participants.add(team));
-  const rows = result.teams.filter(row => participants.has(row.team))
-    .sort((a, b) => b.champion - a.champion || b.final - a.final || a.team - b.team);
-  const heads = labels.map(stage => `<th class="n">${forecastStageLabel(stage)}</th>`).join('');
-  const body = rows.map(row => `<tr><td>${esc(ETM[det.t[row.team]])}</td>` +
-    labels.map(stage => {
-      if (!result.stages[stage]) return '<td class="n missing">\u2014</td>';
-      const value = row[stage];
-      return `<td class="n">${forecastPercent(value)}</td>`;
-    }).join('') + `</tr>`).join('');
-  return `<h3 class="sect">Advancement likelihoods</h3>` +
-    `<p class="forecast-note">Each column is the share of ${result.runs.toLocaleString()} completed runs in which the team reached that stage.</p>` +
-    `<div class="forecast-table"><table><thead><tr><th>Team</th>${heads}</tr></thead>` +
-    `<tbody>${body || '<tr><td colspan="5" class="missing">No bracket entrants could be inferred.</td></tr>'}</tbody></table></div>`;
-}
-
-function runForecast() {
-  const i = forecastEvent, e = EVS[i], det = EDET[i];
-  if (!det || !forecastPoolTeams(det).length) return;
-  const button = $('#tfsim');
-  button.disabled = true;
-  $('#tfstatus').textContent = 'Simulating\u2026';
-  const selected = {};
-  document.querySelectorAll('[data-forecast-pool]').forEach(select => {
-    if (select.value !== '') selected[select.dataset.forecastPool] = +select.value;
-  });
-  // The seed is stable for an event and selection, so a reader can reproduce
-  // the same estimate while changing only the assumptions.
-  const seed = ((Number(e[0]) || i) ^ 0x9e3779b9) >>> 0;
-  try {
-    const result = TournamentSim.simulateTournament(det, {
-      runs: +$('#tfruns').value, selected, seed});
-    forecastResult = {selected, result};
-    renderForecast(i);
-    $('#tfstatus').textContent = `${result.runs.toLocaleString()} runs complete`;
-  } catch (error) {
-    $('#tfstatus').textContent = error.message;
-  } finally {
-    button.disabled = false;
+$('#tforecast').addEventListener('click', event => {
+  const pick = event.target.closest('[data-forecast-kind]');
+  if (!pick || pick.disabled) return;
+  const kind = pick.dataset.forecastKind;
+  const key = pick.dataset.forecastKey;
+  const team = +pick.dataset.forecastTeam;
+  const selected = Number(forecastPicks[kind][key]) === team;
+  if (selected) delete forecastPicks[kind][key];
+  else forecastPicks[kind][key] = team;
+  if (kind === 'p') {
+    forecastPicks.b = {};
+  } else {
+    const round = +key.split(':')[0];
+    for (const downstream of Object.keys(forecastPicks.b)) {
+      if (+downstream.split(':')[0] > round) delete forecastPicks.b[downstream];
+    }
   }
-}
+  saveForecastPicks();
+  renderForecast(forecastEvent);
+});
 
+$('#tffav').onclick = () => {
+  const det = EDET[forecastEvent];
+  forecastPicks = TournamentSim.favoritePicks(det);
+  saveForecastPicks();
+  renderForecast(forecastEvent);
+};
+$('#tfreset').onclick = () => {
+  forecastPicks = {p: {}, b: {}};
+  saveForecastPicks();
+  renderForecast(forecastEvent);
+};
 $('#tpre').onclick = () => {
   const open = $('#tforecast').hidden;
   $('#tforecast').hidden = !open;
   $('#tvbody').hidden = open;
   $('#tvnote').hidden = open;
   $('#tpre').setAttribute('aria-expanded', String(open));
-  if (open) {
-    renderForecast(curEvent);
-    if (!forecastResult || forecastResult.event !== curEvent) runForecast();
-  }
+  if (open) renderForecast(curEvent);
 };
-$('#tfsim').onclick = runForecast;
 
 const POOLTAG = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -3910,7 +4008,13 @@ function evSeeds(det) {
 function openTournament(eid) {
   const i = EVBYID.get(String(eid));
   if (i === undefined) { closeTournament(); return; }
-  if (curEvent !== i) drawTournament(i);
+  if (curEvent !== i) {
+    $('#tforecast').hidden = true;
+    $('#tvbody').hidden = false;
+    $('#tvnote').hidden = false;
+    $('#tpre').setAttribute('aria-expanded', 'false');
+    drawTournament(i);
+  }
   $('#tlist').style.display = 'none';
   $('#tview').style.display = '';
   showTab('events');
