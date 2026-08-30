@@ -1,1 +1,43 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
+1,Philadelphia Pacmen,philadelphia pacmen,club-men,2128.4,25,2026,2026 Pro Championships,2026-09-05
+2,Truck Stop,truck stop,club-men,2121.3,21,2026,2026 Pro Championships,2026-09-05
+3,Ring of Fire,ring of fire,club-men,2112.0,24,2026,2026 Pro Championships,2026-09-05
+4,Chain Lightning,chain lightning,club-men,2030.7,23,2026,2026 Pro Championships,2026-09-05
+5,Doublewide,doublewide,club-men,1984.8,23,2026,2026 Pro Championships,2026-09-05
+6,Mephisto,mephisto,club-men,1887.4,19,2026,2026 Pro Championships,2026-09-05
+7,Vault,vault,club-men,1882.3,25,2026,2026 Pro Championships,2026-09-05
+8,Florida Untied,florida untied,club-men,1854.6,23,2026,2026 Pro Championships,2026-09-05
+9,Cash Crop 2,cash crop 2,club-men,1795.6,19,2026,Shipshape,2026-08-29
+10,Gambit,gambit,club-men,1297.5,23,2026,Shipshape,2026-08-29
+11,PARLAY,parlay,club-men,1270.9,10,2026,Shipshape,2026-08-29
+1,Hybrid,hybrid (mixed),club-mixed,2261.5,25,2026,2026 Pro Championships,2026-09-05
+2,Slow,slow (mixed),club-mixed,2132.0,26,2026,2026 Pro Championships,2026-09-05
+3,shame.,shame. (mixed),club-mixed,2114.1,25,2026,2026 Pro Championships,2026-09-05
+4,Polar Bears,polar bears (mixed),club-mixed,2061.3,25,2026,Northwest Fruit Bowl 2026,2026-08-29
+5,Austin Disco Club,austin disco club (mixed),club-mixed,2059.6,22,2026,2026 Pro Championships,2026-09-05
+6,Sprocket,sprocket (mixed),club-mixed,1996.4,25,2026,2026 Pro Championships,2026-09-05
+7,Drag'n Thrust,drag'n thrust (mixed),club-mixed,1995.1,24,2026,2026 Pro Championships,2026-09-05
+8,Toro,toro (mixed),club-mixed,1970.1,24,2026,2026 Pro Championships,2026-09-05
+9,Lotus,lotus (mixed),club-mixed,1966.6,25,2026,Northwest Fruit Bowl 2026,2026-08-29
+10,Mischief,mischief (mixed),club-mixed,1951.2,26,2026,Northwest Fruit Bowl 2026,2026-08-29
+11,Oregon Scorch,oregon scorch (mixed),club-mixed,1896.1,25,2026,Northwest Fruit Bowl 2026,2026-08-29
+12,Wild Card,wild card (mixed),club-mixed,1832.3,25,2026,Northwest Fruit Bowl 2026,2026-08-29
+13,Spoke,spoke (mixed),club-mixed,1812.4,20,2026,Northwest Fruit Bowl 2026,2026-08-29
+14,Darkwing,darkwing (mixed),club-mixed,1759.8,22,2026,Northwest Fruit Bowl 2026,2026-08-29
+15,MOONDOG,moondog (mixed),club-mixed,1749.4,25,2026,Northwest Fruit Bowl 2026,2026-08-29
+16,LIT Ultimate,lit ultimate (mixed),club-mixed,1742.0,25,2026,Northwest Fruit Bowl 2026,2026-08-29
+17,Lawless,lawless (mixed),club-mixed,1717.6,26,2026,2026 Pro Championships,2026-09-05
+18,Cupcakes,cupcakes (mixed),club-mixed,1685.7,18,2026,Northwest Fruit Bowl 2026,2026-08-29
+19,Chicago Parlay,chicago parlay (mixed),club-mixed,1632.7,24,2026,Northwest Fruit Bowl 2026,2026-08-29
+1,Scandal,scandal (women's),club-women,2240.9,26,2026,2026 Pro Championships,2026-09-05
+2,Molly Brown,molly brown (women's),club-women,2125.4,26,2026,2026 Pro Championships,2026-09-05
+3,Seattle Riot,seattle riot (women's),club-women,2036.1,26,2026,2026 Pro Championships,2026-09-05
+4,BENT,bent (women's),club-women,1936.7,23,2026,2026 Pro Championships,2026-09-05
+5,Phoenix,phoenix (women's),club-women,1844.1,25,2026,2026 Pro Championships,2026-09-05
+6,Parcha,parcha (women's),club-women,1841.1,22,2026,2026 Pro Championships,2026-09-05
+7,Grit,grit (women's),club-women,1698.9,26,2026,2026 Pro Championships,2026-09-05
+8,Agency,agency (women's),club-women,1675.7,24,2026,2026 Pro Championships,2026-09-05
+9,Sureshot,sureshot (women's),club-women,1538.3,21,2026,2026 East Plains Womens Sectional Championship,2026-09-12
+10,Solstice,solstice (women's),club-women,1529.6,25,2026,2026 East Plains Womens Sectional Championship,2026-09-12
+11,Lake Erie Walleye,lake erie walleye (women's),club-women,1408.5,26,2026,2026 East Plains Womens Sectional Championship,2026-09-12
+12,Frosted,frosted (women's),club-women,1358.0,18,2026,2026 East Plains Womens Sectional Championship,2026-09-12
