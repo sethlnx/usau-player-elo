@@ -49,32 +49,35 @@ from .graphql import (API_DIVISION, WORKERS, fetch_event, ingest_event,
 
 
 def stale_events(con, division: str, seasons: list[int] | None, today: str):
-    """Ended events that look unfinished: url -> (event_id, name, played).
+    """Ended events needing more results or their first coach metadata pull.
 
-    The end is COALESCE(end_date, start_date), not end_date. A one-day event
-    prints one date, so `build_db.parse_dates` leaves end_date NULL, and 307
-    events in the corpus have no end at all -- requiring one skipped every one
-    of them. MOB Invite 2026 and Twin Cities Rollaround 2026 both sat at zero
-    played games with the mirror holding twelve because of exactly that.
+    Missing coach metadata ignores the requested season on purpose. The column
+    is added at zero to an existing persistent database, so the first refresh
+    after this feature lands must backfill history rather than publish coaches
+    from the current season only.
     """
     q = """SELECT e.event_id, e.url, e.name, e.season,
                   COUNT(g.rowid),
                   COALESCE(SUM(g.status = 'Final' AND g.home_score IS NOT NULL
                                AND g.away_score IS NOT NULL
-                               AND g.home_score + g.away_score > 0), 0)
+                               AND g.home_score + g.away_score > 0), 0),
+                  e.coach_data_fetched
            FROM events e LEFT JOIN games g ON g.event_id = e.event_id
            WHERE e.division = ?
              AND COALESCE(e.end_date, e.start_date) IS NOT NULL
              AND COALESCE(e.end_date, e.start_date) < ?
            GROUP BY e.event_id"""
     out = {}
-    for eid, url, name, season, total, played in con.execute(q, (division, today)):
-        if seasons and season not in seasons:
+    for eid, url, name, season, total, played, coaches_fetched in con.execute(
+        q, (division, today)
+    ):
+        missing_coaches = not coaches_fetched
+        if seasons and season not in seasons and not missing_coaches:
             continue
-        # Nothing at all, or something still unplayed. Both are worth asking
-        # about; neither is proof on its own.
-        if total == 0 or played < total:
-            out[(url or "").rstrip("/")] = (eid, name, season, played)
+        if missing_coaches or total == 0 or played < total:
+            out[(url or "").rstrip("/")] = (
+                eid, name, season, played, missing_coaches
+            )
     return out
 
 
@@ -95,16 +98,21 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
     have = {(u or "").rstrip("/") for (u,) in con.execute(
         "SELECT url FROM events WHERE division=?", (division,))}
 
-    # Only the mirror's view of the seasons actually in play is needed, and its
-    # event list is the thing that maps a url onto an id we can query.
-    years = seasons or sorted(
-        {s for _, _, s, _ in want.values()} or
-        {s for (s,) in con.execute(
-            "SELECT DISTINCT season FROM events WHERE division=?", (division,))})
+    # Missing coach metadata can reach beyond a requested current season during
+    # the one-time migration of a persistent database.
+    wanted_years = {meta[2] for meta in want.values()}
+    years = sorted(set(seasons or ()) | wanted_years)
+    if not years:
+        years = sorted({s for (s,) in con.execute(
+            "SELECT DISTINCT season FROM events WHERE division=?", (division,)
+        )})
     todo = []
+    listed = set()
+    verified_empty = 0
     for season in years:
         for ev in list_events(division, season):
             key = (ev.get("url") or "").rstrip("/")
+            listed.add(key)
             if key in want:
                 todo.append((want[key], ev))
             elif key not in have:
@@ -115,19 +123,44 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
                 # early for. Future events are left to the ordinary scrape.
                 ends = ev.get("endDate") or ev.get("startDate")
                 if ends and ends < today and "cancel" not in (ev["name"] or "").lower():
-                    todo.append(((None, ev["name"], season, 0), ev))
+                    todo.append(((None, ev["name"], season, 0, True), ev))
+
+    # Some HTML-era rows describe a division the mirror does not list at all.
+    # If the local row also has no teams or games, there is no staff assignment
+    # to import; record that explicit negative lookup instead of retrying it
+    # forever.
+    for key, (eid, name, _season, _played, missing_coaches) in want.items():
+        if not missing_coaches or eid is None or key in listed:
+            continue
+        counts = con.execute(
+            """SELECT (SELECT COUNT(*) FROM games WHERE event_id=?),
+                      (SELECT COUNT(*) FROM event_teams WHERE event_id=?)""",
+            (eid, eid),
+        ).fetchone()
+        if counts != (0, 0):
+            continue
+        verb = "would verify" if dry_run else "verified"
+        print(f"  {verb} no mirror teams for {name[:44]}", flush=True)
+        if not dry_run:
+            con.execute(
+                "UPDATE events SET coach_data_fetched=1 WHERE event_id=?", (eid,)
+            )
+        verified_empty += 1
+    if verified_empty and not dry_run:
+        con.commit()
 
     if not todo:
-        print(f"{division}: nothing stale or missing in {path.name}", flush=True)
+        print(f"{division}: nothing stale or missing in {path.name}; "
+              f"{verified_empty} coach-empty events verified", flush=True)
         con.close()
-        return 0, 0, 0
+        return len(want), 0, 0
 
-    replaced = added = gained = 0
+    replaced = added = gained = verified = 0
     with ThreadPoolExecutor(workers) as ex:
         futs = {ex.submit(fetch_event, ev["id"], division): (meta, ev)
                 for meta, ev in todo}
         for fut in list(futs):
-            (eid, name, season, played), ev = futs[fut]
+            (eid, name, season, played, missing_coaches), ev = futs[fut]
             try:
                 data = fut.result()
             except Exception as e:
@@ -140,9 +173,34 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
                          and g["home_score"] is not None
                          and g["away_score"] is not None
                          and g["home_score"] + g["away_score"] > 0)
-            if theirs <= played:
-                continue          # the mirror knows no more than we do
-            verb = "add" if eid is None else "refresh"
+            if theirs < played:
+                # Do not replace a more complete local schedule. A successful
+                # coach query with no source staff is still a complete negative
+                # metadata result, so persist that fact without touching games.
+                has_source_staff = any(
+                    (team.get("coach_source") or "").strip()
+                    for team in data["teams"].values()
+                )
+                if missing_coaches and not has_source_staff:
+                    verb = "would verify" if dry_run else "verified"
+                    print(f"  {verb} no published staff for {name[:44]}",
+                          flush=True)
+                    if not dry_run:
+                        con.execute(
+                            "UPDATE events SET coach_data_fetched=1 "
+                            "WHERE event_id=?", (eid,)
+                        )
+                        con.commit()
+                    verified += 1
+                elif missing_coaches:
+                    print(f"  ! coach metadata pending for {name[:36]}: "
+                          f"mirror has {theirs} played, local has {played}",
+                          flush=True)
+                continue
+            if theirs == played and not missing_coaches:
+                continue
+            verb = ("add" if eid is None else
+                    "backfill" if missing_coaches and theirs == played else "refresh")
             if dry_run:
                 print(f"  would {verb} {ev['startDate']} {name[:40]:42} "
                       f"{played} -> {theirs} played", flush=True)
@@ -156,9 +214,11 @@ def refresh_division(division: str, seasons: list[int] | None, workers: int,
                 added += 1
             else:
                 replaced += 1
-            gained += theirs - played
+            gained += max(0, theirs - played)
     con.close()
-    print(f"{division}: {len(want)} stale, {replaced} refreshed, {added} added, "
+    print(f"{division}: {len(want)} stale or coach-unfetched, "
+          f"{replaced} refreshed, {added} added, "
+          f"{verified + verified_empty} coach-empty verified, "
           f"+{gained} played games ({path.name})", flush=True)
     return len(want), replaced + added, gained
 

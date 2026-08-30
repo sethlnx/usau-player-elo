@@ -13,6 +13,33 @@ opening rating falls out of whoever is on its roster.
 
 Full plan: `USAU_by_player_elo.md`.
 
+## Coach ratings
+
+USAU's GraphQL team metadata supplies the published coaching staff. Two
+walk-forward ratings use only games where both teams name at least one coach;
+an unknown opponent is excluded rather than invented as a 1500-rated staff.
+When several coaches are listed, the staff rating is their mean and every
+coach receives the same staff update.
+
+**Impact Elo** answers whether a coach's teams repeatedly beat the expectation
+set by their players. A coach starts neutral at 1500. Before each game, the
+model adds each staff's deviation from 1500 to that team's pre-game roster Elo,
+forms the win probability on the division's published scale, and applies a
+$K=24$ update from the residual. A 1500 impact rating changes nothing; a higher
+rating is evidence of performance the roster rating did not already explain.
+
+**Results-only Elo** is the control. It ignores both rosters and rankings,
+forms the expectation from the two staff means on a conventional 400-point
+scale, and applies the same $K=24$ update. `data/coach_metrics.json` compares
+roster Elo, roster-plus-impact Elo, and results-only Elo on the identical
+covered games, including a walk-forward 2024–25 slice.
+
+The upstream `Coaches` field is free text, not person IDs. Explicit role
+markers are authoritative. Unmarked values are accepted only when they parse
+as one or more two-token names; ambiguous text is omitted instead of merging
+several people into a false identity. `coach_key` is therefore a conservative
+normalized name key, not a verified USAU person identifier.
+
 ## Refresh and publish
 
 From a clean `main` checkout with the local `data/usau.db` and `data/euf.db`
@@ -27,6 +54,10 @@ incomplete USAU events in the current season, rebuilds bracket structure,
 player identity, Elo outputs, and the static site, runs the focused publication
 checks, commits only the generated data and `docs/` assets, then pushes
 `main`. GitHub Pages deploys the pushed `docs/` site.
+
+The first refresh after installing coach ratings also backfills coach metadata
+for every finished historical event. This one-time pass ignores the season
+filter so the published model cannot silently use current-season coaches only.
 
 Refresh more than one season when an older result changed:
 
@@ -80,7 +111,7 @@ to Pages—the site never receives a repository credential.
 .venv/bin/python -m scraper.ultimate_canada_database --all --year 2026
 .venv/bin/python -m analysis.euf_overlap      # review name candidates before replay
 .venv/bin/python -m analysis.backtest     # walk-forward eval; reports TEST 2024-25
-.venv/bin/python -m analysis.rankings     # player/team Elo, player_roles.csv, history.json
+.venv/bin/python -m analysis.rankings     # player/team/coach Elo, roles, metrics, history
 .venv/bin/python -m analysis.player_metrics # offline UFA scorecard; add --refit-reference only to recalibrate
 .venv/bin/python -m analysis.identify    # OPTIONAL, ~42 min: data/player_loo.csv
 .venv/bin/python -m analysis.site         # docs/index.html + history.js + t,p,r,g/*.js — no server
@@ -252,12 +283,13 @@ review rather than being merged silently.
 
 ### The GraphQL mirror
 
-`scraper/graphql.py` pulls the same events, games, teams and rosters from the
-third-party mirror at `usau-rankings.fly.dev`, which serves USAU's own data
+`scraper/graphql.py` pulls the same events, games, teams, rosters, and
+published coach metadata from the third-party mirror at
+`usau-rankings.fly.dev`, which serves USAU's own data
 without the WAF. It is a different shape of cost: one request per event
-returns teams, rosters and games together, so a division-decade lands in about
-30 seconds against the HTML path's hours of 1.5s-spaced requests and
-VPN-switch stalls.
+returns teams, coach metadata, rosters, and games together, so a
+division-decade lands in about 30 seconds against the HTML path's hours of
+1.5s-spaced requests and VPN-switch stalls.
 
 ```
 USAU_GQL_DB=data/usau_gql_d3w.db .venv/bin/python -m scraper.graphql \

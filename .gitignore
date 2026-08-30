@@ -36,6 +36,8 @@ data/*
 !data/team_elo_best.csv
 !data/team_elo_upcoming.csv
 !data/player_roles.csv
+!data/coach_elo.csv
+!data/coach_metrics.json
 
 # Hand-reviewed corrections to inferred player roles
 !data/player_role_overrides.csv

@@ -106,11 +106,31 @@ def _load_manual_usa_aliases(
         for row in csv.DictReader(f):
             source_name = (row.get("source_name") or "").strip()
             usau_name = (row.get("usau_name") or "").strip()
+            usau_team = (row.get("usau_team") or "").strip()
             if not source_name or not usau_name:
                 raise ValueError(f"incomplete WFDF player alias in {path}")
             source_key = exact_name_key(source_name)
             candidates = usa.get(exact_name_key(usau_name), [])
-            if len(candidates) != 1 or candidates[0][2]:
+            if usau_team and candidates:
+                ids = [candidate[0] for candidate in candidates]
+                placeholders = ",".join("?" for _ in ids)
+                team_key = exact_name_key(usau_team)
+                matched = {
+                    int(player_id)
+                    for player_id, team_name in con.execute(
+                        f"""SELECT DISTINCT rp.player_id,t.display_name
+                            FROM roster_players rp
+                            JOIN event_teams t USING(event_team_id)
+                            WHERE rp.player_id IN ({placeholders})""",
+                        ids,
+                    )
+                    if exact_name_key(team_name) == team_key
+                }
+                candidates = [
+                    candidate for candidate in candidates
+                    if candidate[0] in matched
+                ]
+            if len(candidates) != 1 or (candidates[0][2] and not usau_team):
                 raise ValueError(
                     f"WFDF player alias target is not one unambiguous USAU "
                     f"identity: {source_name!r} -> {usau_name!r}"

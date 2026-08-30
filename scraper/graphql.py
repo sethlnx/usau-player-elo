@@ -93,6 +93,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from analysis.coaches import coach_value, parse_coaches
+
 from .build_db import (SCHEMA, _CLUB_EXCLUDE, _COLLEGE_EXCLUDE, _D3_MATCH,
                       _ensure_columns, connect)
 
@@ -327,7 +329,7 @@ query($id:ID!){
   event(id:$id){
     id name url city state startDate endDate
     divisions{ division level
-      teams{ team{ id name city state season } } } }
+      teams{ team{ id name city state season data{ key value } } } } }
 }
 """
 
@@ -469,6 +471,8 @@ def fetch_event(event_api_id: str, division: str) -> dict | None:
         "full_name": t.get("name"),
         "city": t.get("city"),
         "season": t.get("season"),
+        "coach_source": coach_value(t.get("data") or []),
+        "coaches": parse_coaches(coach_value(t.get("data") or [])),
     } for tid, t in members.items()}
 
     rosters = {}
@@ -534,6 +538,8 @@ def ingest_event(con, event_id: int, data: dict) -> str:
     if old:
         con.executemany("DELETE FROM roster_entries WHERE event_team_id=?",
                         [(t,) for t in old])
+        con.executemany("DELETE FROM coach_entries WHERE event_team_id=?",
+                        [(t,) for t in old])
     con.execute("DELETE FROM games WHERE event_id=?", (event_id,))
     con.execute("DELETE FROM event_teams WHERE event_id=?", (event_id,))
 
@@ -544,6 +550,13 @@ def ingest_event(con, event_id: int, data: dict) -> str:
                VALUES (?,?,?,?,?,1)""",
             (t["event_team_id"], event_id, t["display_name"], t["full_name"],
              t["city"]))
+        for coach in t.get("coaches", ()):
+            con.execute(
+                """INSERT INTO coach_entries
+                   (event_team_id, coach_key, coach_name, role, source_text)
+                   VALUES (?,?,?,?,?)""",
+                (t["event_team_id"], coach.key, coach.name, coach.role,
+                 t.get("coach_source") or ""))
     lines = 0
     for key, roster in data["rosters"].items():
         for p in roster:
@@ -571,7 +584,12 @@ def ingest_event(con, event_id: int, data: dict) -> str:
             (event_id, g["game_key"], g["slot"], g["stage"], g["date"],
              g["time"], g["home_id"], g["away_id"], g["home_score"],
              g["away_score"], g["status"]))
-    return f"{len(data['games'])} games, {len(data['teams'])} teams, {lines} roster lines"
+    coaches = sum(len(team.get("coaches", ())) for team in data["teams"].values())
+    con.execute(
+        "UPDATE events SET coach_data_fetched=1 WHERE event_id=?", (event_id,)
+    )
+    return (f"{len(data['games'])} games, {len(data['teams'])} teams, "
+            f"{lines} roster lines, {coaches} coaches")
 
 
 def validate(html_db: str, gql_db: str, division: str = "college-women-d3"):

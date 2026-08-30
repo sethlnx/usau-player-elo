@@ -1,0 +1,49 @@
+{
+  "model": {
+    "base": 1500.0,
+    "k": 24.0,
+    "results_scale": 400.0,
+    "impact": "roster Elo plus coach deviation from 1500"
+  },
+  "coverage": {
+    "eligible_games": 191605,
+    "rated_games": 45052,
+    "rate": 0.23512956342475405
+  },
+  "all": {
+    "n": 45052,
+    "roster": {
+      "accuracy": 0.7594779366065879,
+      "brier": 0.16066271532398013,
+      "logloss": 0.48691133438513573
+    },
+    "results_only": {
+      "accuracy": 0.6564636420136731,
+      "brier": 0.21631258911185258,
+      "logloss": 0.6221285383820758
+    },
+    "impact": {
+      "accuracy": 0.7526413921690491,
+      "brier": 0.1641929241993366,
+      "logloss": 0.49716557275277834
+    }
+  },
+  "held_out_2024_2025": {
+    "n": 8508,
+    "roster": {
+      "accuracy": 0.7659849553361542,
+      "brier": 0.15785012982001176,
+      "logloss": 0.4798000600933683
+    },
+    "results_only": {
+      "accuracy": 0.6611424541607899,
+      "brier": 0.2139099556825431,
+      "logloss": 0.617018201158197
+    },
+    "impact": {
+      "accuracy": 0.7592853784673249,
+      "brier": 0.16123400096831594,
+      "logloss": 0.48942951669190027
+    }
+  }
+}

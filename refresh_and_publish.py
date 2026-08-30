@@ -26,6 +26,8 @@ PUBLISHED_PATHS = (
     "data/ambiguities.csv",
     "data/cross_division_links.csv",
     "data/player_elo.csv",
+    "data/coach_elo.csv",
+    "data/coach_metrics.json",
     "data/player_roles.csv",
     "data/team_elo.csv",
     "data/team_elo_best.csv",
@@ -113,6 +115,8 @@ def ensure_ready(remote: str, branch: str) -> None:
 def verify_outputs() -> None:
     required = (
         DATA / "player_elo.csv",
+        DATA / "coach_elo.csv",
+        DATA / "coach_metrics.json",
         DATA / "team_elo.csv",
         DATA / "history.json",
         DOCS / "index.html",

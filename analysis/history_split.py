@@ -50,8 +50,8 @@ BUCKETS = 32
 TOPN = 25
 
 
-def _decode(entry, events):
-    """Yield (event index, season, division, Elo) for every rating update."""
+def _decode(entry, events, value_index=0):
+    """Yield (event index, season, division, selected rating) per update."""
     deltas, vals = entry[0], entry[1]
     i = 0
     for k, d in enumerate(deltas):
@@ -60,7 +60,7 @@ def _decode(entry, events):
             continue
         event, value = events[i], vals[k]
         yield i, event[2], event[3], (
-            value[0] if isinstance(value, list) else value
+            value[value_index] if isinstance(value, list) else value
         )
 
 
@@ -71,7 +71,7 @@ def _median(v):
     return v[h] if len(v) % 2 else (v[h - 1] + v[h]) / 2
 
 
-def _combo(items, events, seasons, six, labels, gender, div, gen):
+def _combo(items, events, seasons, six, labels, gender, div, gen, value_index=0):
     """One Trends answer: event-grain lines, event medians, population count.
 
     Line eligibility stays the per-season top-25 cut. Ranking against each
@@ -89,7 +89,7 @@ def _combo(items, events, seasons, six, labels, gender, div, gen):
             continue
         points = []
         season_values = [None] * len(seasons)
-        for event_index, season, pdiv, elo in _decode(entry, events):
+        for event_index, season, pdiv, elo in _decode(entry, events, value_index):
             # A division selects POINTS, never whole subjects: hundreds of club
             # identities play in more than one, so a per-subject verdict would
             # misfile them.
@@ -166,20 +166,25 @@ def _trends(history, player_names, genders, seasons, six):
     """
     events = history["events"]
     tn = history.get("teamNames", {})
+    cn = history.get("coachNames", {})
     players = history["players"]
+    coaches = history.get("coaches", {})
     codes = sorted({ev[3] for ev in events
                     if len(ev) > 3 and isinstance(ev[3], int)})
     out = {}
-    for kind, items, labels in (
+    for kind, items, labels, value_index in (
             ("p", [(k, players[k]) for k in sorted(players, key=int)],
-             lambda k: player_names.get(k, "Player " + k)),
-            ("c", list(history["teams"].items()), lambda k: tn.get(k) or k)):
+             lambda k: player_names.get(k, "Player " + k), 0),
+            ("c", list(history["teams"].items()), lambda k: tn.get(k) or k, 0),
+            ("h", list(coaches.items()), lambda k: cn.get(k) or k, 0),
+            ("w", list(coaches.items()), lambda k: cn.get(k) or k, 1)):
         for div in ("all", *(str(c) for c in codes)):
             for gen in (("all", "1", "2") if kind == "p" else ("all",)):
                 out[f"{kind}|{div}|{gen}"] = _combo(
                     items, events, seasons, six, labels, genders,
                     None if div == "all" else int(div),
-                    None if (gen == "all" or kind != "p") else int(gen))
+                    None if (gen == "all" or kind != "p") else int(gen),
+                    value_index)
     return out
 
 
@@ -360,7 +365,7 @@ def split(history, player_names, genders, event_meta=None, player_roles=None):
         sides[ev] = _delta({r[0] for r in rows} | {r[1] for r in rows})
 
     core = {k: history[k] for k in (
-        "events", "teamKey", "teamNames", "clubNames",
+        "events", "teamKey", "teamNames", "clubNames", "coaches", "coachNames",
         "gameClubs", "gameStages", "bestSeason") if k in history}
     # Club trajectories carry their event record; the drill-down prints it on
     # every row, and faulting a season of games per row to count wins would

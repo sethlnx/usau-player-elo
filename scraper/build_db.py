@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS events (
     has_schedule INTEGER,
     division TEXT NOT NULL DEFAULT 'club-men',
     complete INTEGER NOT NULL DEFAULT 0,
+    coach_data_fetched INTEGER NOT NULL DEFAULT 0,
     UNIQUE (url, division)
 );
 CREATE TABLE IF NOT EXISTS event_teams (
@@ -154,6 +155,18 @@ CREATE TABLE IF NOT EXISTS roster_entries (
 );
 """
 
+COACH_SCHEMA = """
+CREATE TABLE IF NOT EXISTS coach_entries (
+    event_team_id TEXT NOT NULL REFERENCES event_teams(event_team_id),
+    coach_key TEXT NOT NULL,
+    coach_name TEXT NOT NULL,
+    role TEXT NOT NULL,
+    source_text TEXT NOT NULL,
+    PRIMARY KEY (event_team_id, coach_key)
+);
+CREATE INDEX IF NOT EXISTS coach_entries_key ON coach_entries(coach_key);
+"""
+
 SOURCE_ENTITIES_SCHEMA = """
 CREATE TABLE IF NOT EXISTS source_entities (
     source TEXT NOT NULL,
@@ -171,7 +184,7 @@ CREATE INDEX IF NOT EXISTS source_entities_local
     ON source_entities(entity_type, local_key);
 """
 
-SCHEMA = NORMALIZED_SCHEMA + SOURCE_ENTITIES_SCHEMA
+SCHEMA = NORMALIZED_SCHEMA + COACH_SCHEMA + SOURCE_ENTITIES_SCHEMA
 
 
 def parse_dates(dates_text: str) -> tuple[str | None, str | None]:
@@ -319,12 +332,16 @@ def migrate_url_key(con):
 
 def _ensure_columns(con):
     """Older DBs predate some columns; add them with backfill-safe defaults."""
-    con.executescript(SOURCE_ENTITIES_SCHEMA)
+    con.executescript(COACH_SCHEMA + SOURCE_ENTITIES_SCHEMA)
     cols = [r[1] for r in con.execute("PRAGMA table_info(events)")]
     if "division" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN division TEXT NOT NULL DEFAULT 'club-men'")
     if "complete" not in cols:
         con.execute("ALTER TABLE events ADD COLUMN complete INTEGER NOT NULL DEFAULT 0")
+    if "coach_data_fetched" not in cols:
+        con.execute(
+            "ALTER TABLE events ADD COLUMN coach_data_fetched INTEGER NOT NULL DEFAULT 0"
+        )
     tcols = [r[1] for r in con.execute("PRAGMA table_info(event_teams)")]
     if "canonical_team_id" not in tcols:
         con.execute("ALTER TABLE event_teams ADD COLUMN canonical_team_id TEXT")

@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analysis.backtest import (DB_PATH, load_games, load_maps,
                                load_stat_events, load_ufa_games, replay)
+from analysis.coaches import MIN_GAMES as COACH_MIN_GAMES, CoachRatings, load_assignments
 from analysis.euf_ratings import (EUF_DB, Appearance, EuropeanInputs,
                                   load_european_inputs, merge_inputs)
 from analysis.international_ratings import load_international_inputs
@@ -920,6 +921,7 @@ HISTORY_MIN_GAMES = 30
 
 def write_history(
     con, games, rosters, clubs, snaps, game_deltas, model, season,
+    coach_snaps, coach_names,
     european: EuropeanInputs | None = None,
     output_dir: Path | None = None,
 ):
@@ -959,6 +961,7 @@ def write_history(
         {e for subj, evs in snaps.items() for e in evs
          if subj[0] == "p" and subj[1] in keep}
         | {e for subj, evs in snaps.items() for e in evs if subj[0] == "c"}
+        | {e for evs in coach_snaps.values() for e in evs}
     )
     used = sorted(used_set, key=lambda event: (
         evinfo[event][1] or "", str(event)
@@ -1009,6 +1012,7 @@ def write_history(
                 players[str(subj)] = encode_player(evs)
         else:
             teams[subj] = encode({e: [r, n] for e, (r, n) in evs.items()})
+    coaches = {key: encode(evs) for key, evs in coach_snaps.items()}
 
     # The team tables key on an event-team's display name; the model keys on the
     # normalized club identity from load_maps. Those differ (and deliberately so
@@ -1187,7 +1191,8 @@ def write_history(
 
     out = (output_dir or DB_PATH.parent) / "history.json"
     out.write_text(json.dumps({"events": events, "players": players,
-                               "teams": teams, "teamKey": alias,
+                               "teams": teams, "coaches": coaches,
+                               "coachNames": coach_names, "teamKey": alias,
                                "clubNames": list(club_ix),
                                "teamNames": team_names,
                                "rosters": rosters_out, "people": people,
@@ -1197,6 +1202,7 @@ def write_history(
                                "games": game_rows},
                               separators=(",", ":")))
     print(f"wrote {out} ({len(players):,} players, {len(teams):,} clubs, "
+          f"{len(coaches):,} coaches, "
           f"{len(alias):,} club aliases, {len(events):,} events, "
           f"{len(rosters_out):,} rosters, {len(best_out):,} best rosters, "
           f"{len(people):,} people, {len(team_names):,} club names, "
@@ -1227,6 +1233,22 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
     rosters.update(ufa_rosters)
     clubs.update(external.clubs)
     clubs.update(ufa_clubs)
+    coach_staffs, coach_names = load_assignments(con)
+    usau_team_ids = set(dict(con.execute(
+        "SELECT event_team_id, event_id FROM event_teams"
+    )))
+    team_display = dict(con.execute(
+        "SELECT event_team_id, COALESCE(full_name, display_name) FROM event_teams"
+    ))
+    coach_scales = getattr(cfg, "division_scale", PUBLISHED["division_scale"])
+    coach_default_scale = getattr(
+        cfg, "scale", PUBLISHED["division_scale"]["club-men"]
+    )
+    coach_ratings = CoachRatings()
+    coach_snaps = defaultdict(dict)
+    coach_last = {}
+    coach_divisions = defaultdict(int)
+    coach_teams = defaultdict(set)
     stat_events = load_stat_events(con)
     print(
         f"loaded {len(european.games):,} European games, "
@@ -1282,6 +1304,45 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
                     rating = model.players[p].rating
                     snaps[("p", p)][eid] = (round(rating), club or "")
                     last_rating[p] = rating
+
+        home_id, away_id = g["home_id"], g["away_id"]
+        if (pre is None or home_id not in usau_team_ids
+                or away_id not in usau_team_ids):
+            return
+        home_staff = coach_staffs.get(home_id, ())
+        away_staff = coach_staffs.get(away_id, ())
+        outcome = (1.0 if g["home_score"] > g["away_score"]
+                   else 0.0 if g["home_score"] < g["away_score"] else 0.5)
+        division = g.get("division", "club-men")
+        observed = coach_ratings.observe(
+            season=g["season"], division=division,
+            event_date=g.get("date"), home=home_staff, away=away_staff,
+            home_roster=pre[0], away_roster=pre[1],
+            division_scale=coach_scales.get(division, coach_default_scale),
+            outcome=outcome,
+        )
+        if observed is None:
+            return
+        shared = set(home_staff) & set(away_staff)
+        for etid, staff in ((home_id, home_staff), (away_id, away_staff)):
+            eid = etev[etid]
+            club = clubs.get(etid, "")
+            for key in staff:
+                if key in shared:
+                    continue
+                state = coach_ratings.states[key]
+                coach_snaps[key][eid] = [
+                    round(state.impact), round(state.results), state.games, club
+                ]
+                coach_divisions[key] |= 1 << DIVCODE.get(division, 0)
+                if club:
+                    coach_teams[key].add(club)
+                order = (g.get("date") or g["sort"][0], str(g["game_key"]))
+                if key not in coach_last or order >= coach_last[key][0]:
+                    coach_last[key] = (
+                        order, team_display.get(etid, club or "?"), club,
+                        g["season"],
+                    )
 
     def capture_stats(end, entries, etid, model):
         # etid is None for a stat event with no rated event of its own (a UFA
@@ -1449,6 +1510,44 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
         w.writerows(wfdf_identity_rows)
     print(f"wrote {wfdf_out} ({len(wfdf_identity_rows)} roster-name decisions)")
 
+    coach_keys = [
+        key for key, state in coach_ratings.states.items()
+        if state.games >= COACH_MIN_GAMES and key in coach_last
+    ]
+    impact_order = sorted(
+        coach_keys, key=lambda key: (-coach_ratings.states[key].impact, key)
+    )
+    results_order = sorted(
+        coach_keys, key=lambda key: (-coach_ratings.states[key].results, key)
+    )
+    impact_rank = {key: rank for rank, key in enumerate(impact_order, 1)}
+    results_rank = {key: rank for rank, key in enumerate(results_order, 1)}
+    coach_out = output_dir / "coach_elo.csv"
+    with open(coach_out, "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow([
+            "impact_rank", "results_rank", "coach_key", "coach",
+            "impact_elo", "results_elo", "games", "teams", "last_team",
+            "last_team_key", "last_season", "divisions",
+        ])
+        for key in impact_order:
+            state = coach_ratings.states[key]
+            _order, last_team, last_team_key, last_season = coach_last[key]
+            w.writerow([
+                impact_rank[key], results_rank[key], key,
+                coach_names.get(key, key), round(state.impact, 1),
+                round(state.results, 1), state.games, len(coach_teams[key]),
+                last_team, last_team_key, last_season, coach_divisions[key],
+            ])
+    coach_metrics_out = output_dir / "coach_metrics.json"
+    coach_metrics_out.write_text(json.dumps(coach_ratings.metrics(), indent=2) + "\n")
+    print(
+        f"wrote {coach_out} ({len(coach_keys)} coaches with "
+        f"{COACH_MIN_GAMES}+ covered games)"
+    )
+    coach_snaps = {key: coach_snaps[key] for key in coach_keys}
+    coach_names = {key: coach_names.get(key, key) for key in coach_keys}
+
     season = max(
         con.execute(
             "SELECT max(season) FROM events WHERE has_schedule=1"
@@ -1487,8 +1586,8 @@ def main(cfg: EloConfig | None = None, replay_fn=replay,
         print(f"wrote {team_out} ({total} teams across {len(TEAM_DIVISIONS)} "
               f"divisions, season {season}, {basis} rosters)")
     write_history(
-        con, games, rosters, clubs, snaps, game_deltas, model, season, european,
-        output_dir,
+        con, games, rosters, clubs, snaps, game_deltas, model, season,
+        coach_snaps, coach_names, european, output_dir,
     )
     con.close()
     return records, model

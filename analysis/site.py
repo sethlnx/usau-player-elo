@@ -16,6 +16,7 @@ never replays the model, so the page can never disagree with the CSVs:
     data/player_box_scores.csv   optional USAU event-level G/A/B/T and E± proxy
     data/team_elo.csv            clubs, most recent COMPLETED event roster
     data/team_elo_best.csv       clubs, best full-strength roster of 2026
+    data/coach_elo.csv           coach impact and results-only Elo
     data/usau.db                 USAU schedules for the Tournaments browser
     data/euf.db                  selected WFDF games for the same browser
 
@@ -384,6 +385,13 @@ def build():
         "best": load_csv("team_elo_best.csv"),
         "upcoming": load_csv("team_elo_upcoming.csv"),
     }
+    coach_path = DATA_DIR / "coach_elo.csv"
+    coaches = load_csv("coach_elo.csv") if coach_path.exists() else []
+    coach_metrics_path = DATA_DIR / "coach_metrics.json"
+    coach_metrics = (
+        json.loads(coach_metrics_path.read_text())
+        if coach_metrics_path.exists() else {}
+    )
 
 
     # Trajectories for the drill-down, written by analysis.rankings from the
@@ -599,6 +607,13 @@ def build():
                        int(r["roster_size"]), r["roster_event"],
                        DIVCODE.get(r["division"], 0), r["club_key"]]
                       for r in v] for k, v in clubs.items()},
+        "coaches": [[r["coach"], r["coach_key"], float(r["impact_elo"]),
+                     float(r["results_elo"]), int(r["games"]), int(r["teams"]),
+                     r["last_team"], r["last_team_key"], int(r["last_season"]),
+                     str(int(r["divisions"])), int(r["impact_rank"]),
+                     int(r["results_rank"])]
+                    for r in coaches],
+        "coachMetrics": coach_metrics,
         # All four of these load after first paint; see HIST_OUT and the
         # tier constants above. `history` is the inline escape hatch: set it
         # and the page skips the sidecar entirely.
@@ -1159,6 +1174,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
     <select id="rtype">
       <option value="club">Club teams</option>
       <option value="player">Players</option>
+      <option value="coach">Coaches</option>
     </select>
     <select id="rdiv"></select>
     <select id="ryear">
@@ -1274,6 +1290,29 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
     </aside>
     </div>
   </div>
+
+  <div id="coachRankings" hidden>
+    <div class="bar">
+      <input type="search" id="coachq" placeholder="Search coach or team…" autocomplete="off">
+      <select id="coachSort">
+        <option value="impact">Impact Elo</option>
+        <option value="results">Results-only Elo</option>
+      </select>
+      <select id="coachGames">
+        <option value="5">5+ covered games</option>
+        <option value="20">20+ covered games</option>
+        <option value="50">50+ covered games</option>
+        <option value="100">100+ covered games</option>
+      </select>
+      <span class="count" id="coachCount"></span>
+    </div>
+    <table><thead><tr>
+      <th class="n">#</th><th>Coach</th><th class="n">Impact Elo</th>
+      <th class="n">Results Elo</th><th class="n">G</th><th class="n">Teams</th>
+      <th>Last team</th><th class="n">Yr</th>
+    </tr></thead><tbody id="coachTb"></tbody></table>
+    <p class="note" id="coachNote"></p>
+  </div>
 </section>
 
 <section id="events">
@@ -1352,12 +1391,17 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
     <select id="tsub">
       <option value="p">Players</option>
       <option value="c">Clubs</option>
+      <option value="h">Coaches</option>
     </select>
     <select id="tdiv"></select>
     <select id="tgen">
       <option value="all">All genders</option>
       <option value="1">Male-matching</option>
       <option value="2">Female-matching</option>
+    </select>
+    <select id="tcoachmetric" hidden>
+      <option value="h">Impact Elo</option>
+      <option value="w">Results-only Elo</option>
     </select>
     <select id="tmode">
       <option value="elo">Elo</option>
@@ -1431,12 +1475,15 @@ function showTab(id) {
 document.querySelectorAll('nav button').forEach(
   b => b.onclick = () => showTab(b.dataset.t));
 function drawRankings() {
-  const players = $('#rtype').value === 'player';
-  if (players && $('#rdiv').value === String(DIVCODE_UFA))
+  const type = $('#rtype').value;
+  if (type !== 'club' && $('#rdiv').value === String(DIVCODE_UFA))
     $('#rdiv').value = 'all';
-  $('#clubRankings').hidden = players;
-  $('#playerRankings').hidden = !players;
-  if (players) drawPlayers(); else drawClubs();
+  $('#clubRankings').hidden = type !== 'club';
+  $('#playerRankings').hidden = type !== 'player';
+  $('#coachRankings').hidden = type !== 'coach';
+  if (type === 'player') drawPlayers();
+  else if (type === 'coach') drawCoaches();
+  else drawClubs();
 }
 $('#rtype').onchange = drawRankings;
 $('#rdiv').onchange = drawRankings;
@@ -1779,6 +1826,85 @@ $('#h2hTimeframe').onchange = drawClubs;
 $('#clubView').onchange = drawClubs;
 ['input', 'change'].forEach(e => $('#cq').addEventListener(e, drawClubs));
 $('#basis').onchange = drawClubs;
+
+/* ---------- coaches ---------- */
+function drawCoaches() {
+  const q = $('#coachq').value.trim().toLowerCase();
+  const sort = $('#coachSort').value;
+  const minGames = +$('#coachGames').value;
+  const year = $('#ryear').value;
+  const historical = year !== 'all';
+  const div = $('#rdiv').value;
+  if (historical && !HREADY) {
+    $('#coachCount').textContent = 'Loading coach history…';
+    $('#coachNote').textContent = 'Loading season data…';
+    return;
+  }
+  let pop = (D.coaches || []).map(row => {
+    if (!historical) return {row, snap: null};
+    let snap = null;
+    for (const point of decodeCoach((H.coaches || {})[row[1]])) {
+      if (point.season === +year && (div === 'all' || point.div === +div))
+        snap = point;
+    }
+    return snap ? {row, snap} : null;
+  }).filter(Boolean);
+  pop = pop.filter(item => {
+    const games = item.snap ? item.snap.games : item.row[4];
+    if (games < minGames) return false;
+    if (historical || div === 'all') return true;
+    return (BigInt(item.row[9]) & (1n << BigInt(+div))) !== 0n;
+  });
+  const value = item => item.snap
+    ? item.snap[sort] : item.row[sort === 'impact' ? 2 : 3];
+  pop.sort((a, b) => value(b) - value(a) ||
+    a.row[0].localeCompare(b.row[0]));
+  const rankOf = new Map();
+  pop.forEach((item, index) => rankOf.set(item, index + 1));
+  const rows = q ? pop.filter(item => {
+    const team = item.snap ? clubLabel(item.snap.club) : item.row[6];
+    return `${item.row[0]} ${team}`.toLowerCase().includes(q);
+  }) : pop;
+  $('#coachTb').innerHTML = rows.map(item => {
+    const row = item.row, snap = item.snap, rank = rankOf.get(item);
+    const team = snap ? clubLabel(snap.club) : row[6];
+    const impact = snap ? snap.impact : row[2];
+    const results = snap ? snap.results : row[3];
+    const games = snap ? snap.games : row[4];
+    return `<tr><td class="rk">${rank}</td>` +
+      `<td><span class="nmlink" data-coach="${esc(row[1])}">${esc(row[0])}</span></td>` +
+      `<td class="n">${impact.toFixed(0)}</td><td class="n">${results.toFixed(0)}</td>` +
+      `<td class="n">${games}</td><td class="n">${snap ? '—' : row[5]}</td>` +
+      `<td class="muted" style="font-size:13px">${esc(team || '—')}</td>` +
+      `<td class="n">${snap ? snap.season : row[8]}</td></tr>`;
+  }).join('');
+  $('#coachCount').textContent = q
+    ? `${rows.length} of ${pop.length} coaches match`
+    : `${pop.length.toLocaleString()} coaches`;
+  const coverage = (D.coachMetrics || {}).coverage || {};
+  const held = (D.coachMetrics || {}).held_out_2024_2025 || {};
+  const score = held.n
+    ? ` On the same ${held.n.toLocaleString()} covered 2024–25 games, log loss was ` +
+      `${held.roster.logloss.toFixed(3)} for roster Elo, ` +
+      `${held.impact.logloss.toFixed(3)} with coach impact, and ` +
+      `${held.results_only.logloss.toFixed(3)} for results-only Elo.`
+    : '';
+  $('#coachNote').textContent =
+    `Impact Elo starts at 1500 (neutral) and updates from results after accounting ` +
+    `for both teams’ pre-game roster Elo; it measures repeated over- or ` +
+    `under-performance relative to player strength. Results Elo ignores rosters ` +
+    `and rates the two published coaching staffs only. A staff is the mean of its ` +
+    `coaches, and each listed coach receives the staff’s update. Games missing a ` +
+    `published coach on either side are excluded, not treated as average` +
+    (coverage.eligible_games
+      ? ` — ${coverage.rated_games.toLocaleString()} of ` +
+        `${coverage.eligible_games.toLocaleString()} USAU games are covered.`
+      : '.') + score;
+}
+['input', 'change'].forEach(event =>
+  $('#coachq').addEventListener(event, drawCoaches));
+$('#coachSort').onchange = drawCoaches;
+$('#coachGames').onchange = drawCoaches;
 /* ---------- players ---------- */
 /* Leave-one-out verdict per rating, measured in analysis/identify.py for the
    top 1,000 only. It is a statement about IDENTIFIABILITY, not about the
@@ -2150,7 +2276,7 @@ $('#pnote').textContent = PLAYER_NOTE;
    meantime. HREADY is the guard each entry point checks; HFAILED means the
    core could not be loaded at all, which is worth saying out loud rather than
    showing an empty panel. */
-let H = {events: [], teams: {}, teamKey: {}};
+let H = {events: [], teams: {}, coaches: {}, coachNames: {}, teamKey: {}};
 let TK = {};      // display name -> normalized club key
 let TN = {};      // normalized club key -> current display spelling
 let CN = [];      // affiliation index -> normalized club key
@@ -2532,6 +2658,22 @@ function decode(entry) {
   return out;
 }
 
+function decodeCoach(entry) {
+  if (!entry) return [];
+  const out = []; let eventIndex = 0;
+  for (let i = 0; i < entry[0].length; i++) {
+    eventIndex += entry[0][i];
+    const event = HEV[eventIndex], value = entry[1][i];
+    if (!event || !Array.isArray(value)) continue;
+    out.push({
+      date: event[0], event: event[1], season: event[2], div: event[3],
+      evIdx: eventIndex, impact: value[0], results: value[1],
+      games: value[2], club: value[3] || '', elo: value[0],
+    });
+  }
+  return out;
+}
+
 const DAY = 864e5;
 const asDay = s => Date.parse(s) / DAY;
 
@@ -2623,6 +2765,19 @@ function histTable(pts, isTeam, ckey) {
                    '<th class="n">Roster</th>' : '<th>Team</th>') +
          `<th class="n">Elo after</th><th class="n">Δ</th></tr></thead>` +
          `<tbody>${rows}</tbody></table>`;
+}
+
+function coachHistTable(points) {
+  const rows = points.slice().reverse().map(point =>
+    `<tr><td class="d">${point.date}</td><td>${esc(point.event)} ` +
+    `<span class="muted" style="font-size:11.5px">${DIVTAG[point.div] || DIVTAG[0]}</span></td>` +
+    `<td>${point.club ? `<span class="nmlink" data-club="${esc(point.club)}">` +
+      `${esc(clubLabel(point.club))}</span>` : '—'}</td>` +
+    `<td class="n">${point.impact}</td><td class="n">${point.results}</td>` +
+    `<td class="n">${point.games}</td></tr>`).join('');
+  return `<table class="hist"><thead><tr><th>Date</th><th>Event</th><th>Team</th>` +
+    `<th class="n">Impact</th><th class="n">Results</th><th class="n">G</th>` +
+    `</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 /* The games behind one event, in the order the model replayed them, each with
@@ -2905,6 +3060,7 @@ let pendingDetail = null;
    has no entry in the core index and so needs nothing faulted. */
 function detailDep(kind, key) {
   if (kind === 'p') return ['p', playerBucket(key)];
+  if (kind === 'h') return null;
   const ckey = TK[key] || key;
   if (UFA_BY_KEY.has(ckey)) return null;
   const rb = RBC[ckey];
@@ -2921,7 +3077,9 @@ function openDetail(kind, key, opts) {
     // that the key itself is all there is.
     const title = kind === 'p'
       ? ((PBY.get(String(key)) || [key])[0])
-      : (HREADY ? clubLabel(TK[key] || key) : key);
+      : kind === 'h'
+        ? ((D.coaches || []).find(row => row[1] === key) || [key])[0]
+        : (HREADY ? clubLabel(TK[key] || key) : key);
     const dead = HFAILED || st === 'fail';
     pendingDetail = (HREADY || HFAILED) ? null : {kind, key, opts};
     $('#dbody').innerHTML = `<h2>${esc(title)}</h2>` +
@@ -2954,6 +3112,14 @@ function openDetail(kind, key, opts) {
       // this is a hand-typed pid rather than anything the page ever linked.
       title = 'Player ' + key;
     }
+  } else if (kind === 'h') {
+    const row = (D.coaches || []).find(item => item[1] === key);
+    title = (H.coachNames || {})[key] || (row ? row[0] : key);
+    if (row) {
+      parts.push(`impact Elo <b>${row[2].toFixed(0)}</b>`,
+                 `results Elo <b>${row[3].toFixed(0)}</b>`,
+                 `${row[4]} covered games`, `${row[5]} teams`);
+    }
   } else {
     ckey = TK[key] || key;
     title = clubLabel(ckey);
@@ -2977,7 +3143,9 @@ function openDetail(kind, key, opts) {
       }
     }
   }
-  const pts = decode(kind === 'p' ? PLAY[key] : H.teams[ckey]);
+  const pts = kind === 'h'
+    ? decodeCoach((H.coaches || {})[key])
+    : decode(kind === 'p' ? PLAY[key] : H.teams[ckey]);
   const peak = pts.length ? Math.max(...pts.map(p => p.elo)) : null;
   const peakAt = pts.find(p => p.elo === peak);
   if (peak !== null) parts.push(
@@ -2990,12 +3158,16 @@ function openDetail(kind, key, opts) {
     `<div class="dhead"><h2>${esc(title)}</h2>${pinHead}</div>` +
     `<div class="meta">${parts.join(' · ')}</div>` + chart(pts) +
     `<p class="note" style="margin:0 0 14px">` +
-    (kind === 'c' && UFA_BY_KEY.has(ckey)
-      ? `Each point is the rating after one UFA game. ${pts.length} games on record; ` +
-        `click one in the table for its score`
-      : `Each point is the rating after that event — a weekend tournament is one ` +
-        `step, not one point per game. ${pts.length} event${pts.length === 1 ? '' : 's'} ` +
-        `on record; click one in the table for the games behind it`) +
+    (kind === 'h'
+      ? `Each point is both coach ratings after that event. Impact accounts for ` +
+        `pre-game roster Elo; results Elo does not. ${pts.length} event` +
+        `${pts.length === 1 ? '' : 's'} on record`
+      : kind === 'c' && UFA_BY_KEY.has(ckey)
+        ? `Each point is the rating after one UFA game. ${pts.length} games on record; ` +
+          `click one in the table for its score`
+        : `Each point is the rating after that event — a weekend tournament is one ` +
+          `step, not one point per game. ${pts.length} event${pts.length === 1 ? '' : 's'} ` +
+          `on record; click one in the table for the games behind it`) +
     (kind === 'p'
       ? (IS_GLICKO
         ? ', which are the games of the club they turned out for. Glicko-2 updates ' +
@@ -3006,7 +3178,9 @@ function openDetail(kind, key, opts) {
           'amount, so the Δ on the event row is their own')
       : '') + `.</p>` +
     (kind === 'c' ? rosterSection(ckey) : '') +
-    (pts.length ? histTable(pts, kind === 'c', ckey) : '');
+    (pts.length
+      ? (kind === 'h' ? coachHistTable(pts) : histTable(pts, kind === 'c', ckey))
+      : '');
   if (opts.push !== false) {
     const top = navStack[navStack.length - 1];
     if (!top || top.kind !== kind || top.key !== key) navStack.push({kind, key});
@@ -3064,6 +3238,10 @@ $('#ptb').addEventListener('click', e => {
 $('#ctb').addEventListener('click', e => {
   const el = e.target.closest('[data-club]'); if (el) openDetail('c', el.dataset.club);
 });
+$('#coachTb').addEventListener('click', event => {
+  const coach = event.target.closest('[data-coach]');
+  if (coach) openDetail('h', coach.dataset.coach);
+});
 $('#ufatb').addEventListener('click', e => {
   const el = e.target.closest('[data-club]');
   if (el) openDetail('c', el.dataset.club);
@@ -3071,6 +3249,8 @@ $('#ufatb').addEventListener('click', e => {
 /* Every link and disclosure inside the panel: roster-size cells, event rows,
    affiliation cells, and the people inside an expanded roster. */
 $('#dbody').addEventListener('click', e => {
+  const coach = e.target.closest('[data-coach]');
+  if (coach) { openDetail('h', coach.dataset.coach); return; }
   const tb = e.target.closest('.rtab');
   if (tb) {
     const sec = tb.closest('.rsec');
@@ -3756,9 +3936,11 @@ $('#tvbody').addEventListener('click', ev => {
 // taken at face value; openDetail shows the waiting state and re-resolves it.
 const known = (kind, key) => !HREADY ? true : kind === 'p'
   ? PBY.has(String(key))
-  : !!H.teams[TK[key] || key] || UFA_BY_KEY.has(TK[key] || key);
+  : kind === 'h'
+    ? !!(H.coaches || {})[key]
+    : !!H.teams[TK[key] || key] || UFA_BY_KEY.has(TK[key] || key);
 function routeHash() {
-  const m = /^#([pct])\/(.+)$/.exec(location.hash || '');
+  const m = /^#([hpct])\/(.+)$/.exec(location.hash || '');
   // A tournament is a VIEW, not the overlay panel: it owns the tab, and any
   // club panel opened from inside it is layered on top and closed first.
   if (m && m[1] === 't') {
@@ -3779,8 +3961,8 @@ function routeHash() {
   try { key = decodeURIComponent(m[2]); } catch (err) { key = m[2]; }
   if (cur && cur.kind === m[1] && cur.key === key) return;
   if (!known(m[1], key)) { closeDetail(true); return; }
-  if (curEvent === null && (m[1] === 'p' || m[1] === 'c')) {
-    $('#rtype').value = m[1] === 'p' ? 'player' : 'club';
+  if (curEvent === null && (m[1] === 'p' || m[1] === 'c' || m[1] === 'h')) {
+    $('#rtype').value = m[1] === 'p' ? 'player' : m[1] === 'h' ? 'coach' : 'club';
     drawRankings();
     showTab('rankings');
   }
@@ -3854,7 +4036,7 @@ function decodeTrendEvents(deltas) {
 }
 
 function trendData(kind, div, gen) {
-  const ck = kind + '|' + div + '|' + (kind === 'c' ? 'all' : gen);
+  const ck = kind + '|' + div + '|' + (kind === 'p' ? gen : 'all');
   if (trendCache[ck]) return trendCache[ck];
   const raw = (H.trends || {})[ck];
   if (!raw) {
@@ -4024,7 +4206,8 @@ function renderTrendSnapshot(eventIndex, state) {
   $('#tlegend').innerHTML = ranked.map(({series, seriesIndex, value}) => {
     const dash = DASH[Math.floor(seriesIndex / 8) % DASH.length];
     const link = kind === 'p' ? `data-pid="${esc(series.key)}"`
-                              : `data-club="${esc(series.key)}"`;
+      : kind === 'h' ? `data-coach="${esc(series.key)}"`
+      : `data-club="${esc(series.key)}"`;
     return `<div class="lrow${hotIdx === seriesIndex ? ' hot' : ''}" ` +
       `data-series="${seriesIndex}" style="color:var(--s${seriesIndex % 8 + 1})">` +
       `<svg class="sw" viewBox="0 0 14 3"><line x1="0" y1="1.5" x2="14" y2="1.5" ` +
@@ -4055,11 +4238,12 @@ function drawTrends() {
     $('#tcount').textContent = '';
     return;
   }
-  const kind = $('#tsub').value, mode = $('#tmode').value, div = $('#tdiv').value;
+  const subject = $('#tsub').value;
+  const kind = subject === 'h' ? $('#tcoachmetric').value : subject;
+  const mode = $('#tmode').value, div = $('#tdiv').value;
   const gen = $('#tgen').value;
-  // Clubs carry no gender-matching group, so the control is disabled rather
-  // than silently ignored when the subject is clubs.
-  $('#tgen').disabled = kind !== 'p';
+  $('#tgen').disabled = subject !== 'p';
+  $('#tcoachmetric').hidden = subject !== 'h';
   const dat = trendData(kind, div, gen);
   hotIdx = null; pinIdx = null;
   lockedTrendEventIdx = null; shownTrendEventIdx = null;
@@ -4076,9 +4260,10 @@ function drawTrends() {
   const first = plottedDates.length ? plottedDates[0] : '';
   const last = plottedDates.length ? plottedDates[plottedDates.length - 1] : '';
   const span = first ? ` · ${first.slice(0, 4)}–${last.slice(0, 4)}` : '';
+  const noun = subject === 'p' ? 'players' : subject === 'h' ? 'coaches' : 'clubs';
   $('#tcount').textContent = `${curSeries.length} of ` +
-    `${dat.n.toLocaleString()} ${kind === 'p' ? 'players' : 'clubs'} have finished ` +
-    `a season in the top 25 · ${DIVLABEL[div]}${kind === 'p' ? GENLABEL[gen] : ''}${span}`;
+    `${dat.n.toLocaleString()} ${noun} have finished a season in the top 25 · ` +
+    `${DIVLABEL[div]}${subject === 'p' ? GENLABEL[gen] : ''}${span}`;
 }
 
 function pinTrendSeries(i) {
@@ -4137,9 +4322,10 @@ $('#tunlock').onclick = () => {
   setTrendMarker(null);
 };
 $('#tlegend').addEventListener('click', e => {
-  const lab = e.target.closest('[data-pid],[data-club]');
+  const lab = e.target.closest('[data-pid],[data-club],[data-coach]');
   if (lab) {
     if (lab.dataset.pid) openDetail('p', lab.dataset.pid);
+    else if (lab.dataset.coach) openDetail('h', lab.dataset.coach);
     else openDetail('c', lab.dataset.club);
     return;
   }
@@ -4150,6 +4336,7 @@ $('#tsub').onchange = drawTrends;
 $('#tdiv').onchange = drawTrends;
 $('#tgen').onchange = drawTrends;
 $('#tmode').onchange = drawTrends;
+$('#tcoachmetric').onchange = drawTrends;
 $('#tnote').textContent =
   `One point per tournament, using the rating after that event. Professional ` +
   `fixtures are one-game rating events, so those divisions update per game. ` +
@@ -4171,7 +4358,7 @@ $('#tnote').textContent =
   `own record in whichever division you are looking at. Distinct source events ` +
   `remain distinct even when a tournament name or date repeats across divisions. ` +
   `Gender works the other way and selects whole people, since nobody changes ` +
-  `group between events; it is inert for clubs. Both controls narrow the ` +
+  `group between events; it is inert for clubs and coaches. Both controls narrow the ` +
   `population before season-end top-25 eligibility is computed. All ${NDIV} ` +
   `divisions share one rating scale, bridged by the ${GENDER_NOTE}`;
 

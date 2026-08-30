@@ -214,6 +214,42 @@ class EUFRankingIngestionTests(unittest.TestCase):
             "Alexander Merriman", {"alexandermerriman"}, aliases, {}, {},
         ))
 
+    def test_reviewed_wfdf_alias_can_disambiguate_by_team(self):
+        db = sqlite3.connect(":memory:")
+        db.executescript("""
+          CREATE TABLE players (
+            player_id INTEGER PRIMARY KEY,
+            display_name TEXT NOT NULL,
+            ambiguous INTEGER NOT NULL
+          );
+          CREATE TABLE event_teams (
+            event_team_id TEXT PRIMARY KEY,
+            display_name TEXT NOT NULL
+          );
+          CREATE TABLE roster_players (
+            event_team_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            player_id INTEGER NOT NULL
+          );
+          INSERT INTO players VALUES (1,'Mac Hecht',1),(2,'Mac Hecht',1);
+          INSERT INTO event_teams VALUES ('a','DiG'),('b','Revolver');
+          INSERT INTO roster_players VALUES
+            ('a','Mac Hecht',1),('b','Mac Hecht',2);
+        """)
+        alias_path = Path(self.temp.name) / "wfdf_player_aliases.csv"
+        alias_path.write_text(
+            "source_name,usau_name,usau_team\n"
+            "Malcolm Hecht,Mac Hecht,Revolver\n"
+        )
+
+        aliases = _load_manual_usa_aliases(db, alias_path)
+        db.close()
+
+        self.assertEqual(
+            (2, "Mac Hecht"),
+            aliases["malcolm hecht"],
+        )
+
     def test_rating_bridge_requires_unique_same_season_noncolliding_name(self):
         db = sqlite3.connect(":memory:")
         db.executescript("""
