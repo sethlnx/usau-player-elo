@@ -166,6 +166,58 @@ def winner(g):
         return None
     return g["home"] if g["hs"] > g["as"] else g["away"]
 
+def _round_robin_winner(pools, brackets, loose, games, expected_teams,
+                        completed_on, today):
+    """Winner of a completed, single-pool round robin, else ``None``.
+
+    A round robin has no title game to identify its champion. Crown its
+    standings leader only when the full published field played exactly once,
+    every listed fixture is final, and the event has ended. Anything less
+    could be an opening pool whose bracket has not been published yet.
+    """
+    if not completed_on or completed_on > today or brackets or loose \
+            or len(pools) != 1:
+        return None
+    teams, pool_games, placement = pools[0]
+    if placement or len(teams) != expected_teams \
+            or any(not g["done"] for g in games):
+        return None
+    if len(pool_games) != len(teams) * (len(teams) - 1) // 2:
+        return None
+
+    records = {team: [0, 0, 0] for team in teams}  # wins, PF, PA
+    for g in pool_games:
+        home, away = records[g["home"]], records[g["away"]]
+        home[1] += g["hs"]
+        home[2] += g["as"]
+        away[1] += g["as"]
+        away[2] += g["hs"]
+        if g["hs"] > g["as"]:
+            home[0] += 1
+        elif g["as"] > g["hs"]:
+            away[0] += 1
+
+    most_wins = max(record[0] for record in records.values())
+    leaders = [team for team, record in records.items() if record[0] == most_wins]
+    if len(leaders) == 1:
+        return leaders[0]
+
+    # Match the page's pool standings: head-to-head inside the tied group,
+    # then point differential and points scored. Refuse a still-tied result.
+    tied = set(leaders)
+    head_to_head = {team: 0 for team in leaders}
+    for g in pool_games:
+        if g["home"] not in tied or g["away"] not in tied or g["hs"] == g["as"]:
+            continue
+        head_to_head[g["home"] if g["hs"] > g["as"] else g["away"]] += 1
+    rank = lambda team: (
+        head_to_head[team],
+        records[team][1] - records[team][2],
+        records[team][1],
+    )
+    leaders.sort(key=rank, reverse=True)
+    return leaders[0] if rank(leaders[0]) > rank(leaders[1]) else None
+
 
 def classify(stage):
     """(bracket key, round rank) for a knockout label, else None.
@@ -708,6 +760,16 @@ def build(con, supplemental=()):
                     w = winner(rounds[-1][0])
                     champ = local[w] if w is not None else -1
                     break
+
+        # A completed single-pool round robin crowns its standings leader even
+        # though it has no championship bracket or final.
+        if champ < 0:
+            round_robin_champ = _round_robin_winner(
+                pools, brs, loose, games or [], counts.get(eid, len(field)),
+                end or start or "", today,
+            )
+            if round_robin_champ is not None:
+                champ = local[round_robin_champ]
 
         ix = len(events)
         detail[ix] = {

@@ -46,6 +46,41 @@ class TournamentPublicationTests(unittest.TestCase):
         self.assertEqual([], payload["detail"][0]["p"])
         self.assertEqual([], payload["detail"][0]["b"])
         self.assertEqual([], payload["detail"][0]["o"])
+
+    def test_completed_round_robin_publishes_standings_winner(self):
+        self.con.execute(
+            """INSERT INTO events
+               (event_id, season, name, url, start_date, end_date, division)
+               VALUES (3, 2000, 'Rumspringa Round Robin', 'https://example.test/3',
+                       '2000-08-22', '2000-08-22', 'club-men')"""
+        )
+        self.con.executemany(
+            """INSERT INTO event_teams
+               (event_team_id, event_id, display_name, roster_fetched)
+               VALUES (?, 3, ?, 1)""",
+            [("3:a", "EZ"), ("3:b", "Dub Club"), ("3:c", "Rumspringa"),
+             ("3:d", "Bodega Cats")],
+        )
+        self.con.executemany(
+            """INSERT INTO games
+               (event_id, game_key, stage, date, home_id, away_id,
+                home_score, away_score, status)
+               VALUES (3, ?, 'Pool A', '2000-08-22', ?, ?, ?, ?, 'played')""",
+            [
+                ("game-1", "3:a", "3:b", 11, 9),
+                ("game-2", "3:c", "3:d", 13, 3),
+                ("game-3", "3:c", "3:a", 12, 9),
+                ("game-4", "3:b", "3:d", 10, 8),
+                ("game-5", "3:a", "3:d", 12, 9),
+                ("game-6", "3:c", "3:b", 13, 7),
+            ],
+        )
+
+        payload = build(self.con)
+
+        event = payload["events"][0]
+        self.assertEqual("Rumspringa", payload["teams"][event[10]])
+
     def test_supplemental_event_ids_are_namespaced(self):
 
 
