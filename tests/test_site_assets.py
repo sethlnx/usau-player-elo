@@ -56,6 +56,18 @@ class SiteAssetContractTests(unittest.TestCase):
         self.assertEqual("events", parser.parents["tlist"])
         self.assertEqual("events", parser.parents["tview"])
 
+    def test_tournament_list_uses_compact_card_contract(self):
+        self.assertIn('id="etb" class="evlist"', TEMPLATE)
+        self.assertIn('class="evtitle"', TEMPLATE)
+        self.assertIn('class="evloc"', TEMPLATE)
+        self.assertIn('<b>Winner</b>', TEMPLATE)
+        self.assertIn('<b>Teams</b>', TEMPLATE)
+        self.assertIn('<b>Editions</b>', TEMPLATE)
+        self.assertNotIn(
+            '<th>Dates</th><th>Tournament</th><th>Division</th>',
+            TEMPLATE,
+        )
+
     def test_sidecar_urls_change_with_data_and_generator_code(self):
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "history.json"

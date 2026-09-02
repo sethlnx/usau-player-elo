@@ -1050,12 +1050,24 @@ button.dpin.on{border-color:var(--accent);color:var(--ink)}
 .rsum{font-size:12px;color:var(--ink-3);margin:0 0 9px;line-height:1.6}
 
 .ufatbl td:nth-child(2){min-width:300px}
-/* ---------- tournaments ---------- */
-.evtbl tr.ev{cursor:pointer}
-.evscroll{overflow-x:auto}
-.evscroll .evtbl{min-width:max-content}
-.evtbl tr.ev:hover td{background:var(--chip)}
-td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.evlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:7px}
+.evcard{display:block;width:100%;box-sizing:border-box;text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:8px 10px;color:var(--ink);font:inherit;cursor:pointer}
+.evcard:hover{background:var(--chip);border-color:var(--line-strong)}
+.evtitle{font-size:13px;line-height:1.3;font-weight:600;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.evtitle .evdiv{text-transform:uppercase;letter-spacing:.03em;font-size:11px;
+  color:var(--ink-3)}
+.evloc{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-top:1px}
+.evfacts{display:flex;align-items:baseline;gap:10px;margin-top:6px;font-size:12px}
+.evfact{min-width:0;white-space:nowrap}
+.evfact:first-child{flex:1;overflow:hidden;text-overflow:ellipsis}
+.evfact b{font-size:10px;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--ink-3);font-weight:600;margin-right:3px}
+.evfact .crown{overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.evfact .muted{font-family:var(--mono)}
 .tag{display:inline-block;font-size:10.5px;text-transform:uppercase;
   letter-spacing:.04em;padding:1px 6px;border-radius:4px;background:var(--chip);
   color:var(--ink-3);font-weight:600;white-space:nowrap}
@@ -1375,11 +1387,7 @@ td.dt{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);white-space:no
       </select>
       <span class="count" id="ecount"></span>
     </div>
-    <div class="evscroll"><table class="evtbl"><thead><tr>
-      <th>Dates</th><th>Tournament</th><th>Division</th>
-      <th class="n">Teams</th><th class="n">Field</th><th>Champion</th>
-      <th class="n">Editions</th>
-    </tr></thead><tbody id="etb"></tbody></table></div>
+    <div id="etb" class="evlist"></div>
     <p class="note" id="enote"></p>
   </div>
   <div id="tview" style="display:none">
@@ -3497,21 +3505,13 @@ function drawEvents() {
     const n = ESER[e[9]][1].length;
     const ch = e[10] >= 0 ? `<span class="crown">${esc(ETM[e[10]])}</span>`
                           : '<span class="muted">\u2014</span>';
-    // Division, championship tier and field strength are three separate facts,
-    // so they get three separate marks: colouring the division tag by tier read
-    // as if "Club Men's" itself meant something. Only Regionals and up carry a
-    // series chip — Sectionals and Conference are most of the corpus, and the
-    // filter already finds them.
-    const chip = e[8] >= 3
-      ? `<span class="tag t${e[8]}">${esc(TV.tiers[e[8]])}</span> ` : '';
-    const region = EVENT_GEO.get(e)[0];
-    return `<tr class="ev" data-ev="${e[0]}"><td class="dt">${daterange(e[4], e[5])}</td>` +
-      `<td>${chip}${esc(e[1])}` +
-      `${e[6] ? ` <span class="muted">\u00b7 ${esc(e[6])}` +
-        `${region === 'Unknown region' ? '' : ` \u00b7 ${esc(region)}`}</span>` : ''}</td>` +
-      `<td><span class="tag">${esc(EDIVL[e[3]] || '')}</span></td>` +
-      `<td class="n">${e[7]}</td><td class="n">${strCell(e)}</td><td>${ch}</td>` +
-      `<td class="n">${n > 1 ? n : '<span class="muted">1</span>'}</td></tr>`;
+    return `<button type="button" class="evcard" data-ev="${e[0]}">` +
+      `<div class="evtitle"><span class="evdiv">${esc(EDIVL[e[3]] || '')}</span>` +
+      ` - ${esc(e[1])}</div>` +
+      `<div class="evloc">${esc(e[6] || 'Location unavailable')}</div>` +
+      `<div class="evfacts"><span class="evfact"><b>Winner</b> ${ch}</span>` +
+      `<span class="evfact"><b>Teams</b> ${e[7]}</span>` +
+      `<span class="evfact"><b>Editions</b> ${n}</span></div></button>`;
   }).join('');
   $('#ecount').textContent = `${total.toLocaleString()} tournament` +
     (total === 1 ? '' : 's') + (total > shown.length
