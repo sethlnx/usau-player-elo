@@ -4249,22 +4249,41 @@ function trendChart(series, events) {
 }
 
 let hotIdx = null, pinIdx = null;
-let lockedTrendEventIdx = null, shownTrendEventIdx = null;
+let lockedTrendEventPosition = null, shownTrendEventPosition = null;
 let curSeries = [], curEvents = [], curMed = new Map(), curMode = 'elo';
+let trendEventPositions = new Map();
 const seriesVal = (series, i) => curMode === 'med'
   ? series.vals[i] - curMed.get(series.events[i])
   : series.vals[i];
 const trendValueText = value =>
   (curMode === 'med' && value > 0 ? '+' : '') + Math.round(value);
 
-function trendPointAtEvent(series, event) {
+function trendValueAtPosition(series, position) {
   let lo = 0, hi = series.events.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    if (series.events[mid] <= event) lo = mid + 1;
+    const midPosition = trendEventPositions.get(series.events[mid]);
+    if (Number.isFinite(midPosition) && midPosition <= position) lo = mid + 1;
     else hi = mid;
   }
-  return lo - 1;
+  const pointIndex = lo - 1;
+  if (pointIndex < 0) return null;
+  const pointEvent = series.events[pointIndex];
+  const pointPosition = trendEventPositions.get(pointEvent);
+  const pointValue = seriesVal(series, pointIndex);
+  if (!Number.isFinite(pointValue) || !Number.isFinite(pointPosition)) return null;
+  if (pointPosition === position) return pointValue;
+
+  const nextIndex = pointIndex + 1;
+  if (nextIndex >= series.events.length) return null;
+  const nextEvent = series.events[nextIndex];
+  const nextPosition = trendEventPositions.get(nextEvent);
+  const nextValue = seriesVal(series, nextIndex);
+  if (!Number.isFinite(nextValue) || !Number.isFinite(nextPosition) ||
+      nextPosition <= pointPosition) return null;
+  const fraction = (position - pointPosition) /
+    (nextPosition - pointPosition);
+  return pointValue + (nextValue - pointValue) * fraction;
 }
 
 function trendEventX(eventIndex) {
@@ -4273,7 +4292,7 @@ function trendEventX(eventIndex) {
     eventIndex / (curEvents.length - 1);
 }
 
-function trendEventIndexFromPointer(e) {
+function trendEventPositionFromPointer(e) {
   const svg = $('#tsvg');
   if (!svg || !curEvents.length) return null;
   const bounds = svg.getBoundingClientRect();
@@ -4283,39 +4302,37 @@ function trendEventIndexFromPointer(e) {
       y < TREND_T || y > TREND_H - TREND_B) return null;
   if (curEvents.length === 1) return 0;
   const ratio = (x - TREND_L) / (TREND_W - TREND_L - TREND_R);
-  return Math.round(ratio * (curEvents.length - 1));
+  return ratio * (curEvents.length - 1);
 }
 
-function setTrendMarker(eventIndex, locked = false) {
+function setTrendMarker(eventPosition, locked = false) {
   const svg = $('#tsvg'), line = $('#tscrubline');
   if (!svg || !line) return;
-  const visible = eventIndex !== null;
+  const visible = eventPosition !== null;
   svg.classList.toggle('scrubbing', visible);
   svg.classList.toggle('locked', visible && locked);
   if (!visible) return;
-  const x = trendEventX(eventIndex).toFixed(1);
+  const x = trendEventX(eventPosition).toFixed(1);
   line.setAttribute('x1', x); line.setAttribute('x2', x);
 }
 
-function renderTrendSnapshot(eventIndex, state) {
+function renderTrendSnapshot(eventPosition, state) {
   if (!curEvents.length) {
     $('#tlegend').innerHTML = ''; $('#tlhead').textContent = '';
     $('#tunlock').hidden = true;
     return;
   }
-  eventIndex = Math.max(0, Math.min(curEvents.length - 1, eventIndex));
+  eventPosition = Math.max(0, Math.min(curEvents.length - 1, eventPosition));
+  const eventIndex = Math.round(eventPosition);
   const event = curEvents[eventIndex];
   const ranked = curSeries.map((series, seriesIndex) => {
-    const pointIndex = trendPointAtEvent(series, event);
-    if (pointIndex < 0) return null;
-    const playsNow = series.events[pointIndex] === event;
-    const playsLater = pointIndex + 1 < series.events.length &&
-      series.events[pointIndex + 1] > event;
-    if (!playsNow && !playsLater) return null;
-    return {series, seriesIndex, value: seriesVal(series, pointIndex)};
+    const value = trendValueAtPosition(series, eventPosition);
+    if (value === null) return null;
+    return {series, seriesIndex, value};
   }).filter(Boolean);
   ranked.sort((a, b) => b.value - a.value ||
-    a.series.label.localeCompare(b.series.label));
+    a.series.label.localeCompare(b.series.label) ||
+    a.seriesIndex - b.seriesIndex);
   const kind = $('#tsub').value;
   $('#tlegend').innerHTML = ranked.map(({series, seriesIndex, value}) => {
     const dash = DASH[Math.floor(seriesIndex / 8) % DASH.length];
@@ -4337,7 +4354,7 @@ function renderTrendSnapshot(eventIndex, state) {
   $('#tlhead').textContent = `${label} · ${ev[0] || ''} · ${ev[1] || 'Event'} · ` +
     `${ranked.length} current`;
   $('#tunlock').hidden = state !== 'locked';
-  shownTrendEventIdx = eventIndex;
+  shownTrendEventPosition = eventPosition;
 }
 
 function drawTrends() {
@@ -4360,8 +4377,9 @@ function drawTrends() {
   $('#tcoachmetric').hidden = subject !== 'h';
   const dat = trendData(kind, div, gen);
   hotIdx = null; pinIdx = null;
-  lockedTrendEventIdx = null; shownTrendEventIdx = null;
+  lockedTrendEventPosition = null; shownTrendEventPosition = null;
   curMode = mode; curEvents = dat.events; curMed = dat.med; curSeries = dat.top;
+  trendEventPositions = new Map(curEvents.map((event, index) => [event, index]));
   $('#tchart').innerHTML = trendChart(curSeries, curEvents);
   $('#tlegend').classList.remove('dim');
   if (curEvents.length) renderTrendSnapshot(curEvents.length - 1, 'latest');
@@ -4407,31 +4425,31 @@ $('#tchart').addEventListener('mouseover', e => {
   if (group) setHot(+group.dataset.series);
 });
 $('#tchart').addEventListener('pointermove', e => {
-  if (lockedTrendEventIdx !== null) return;
-  const eventIndex = trendEventIndexFromPointer(e);
-  if (eventIndex === null || eventIndex === shownTrendEventIdx) return;
-  renderTrendSnapshot(eventIndex, 'scrub');
-  setTrendMarker(eventIndex);
+  if (lockedTrendEventPosition !== null) return;
+  const eventPosition = trendEventPositionFromPointer(e);
+  if (eventPosition === null || eventPosition === shownTrendEventPosition) return;
+  renderTrendSnapshot(eventPosition, 'scrub');
+  setTrendMarker(eventPosition);
 });
 $('#tchart').addEventListener('mouseleave', () => {
   setHot(pinIdx);
-  if (lockedTrendEventIdx === null && curEvents.length) {
+  if (lockedTrendEventPosition === null && curEvents.length) {
     renderTrendSnapshot(curEvents.length - 1, 'latest');
     setTrendMarker(null);
   }
 });
 $('#tchart').addEventListener('click', e => {
   const svg = $('#tsvg');
-  const eventIndex = lockedTrendEventIdx === null && svg &&
+  const eventPosition = lockedTrendEventPosition === null && svg &&
       svg.classList.contains('scrubbing')
-    ? shownTrendEventIdx : trendEventIndexFromPointer(e);
-  if (eventIndex === null) return;
-  lockedTrendEventIdx = eventIndex;
-  renderTrendSnapshot(eventIndex, 'locked');
-  setTrendMarker(eventIndex, true);
+    ? shownTrendEventPosition : trendEventPositionFromPointer(e);
+  if (eventPosition === null) return;
+  lockedTrendEventPosition = eventPosition;
+  renderTrendSnapshot(eventPosition, 'locked');
+  setTrendMarker(eventPosition, true);
 });
 $('#tunlock').onclick = () => {
-  lockedTrendEventIdx = null;
+  lockedTrendEventPosition = null;
   if (curEvents.length) renderTrendSnapshot(curEvents.length - 1, 'latest');
   setTrendMarker(null);
 };
