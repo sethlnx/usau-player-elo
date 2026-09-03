@@ -4258,7 +4258,12 @@ const seriesVal = (series, i) => curMode === 'med'
 const trendValueText = value =>
   (curMode === 'med' && value > 0 ? '+' : '') + Math.round(value);
 
-function trendValueAtPosition(series, position) {
+function trendCalendarYear(event) {
+  const meta = HEV[event], date = meta && meta[0];
+  return typeof date === 'string' && date.length >= 4 ? date.slice(0, 4) : null;
+}
+
+function trendValueAtPosition(series, position, eventYear) {
   let lo = 0, hi = series.events.length;
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
@@ -4275,7 +4280,10 @@ function trendValueAtPosition(series, position) {
   if (pointPosition === position) return pointValue;
 
   const nextIndex = pointIndex + 1;
-  if (nextIndex >= series.events.length) return null;
+  if (nextIndex >= series.events.length) {
+    const pointYear = trendCalendarYear(pointEvent);
+    return eventYear !== null && pointYear === eventYear ? pointValue : null;
+  }
   const nextEvent = series.events[nextIndex];
   const nextPosition = trendEventPositions.get(nextEvent);
   const nextValue = seriesVal(series, nextIndex);
@@ -4325,8 +4333,10 @@ function renderTrendSnapshot(eventPosition, state) {
   eventPosition = Math.max(0, Math.min(curEvents.length - 1, eventPosition));
   const eventIndex = Math.round(eventPosition);
   const event = curEvents[eventIndex];
+  const eventMeta = HEV[event];
+  const eventYear = trendCalendarYear(event);
   const ranked = curSeries.map((series, seriesIndex) => {
-    const value = trendValueAtPosition(series, eventPosition);
+    const value = trendValueAtPosition(series, eventPosition, eventYear);
     if (value === null) return null;
     return {series, seriesIndex, value};
   }).filter(Boolean);
@@ -4349,7 +4359,7 @@ function renderTrendSnapshot(eventPosition, state) {
   }).join('');
   $('#tlegend').classList.toggle('dim', hotIdx !== null);
   $('#tlegend').scrollTop = 0;
-  const ev = HEV[event] || [];
+  const ev = eventMeta || [];
   const label = state === 'locked' ? 'Locked' : state === 'latest' ? 'Latest' : 'Scrubbing';
   $('#tlhead').textContent = `${label} · ${ev[0] || ''} · ${ev[1] || 'Event'} · ` +
     `${ranked.length} current`;
