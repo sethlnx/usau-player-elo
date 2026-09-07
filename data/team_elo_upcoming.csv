@@ -1,28 +1,28 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
-1,Philadelphia Pacmen,philadelphia pacmen,club-men,2132.4,25,2026,2026 Pro Championships,2026-09-05
-2,Truck Stop,truck stop,club-men,2117.0,21,2026,2026 Pro Championships,2026-09-05
-3,Ring of Fire,ring of fire,club-men,2116.3,24,2026,2026 Pro Championships,2026-09-05
-4,Chain Lightning,chain lightning,club-men,2036.5,23,2026,2026 Pro Championships,2026-09-05
-5,Doublewide,doublewide,club-men,1987.2,23,2026,2026 Pro Championships,2026-09-05
-6,Mephisto,mephisto,club-men,1890.9,19,2026,2026 Pro Championships,2026-09-05
-7,Vault,vault,club-men,1884.7,25,2026,2026 Pro Championships,2026-09-05
-8,Florida Untied,florida untied,club-men,1856.4,23,2026,2026 Pro Championships,2026-09-05
-1,Hybrid,hybrid (mixed),club-mixed,2264.7,25,2026,2026 Pro Championships,2026-09-05
-2,Slow,slow (mixed),club-mixed,2133.3,26,2026,2026 Pro Championships,2026-09-05
-3,shame.,shame. (mixed),club-mixed,2115.1,25,2026,2026 Pro Championships,2026-09-05
-4,Austin Disco Club,austin disco club (mixed),club-mixed,2060.2,22,2026,2026 Pro Championships,2026-09-05
-5,Sprocket,sprocket (mixed),club-mixed,1997.7,25,2026,2026 Pro Championships,2026-09-05
-6,Drag'n Thrust,drag'n thrust (mixed),club-mixed,1996.2,24,2026,2026 Pro Championships,2026-09-05
-7,Toro,toro (mixed),club-mixed,1971.3,24,2026,2026 Pro Championships,2026-09-05
-8,Lawless,lawless (mixed),club-mixed,1718.5,26,2026,2026 Pro Championships,2026-09-05
-1,Scandal,scandal (women's),club-women,2244.9,26,2026,2026 Pro Championships,2026-09-05
-2,Molly Brown,molly brown (women's),club-women,2126.5,26,2026,2026 Pro Championships,2026-09-05
-3,Seattle Riot,seattle riot (women's),club-women,2037.7,26,2026,2026 Pro Championships,2026-09-05
-4,BENT,bent (women's),club-women,1938.4,23,2026,2026 Pro Championships,2026-09-05
-5,Phoenix,phoenix (women's),club-women,1845.2,25,2026,2026 Pro Championships,2026-09-05
-6,Parcha,parcha (women's),club-women,1842.2,22,2026,2026 Pro Championships,2026-09-05
-7,Grit,grit (women's),club-women,1699.9,26,2026,2026 Pro Championships,2026-09-05
-8,Agency,agency (women's),club-women,1676.3,24,2026,2026 Pro Championships,2026-09-05
+1,Truck Stop,truck stop,club-men,2165.5,21,2026,2026 Pro Championships,2026-09-05
+2,Ring of Fire,ring of fire,club-men,2161.9,24,2026,2026 Pro Championships,2026-09-05
+3,Philadelphia Pacmen,philadelphia pacmen,club-men,2102.1,25,2026,2026 Pro Championships,2026-09-05
+4,Chain Lightning,chain lightning,club-men,2038.4,23,2026,2026 Pro Championships,2026-09-05
+5,Doublewide,doublewide,club-men,1959.4,23,2026,2026 Pro Championships,2026-09-05
+6,Mephisto,mephisto,club-men,1890.7,19,2026,2026 Pro Championships,2026-09-05
+7,Vault,vault,club-men,1848.1,25,2026,2026 Pro Championships,2026-09-05
+8,Florida Untied,florida untied,club-men,1828.1,23,2026,2026 Pro Championships,2026-09-05
+1,Hybrid,hybrid (mixed),club-mixed,2275.1,25,2026,2026 Pro Championships,2026-09-05
+2,Slow,slow (mixed),club-mixed,2117.6,26,2026,2026 Pro Championships,2026-09-05
+3,Austin Disco Club,austin disco club (mixed),club-mixed,2087.5,22,2026,2026 Pro Championships,2026-09-05
+4,shame.,shame. (mixed),club-mixed,2085.2,25,2026,2026 Pro Championships,2026-09-05
+5,Sprocket,sprocket (mixed),club-mixed,1992.4,25,2026,2026 Pro Championships,2026-09-05
+6,Drag'n Thrust,drag'n thrust (mixed),club-mixed,1984.4,24,2026,2026 Pro Championships,2026-09-05
+7,Toro,toro (mixed),club-mixed,1966.9,24,2026,2026 Pro Championships,2026-09-05
+8,Lawless,lawless (mixed),club-mixed,1705.0,26,2026,2026 Pro Championships,2026-09-05
+1,Scandal,scandal (women's),club-women,2243.4,26,2026,2026 Pro Championships,2026-09-05
+2,Molly Brown,molly brown (women's),club-women,2085.5,26,2026,2026 Pro Championships,2026-09-05
+3,Seattle Riot,seattle riot (women's),club-women,2075.3,26,2026,2026 Pro Championships,2026-09-05
+4,BENT,bent (women's),club-women,1947.5,23,2026,2026 Pro Championships,2026-09-05
+5,Parcha,parcha (women's),club-women,1845.6,22,2026,2026 Pro Championships,2026-09-05
+6,Phoenix,phoenix (women's),club-women,1833.6,25,2026,2026 Pro Championships,2026-09-05
+7,Grit,grit (women's),club-women,1686.7,26,2026,2026 Pro Championships,2026-09-05
+8,Agency,agency (women's),club-women,1664.4,24,2026,2026 Pro Championships,2026-09-05
 9,Sureshot,sureshot (women's),club-women,1538.6,21,2026,2026 East Plains Womens Sectional Championship,2026-09-12
 10,Solstice,solstice (women's),club-women,1529.9,25,2026,2026 East Plains Womens Sectional Championship,2026-09-12
 11,Lake Erie Walleye,lake erie walleye (women's),club-women,1408.8,26,2026,2026 East Plains Womens Sectional Championship,2026-09-12
