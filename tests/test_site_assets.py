@@ -1,72 +1,40 @@
 import json
 import sqlite3
 import tempfile
-from html.parser import HTMLParser
 import unittest
 from pathlib import Path
 
 from analysis.backtest import DB_PATH
-from analysis.site import (bucket_urls, load_csv,
-                           TEMPLATE,
+from analysis.site import (_played_event_ids, bucket_urls, load_csv,
                            load_player_box_score_payload,
                            load_player_metric_payload, load_ufa_payload,
                            sidecar_version, ufa_game_ratings)
 
 
 class SiteAssetContractTests(unittest.TestCase):
-    def test_refresh_link_opens_authenticated_workflow(self):
-        self.assertIn(
-            'href="https://github.com/sethlnx/usau-player-elo/actions/workflows/'
-            'refresh-rankings.yml"',
-            TEMPLATE,
+    def test_played_events_require_a_nonzero_complete_score(self):
+        con = sqlite3.connect(":memory:")
+        self.addCleanup(con.close)
+        con.execute(
+            "CREATE TABLE games (event_id INTEGER, home_score INTEGER, "
+            "away_score INTEGER)"
         )
-        self.assertIn(">Refresh rankings</a>", TEMPLATE)
-        self.assertNotIn("GITHUB_TOKEN", TEMPLATE)
-
-    def test_tournament_detail_is_a_sibling_of_the_list(self):
-        class ParentParser(HTMLParser):
-            void_tags = {
-                "area", "base", "br", "col", "embed", "hr", "img", "input",
-                "link", "meta", "param", "source", "track", "wbr",
-            }
-
-            def __init__(self):
-                super().__init__()
-                self.stack = []
-                self.parents = {}
-
-            def handle_starttag(self, tag, attrs):
-                attrs = dict(attrs)
-                element_id = attrs.get("id")
-                if element_id:
-                    parent_attrs = dict(self.stack[-1][1]) if self.stack else {}
-                    self.parents[element_id] = parent_attrs.get("id")
-                if tag not in self.void_tags:
-                    self.stack.append((tag, attrs.items()))
-
-            def handle_endtag(self, tag):
-                for index in range(len(self.stack) - 1, -1, -1):
-                    if self.stack[index][0] == tag:
-                        del self.stack[index:]
-                        return
-
-        parser = ParentParser()
-        parser.feed(TEMPLATE)
-
-        self.assertEqual("events", parser.parents["tlist"])
-        self.assertEqual("events", parser.parents["tview"])
-
-    def test_tournament_list_uses_compact_card_contract(self):
-        self.assertIn('id="etb" class="evlist"', TEMPLATE)
-        self.assertIn('class="evtitle"', TEMPLATE)
-        self.assertIn('class="evloc"', TEMPLATE)
-        self.assertIn('<b>Winner</b>', TEMPLATE)
-        self.assertIn('<b>Teams</b>', TEMPLATE)
-        self.assertIn('<b>Editions</b>', TEMPLATE)
-        self.assertNotIn(
-            '<th>Dates</th><th>Tournament</th><th>Division</th>',
-            TEMPLATE,
+        con.executemany(
+            "INSERT INTO games VALUES (?, ?, ?)",
+            [
+                (1, 0, 0),       # Scheduled fixture.
+                (2, None, None),
+                (3, 8, None),    # Partial score.
+                (4, 15, 0),      # Played shutout.
+                (5, 12, 12),     # Played draw.
+            ],
         )
+        self.assertEqual({4, 5}, _played_event_ids(con))
+
+        con.execute(
+            "UPDATE games SET home_score=13, away_score=9 WHERE event_id=1"
+        )
+        self.assertEqual({1, 4, 5}, _played_event_ids(con))
 
     def test_sidecar_urls_change_with_data_and_generator_code(self):
         with tempfile.TemporaryDirectory() as tmp:

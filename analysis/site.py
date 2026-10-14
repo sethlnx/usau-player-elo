@@ -118,6 +118,14 @@ ROLE_SOURCE_CODE = {
 }
 
 
+def _played_event_ids(con):
+    """Return events with real scores, not unplayed 0–0 fixtures."""
+    return {eid for (eid,) in con.execute(
+        """SELECT DISTINCT event_id FROM games
+           WHERE home_score IS NOT NULL AND away_score IS NOT NULL
+             AND home_score + away_score > 0""")}
+
+
 def ufa_game_ratings(history):
     """Return each UFA team's postgame Elo at the end of each season."""
     events = history.get("events", [])
@@ -478,13 +486,9 @@ def build():
     # a date test would file a tournament you can already read results for
     # under "nothing has happened yet". Results are also what the page can
     # actually show, which is the question a reader is really asking.
-    played = {eid for (eid,) in con.execute(
-        """SELECT DISTINCT event_id FROM games
-           WHERE home_score IS NOT NULL AND away_score IS NOT NULL""")}
+    played = _played_event_ids(con)
     if euf_con:
-        played.update(f"wfdf:{eid}" for (eid,) in euf_con.execute(
-            """SELECT DISTINCT event_id FROM games
-               WHERE home_score IS NOT NULL AND away_score IS NOT NULL"""))
+        played.update(f"wfdf:{eid}" for eid in _played_event_ids(euf_con))
     for row, source in zip(tourneys["events"], tourney_sources):
         row.append(0 if row[0] in played else 1)
         row.append(source)
@@ -3517,9 +3521,10 @@ function drawEvents() {
     (total === 1 ? '' : 's') + (total > shown.length
       ? ` \u00b7 showing ${shown.length}` : '');
 }
-['#eq', '#ediv', '#eyear', '#etier', '#estr', '#esort', '#estate'].forEach(s => {
-  const el = $(s);
-  el.oninput = drawEvents; el.onchange = drawEvents;
+// Search change fires on blur and can detach the card being clicked.
+$('#eq').oninput = drawEvents;
+['#ediv', '#eyear', '#etier', '#estr', '#esort', '#estate'].forEach(s => {
+  $(s).onchange = drawEvents;
 });
 $('#etb').addEventListener('click', e => {
   const tr = e.target.closest('[data-ev]');

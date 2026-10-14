@@ -1,29 +1,93 @@
 rank,club,club_key,division,elo,roster_size,season,roster_event,roster_event_date
-1,Truck Stop,truck stop,club-men,2165.5,21,2026,2026 Pro Championships,2026-09-05
-2,Ring of Fire,ring of fire,club-men,2161.9,24,2026,2026 Pro Championships,2026-09-05
-3,Philadelphia Pacmen,philadelphia pacmen,club-men,2102.1,25,2026,2026 Pro Championships,2026-09-05
-4,Chain Lightning,chain lightning,club-men,2038.4,23,2026,2026 Pro Championships,2026-09-05
-5,Doublewide,doublewide,club-men,1959.4,23,2026,2026 Pro Championships,2026-09-05
-6,Mephisto,mephisto,club-men,1890.7,19,2026,2026 Pro Championships,2026-09-05
-7,Vault,vault,club-men,1848.1,25,2026,2026 Pro Championships,2026-09-05
-8,Florida Untied,florida untied,club-men,1828.1,23,2026,2026 Pro Championships,2026-09-05
-1,Hybrid,hybrid (mixed),club-mixed,2275.1,25,2026,2026 Pro Championships,2026-09-05
-2,Slow,slow (mixed),club-mixed,2117.6,26,2026,2026 Pro Championships,2026-09-05
-3,Austin Disco Club,austin disco club (mixed),club-mixed,2087.5,22,2026,2026 Pro Championships,2026-09-05
-4,shame.,shame. (mixed),club-mixed,2085.2,25,2026,2026 Pro Championships,2026-09-05
-5,Sprocket,sprocket (mixed),club-mixed,1992.4,25,2026,2026 Pro Championships,2026-09-05
-6,Drag'n Thrust,drag'n thrust (mixed),club-mixed,1984.4,24,2026,2026 Pro Championships,2026-09-05
-7,Toro,toro (mixed),club-mixed,1966.9,24,2026,2026 Pro Championships,2026-09-05
-8,Lawless,lawless (mixed),club-mixed,1705.0,26,2026,2026 Pro Championships,2026-09-05
-1,Scandal,scandal (women's),club-women,2243.4,26,2026,2026 Pro Championships,2026-09-05
-2,Molly Brown,molly brown (women's),club-women,2085.5,26,2026,2026 Pro Championships,2026-09-05
-3,Seattle Riot,seattle riot (women's),club-women,2075.3,26,2026,2026 Pro Championships,2026-09-05
-4,BENT,bent (women's),club-women,1947.5,23,2026,2026 Pro Championships,2026-09-05
-5,Parcha,parcha (women's),club-women,1845.6,22,2026,2026 Pro Championships,2026-09-05
-6,Phoenix,phoenix (women's),club-women,1833.6,25,2026,2026 Pro Championships,2026-09-05
-7,Grit,grit (women's),club-women,1686.7,26,2026,2026 Pro Championships,2026-09-05
-8,Agency,agency (women's),club-women,1664.4,24,2026,2026 Pro Championships,2026-09-05
-9,Sureshot,sureshot (women's),club-women,1538.6,21,2026,2026 East Plains Womens Sectional Championship,2026-09-12
-10,Solstice,solstice (women's),club-women,1529.9,25,2026,2026 East Plains Womens Sectional Championship,2026-09-12
-11,Lake Erie Walleye,lake erie walleye (women's),club-women,1408.8,26,2026,2026 East Plains Womens Sectional Championship,2026-09-12
-12,Frosted,frosted (women's),club-women,1358.3,18,2026,2026 East Plains Womens Sectional Championship,2026-09-12
+1,Massachusetts (Zoodisc),massachusetts (zoodisc),college,2000.2,25,2026,The Lobster Pot 2026,2026-10-17
+2,Middlebury (Pranksters),middlebury (pranksters),college,1897.7,11,2026,The Lobster Pot 2026,2026-10-17
+3,Vermont (Chill),vermont (chill),college,1823.8,18,2026,The Lobster Pot 2026,2026-10-17
+4,Brown (Brownian Motion),brown (brownian motion),college,1815.1,19,2026,The Lobster Pot 2026,2026-10-17
+5,Tufts (Elephant Men),tufts (elephant men),college,1692.5,16,2026,The Lobster Pot 2026,2026-10-17
+6,Williams (WUFO),williams (wufo),college,1674.6,27,2026,The Lobster Pot 2026,2026-10-17
+7,Northeastern (Huskies),northeastern (huskies),college,1598.9,23,2026,The Lobster Pot 2026,2026-10-17
+8,Bowdoin (Clown),bowdoin (clown),college,1579.7,16,2026,The Lobster Pot 2026,2026-10-17
+9,Cornell (Buds),cornell (buds),college,1561.6,21,2026,The Lobster Pot 2026,2026-10-17
+10,Rhode Island (RIUT),rhode island (riut),college,1509.7,19,2026,The Lobster Pot 2026,2026-10-17
+11,Syracuse (Doom),syracuse (doom),college,1501.8,24,2026,The Lobster Pot 2026,2026-10-17
+12,Boston College (Eagles),boston college (eagles),college,1488.8,20,2026,The Lobster Pot 2026,2026-10-17
+13,Yale (Süperfly),yale (süperfly),college,1488.4,25,2026,The Lobster Pot 2026,2026-10-17
+14,Florida (Florida),florida (florida),college,1486.7,19,2026,The Lobster Pot 2026,2026-10-17
+15,Vermont-B (Chill Dev),vermont-b (chill dev),college,1482.8,15,2026,The Lobster Pot 2026,2026-10-17
+16,Maine (Snositi),maine (snositi),college,1471.4,13,2026,The Lobster Pot 2026,2026-10-17
+17,West Chester (West Chester),west chester (west chester),college,1457.7,20,2026,The Lobster Pot 2026,2026-10-17
+18,Colby (CDC (Men's)),colby (cdc (men's)),college,1456.9,17,2026,The Lobster Pot 2026,2026-10-17
+19,Brandeis (TRON),brandeis (tron),college,1451.3,15,2026,The Lobster Pot 2026,2026-10-17
+20,Wesleyan (Nietzsch Factor),wesleyan (nietzsch factor),college,1450.7,26,2026,The Lobster Pot 2026,2026-10-17
+21,Rochester (Piggies),rochester (piggies),college,1448.9,20,2026,The Lobster Pot 2026,2026-10-17
+22,Dartmouth (Pain Train),dartmouth (pain train),college,1431.7,19,2026,The Lobster Pot 2026,2026-10-17
+23,Amherst (Army of Darkness),amherst (army of darkness),college,1426.9,30,2026,The Lobster Pot 2026,2026-10-17
+24,SUNY-Buffalo (Green Eggs and Ham),suny-buffalo (green eggs and ham),college,1402.3,19,2026,The Lobster Pot 2026,2026-10-17
+25,Massachusetts -B (Umass Amherst Developmental),massachusetts -b (umass amherst developmental),college,1400.0,28,2026,The Lobster Pot 2026,2026-10-17
+26,Boston University (Boston University),boston university (boston university),college,1391.1,22,2026,The Lobster Pot 2026,2026-10-17
+27,Rutgers (Machine),rutgers (machine),college,1383.0,16,2026,The Lobster Pot 2026,2026-10-17
+28,Connecticut (UConn Huskies),connecticut (uconn huskies),college,1372.4,29,2026,The Lobster Pot 2026,2026-10-17
+29,Bryant (Bryant Craze),bryant (bryant craze),college,1339.3,11,2026,The Lobster Pot 2026,2026-10-17
+30,RIT (RIT Spudheds),rit (rit spudheds),college,1327.9,18,2026,The Lobster Pot 2026,2026-10-17
+31,Bates (Orange Whip),bates (orange whip),college,1301.7,18,2026,The Lobster Pot 2026,2026-10-17
+32,Harvard (Red Line),harvard (red line),college,1278.5,20,2026,The Lobster Pot 2026,2026-10-17
+33,MIT (Grim Beaver),mit (grim beaver),college,1256.2,16,2026,The Lobster Pot 2026,2026-10-17
+34,Connecticut-B (Grind),connecticut-b (grind),college,1241.0,14,2026,The Lobster Pot 2026,2026-10-17
+35,Rensselaer Polytech (Trudge),rensselaer polytech (trudge),college,1232.1,22,2026,The Lobster Pot 2026,2026-10-17
+36,Tufts-B (Tufts B),tufts-b (tufts b),college,1231.7,19,2026,The Lobster Pot 2026,2026-10-17
+37,Dartmouth-B (Discomfort Trolley),dartmouth-b (discomfort trolley),college,1225.4,21,2026,The Lobster Pot 2026,2026-10-17
+38,Plymouth State University (Pioneers),plymouth state university (pioneers),college,1214.2,25,2026,The Lobster Pot 2026,2026-10-17
+39,Northeastern-B (Beastern),northeastern-b (beastern),college,1198.8,15,2026,The Lobster Pot 2026,2026-10-17
+40,Brown-B (Brown - B),brown-b (brown - b),college,1194.8,10,2026,The Lobster Pot 2026,2026-10-17
+41,New Hampshire (New Hampshire Ultimate Team),new hampshire (new hampshire ultimate team),college,1187.4,21,2026,The Lobster Pot 2026,2026-10-17
+42,Vermont-C (Chill B),vermont-c (chill b),college,1178.1,15,2026,The Lobster Pot 2026,2026-10-17
+43,Northeastern-C (Salty C Dogs),northeastern-c (salty c dogs),college,1162.8,11,2026,The Lobster Pot 2026,2026-10-17
+44,Western New England (Golden Bears),western new england (golden bears),college,1160.0,15,2026,The Lobster Pot 2026,2026-10-17
+45,Bentley (Icehouse),bentley (icehouse),college,1144.3,23,2026,The Lobster Pot 2026,2026-10-17
+46,Keene State (KSC Night Owls),keene state (ksc night owls),college,1103.8,10,2026,The Lobster Pot 2026,2026-10-17
+47,Southern New Hampshire University,southern new hampshire university,college,1073.8,12,2026,The Lobster Pot 2026,2026-10-17
+48,SUNY-Buffalo-B (Buffalo Grinch),suny-buffalo-b (buffalo grinch),college,1067.6,15,2026,The Lobster Pot 2026,2026-10-17
+49,Providence (PC Ulty),providence (pc ulty),college,1061.2,13,2026,The Lobster Pot 2026,2026-10-17
+50,MIT-B (Woodmunchers),mit-b (woodmunchers),college,1045.4,11,2026,The Lobster Pot 2026,2026-10-17
+51,Massachusetts-Lowell (Riverhawks),massachusetts-lowell (riverhawks),college,958.5,13,2026,The Lobster Pot 2026,2026-10-17
+52,Fairfield (Fairfield Stags),fairfield (fairfield stags),college,945.5,15,2026,The Lobster Pot 2026,2026-10-17
+1,Tufts (EWO),tufts (ewo),college-women,1809.1,18,2026,The Lobster Pot 2026,2026-10-17
+2,Vermont  (Ruckus),vermont (ruckus),college-women,1793.2,19,2026,The Lobster Pot 2026,2026-10-17
+3,Northeastern (Valkyries A),northeastern (valkyries a),college-women,1605.4,19,2026,The Lobster Pot 2026,2026-10-17
+4,Brown (Shiver),brown (shiver),college-women,1558.4,13,2026,The Lobster Pot 2026,2026-10-17
+5,Boston College (Boston College),boston college (boston college),college-women,1491.6,13,2026,The Lobster Pot 2026,2026-10-17
+6,Vermont-B (Bruckus),vermont-b (bruckus),college-women,1488.5,25,2026,The Lobster Pot 2026,2026-10-17
+7,Cornell (Wild Roses),cornell (wild roses),college-women,1437.9,25,2026,The Lobster Pot 2026,2026-10-17
+8,Amherst (Sparkle Motion),amherst (sparkle motion),college-women,1429.6,11,2026,The Lobster Pot 2026,2026-10-17
+9,Boston University (Uprising A),boston university (uprising a),college-women,1417.0,19,2026,The Lobster Pot 2026,2026-10-17
+10,SUNY-Buffalo (the Lorax),suny-buffalo (the lorax),college-women,1411.3,15,2026,The Lobster Pot 2026,2026-10-17
+11,Connecticut (UConn Women's Ultimate),connecticut (uconn women's ultimate),college-women,1408.4,12,2026,The Lobster Pot 2026,2026-10-17
+12,Wellesley (Whiptails),wellesley (whiptails),college-women,1405.5,21,2026,The Lobster Pot 2026,2026-10-17
+13,Rhode Island (Disky Business),rhode island (disky business),college-women,1373.4,13,2026,The Lobster Pot 2026,2026-10-17
+14,Williams (Nova),williams (nova),college-women,1338.5,18,2026,The Lobster Pot 2026,2026-10-17
+15,MIT (sMITe),mit (smite),college-women,1287.3,22,2026,The Lobster Pot 2026,2026-10-17
+16,Bates (Cold Front),bates (cold front),college-women,1257.9,20,2026,The Lobster Pot 2026,2026-10-17
+17,Wellesley-B (Tails),wellesley-b (tails),college-women,1247.0,18,2026,The Lobster Pot 2026,2026-10-17
+18,Dartmouth (Dartmouth Ultimate),dartmouth (dartmouth ultimate),college-women,1242.3,20,2026,The Lobster Pot 2026,2026-10-17
+19,Smith (Luna Disc ),smith (luna disc ),college-women,1238.2,25,2026,The Lobster Pot 2026,2026-10-17
+20,Bentley (WoBUS),bentley (wobus),college-women,1223.4,10,2026,The Lobster Pot 2026,2026-10-17
+21,Maine (Koi Named Sue),maine (koi named sue),college-women,1212.6,10,2026,The Lobster Pot 2026,2026-10-17
+22,Brandeis (Banshee),brandeis (banshee),college-women,1212.2,19,2026,The Lobster Pot 2026,2026-10-17
+23,Tufts-B (BWO Keggs ),tufts-b (bwo keggs ),college-women,1205.7,10,2026,The Lobster Pot 2026,2026-10-17
+24,Northeastern-B (Valkyries),northeastern-b (valkyries),college-women,1155.3,24,2026,The Lobster Pot 2026,2026-10-17
+25,Bowdoin (Chaos Theory),bowdoin (chaos theory),college-women,1133.6,16,2026,The Lobster Pot 2026,2026-10-17
+26,Vermont-C (UVM C),vermont-c (uvm c),college-women,1122.1,10,2026,The Lobster Pot 2026,2026-10-17
+27,Syracuse (Fox Force Seven),syracuse (fox force seven),college-women,1076.4,11,2026,The Lobster Pot 2026,2026-10-17
+28,Colby (CDC (Women's)),colby (cdc (women's)),college-women,1052.8,11,2026,The Lobster Pot 2026,2026-10-17
+29,Brown-B (Cosmic Rays),brown-b (cosmic rays),college-women,1050.6,10,2026,The Lobster Pot 2026,2026-10-17
+30,New Hampshire (Oriza Women's Ultimate),new hampshire (oriza women's ultimate),college-women,1032.9,14,2026,The Lobster Pot 2026,2026-10-17
+1,Hamilton (Hot Saucers),hamilton (hot saucers) (college mixed),college-mixed,1402.9,14,2026,The Lobster Pot 2026,2026-10-17
+2,Skidmore (Womb-bats),skidmore (womb-bats) (college mixed),college-mixed,1351.7,10,2026,The Lobster Pot 2026,2026-10-17
+3,Skidmore (Wombat$),skidmore (wombat$) (college mixed),college-mixed,1283.4,10,2026,The Lobster Pot 2026,2026-10-17
+4,Clark (Woo Town Killer Bees ),clark (woo town killer bees ) (college mixed),college-mixed,1215.6,18,2026,The Lobster Pot 2026,2026-10-17
+5,Maine-Farmington (Beavers),maine-farmington (beavers) (college mixed),college-mixed,1193.7,10,2026,The Lobster Pot 2026,2026-10-17
+6,Connecticut College (Amalthos),connecticut college (amalthos) (college mixed),college-mixed,1155.0,22,2026,The Lobster Pot 2026,2026-10-17
+7,Saint Michael's (Purple Nite),saint michael's (purple nite) (college mixed),college-mixed,1153.8,18,2026,The Lobster Pot 2026,2026-10-17
+8,Holy Cross (Purple Heys),holy cross (purple heys) (college mixed),college-mixed,1148.0,29,2026,The Lobster Pot 2026,2026-10-17
+9,New England (Nor'easters ),new england (nor'easters ) (college mixed),college-mixed,1105.3,9,2026,The Lobster Pot 2026,2026-10-17
+10,Emerson (Emerson Skunks),emerson (emerson skunks) (college mixed),college-mixed,987.1,16,2026,The Lobster Pot 2026,2026-10-17

@@ -98,6 +98,11 @@ open the workflow page but cannot run it. The refresh job uses its short-lived
 GitHub token for the push, then a separate least-privilege job deploys `docs/`
 to Pages—the site never receives a repository credential.
 
+In **Tournaments**, **Upcoming** means no complete, non-zero score is on
+record, rather than that the event date is in the future. Scheduled `0–0`
+placeholders and partial scores stay upcoming; a scored shutout or draw counts
+as played.
+
 ## Pipeline
 
 ```
