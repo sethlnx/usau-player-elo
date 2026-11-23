@@ -55,6 +55,10 @@ player identity, Elo outputs, and the static site, runs the focused publication
 checks, commits only the generated data and `docs/` assets, then pushes
 `main`. GitHub Pages deploys the pushed `docs/` site.
 
+The push workflow uploads the site before starting the Pages deployment job.
+Each upload attempt uses a distinct artifact name so reruns cannot select a
+previous attempt's artifact.
+
 The first refresh after installing coach ratings also backfills coach metadata
 for every finished historical event. This one-time pass ignores the season
 filter so the published model cannot silently use current-season coaches only.

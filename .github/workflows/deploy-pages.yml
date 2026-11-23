@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - docs/**
+      - .github/workflows/deploy-pages.yml
 # Preserve Pages deployment for ordinary human-authenticated docs pushes. The
 # manual refresh deploys itself because its GITHUB_TOKEN push cannot trigger us.
 
@@ -13,8 +14,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  upload:
+    name: Upload site
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
+
+    steps:
+      - name: Check out site
+        uses: actions/checkout@v4
+      # A rerun must not reuse the artifact from an earlier attempt.
+      - name: Name the Pages artifact
+        id: artifact
+        run: echo "name=github-pages-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: docs
+
   deploy:
     name: Deploy site
+    needs: upload
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,14 +48,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Check out site
-        uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
       - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.upload.outputs.artifact_name }}
